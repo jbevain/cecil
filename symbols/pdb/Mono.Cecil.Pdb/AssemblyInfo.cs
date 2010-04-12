@@ -4,7 +4,7 @@
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// (C) 2006 Jb Evain
+// Copyright (c) 2008 - 2010 Jb Evain
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle ("Mono.Cecil.Pdb")]
 [assembly: AssemblyProduct ("Mono.Cecil")]
-[assembly: AssemblyCopyright ("Copyright © 2004 - 2010, Jb Evain")]
+[assembly: AssemblyCopyright ("Copyright © 2008 - 2010 Jb Evain")]
 
 [assembly: CLSCompliant (false)]
 [assembly: ComVisible (false)]
