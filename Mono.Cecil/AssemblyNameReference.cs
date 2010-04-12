@@ -133,7 +133,7 @@ namespace Mono.Cecil {
 			default:
 				// None default to SHA1
 #if SILVERLIGHT
-				ha = new SHA1Managed ();
+				algorithm = new SHA1Managed ();
 				break;
 #else
 				algorithm = SHA1.Create ();

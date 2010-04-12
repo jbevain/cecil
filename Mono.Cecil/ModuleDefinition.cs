@@ -596,7 +596,7 @@ namespace Mono.Cecil {
 			if (kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();
 				module.assembly = assembly;
-				module.assembly.Name = new AssemblyNameDefinition (name, new Version ());
+				module.assembly.Name = new AssemblyNameDefinition (name, new Version (0, 0));
 				assembly.main_module = module;
 			}
 

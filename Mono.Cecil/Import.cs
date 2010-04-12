@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 			reference.etype = ImportElementType (type);
 			reference.module = module;
 
-			if (type.IsNested)
+			if (IsNestedType (type))
 				reference.DeclaringType = ImportType (type.DeclaringType, context);
 			else
 				reference.Namespace = type.Namespace;
@@ -87,6 +87,20 @@ namespace Mono.Cecil {
 				ImportGenericParameters (reference, type.GetGenericArguments ());
 
 			return reference;
+		}
+
+		static bool IsNestedType (Type type)
+		{
+#if !SILVERLIGHT
+			return type.IsNested;
+#else
+			return type.IsNestedPublic
+				|| type.IsNestedPrivate
+				|| type.IsNestedFamORAssem
+				|| type.IsNestedFamily
+				|| type.IsNestedFamANDAssem
+				|| type.IsNestedAssembly;
+#endif
 		}
 
 		TypeReference ImportTypeSpecification (Type type, IGenericContext context)
