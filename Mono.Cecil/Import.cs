@@ -206,13 +206,25 @@ namespace Mono.Cecil {
 			var declaring_type = ImportType (field.DeclaringType, null);
 
 			if (IsGenericInstance (field.DeclaringType))
-				field = field.Module.ResolveField (field.MetadataToken);
+				field = ResolveFieldDefinition (field);
 
 			return new FieldReference {
 				Name = field.Name,
 				DeclaringType = declaring_type,
 				FieldType = ImportType (field.FieldType, declaring_type),
 			};
+		}
+
+		static SR.FieldInfo ResolveFieldDefinition (SR.FieldInfo field)
+		{
+#if !SILVERLIGHT
+			return field.Module.ResolveField (field.MetadataToken);
+#else
+			return field.DeclaringType.GetGenericTypeDefinition ().GetField (field.Name,
+				SR.BindingFlags.Public
+				| SR.BindingFlags.NonPublic
+				| (field.IsStatic ? SR.BindingFlags.Static : SR.BindingFlags.Instance));
+#endif
 		}
 
 		public MethodReference ImportMethod (SR.MethodBase method)

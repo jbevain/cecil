@@ -163,10 +163,10 @@
     <Compile Include="Mono.Collections.Generic\Collection.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoConvert.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoService.cs" />
+    <Compile Include="Mono\Actions.cs" />
+    <Compile Include="Mono\Empty.cs" />
+    <Compile Include="Mono\Funcs.cs" />
     <Compile Include="System.Runtime.CompilerServices\ExtensionAttribute.cs" />
-    <Compile Include="System\Actions.cs" />
-    <Compile Include="System\Empty.cs" />
-    <Compile Include="System\Funcs.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NOTES.txt" />
