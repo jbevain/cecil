@@ -45,16 +45,16 @@ namespace Mono.Cecil.Rocks {
 
 				switch (instruction.OpCode.Code) {
 				case Code.Ldarg_0:
-					ExpandMacro (instruction, OpCodes.Ldarg, GetParameter (self, 0));
+					ExpandMacro (instruction, OpCodes.Ldarg, self.GetParameter (0));
 					break;
 				case Code.Ldarg_1:
-					ExpandMacro (instruction, OpCodes.Ldarg, GetParameter (self, 1));
+					ExpandMacro (instruction, OpCodes.Ldarg, self.GetParameter (1));
 					break;
 				case Code.Ldarg_2:
-					ExpandMacro (instruction, OpCodes.Ldarg, GetParameter (self, 2));
+					ExpandMacro (instruction, OpCodes.Ldarg, self.GetParameter (2));
 					break;
 				case Code.Ldarg_3:
-					ExpandMacro (instruction, OpCodes.Ldarg, GetParameter (self, 3));
+					ExpandMacro (instruction, OpCodes.Ldarg, self.GetParameter (3));
 					break;
 				case Code.Ldloc_0:
 					ExpandMacro (instruction, OpCodes.Ldloc, self.Variables [0]);
@@ -175,15 +175,6 @@ namespace Mono.Cecil.Rocks {
 					break;
 				}
 			}
-		}
-
-		static ParameterDefinition GetParameter (MethodBody body, int index)
-		{
-			var method = body.Method;
-			if (method.HasThis)
-				index--;
-
-			return method.Parameters [index];
 		}
 
 		static void ExpandMacro (Instruction instruction, OpCode opcode, object operand)
