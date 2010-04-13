@@ -387,7 +387,10 @@ namespace Mono.Cecil {
 				HashAlgorithm = name.HashAlgorithm,
 			};
 
-			var pk_token = new byte [name.PublicKeyToken.Length];
+			var pk_token = name.PublicKeyToken != null
+				? new byte [name.PublicKeyToken.Length]
+				: Empty<byte>.Array;
+
 			if (pk_token.Length > 0)
 				Buffer.BlockCopy (name.PublicKeyToken, 0, pk_token, 0, pk_token.Length);
 
