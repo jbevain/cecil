@@ -19,3 +19,10 @@ class Bar {
 		[MarshalAs (UnmanagedType.LPArray, ArraySubType = UnmanagedType.I2)] object d);
 }
 
+public class Baz {
+
+	public void PrintAnswer ()
+	{
+		Console.WriteLine ("answer: {0}", 42);
+	}
+}
