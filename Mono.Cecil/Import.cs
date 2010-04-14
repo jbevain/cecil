@@ -387,7 +387,7 @@ namespace Mono.Cecil {
 				HashAlgorithm = name.HashAlgorithm,
 			};
 
-			var pk_token = name.PublicKeyToken != null
+			var pk_token = !name.PublicKeyToken.IsNullOrEmpty ()
 				? new byte [name.PublicKeyToken.Length]
 				: Empty<byte>.Array;
 
