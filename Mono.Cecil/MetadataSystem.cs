@@ -71,6 +71,38 @@ namespace Mono.Cecil {
 		internal Dictionary<MetadataToken, Range> GenericParameters;
 		internal Dictionary<uint, MetadataToken []> GenericConstraints;
 
+		static readonly Dictionary<string, bool> PrimitiveValueTypes = new Dictionary<string, bool> {
+			{ "Boolean", true },
+			{ "Char", true },
+			{ "SByte", true },
+			{ "Byte", true },
+			{ "Int16", true },
+			{ "UInt16", true },
+			{ "Int32", true },
+			{ "UInt32", true },
+            { "Int64", true },
+			{ "UInt64", true },
+			{ "Single", true },
+			{ "Double", true },
+			{ "IntPtr", true },
+			{ "UIntPtr", true },
+		};
+
+		public static bool IsPrimitiveValueType (TypeReference type)
+		{
+			var scope = type.scope;
+			if (scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
+				return false;
+
+			if (scope.Name != "mscorlib")
+				return false;
+
+			if (type.Namespace != "System")
+				return false;
+
+			return PrimitiveValueTypes.ContainsKey (type.Name);
+		}
+
 		public void Clear ()
 		{
 			if (NestedTypes != null) NestedTypes.Clear ();
