@@ -82,6 +82,7 @@ Mono.Cecil
 	* TypeDefinition:
 		- HasConstructors
 		- Constructors
+		* ctor: swapped namespace and name parameter.
 
 	* ParameterDefinition:
 		* Method : IMethodSignature
@@ -126,6 +127,7 @@ Mono.Cecil
 		+ IsDefinition : bool
 
 		* GetOriginalType -> GetElementType
+		* ctor: swapped namespace and name parameter.
 
 	* MethodReference
 		+ IsGenericInstance : bool
