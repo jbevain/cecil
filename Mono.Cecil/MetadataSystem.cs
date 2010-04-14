@@ -80,7 +80,7 @@ namespace Mono.Cecil {
 			{ "UInt16", true },
 			{ "Int32", true },
 			{ "UInt32", true },
-            { "Int64", true },
+			{ "Int64", true },
 			{ "UInt64", true },
 			{ "Single", true },
 			{ "Double", true },
