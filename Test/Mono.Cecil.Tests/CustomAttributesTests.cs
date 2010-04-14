@@ -284,6 +284,48 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (argument.Value);
 		}
 
+		[TestCSharp ("CustomAttributes.cs")]
+		public void OpenGenericTypeOf (ModuleDefinition module)
+		{
+			var open_generic = module.GetType ("OpenGeneric`2");
+			Assert.IsNotNull (open_generic);
+
+			var attribute = GetAttribute (open_generic, "Foo");
+			Assert.IsNotNull (attribute);
+
+			Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+
+			var argument = attribute.ConstructorArguments [0];
+
+			Assert.AreEqual ("System.Type", argument.Type.FullName);
+
+			var type = argument.Value as TypeReference;
+			Assert.IsNotNull (type);
+
+			Assert.AreEqual ("System.Collections.Generic.Dictionary`2", type.FullName);
+		}
+
+		[TestCSharp ("CustomAttributes.cs")]
+		public void ClosedGenericTypeOf (ModuleDefinition module)
+		{
+			var closed_generic = module.GetType ("ClosedGeneric");
+			Assert.IsNotNull (closed_generic);
+
+			var attribute = GetAttribute (closed_generic, "Foo");
+			Assert.IsNotNull (attribute);
+
+			Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+
+			var argument = attribute.ConstructorArguments [0];
+
+			Assert.AreEqual ("System.Type", argument.Type.FullName);
+
+			var type = argument.Value as TypeReference;
+			Assert.IsNotNull (type);
+
+			Assert.AreEqual ("System.Collections.Generic.Dictionary`2<System.String,OpenGeneric`2<Machin,System.Int32>>", type.FullName);
+		}
+
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));
