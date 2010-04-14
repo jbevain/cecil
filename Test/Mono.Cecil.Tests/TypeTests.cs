@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 
 using NUnit.Framework;
@@ -138,6 +140,18 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual (1, generic_instance.GenericArguments.Count);
 			Assert.AreEqual (rec_child, generic_instance.GenericArguments [0]);
+		}
+
+		[TestCSharp ("Methods.cs")]
+		public void TypeReferenceValueType (ModuleDefinition module)
+		{
+			var baz = module.GetType ("Baz");
+			var method = baz.GetMethod ("PrintAnswer");
+
+			var box = method.Body.Instructions.Where (i => i.OpCode == OpCodes.Box).First ();
+			var int32 = (TypeReference) box.Operand;
+
+			Assert.IsTrue (int32.IsValueType);
 		}
 	}
 }
