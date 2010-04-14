@@ -64,5 +64,24 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::Bar()", methods [0].FullName);
 			Assert.AreEqual ("System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::Baz()", methods [1].FullName);
 		}
+
+		enum Pan : byte {
+			Pin,
+			Pon,
+		}
+
+		[Test]
+		public void GetEnumUnderlyingType ()
+		{
+			var pan = typeof (Pan).ToDefinition ();
+
+			Assert.IsNotNull (pan);
+			Assert.IsTrue (pan.IsEnum);
+
+			var underlying_type = pan.GetEnumUnderlyingType ();
+			Assert.IsNotNull (underlying_type);
+
+			Assert.AreEqual ("System.Byte", underlying_type.FullName);
+		}
 	}
 }
