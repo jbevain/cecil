@@ -19,6 +19,7 @@ namespace Mono.Cecil.Tests {
 
 			var bar = foo.GetMethod ("Bar");
 			Assert.IsNotNull (bar);
+			Assert.IsTrue (bar.IsIL);
 
 			AssertCode (@"
 	.locals init (System.Int32 V_0)
