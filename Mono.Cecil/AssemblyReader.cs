@@ -2580,7 +2580,11 @@ namespace Mono.Cecil {
 
 				ReadGenericInstanceSignature (generic_instance);
 
-				generic_instance.IsValueType = is_value_type;
+				if (is_value_type) {
+					generic_instance.IsValueType = true;
+					element_type.GetElementType ().IsValueType = true;
+				}
+
 				return generic_instance;
 			}
 			case ElementType.Object: return TypeSystem.Object;
