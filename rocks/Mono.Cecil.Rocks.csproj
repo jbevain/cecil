@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mono.Cecil.Rocks\AssemblyInfo.cs" />
+    <Compile Include="Mono.Cecil.Rocks\MethodDefinitionRocks.cs" />
     <Compile Include="Mono.Cecil.Rocks\SecurityDeclarationRocks.cs" />
     <Compile Include="Mono.Cecil.Rocks\MethodBodyRocks.cs" />
     <Compile Include="Mono.Cecil.Rocks\ILParser.cs" />
