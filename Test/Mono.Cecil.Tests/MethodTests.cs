@@ -38,7 +38,6 @@ namespace Mono.Cecil.Tests {
 			var pan = bar.GetMethod ("Pan");
 
 			Assert.IsTrue (pan.IsPInvokeImpl);
-			Assert.IsFalse (pan.IsIL);
 			Assert.IsNotNull (pan.PInvokeInfo);
 
 			Assert.AreEqual ("Pan", pan.PInvokeInfo.EntryPoint);
