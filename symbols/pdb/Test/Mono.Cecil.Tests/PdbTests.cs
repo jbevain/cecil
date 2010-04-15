@@ -1,4 +1,5 @@
 
+using System.IO;
 using System.Linq;
 
 using Mono.Cecil.Cil;
@@ -75,6 +76,50 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
 		}
 
+		[Test]
+		public void CreateMethodFromScratch ()
+		{
+			var module = ModuleDefinition.CreateModule ("Pan", ModuleKind.Dll);
+			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.Import (typeof (object)));
+			module.Types.Add (type);
+
+			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.Import (typeof (string)));
+			type.Methods.Add (method);
+
+			var body = method.Body;
+
+			body.InitLocals = true;
+
+			var il = body.GetILProcessor ();
+			var temp = new VariableDefinition ("temp", module.Import (typeof (string)));
+			body.Variables.Add (temp);
+
+			il.Emit (OpCodes.Nop);
+			il.Emit (OpCodes.Ldstr, "hello");
+			il.Emit (OpCodes.Stloc, temp);
+			il.Emit (OpCodes.Ldloc, temp);
+			il.Emit (OpCodes.Ret);
+
+			body.Instructions [0].SequencePoint = new SequencePoint (new Document ("C:\test.cs")) {
+				StartLine = 0,
+				StartColumn = 0,
+				EndLine = 0,
+				EndColumn = 4,
+			};
+
+			var file = Path.Combine (Path.GetTempPath (), "Pan.dll");
+			module.Write (file, new WriterParameters {
+				SymbolWriterProvider = new PdbWriterProvider (),
+			});
+
+			module = ModuleDefinition.ReadModule (file, new ReaderParameters {
+				SymbolReaderProvider = new PdbReaderProvider (),
+			});
+
+			method = module.GetType ("Pin.Pon").GetMethod ("Pang");
+
+			Assert.AreEqual ("temp", method.Body.Variables [0].Name);
+		}
 
 		static void AssertCode (string expected, MethodDefinition method)
 		{

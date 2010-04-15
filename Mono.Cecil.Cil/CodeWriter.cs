@@ -139,9 +139,10 @@ namespace Mono.Cecil.Cil {
 			WriteByte (0x30);
 			WriteInt16 ((short) body.max_stack_size);
 			WriteInt32 (body.code_size);
-			WriteMetadataToken (body.HasVariables
+			body.local_var_token = body.HasVariables
 				? GetStandAloneSignature (body.Variables)
-				: MetadataToken.Zero);
+				: MetadataToken.Zero;
+			WriteMetadataToken (body.local_var_token);
 		}
 
 		void WriteInstructions ()
