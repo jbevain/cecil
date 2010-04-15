@@ -100,7 +100,7 @@ namespace Mono.Cecil.Tests {
 			il.Emit (OpCodes.Ldloc, temp);
 			il.Emit (OpCodes.Ret);
 
-			body.Instructions [0].SequencePoint = new SequencePoint (new Document ("C:\test.cs")) {
+			body.Instructions [0].SequencePoint = new SequencePoint (new Document (@"C:\test.cs")) {
 				StartLine = 0,
 				StartColumn = 0,
 				EndLine = 0,
