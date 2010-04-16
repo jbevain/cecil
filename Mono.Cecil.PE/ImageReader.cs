@@ -342,20 +342,7 @@ namespace Mono.Cecil.PE {
 			Advance (8);
 
 			var version = ReadZeroTerminatedString (ReadInt32 ());
-			switch (version [1]) {
-			case '1':
-				image.Runtime = version [3] == '0'
-					? TargetRuntime.Net_1_0
-					: TargetRuntime.Net_1_1;
-				break;
-			case '2':
-				image.Runtime = TargetRuntime.Net_2_0;
-				break;
-			case '4':
-			default:
-				image.Runtime = TargetRuntime.Net_4_0;
-				break;
-			}
+			image.Runtime = version.ParseRuntime ();
 
 			// Flags		2
 			Advance (2);

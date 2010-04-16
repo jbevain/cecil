@@ -609,23 +609,7 @@ namespace Mono.Cecil {
 
 		static TargetRuntime GetCurrentRuntime ()
 		{
-#if SILVERLIGHT
-			return TargetRuntime.Net_2_0;
-#else
-			var corlib_version = typeof (object).Assembly.GetName ().Version;
-			switch (corlib_version.Major) {
-			case 1:
-				return corlib_version.Minor == 0
-					? TargetRuntime.Net_1_0
-					: TargetRuntime.Net_1_1;
-			case 2:
-				return TargetRuntime.Net_2_0;
-			case 4:
-				return TargetRuntime.Net_4_0;
-			default:
-				throw new NotSupportedException ();
-			}
-#endif
+			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
 		}
 
 #endif
@@ -731,13 +715,28 @@ namespace Mono.Cecil {
 			return self != null && self.HasImage;
 		}
 
-		public static string GetFullyQualifiedName (this Stream stream)
+		public static string GetFullyQualifiedName (this Stream self)
 		{
-			var file_stream = stream as FileStream;
+			var file_stream = self as FileStream;
 			if (file_stream == null)
 				return string.Empty;
 
 			return Path.GetFullPath (file_stream.Name);
+		}
+
+		public static TargetRuntime ParseRuntime (this string self)
+		{
+			switch (self [1]) {
+			case '1':
+				return self [3] == '0'
+					? TargetRuntime.Net_1_0
+					: TargetRuntime.Net_1_1;
+			case '2':
+				return TargetRuntime.Net_2_0;
+			case '4':
+			default:
+				return TargetRuntime.Net_4_0;
+			}
 		}
 	}
 }
