@@ -609,7 +609,23 @@ namespace Mono.Cecil {
 
 		static TargetRuntime GetCurrentRuntime ()
 		{
+#if !CF
 			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
+#else
+			var corlib_version = typeof (object).Assembly.GetName ().Version;
+			switch (corlib_version.Major) {
+			case 1:
+				return corlib_version.Minor == 0
+					? TargetRuntime.Net_1_0
+					: TargetRuntime.Net_1_1;
+			case 2:
+				return TargetRuntime.Net_2_0;
+			case 4:
+				return TargetRuntime.Net_4_0;
+			default:
+				throw new NotSupportedException ();
+			}
+#endif
 		}
 
 #endif
