@@ -29,12 +29,12 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Security.Cryptography;
 
 #if !READ_ONLY
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
+using System.Runtime.Serialization;
 using Mono.Security.Cryptography;
 #endif
 
@@ -48,7 +48,7 @@ namespace Mono.Cecil {
 
 	static class CryptoService {
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 		public static void StrongName (Stream stream, ImageWriter writer, StrongNameKeyPair key_pair)
 		{
 			int strong_name_pointer;
@@ -172,7 +172,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 	static partial class Mixin {
 
 		public static RSA CreateRSA (this StrongNameKeyPair key_pair)

@@ -241,7 +241,13 @@ namespace Mono.Collections.Generic {
 				System.Math.Max (items.Length * 2, default_capacity),
 				new_size);
 
+#if !CF
 			Array.Resize (ref items, new_size);
+#else
+			var array = new T [new_size];
+			Array.Copy (items, array, size);
+			items = array;
+#endif
 		}
 
 		int IList.Add (object value)

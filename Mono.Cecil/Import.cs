@@ -38,6 +38,12 @@ namespace Mono.Cecil {
 
 		readonly ModuleDefinition module;
 
+		public MetadataImporter (ModuleDefinition module)
+		{
+			this.module = module;
+		}
+
+#if !CF
 		static readonly Dictionary<Type, ElementType> type_etype_mapping = new Dictionary<Type, ElementType> {
 			{ typeof (void), ElementType.Void },
 			{ typeof (bool), ElementType.Boolean },
@@ -58,11 +64,6 @@ namespace Mono.Cecil {
 			{ typeof (UIntPtr), ElementType.U },
 			{ typeof (object), ElementType.Object },
 		};
-
-		public MetadataImporter (ModuleDefinition module)
-		{
-			this.module = module;
-		}
 
 		public TypeReference ImportType (Type type, IGenericContext context)
 		{
@@ -291,6 +292,7 @@ namespace Mono.Cecil {
 		{
 			return (method.CallingConvention & conventions) != 0;
 		}
+#endif
 
 		static readonly Dictionary<string, ElementType> string_etype_mapping = new Dictionary<string, ElementType> {
 			{ "Void", ElementType.Void },
