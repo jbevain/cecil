@@ -164,6 +164,7 @@ namespace Mono.Cecil {
 		AssemblyNameReference ImportScope (SR.Assembly assembly)
 		{
 			AssemblyNameReference scope;
+#if !SILVERLIGHT
 			var name = assembly.GetName ();
 
 			if (TryGetAssemblyNameReference (name, out scope))
@@ -178,6 +179,16 @@ namespace Mono.Cecil {
 			module.AssemblyReferences.Add (scope);
 
 			return scope;
+#else
+			var name = AssemblyNameReference.Parse (assembly.FullName);
+
+			if (TryGetAssemblyNameReference (name, out scope))
+				return scope;
+
+			module.AssemblyReferences.Add (name);
+
+			return name;
+#endif
 		}
 
 		bool TryGetAssemblyNameReference (SR.AssemblyName name, out AssemblyNameReference assembly_reference)
