@@ -191,6 +191,7 @@ namespace Mono.Cecil {
 #endif
 		}
 
+#if !SILVERLIGHT
 		bool TryGetAssemblyNameReference (SR.AssemblyName name, out AssemblyNameReference assembly_reference)
 		{
 			var references = module.AssemblyReferences;
@@ -207,6 +208,7 @@ namespace Mono.Cecil {
 			assembly_reference = null;
 			return false;
 		}
+#endif
 
 		public FieldReference ImportField (SR.FieldInfo field)
 		{
