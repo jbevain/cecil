@@ -94,12 +94,7 @@ namespace Mono.Cecil {
 #if !SILVERLIGHT
 			return type.IsNested;
 #else
-			return type.IsNestedPublic
-				|| type.IsNestedPrivate
-				|| type.IsNestedFamORAssem
-				|| type.IsNestedFamily
-				|| type.IsNestedFamANDAssem
-				|| type.IsNestedAssembly;
+			return type.DeclaringType != null;
 #endif
 		}
 
