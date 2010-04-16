@@ -222,7 +222,9 @@ namespace Mono.Cecil.Cil {
 				if (assembly != null)
 					return assembly.GetType (fullname);
 			} catch (FileNotFoundException) {
+#if !CF
 			} catch (FileLoadException) {
+#endif
 			}
 
 			return null;

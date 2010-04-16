@@ -94,7 +94,7 @@ namespace Mono.Cecil {
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider);
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 			if (parameters.StrongNameKeyPair != null && module.assembly != null) {
 				var name = module.assembly.Name;
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
@@ -113,7 +113,7 @@ namespace Mono.Cecil {
 
 			writer.WriteImage ();
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 			if (parameters.StrongNameKeyPair != null)
 				CryptoService.StrongName (stream, writer, parameters.StrongNameKeyPair);
 #endif

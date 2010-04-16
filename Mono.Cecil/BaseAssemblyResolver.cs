@@ -82,7 +82,7 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
 
 			if (IsZero (name.Version)) {
@@ -128,7 +128,7 @@ namespace Mono.Cecil {
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference)
 		{
 			var corlib = typeof (object).Assembly.GetName ();

@@ -93,7 +93,7 @@ namespace Mono.Cecil {
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 		SR.StrongNameKeyPair key_pair;
 #endif
 		public Stream SymbolStream {
@@ -110,7 +110,7 @@ namespace Mono.Cecil {
 			get { return write_symbols; }
 			set { write_symbols = value; }
 		}
-#if !SILVERLIGHT
+#if !SILVERLIGHT && !CF
 		public SR.StrongNameKeyPair StrongNameKeyPair {
 			get { return key_pair; }
 			set { key_pair = value; }
@@ -480,6 +480,7 @@ namespace Mono.Cecil {
 				throw new ArgumentNullException ("method");
 		}
 
+#if !CF
 		public TypeReference Import (Type type)
 		{
 			CheckType (type);
@@ -500,6 +501,7 @@ namespace Mono.Cecil {
 
 			return MetadataImporter.ImportMethod (method);
 		}
+#endif
 
 		public TypeReference Import (TypeReference type)
 		{
