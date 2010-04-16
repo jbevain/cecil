@@ -609,6 +609,9 @@ namespace Mono.Cecil {
 
 		static TargetRuntime GetCurrentRuntime ()
 		{
+#if SILVERLIGHT
+			return TargetRuntime.Net_2_0;
+#else
 			var corlib_version = typeof (object).Assembly.GetName ().Version;
 			switch (corlib_version.Major) {
 			case 1:
@@ -622,6 +625,7 @@ namespace Mono.Cecil {
 			default:
 				throw new NotSupportedException ();
 			}
+#endif
 		}
 
 #endif
