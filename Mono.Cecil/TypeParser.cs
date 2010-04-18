@@ -108,9 +108,6 @@ namespace Mono.Cecil {
 			while (position < length) {
 				var chr = fullname [position];
 
-				if (TrySkipEscapeChar (chr))
-					continue;
-
 				if (IsDelimiter (chr))
 					break;
 
@@ -125,17 +122,7 @@ namespace Mono.Cecil {
 			return "+,[]*&".IndexOf (chr) != -1;
 		}
 
-		bool TrySkipEscapeChar (char chr)
-		{
-			if (chr == '\\') {
-				position++;
-				return true;
-			}
-
-			return false;
-		}
-
-		void SkipWhiteSpaces ()
+		void TryParseWhiteSpace ()
 		{
 			while (position < length && Char.IsWhiteSpace (fullname [position]))
 				position++;
@@ -237,9 +224,6 @@ namespace Mono.Cecil {
 			int start = position;
 			while (position < length) {
 				var chr = fullname [position];
-
-				if (TrySkipEscapeChar (chr))
-					continue;
 
 				if (chr == '[')
 					break;
