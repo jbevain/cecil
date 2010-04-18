@@ -29,6 +29,22 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void SimpleTypeDefinition ()
+		{
+			var module = GetCurrentModule ();
+
+			const string fullname = "Mono.Cecil.Tests.TypeParserTests";
+
+			var type = TypeParser.ParseType (module, fullname);
+			Assert.IsNotNull (type);
+			Assert.AreEqual (module, type.Scope);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("Mono.Cecil.Tests", type.Namespace);
+			Assert.AreEqual ("TypeParserTests", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeDefinition), type);
+		}
+
+		[Test]
 		public void ByRefTypeReference ()
 		{
 			var module = GetCurrentModule ();
