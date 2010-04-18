@@ -100,5 +100,43 @@ namespace Mono.Cecil.Tests {
 			Assert.IsInstanceOfType (typeof (TypeReference), type);
 			Assert.AreEqual (2, type.GenericParameters.Count);
 		}
+
+		[Test]
+		public void NestedType ()
+		{
+			var module = GetCurrentModule ();
+
+			const string fullname = "Bingo.Foo`1+Bar`1+Baz`1, Bingo";
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			Assert.IsNotNull (type);
+			Assert.AreEqual ("Bingo", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("", type.Namespace);
+			Assert.AreEqual ("Baz`1", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+			Assert.AreEqual (1, type.GenericParameters.Count);
+
+			type = type.DeclaringType;
+
+			Assert.IsNotNull (type);
+			Assert.AreEqual ("Bingo", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("", type.Namespace);
+			Assert.AreEqual ("Bar`1", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+			Assert.AreEqual (1, type.GenericParameters.Count);
+
+			type = type.DeclaringType;
+
+			Assert.IsNotNull (type);
+			Assert.AreEqual ("Bingo", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("Bingo", type.Namespace);
+			Assert.AreEqual ("Foo`1", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+			Assert.AreEqual (1, type.GenericParameters.Count);
+		}
 	}
 }
