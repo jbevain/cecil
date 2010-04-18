@@ -206,10 +206,26 @@ namespace Mono.Cecil {
 
 		Type [] ParseGenericArguments (int arity)
 		{
-			if (position == length || fullname [position] != '[')
-				return null;
+			Type [] generic_arguments = null;
 
-			throw new NotImplementedException ();
+			if (position == length || fullname [position] != '[')
+				return generic_arguments;
+
+			TryParse ('[');
+
+			for (int i = 0; i < arity; i++) {
+				var fq_argument = TryParse ('[');
+				Add (ref generic_arguments, ParseType ());
+				if (fq_argument)
+					TryParse (']');
+
+				TryParse (',');
+				TryParseWhiteSpace ();
+			}
+
+			TryParse (']');
+
+			return generic_arguments;
 		}
 
 		string ParseAssemblyName ()
@@ -223,7 +239,7 @@ namespace Mono.Cecil {
 			while (position < length) {
 				var chr = fullname [position];
 
-				if (chr == '[')
+				if (chr == '[' || chr == ']')
 					break;
 
 				position++;

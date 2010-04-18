@@ -1,9 +1,6 @@
 using System;
 using System.Linq;
 
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-
 using NUnit.Framework;
 
 namespace Mono.Cecil.Tests {
@@ -185,6 +182,76 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("Bingo", type.Namespace);
 			Assert.AreEqual ("Gazonk", type.Name);
 			Assert.IsInstanceOfType (typeof (TypeReference), type);
+		}
+
+		[Test]
+		public void GenericInstanceExternArguments ()
+		{
+			var module = GetCurrentModule ();
+
+			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[[System.Int32, {0}],[System.String, {0}]]",
+				typeof (object).Assembly.FullName);
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			var instance = type as GenericInstanceType;
+			Assert.IsNotNull (instance);
+			Assert.AreEqual (2, instance.GenericArguments.Count);
+			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
+			Assert.AreEqual ("Dictionary`2", type.Name);
+
+			type = instance.ElementType;
+
+			Assert.AreEqual (2, type.GenericParameters.Count);
+
+			var argument = instance.GenericArguments [0];
+			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("System", argument.Namespace);
+			Assert.AreEqual ("Int32", argument.Name);
+
+			argument = instance.GenericArguments [1];
+			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("System", argument.Namespace);
+			Assert.AreEqual ("String", argument.Name);
+		}
+
+		[Test]
+		public void GenericInstanceMixedArguments ()
+		{
+			var module = GetCurrentModule ();
+
+			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[Mono.Cecil.Tests.TypeParserTests,[System.String, {0}]]",
+				typeof (object).Assembly.FullName);
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			var instance = type as GenericInstanceType;
+			Assert.IsNotNull (instance);
+			Assert.AreEqual (2, instance.GenericArguments.Count);
+			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
+			Assert.AreEqual ("Dictionary`2", type.Name);
+
+			type = instance.ElementType;
+
+			Assert.AreEqual (2, type.GenericParameters.Count);
+
+			var argument = instance.GenericArguments [0];
+			Assert.IsInstanceOfType (typeof (TypeDefinition), argument);
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("Mono.Cecil.Tests", argument.Namespace);
+			Assert.AreEqual ("TypeParserTests", argument.Name);
+
+			argument = instance.GenericArguments [1];
+			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("System", argument.Namespace);
+			Assert.AreEqual ("String", argument.Name);
 		}
 	}
 }
