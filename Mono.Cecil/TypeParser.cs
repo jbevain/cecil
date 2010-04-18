@@ -221,7 +221,7 @@ namespace Mono.Cecil {
 
 		Type [] ParseGenericArguments (int arity)
 		{
-			if (position < length || fullname [position] != '[')
+			if (position == length || fullname [position] != '[')
 				return new Type [0];
 
 			throw new NotImplementedException ();
@@ -335,6 +335,8 @@ namespace Mono.Cecil {
 				module = module,
 			};
 
+			AdjustGenericParameters (type);
+
 			var nested_names = type_info.nested_names;
 			if (nested_names.IsNullOrEmpty ())
 				return type;
@@ -344,9 +346,26 @@ namespace Mono.Cecil {
 					DeclaringType = type,
 					module = module,
 				};
+
+				AdjustGenericParameters (type);
 			}
 
 			return type;
+		}
+
+		static void AdjustGenericParameters (TypeReference type)
+		{
+			var name = type.Name;
+			var index = name.LastIndexOf ('`');
+			if (index == -1)
+				return;
+
+			int arity;
+			if (!int.TryParse (name.Substring (index + 1), out arity))
+				return;
+
+			for (int i = 0; i < arity; i++)
+				type.GenericParameters.Add (new GenericParameter (type));
 		}
 
 		static IMetadataScope GetMetadataScope (ModuleDefinition module, Type type_info)

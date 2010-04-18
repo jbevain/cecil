@@ -82,5 +82,23 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("TypeDefinition", type.Name);
 			Assert.IsInstanceOfType (typeof (TypeReference), type);
 		}
+
+		[Test]
+		public void OpenGenericType ()
+		{
+			var module = GetCurrentModule ();
+			var corlib = module.TypeSystem.Corlib;
+
+			const string fullname = "System.Collections.Generic.Dictionary`2";
+
+			var type = TypeParser.ParseType (module, fullname);
+			Assert.IsNotNull (type);
+			Assert.AreEqual (corlib, type.Scope);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
+			Assert.AreEqual ("Dictionary`2", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+			Assert.AreEqual (2, type.GenericParameters.Count);
+		}
 	}
 }
