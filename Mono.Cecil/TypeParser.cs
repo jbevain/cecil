@@ -211,15 +211,17 @@ namespace Mono.Cecil {
 		Type [] ParseGenericArguments (int arity)
 		{
 			if (position == length || fullname [position] != '[')
-				return new Type [0];
+				return null;
 
 			throw new NotImplementedException ();
 		}
 
 		string ParseAssemblyName ()
 		{
-			if (!TryParse (',') && !TryParse (' '))
+			if (!TryParse (','))
 				return string.Empty;
+
+			TryParseWhiteSpace ();
 
 			int start = position;
 			while (position < length) {
@@ -237,6 +239,9 @@ namespace Mono.Cecil {
 
 		public static TypeReference ParseType (ModuleDefinition module, string fullname)
 		{
+			if (fullname == null)
+				return null;
+
 			var parser = new TypeParser (fullname);
 			var type_info = parser.ParseType ();
 
@@ -378,7 +383,7 @@ namespace Mono.Cecil {
 		static bool TryGetDefinition (ModuleDefinition module, Type type_info, out TypeReference type)
 		{
 			type = null;
-			if (!string.IsNullOrEmpty (type_info.assembly))
+			if (!TryCurrentModule (module, type_info))
 				return false;
 
 			var typedef = module.GetType (type_info.type_fullname);
@@ -393,6 +398,17 @@ namespace Mono.Cecil {
 
 			type = typedef;
 			return true;
+		}
+
+		static bool TryCurrentModule (ModuleDefinition module, Type type_info)
+		{
+			if (string.IsNullOrEmpty (type_info.assembly))
+				return true;
+
+			if (module.assembly != null && module.assembly.Name.FullName == type_info.assembly)
+				return true;
+
+			return false;
 		}
 	}
 }
