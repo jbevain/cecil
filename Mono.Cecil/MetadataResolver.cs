@@ -75,18 +75,7 @@ namespace Mono.Cecil {
 
 			var declaring_type = type.DeclaringType.Resolve ();
 
-			if (!declaring_type.HasNestedTypes)
-				return null;
-
-			var nested_types = declaring_type.NestedTypes;
-
-			for (int i = 0; i < nested_types.Count; i++) {
-				var nested_type = nested_types [i];
-				if (nested_type.Name == type.Name)
-					return nested_type;
-			}
-
-			return null;
+			return declaring_type.GetNestedType (type.Name);
 		}
 
 		public static FieldDefinition Resolve (IAssemblyResolver resolver, FieldReference field)

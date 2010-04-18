@@ -486,5 +486,21 @@ namespace Mono.Cecil {
 
 			throw new ArgumentException ();
 		}
+
+		public static TypeDefinition GetNestedType (this TypeDefinition self, string name)
+		{
+			if (!self.HasNestedTypes)
+				return null;
+
+			var nested_types = self.NestedTypes;
+
+			for (int i = 0; i < nested_types.Count; i++) {
+				var nested_type = nested_types [i];
+				if (nested_type.Name == name)
+					return nested_type;
+			}
+
+			return null;
+		}
 	}
 }
