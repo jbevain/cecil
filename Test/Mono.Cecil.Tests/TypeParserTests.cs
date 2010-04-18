@@ -66,9 +66,21 @@ namespace Mono.Cecil.Tests {
 			Assert.IsInstanceOfType (typeof (TypeReference), type);
 		}
 
-		static ModuleDefinition GetCurrentModule ()
+		[Test]
+		public void FullyQualifiedTypeReference ()
 		{
-			return ModuleDefinition.ReadModule (typeof (TypeParserTests).Module.FullyQualifiedName);
+			var module = GetCurrentModule ();
+			var cecil = module.AssemblyReferences.Where (reference => reference.Name == "Mono.Cecil").First ();
+
+			var fullname = "Mono.Cecil.TypeDefinition, " + cecil.FullName;
+
+			var type = TypeParser.ParseType (module, fullname);
+			Assert.IsNotNull (type);
+			Assert.AreEqual (cecil, type.Scope);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("Mono.Cecil", type.Namespace);
+			Assert.AreEqual ("TypeDefinition", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
 		}
 	}
 }

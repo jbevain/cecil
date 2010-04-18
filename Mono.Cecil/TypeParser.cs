@@ -211,6 +211,8 @@ namespace Mono.Cecil {
 						break;
 					}
 					break;
+				default:
+					return specs;
 				}
 			}
 
@@ -227,6 +229,9 @@ namespace Mono.Cecil {
 
 		string ParseAssemblyName ()
 		{
+			if (!TryParse (',') && !TryParse (' '))
+				return string.Empty;
+
 			int start = position;
 			while (position < length) {
 				var chr = fullname [position];
