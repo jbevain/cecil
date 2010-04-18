@@ -208,6 +208,8 @@ namespace Mono.Cecil {
 							rank++;
 
 						Add (ref specs, rank);
+
+						TryParse (']');
 						break;
 					}
 					break;

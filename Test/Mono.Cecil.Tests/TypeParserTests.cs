@@ -138,5 +138,53 @@ namespace Mono.Cecil.Tests {
 			Assert.IsInstanceOfType (typeof (TypeReference), type);
 			Assert.AreEqual (1, type.GenericParameters.Count);
 		}
+
+		[Test]
+		public void Vector ()
+		{
+			var module = GetCurrentModule ();
+
+			const string fullname = "Bingo.Gazonk[], Bingo";
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			var array = type as ArrayType;
+			Assert.IsNotNull (array);
+			Assert.AreEqual (1, array.Rank);
+			Assert.IsTrue (array.IsVector);
+
+			type = array.ElementType;
+
+			Assert.IsNotNull (type);
+			Assert.AreEqual ("Bingo", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("Bingo", type.Namespace);
+			Assert.AreEqual ("Gazonk", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+		}
+
+		[Test]
+		public void ThreeDimensionalArray ()
+		{
+			var module = GetCurrentModule ();
+
+			const string fullname = "Bingo.Gazonk[,,], Bingo";
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			var array = type as ArrayType;
+			Assert.IsNotNull (array);
+			Assert.AreEqual (3, array.Rank);
+			Assert.IsFalse (array.IsVector);
+
+			type = array.ElementType;
+
+			Assert.IsNotNull (type);
+			Assert.AreEqual ("Bingo", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("Bingo", type.Namespace);
+			Assert.AreEqual ("Gazonk", type.Name);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+		}
 	}
 }
