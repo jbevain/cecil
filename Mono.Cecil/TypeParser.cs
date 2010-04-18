@@ -27,6 +27,8 @@
 //
 
 using System;
+using System.Text;
+using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
 
@@ -63,7 +65,7 @@ namespace Mono.Cecil {
 
 			type.nested_names = ParseNestedNames ();
 
-			if (IsGeneric (type))
+			if (TryGetArity (type))
 				type.generic_arguments = ParseGenericArguments (type.arity);
 
 			type.specs = ParseSpecs ();
@@ -73,7 +75,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		static bool IsGeneric (Type type)
+		static bool TryGetArity (Type type)
 		{
 			int arity = 0;
 
@@ -105,14 +107,8 @@ namespace Mono.Cecil {
 		string ParsePart ()
 		{
 			int start = position;
-			while (position < length) {
-				var chr = fullname [position];
-
-				if (IsDelimiter (chr))
-					break;
-
+			while (position < length && !IsDelimiter (fullname [position]))
 				position++;
-			}
 
 			return fullname.Substring (start, position - start);
 		}
@@ -409,6 +405,114 @@ namespace Mono.Cecil {
 				return true;
 
 			return false;
+		}
+
+		public static string ToParseable (TypeReference type)
+		{
+			if (type == null)
+				return null;
+
+			var name = new StringBuilder ();
+			AppendType (type, name);
+			return name.ToString ();
+		}
+
+		static void AppendType (TypeReference type, StringBuilder name)
+		{
+			name.Append (type.Name);
+
+			TryPrependDeclaringType (type.DeclaringType, name);
+
+			if (!string.IsNullOrEmpty (type.Namespace)) {
+				name.Insert (0, '.');
+				name.Insert (0, type.Namespace);
+			}
+
+			if (type.IsTypeSpecification ())
+				AppendTypeSpecification (type, name);
+
+			if (RequiresFullyQualifiedName (type)) {
+				name.Append (", ");
+				name.Append (GetScopeFullName (type));
+			}
+		}
+
+		static string GetScopeFullName (TypeReference type)
+		{
+			var scope = type.Scope;
+			switch (scope.MetadataScopeType) {
+			case MetadataScopeType.AssemblyNameReference:
+				return ((AssemblyNameReference) scope).FullName;
+			case MetadataScopeType.ModuleDefinition:
+				return ((ModuleDefinition) scope).Assembly.Name.FullName;
+			}
+
+			throw new ArgumentException ();
+		}
+
+		static void AppendTypeSpecification (TypeReference type, StringBuilder name)
+		{
+			switch (type.etype) {
+			case ElementType.Ptr:
+				name.Append ('*');
+				break;
+			case ElementType.ByRef:
+				name.Append ('&');
+				break;
+			case ElementType.SzArray:
+			case ElementType.Array:
+				var array = (ArrayType) type;
+				if (array.IsVector) {
+					name.Append ("[]");
+				} else {
+					name.Append ('[');
+					for (int i = 1; i < array.Rank; i++)
+						name.Append (',');
+					name.Append (']');
+				}
+				break;
+			case ElementType.GenericInst:
+				var instance = (GenericInstanceType) type;
+				var arguments = instance.GenericArguments;
+
+				name.Append ('[');
+
+				for (int i = 0; i < arguments.Count; i++) {
+					var argument = arguments [i];
+					var requires_fqname = RequiresFullyQualifiedName (argument);
+
+					if (requires_fqname)
+						name.Append ('[');
+
+					AppendType (argument, name);
+
+					if (requires_fqname)
+						name.Append (']');
+				}
+
+				name.Append (']');
+				break;
+			default:
+				return;
+			}
+
+			AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
+		}
+
+		static bool RequiresFullyQualifiedName (TypeReference type)
+		{
+			return type.Scope != type.Module && type.Scope.Name != "mscorlib";
+		}
+
+		static void TryPrependDeclaringType (TypeReference type, StringBuilder name)
+		{
+			if (type == null)
+				return;
+
+			name.Insert (0, '+');
+			name.Insert (0, type.Name);
+
+			TryPrependDeclaringType (type.DeclaringType, name);
 		}
 	}
 }
