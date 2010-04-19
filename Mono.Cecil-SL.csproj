@@ -156,6 +156,7 @@
     <Compile Include="Mono.Cecil\TypeAttributes.cs" />
     <Compile Include="Mono.Cecil\TypeDefinition.cs" />
     <Compile Include="Mono.Cecil\TypeDefinitionCollection.cs" />
+    <Compile Include="Mono.Cecil\TypeParser.cs" />
     <Compile Include="Mono.Cecil\TypeReference.cs" />
     <Compile Include="Mono.Cecil\TypeSpecification.cs" />
     <Compile Include="Mono.Cecil\TypeSystem.cs" />

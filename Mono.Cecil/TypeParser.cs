@@ -432,7 +432,7 @@ namespace Mono.Cecil {
 			TryPrependDeclaringType (type.DeclaringType, name, start);
 
 			if (!string.IsNullOrEmpty (type.Namespace)) {
-				name.Insert (start, '.');
+				name.Insert (start, ".");
 				name.Insert (start, type.Namespace);
 			}
 
@@ -521,7 +521,7 @@ namespace Mono.Cecil {
 			if (type == null)
 				return;
 
-			name.Insert (start, '+');
+			name.Insert (start, "+");
 			name.Insert (start, type.Name);
 
 			TryPrependDeclaringType (type.DeclaringType, name, start);
