@@ -28,6 +28,7 @@
 
 using System;
 using System.Text;
+
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
@@ -91,17 +92,23 @@ namespace Mono.Cecil {
 			return arity > 0;
 		}
 
-		static void TryAddArity (string name, ref int arity)
+		static bool TryGetArity (string name, out int arity)
 		{
+			arity = 0;
 			var index = name.LastIndexOf ('`');
 			if (index == -1)
+				return false;
+
+			return !int.TryParse (name.Substring (index + 1), out arity);
+		}
+
+		static void TryAddArity (string name, ref int arity)
+		{
+			int type_arity;
+			if (!TryGetArity (name, out type_arity))
 				return;
 
-			int value;
-			if (!int.TryParse (name.Substring (index + 1), out value))
-				return;
-
-			arity += value;
+			arity += type_arity;
 		}
 
 		string ParsePart ()
@@ -349,14 +356,8 @@ namespace Mono.Cecil {
 
 		static void AdjustGenericParameters (TypeReference type)
 		{
-			var name = type.Name;
-			var index = name.LastIndexOf ('`');
-			if (index == -1)
-				return;
-
 			int arity;
-			if (!int.TryParse (name.Substring (index + 1), out arity))
-				return;
+			if (!TryGetArity (type.Name, out arity))
 
 			for (int i = 0; i < arity; i++)
 				type.GenericParameters.Add (new GenericParameter (type));
