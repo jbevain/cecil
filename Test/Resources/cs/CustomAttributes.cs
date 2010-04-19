@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 [assembly: Foo ("bingo")]
@@ -137,4 +138,13 @@ class Truc {
 
 [Foo (Chose = (Type) null)]
 class Machin {
+}
+
+[Foo (typeof (Dictionary<,>))]
+class OpenGeneric<X, Y> {
+}
+
+
+[Foo (typeof (Dictionary<string, OpenGeneric<Machin, int>[,]>))]
+class ClosedGeneric {
 }

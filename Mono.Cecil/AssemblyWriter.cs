@@ -1965,6 +1965,11 @@ namespace Mono.Cecil {
 
 		public void WriteUTF8String (string @string)
 		{
+			if (@string == null) {
+				WriteByte (0xff);
+				return;
+			}
+
 			var bytes = Encoding.UTF8.GetBytes (@string);
 			WriteCompressedUInt32 ((uint) bytes.Length);
 			WriteBytes (bytes);
@@ -2251,7 +2256,7 @@ namespace Mono.Cecil {
 				break;
 			case ElementType.None:
 				if (type.IsTypeOf ("System", "Type"))
-					WriteCustomAttributeTypeReference ((TypeReference) value);
+					WriteTypeReference ((TypeReference) value);
 				else
 					WriteCustomAttributeEnumValue (type, value);
 				break;
@@ -2305,16 +2310,6 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void WriteCustomAttributeTypeReference (TypeReference type)
-		{
-			if (type == null) {
-				WriteByte (0xff);
-				return;
-			}
-
-			WriteUTF8String (Normalize (type.FullName) + ", " + GetScopeName (type));
-		}
-
 		void WriteCustomAttributeEnumValue (TypeReference enum_type, object value)
 		{
 			var type = enum_type.Resolve ();
@@ -2351,39 +2346,6 @@ namespace Mono.Cecil {
 				WriteElementType (etype);
 				return;
 			}
-		}
-
-		static string Normalize (string type)
-		{
-			return type.Replace ('/', '+');
-		}
-
-		string GetFullyQualifiedTypeName (TypeReference type)
-		{
-			var fqname = Normalize (type.FullName);
-
-			if (TypeRequiresFullyQualifiedName (type))
-				fqname += ", " + GetScopeName (type);
-
-			return fqname;
-		}
-
-		bool TypeRequiresFullyQualifiedName (TypeReference type)
-		{
-			return type.Module != metadata.module && type.Module.Assembly.Name.Name != "mscorlib";
-		}
-
-		static string GetScopeName (TypeReference type)
-		{
-			var scope = type.Scope;
-			switch (scope.MetadataScopeType) {
-			case MetadataScopeType.AssemblyNameReference:
-				return ((AssemblyNameReference) scope).FullName;
-			case MetadataScopeType.ModuleDefinition:
-				return ((ModuleDefinition) scope).Assembly.Name.FullName;
-			}
-
-			throw new ArgumentException ();
 		}
 
 		public void WriteCustomAttributeNamedArguments (CustomAttribute attribute)
@@ -2454,7 +2416,7 @@ namespace Mono.Cecil {
 
 		void WriteTypeReference (TypeReference type)
 		{
-			WriteUTF8String (GetFullyQualifiedTypeName (type));
+			WriteUTF8String (TypeParser.ToParseable (type));
 		}
 
 		public void WriteMarshalInfo (MarshalInfo marshal_info)

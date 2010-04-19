@@ -2829,82 +2829,7 @@ namespace Mono.Cecil {
 
 		public TypeReference ReadTypeReference ()
 		{
-			return ParseFullyQualifiedTypeName (ReadUTF8String ());
-		}
-
-		static string Normalize (string type)
-		{
-			return type.Replace ('+', '/');
-		}
-
-		TypeReference ParseFullyQualifiedTypeName (string fqname) // most horrible method so far
-		{
-			if (fqname == null)
-				return null;
-
-			IMetadataScope scope;
-			var module = reader.module;
-
-			var separator = fqname.IndexOf (',');
-
-			if (separator > 0) {
-				var assembly_name = fqname.Substring (separator + 1);
-				var reference = AssemblyNameReference.Parse (assembly_name);
-
-				if (module.Assembly != null && module.Assembly.Name.FullName == reference.FullName)
-					return module.GetType (Normalize (fqname.Substring (0, separator)));
-
-				MatchReference (ref reference);
-
-				scope = reference;
-			} else {
-				var current_type = module.GetType (Normalize (fqname));
-				if (current_type != null)
-					return current_type;
-
-				scope = module.TypeSystem.Corlib;
-			}
-
-			var type_name = separator > 0 ? fqname.Substring (0, separator) : fqname;
-
-			var names = type_name.Split ('+');
-
-			var outer_fullname = names [0];
-			separator = outer_fullname.LastIndexOf ('.');
-
-			string name, @namespace;
-			if (separator > 0) {
-				@namespace = outer_fullname.Substring (0, separator);
-				name = outer_fullname.Substring (separator + 1);
-			} else {
-				@namespace = string.Empty;
-				name = outer_fullname;
-			}
-
-			var type = new TypeReference (@namespace, name, scope);
-			type.module = module;
-
-			for (int i = 1; i < names.Length; i++) {
-				var nested_type = new TypeReference (string.Empty, names [i], scope);
-				nested_type.module = module;
-				nested_type.DeclaringType = type;
-				type = nested_type;
-			}
-
-			return type;
-		}
-
-		void MatchReference (ref AssemblyNameReference candidate)
-		{
-			var references = reader.module.AssemblyReferences;
-			for (int i = 0; i < references.Count; i++) {
-				var reference = references [i];
-				if (reference.FullName != candidate.FullName)
-					continue;
-
-				candidate = reference;
-				return;
-			}
+			return TypeParser.ParseType (reader.module, ReadUTF8String ());
 		}
 
 		object ReadCustomAttributeEnum (TypeReference enum_type)
@@ -2969,7 +2894,7 @@ namespace Mono.Cecil {
 				var guid_value = ReadUTF8String ();
 				marshaler.Guid = !string.IsNullOrEmpty (guid_value) ? new Guid (guid_value) : Guid.Empty;
 				marshaler.UnmanagedType = ReadUTF8String ();
-				marshaler.ManagedType = ParseFullyQualifiedTypeName (ReadUTF8String ());
+				marshaler.ManagedType = ReadTypeReference ();
 				marshaler.Cookie = ReadUTF8String ();
 				return marshaler;
 			}
