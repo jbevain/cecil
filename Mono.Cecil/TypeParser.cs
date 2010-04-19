@@ -99,7 +99,7 @@ namespace Mono.Cecil {
 			if (index == -1)
 				return false;
 
-			return !int.TryParse (name.Substring (index + 1), out arity);
+			return int.TryParse (name.Substring (index + 1), out arity);
 		}
 
 		static void TryAddArity (string name, ref int arity)
@@ -358,6 +358,7 @@ namespace Mono.Cecil {
 		{
 			int arity;
 			if (!TryGetArity (type.Name, out arity))
+				return;
 
 			for (int i = 0; i < arity; i++)
 				type.GenericParameters.Add (new GenericParameter (type));
