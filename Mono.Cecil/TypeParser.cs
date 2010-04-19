@@ -235,10 +235,9 @@ namespace Mono.Cecil {
 
 			TryParseWhiteSpace ();
 
-			int start = position;
+			var start = position;
 			while (position < length) {
 				var chr = fullname [position];
-
 				if (chr == '[' || chr == ']')
 					break;
 
@@ -248,25 +247,20 @@ namespace Mono.Cecil {
 			return fullname.Substring (start, position - start);
 		}
 
-
 		public static TypeReference ParseType (ModuleDefinition module, string fullname)
 		{
 			if (fullname == null)
 				return null;
 
 			var parser = new TypeParser (fullname);
-			var type_info = parser.ParseType ();
-
-			return GetTypeReference (module, type_info);
+			return GetTypeReference (module, parser.ParseType ());
 		}
 
 		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info)
 		{
 			TypeReference type;
-			if (!TryGetDefinition (module, type_info, out type)) {
-				var scope = GetMetadataScope (module, type_info);
-				type = CreateReference (type_info, module, scope);
-			}
+			if (!TryGetDefinition (module, type_info, out type))
+				type = CreateReference (type_info, module, GetMetadataScope (module, type_info));
 
 			return CreateSpecs (type, type_info);
 		}
@@ -443,7 +437,7 @@ namespace Mono.Cecil {
 			}
 
 			if (type.IsTypeSpecification ())
-				AppendTypeSpecification (type, name);
+				AppendTypeSpecification ((TypeSpecification) type, name);
 
 			if (RequiresFullyQualifiedName (type)) {
 				name.Append (", ");
@@ -464,21 +458,20 @@ namespace Mono.Cecil {
 			throw new ArgumentException ();
 		}
 
-		static void AppendTypeSpecification (TypeReference type, StringBuilder name)
+		static void AppendTypeSpecification (TypeSpecification type, StringBuilder name)
 		{
+			if (type.ElementType.IsTypeSpecification ())
+				AppendTypeSpecification ((TypeSpecification) type.ElementType, name);
+
 			switch (type.etype) {
 			case ElementType.Ptr:
-				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
 				name.Append ('*');
 				break;
 			case ElementType.ByRef:
-				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
 				name.Append ('&');
 				break;
 			case ElementType.SzArray:
 			case ElementType.Array:
-				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
-
 				var array = (ArrayType) type;
 				if (array.IsVector) {
 					name.Append ("[]");
@@ -490,8 +483,6 @@ namespace Mono.Cecil {
 				}
 				break;
 			case ElementType.GenericInst:
-				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
-
 				var instance = (GenericInstanceType) type;
 				var arguments = instance.GenericArguments;
 
