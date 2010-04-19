@@ -323,7 +323,7 @@ namespace Mono.Cecil.Tests {
 			var type = argument.Value as TypeReference;
 			Assert.IsNotNull (type);
 
-			Assert.AreEqual ("System.Collections.Generic.Dictionary`2<System.String,OpenGeneric`2<Machin,System.Int32>>", type.FullName);
+			Assert.AreEqual ("System.Collections.Generic.Dictionary`2<System.String,OpenGeneric`2<Machin,System.Int32>[,]>", type.FullName);
 		}
 
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)

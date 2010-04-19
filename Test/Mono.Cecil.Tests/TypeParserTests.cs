@@ -253,5 +253,58 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System", argument.Namespace);
 			Assert.AreEqual ("String", argument.Name);
 		}
+
+		public class Foo<TX, TY> {
+		}
+
+		[Test]
+		public void ComplexGenericInstanceMixedArguments ()
+		{
+			var module = GetCurrentModule ();
+
+			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[[System.String, {0}],Mono.Cecil.Tests.TypeParserTests+Foo`2[Mono.Cecil.Tests.TypeParserTests,[System.Int32, {0}]]]",
+				typeof (object).Assembly.FullName);
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			var instance = type as GenericInstanceType;
+			Assert.IsNotNull (instance);
+			Assert.AreEqual (2, instance.GenericArguments.Count);
+			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
+			Assert.AreEqual ("Dictionary`2", type.Name);
+
+			type = instance.ElementType;
+
+			Assert.AreEqual (2, type.GenericParameters.Count);
+
+			var argument = instance.GenericArguments [0];
+			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("System", argument.Namespace);
+			Assert.AreEqual ("String", argument.Name);
+
+			argument = instance.GenericArguments [1];
+
+			instance = argument as GenericInstanceType;
+			Assert.IsNotNull (instance);
+			Assert.AreEqual (2, instance.GenericArguments.Count);
+			Assert.AreEqual (module, instance.Module);
+			Assert.AreEqual ("Mono.Cecil.Tests.TypeParserTests/Foo`2", instance.ElementType.FullName);
+			Assert.IsInstanceOfType (typeof (TypeDefinition), instance.ElementType);
+
+			argument = instance.GenericArguments [0];
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("Mono.Cecil.Tests", argument.Namespace);
+			Assert.AreEqual ("TypeParserTests", argument.Name);
+			Assert.IsInstanceOfType (typeof (TypeDefinition), argument);
+
+			argument = instance.GenericArguments [1];
+			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("System", argument.Namespace);
+			Assert.AreEqual ("Int32", argument.Name);
+		}
 	}
 }

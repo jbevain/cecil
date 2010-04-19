@@ -257,19 +257,16 @@ namespace Mono.Cecil {
 			var parser = new TypeParser (fullname);
 			var type_info = parser.ParseType ();
 
-			var type = GetTypeReference (module, type_info);
-
-			return type;
+			return GetTypeReference (module, type_info);
 		}
 
 		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info)
 		{
 			TypeReference type;
-			if (TryGetDefinition (module, type_info, out type))
-				return type;
-
-			var scope = GetMetadataScope (module, type_info);
-			type = CreateReference (type_info, module, scope);
+			if (!TryGetDefinition (module, type_info, out type)) {
+				var scope = GetMetadataScope (module, type_info);
+				type = CreateReference (type_info, module, scope);
+			}
 
 			return CreateSpecs (type, type_info);
 		}
@@ -435,13 +432,14 @@ namespace Mono.Cecil {
 
 		static void AppendType (TypeReference type, StringBuilder name)
 		{
-			name.Append (type.Name);
+			var start = name.Length;
+			name.Append (type.GetElementType ().Name);
 
-			TryPrependDeclaringType (type.DeclaringType, name);
+			TryPrependDeclaringType (type.DeclaringType, name, start);
 
 			if (!string.IsNullOrEmpty (type.Namespace)) {
-				name.Insert (0, '.');
-				name.Insert (0, type.Namespace);
+				name.Insert (start, '.');
+				name.Insert (start, type.Namespace);
 			}
 
 			if (type.IsTypeSpecification ())
@@ -470,13 +468,17 @@ namespace Mono.Cecil {
 		{
 			switch (type.etype) {
 			case ElementType.Ptr:
+				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
 				name.Append ('*');
 				break;
 			case ElementType.ByRef:
+				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
 				name.Append ('&');
 				break;
 			case ElementType.SzArray:
 			case ElementType.Array:
+				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
+
 				var array = (ArrayType) type;
 				if (array.IsVector) {
 					name.Append ("[]");
@@ -488,14 +490,19 @@ namespace Mono.Cecil {
 				}
 				break;
 			case ElementType.GenericInst:
+				AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
+
 				var instance = (GenericInstanceType) type;
 				var arguments = instance.GenericArguments;
 
 				name.Append ('[');
 
 				for (int i = 0; i < arguments.Count; i++) {
+					if (i > 0)
+						name.Append (',');
+
 					var argument = arguments [i];
-					var requires_fqname = RequiresFullyQualifiedName (argument);
+					var requires_fqname = argument.Scope != argument.Module;
 
 					if (requires_fqname)
 						name.Append ('[');
@@ -511,8 +518,6 @@ namespace Mono.Cecil {
 			default:
 				return;
 			}
-
-			AppendTypeSpecification (((TypeSpecification) type).ElementType, name);
 		}
 
 		static bool RequiresFullyQualifiedName (TypeReference type)
@@ -520,15 +525,15 @@ namespace Mono.Cecil {
 			return type.Scope != type.Module && type.Scope.Name != "mscorlib";
 		}
 
-		static void TryPrependDeclaringType (TypeReference type, StringBuilder name)
+		static void TryPrependDeclaringType (TypeReference type, StringBuilder name, int start)
 		{
 			if (type == null)
 				return;
 
-			name.Insert (0, '+');
-			name.Insert (0, type.Name);
+			name.Insert (start, '+');
+			name.Insert (start, type.Name);
 
-			TryPrependDeclaringType (type.DeclaringType, name);
+			TryPrependDeclaringType (type.DeclaringType, name, start);
 		}
 	}
 }
