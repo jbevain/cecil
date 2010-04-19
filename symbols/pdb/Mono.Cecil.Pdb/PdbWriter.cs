@@ -35,6 +35,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Pdb {
 
+#if !READ_ONLY
 	public class PdbWriter : Cil.ISymbolWriter {
 
 		readonly SymWriter writer;
@@ -220,4 +221,5 @@ namespace Mono.Cecil.Pdb {
 			writer.Close ();
 		}
 	}
+#endif
 }

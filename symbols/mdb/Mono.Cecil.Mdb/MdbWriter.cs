@@ -34,9 +34,9 @@ using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 using Mono.CompilerServices.SymbolWriter;
 
-
 namespace Mono.Cecil.Mdb {
 
+#if !READ_ONLY
 	public class MdbWriterProvider : ISymbolWriterProvider {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
@@ -243,4 +243,5 @@ namespace Mono.Cecil.Mdb {
 			}
 		}
 	}
+#endif
 }
