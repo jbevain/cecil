@@ -204,6 +204,13 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (method.Body.ThisParameter, method.Body.Instructions [0].Operand);
 		}
 
+		[TestModule ("iterator.exe")]
+		public void Iterator (ModuleDefinition module)
+		{
+			var method = module.GetType ("Program").GetMethod ("GetLittleArgs");
+			Assert.IsNotNull (method.Body);
+		}
+
 		[TestCSharp ("CustomAttributes.cs")]
 		public void LoadString (ModuleDefinition module)
 		{

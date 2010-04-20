@@ -121,6 +121,8 @@ namespace Mono.Cecil.Cil {
 			if (body.HasExceptionHandlers)
 				WriteExceptionHandlers ();
 
+			Align (4);
+
 			var symbol_writer = metadata.symbol_writer;
 			if (symbol_writer != null)
 				symbol_writer.Write (body);
