@@ -186,3 +186,9 @@ Mono.Cecil.Cil:
 	* CilWorker -> ILProcessor
 
 TODO:
+
+	* Mono.Cecil.Rocks
+		* ILGenerator
+		* GetBaseMethod
+
+	* HOWTOs
