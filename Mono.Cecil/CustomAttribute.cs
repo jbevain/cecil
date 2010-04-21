@@ -79,6 +79,7 @@ namespace Mono.Cecil {
 		readonly internal uint signature;
 		internal bool resolved;
 		MethodReference constructor;
+		byte [] blob;
 		internal Collection<CustomAttributeArgument> arguments;
 		internal Collection<CustomAttributeNamedArgument> fields;
 		internal Collection<CustomAttributeNamedArgument> properties;
@@ -166,12 +167,22 @@ namespace Mono.Cecil {
 			this.resolved = true;
 		}
 
+		public CustomAttribute (MethodReference constructor, byte [] blob)
+		{
+			this.constructor = constructor;
+			this.resolved = false;
+			this.blob = blob;
+		}
+
 		public byte [] GetBlob ()
 		{
+			if (blob != null)
+				return blob;
+
 			if (!HasImage || signature == 0)
 				throw new NotSupportedException ();
 
-			return Module.Read (this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature)); ;
+			return blob = Module.Read (this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature)); ;
 		}
 
 		void Resolve ()

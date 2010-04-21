@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -324,6 +325,42 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (type);
 
 			Assert.AreEqual ("System.Collections.Generic.Dictionary`2<System.String,OpenGeneric`2<Machin,System.Int32>[,]>", type.FullName);
+		}
+
+		[Test]
+		public void DefineCustomAttributeFromBlob ()
+		{
+			var file = Path.Combine (Path.GetTempPath (), "CaBlob.dll");
+
+			var module = ModuleDefinition.CreateModule ("CaBlob.dll", ModuleKind.Dll, TargetRuntime.Net_2_0);
+			var assembly_title_ctor = module.Import (typeof (System.Reflection.AssemblyTitleAttribute).GetConstructor (new[] {typeof (string)}));
+
+			Assert.IsNotNull (assembly_title_ctor);
+
+			var buffer = new ByteBuffer ();
+			buffer.WriteUInt16 (1); // ca signature
+
+			var title = Encoding.UTF8.GetBytes ("CaBlob");
+
+			buffer.WriteCompressedUInt32 ((uint) title.Length);
+			buffer.WriteBytes (title);
+
+			buffer.WriteUInt16 (0); // named arguments
+
+			var blob = new byte [buffer.length];
+			Buffer.BlockCopy (buffer.buffer, 0, blob, 0, buffer.length);
+
+			var attribute = new CustomAttribute (assembly_title_ctor, blob);
+			module.Assembly.CustomAttributes.Add (attribute);
+
+			module.Write (file);
+
+			module = ModuleDefinition.ReadModule (file);
+
+			attribute = GetAttribute (module.Assembly, "AssemblyTitle");
+
+			Assert.IsNotNull (attribute);
+			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
 		}
 
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
