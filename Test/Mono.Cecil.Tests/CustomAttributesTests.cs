@@ -333,7 +333,7 @@ namespace Mono.Cecil.Tests {
 			var file = Path.Combine (Path.GetTempPath (), "CaBlob.dll");
 
 			var module = ModuleDefinition.CreateModule ("CaBlob.dll", ModuleKind.Dll, TargetRuntime.Net_2_0);
-			var assembly_title_ctor = module.Import (typeof (System.Reflection.AssemblyTitleAttribute).GetConstructor (new[] {typeof (string)}));
+			var assembly_title_ctor = module.Import (typeof (System.Reflection.AssemblyTitleAttribute).GetConstructor (new [] {typeof (string)}));
 
 			Assert.IsNotNull (assembly_title_ctor);
 
