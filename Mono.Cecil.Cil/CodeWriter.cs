@@ -283,7 +283,7 @@ namespace Mono.Cecil.Cil {
 		bool RequiresFatHeader ()
 		{
 			var body = this.body;
-			return body.CodeSize > 64
+			return body.CodeSize >= 64
 				|| body.InitLocals
 				|| body.HasVariables
 				|| body.HasExceptionHandlers
