@@ -81,12 +81,14 @@ namespace Mono.Cecil {
 				throw new ArgumentException ("Type already attached");
 
 			type.module = container;
+			type.scope = container;
 			name_cache [type.FullName] = type;
 		}
 
 		void Detach (TypeDefinition type)
 		{
 			type.module = null;
+			type.scope = null;
 			name_cache.Remove (type.FullName);
 		}
 
