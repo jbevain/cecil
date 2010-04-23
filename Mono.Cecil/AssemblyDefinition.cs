@@ -180,5 +180,10 @@ namespace Mono.Cecil {
 			main_module.Write (stream, parameters);
 		}
 #endif
+
+		public override string ToString ()
+		{
+			return name != null ? name.FullName : string.Empty;
+		}
 	}
 }
