@@ -2920,7 +2920,12 @@ namespace Mono.Cecil {
 			}
 
 			var length = (int) ReadCompressedUInt32 ();
-			var @string = Encoding.UTF8.GetString (this.buffer, position, length);
+			if (length == 0)
+				return string.Empty;
+
+			var @string = Encoding.UTF8.GetString (buffer, position,
+				buffer [position + length - 1] == 0 ? length - 1 : length);
+
 			position += length;
 			return @string;
 		}
