@@ -40,8 +40,9 @@ namespace Mono.Cecil {
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
 
 		readonly Collection<string> directories;
-#if !SILVERLIGHT
-		Collection<string> mono_gac_paths;
+
+#if !SILVERLIGHT && !CF
+		readonly Collection<string> gac_paths;
 #endif
 
 		public void AddSearchDirectory (string directory)
@@ -69,6 +70,9 @@ namespace Mono.Cecil {
 		protected BaseAssemblyResolver ()
 		{
 			directories = new Collection<string> { ".", "bin" };
+#if !SILVERLIGHT && !CF
+			gac_paths = GetGacPaths ();
+#endif
 		}
 
 		AssemblyDefinition GetAssembly (string file)
@@ -172,10 +176,25 @@ namespace Mono.Cecil {
 			return null;
 		}
 
+		static Collection<string> GetGacPaths ()
+		{
+			if (on_mono)
+				return GetDefaultMonoGacPaths ();
+
+			var paths = new Collection<string> (2);
+			var windir = Environment.GetEnvironmentVariable ("WINDIR");
+			if (windir == null)
+				return paths;
+
+			paths.Add (Path.Combine (windir, "assembly"));
+			paths.Add (Path.Combine (windir, Path.Combine ("Microsoft.NET", "assembly")));
+			return paths;
+		}
+
 		static Collection<string> GetDefaultMonoGacPaths ()
 		{
-			var paths = new Collection<string> ();
-			string gac = GetCurrentGacPath ();
+			var paths = new Collection<string> (1);
+			var gac = GetCurrentMonoGac ();
 			if (gac != null)
 				paths.Add (gac);
 
@@ -196,12 +215,9 @@ namespace Mono.Cecil {
 			return paths;
 		}
 
-		IEnumerable<string> GetMonoGacPaths ()
+		static string GetCurrentMonoGac ()
 		{
-			if (mono_gac_paths == null)
-				mono_gac_paths = GetDefaultMonoGacPaths ();
-
-			return mono_gac_paths;
+			return Path.Combine (Directory.GetParent (typeof (object).Module.FullyQualifiedName).FullName, "gac");
 		}
 
 		AssemblyDefinition GetAssemblyInGac (AssemblyNameReference reference)
@@ -209,21 +225,33 @@ namespace Mono.Cecil {
 			if (reference.PublicKeyToken == null || reference.PublicKeyToken.Length == 0)
 				return null;
 
-			if (on_mono) {
-				foreach (var gacpath in GetMonoGacPaths ()) {
-					var file = GetAssemblyFile (reference, gacpath);
-					if (File.Exists (file))
-						return GetAssembly (file);
-				}
-			} else {
-				var current_gac = GetCurrentGacPath ();
-				if (current_gac == null)
-					return null;
+			if (on_mono)
+				return GetAssemblyInMonoGac (reference);
 
-				var gacs = new [] {"GAC_MSIL", "GAC_32", "GAC"};
-				for (int i = 0; i < gacs.Length; i++) {
-					var gac = Path.Combine (Directory.GetParent (current_gac).FullName, gacs [i]);
-					var file = GetAssemblyFile (reference, gac);
+			return GetAssemblyInNetGac (reference);
+		}
+
+		AssemblyDefinition GetAssemblyInMonoGac (AssemblyNameReference reference)
+		{
+			for (int i = 0; i < gac_paths.Count; i++) {
+				var gac_path = gac_paths [i];
+				var file = GetAssemblyFile (reference, string.Empty, gac_path);
+				if (File.Exists (file))
+					return GetAssembly (file);
+			}
+
+			return null;
+		}
+
+		AssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference)
+		{
+			var gacs = new [] { "GAC_MSIL", "GAC_32", "GAC" };
+			var prefixes = new [] { string.Empty, "v4.0_" };
+
+			for (int i = 0; i < 2; i++) {
+				for (int j = 0; j < gacs.Length; j++) {
+					var gac = Path.Combine (gac_paths [i], gacs [j]);
+					var file = GetAssemblyFile (reference, prefixes [i], gac);
 					if (Directory.Exists (gac) && File.Exists (file))
 						return GetAssembly (file);
 				}
@@ -232,9 +260,10 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static string GetAssemblyFile (AssemblyNameReference reference, string gac)
+		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ();
+			gac_folder.Append (prefix);
 			gac_folder.Append (reference.Version);
 			gac_folder.Append ("__");
 			for (int i = 0; i < reference.PublicKeyToken.Length; i++)
@@ -244,20 +273,6 @@ namespace Mono.Cecil {
 				Path.Combine (
 					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
 				reference.Name + ".dll");
-		}
-
-		static string GetCurrentGacPath ()
-		{
-			var file = typeof (Uri).Module.FullyQualifiedName;
-			if (!File.Exists (file))
-				return null;
-
-			return Directory.GetParent (
-				Directory.GetParent (
-					Path.GetDirectoryName (
-						file)
-					).FullName
-				).FullName;
 		}
 #endif
 	}
