@@ -1652,6 +1652,11 @@ namespace Mono.Cecil {
 				return ElementType.Class;
 			case ElementType.String:
 				return constant != null ? ElementType.String : ElementType.Class;
+			case ElementType.Object:
+				if (constant != null)
+					throw new ArgumentException ();
+
+				return ElementType.Class;
 			case ElementType.GenericInst:
 			case ElementType.CModOpt:
 			case ElementType.CModReqD:

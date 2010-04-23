@@ -196,6 +196,17 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (null, (string) field.Constant);
 		}
 
+		[TestCSharp ("Fields.cs")]
+		public void ObjectConstant (ModuleDefinition module)
+		{
+			var panpan = module.GetType ("PanPan");
+			Assert.IsNotNull (panpan);
+
+			var field = panpan.GetField ("obj");
+			Assert.IsTrue (field.HasConstant);
+			Assert.IsNull (field.Constant);
+		}
+
 		[TestCSharp ("Generics.cs")]
 		public void NestedEnumOfGenericTypeDefinition (ModuleDefinition module)
 		{

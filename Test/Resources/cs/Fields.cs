@@ -36,6 +36,7 @@ class PanPan {
 	public const PanPan Peter = null;
 	public const string QQ = "qq";
 	public const string nil = null;
+	public const object obj = null;
 }
 
 [StructLayout (LayoutKind.Sequential)]
