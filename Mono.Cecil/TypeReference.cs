@@ -68,7 +68,13 @@ namespace Mono.Cecil {
 		}
 
 		public override ModuleDefinition Module {
-			get { return module; }
+			get {
+				var declaring_type = this.DeclaringType;
+				if (declaring_type != null)
+					return declaring_type.Module;
+
+				return module;
+			}
 		}
 
 		IGenericParameterProvider IGenericContext.Type {
@@ -98,8 +104,9 @@ namespace Mono.Cecil {
 
 		public virtual IMetadataScope Scope {
 			get {
-				if (this.DeclaringType != null)
-					return this.DeclaringType.Scope;
+				var declaring_type = this.DeclaringType;
+				if (declaring_type != null)
+					return declaring_type.Scope;
 
 				return scope;
 			}
