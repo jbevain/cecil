@@ -59,5 +59,10 @@ namespace Mono.Cecil {
 			Mixin.CheckName (name);
 			this.name = name;
 		}
+
+		public override string ToString ()
+		{
+			return name;
+		}
 	}
 }
