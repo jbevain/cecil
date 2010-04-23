@@ -1175,10 +1175,9 @@ namespace Mono.Cecil {
 			case ElementType.CModReqD:
 				return GetFieldTypeSize (((IModifierType) type).ElementType);
 			default:
-				var type_def = type.Resolve ();
-
-				if (type_def != null && type_def.HasLayoutInfo)
-					size = type_def.ClassSize;
+				var field_type = type.CheckedResolve ();
+				if (field_type.HasLayoutInfo)
+					size = field_type.ClassSize;
 
 				break;
 			}
@@ -2834,7 +2833,7 @@ namespace Mono.Cecil {
 
 		object ReadCustomAttributeEnum (TypeReference enum_type)
 		{
-			var type = enum_type.Resolve ();
+			var type = enum_type.CheckedResolve ();
 			if (!type.IsEnum)
 				throw new ArgumentException ();
 

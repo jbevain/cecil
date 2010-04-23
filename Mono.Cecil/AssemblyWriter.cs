@@ -1645,7 +1645,7 @@ namespace Mono.Cecil {
 			var etype = constant_type.etype;
 			switch (etype) {
 			case ElementType.None:
-				var type = constant_type.Resolve ();
+				var type = constant_type.CheckedResolve ();
 				if (type.IsEnum)
 					return GetConstantType (type.GetEnumUnderlyingType (), constant);
 
@@ -2312,7 +2312,7 @@ namespace Mono.Cecil {
 
 		void WriteCustomAttributeEnumValue (TypeReference enum_type, object value)
 		{
-			var type = enum_type.Resolve ();
+			var type = enum_type.CheckedResolve ();
 			if (!type.IsEnum)
 				throw new ArgumentException ();
 
