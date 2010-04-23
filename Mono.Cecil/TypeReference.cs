@@ -237,5 +237,14 @@ namespace Mono.Cecil {
 
 			return false;
 		}
+
+		public static TypeDefinition CheckedResolve (this TypeReference self)
+		{
+			var type = self.Resolve ();
+			if (type == null)
+				throw new InvalidOperationException (string.Format ("Failed to resolve type: {0}", self.FullName));
+
+			return type;
+		}
 	}
 }
