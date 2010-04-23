@@ -74,6 +74,8 @@ namespace Mono.Cecil {
 				return module.GetType (type.FullName);
 
 			var declaring_type = type.DeclaringType.Resolve ();
+			if (declaring_type == null)
+				return null;
 
 			return declaring_type.GetNestedType (type.Name);
 		}
