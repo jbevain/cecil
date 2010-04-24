@@ -1654,7 +1654,7 @@ namespace Mono.Cecil {
 				return constant != null ? ElementType.String : ElementType.Class;
 			case ElementType.Object:
 				if (constant != null)
-					throw new ArgumentException ();
+					return GetConstantType (constant.GetType ());
 
 				return ElementType.Class;
 			case ElementType.GenericInst:
@@ -1665,6 +1665,40 @@ namespace Mono.Cecil {
 				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
 			default:
 				return etype;
+			}
+		}
+
+		static ElementType GetConstantType (Type type)
+		{
+			switch (Type.GetTypeCode (type)) {
+			case TypeCode.Boolean:
+				return ElementType.Boolean;
+			case TypeCode.Byte:
+				return ElementType.U1;
+			case TypeCode.SByte:
+				return ElementType.I1;
+			case TypeCode.Char:
+				return ElementType.Char;
+			case TypeCode.Int16:
+				return ElementType.I2;
+			case TypeCode.UInt16:
+				return ElementType.U2;
+			case TypeCode.Int32:
+				return ElementType.I4;
+			case TypeCode.UInt32:
+				return ElementType.U4;
+			case TypeCode.Int64:
+				return ElementType.I8;
+			case TypeCode.UInt64:
+				return ElementType.U8;
+			case TypeCode.Single:
+				return ElementType.R4;
+			case TypeCode.Double:
+				return ElementType.R8;
+			case TypeCode.String:
+				return ElementType.String;
+			default:
+				throw new NotSupportedException (type.FullName);
 			}
 		}
 

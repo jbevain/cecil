@@ -89,6 +89,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\assemblies\boxedoptarg.dll" />
     <Content Include="Resources\assemblies\catch.exe" />
     <Content Include="Resources\assemblies\decsec-att.dll" />
     <Content Include="Resources\assemblies\decsec-xml.dll" />
@@ -100,6 +101,7 @@
     <Content Include="Resources\assemblies\hello.x86.exe" />
     <Content Include="Resources\assemblies\hello1.exe" />
     <Content Include="Resources\assemblies\hellow.exe" />
+    <Content Include="Resources\assemblies\iterator.exe" />
     <Content Include="Resources\assemblies\libhello.dll" />
     <Content Include="Resources\assemblies\libres.dll" />
     <Content Include="Resources\assemblies\mma.exe" />

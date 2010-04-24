@@ -88,5 +88,16 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (-1, info.Size);
 			Assert.AreEqual (-1, info.SizeParameterIndex);
 		}
+
+		[TestModule ("boxedoptarg.dll")]
+		public void BoxedDefaultArgumentValue (ModuleDefinition module)
+		{
+			var foo = module.GetType ("Foo");
+			var bar = foo.GetMethod ("Bar");
+			var baz = bar.Parameters [0];
+
+			Assert.IsTrue (baz.HasConstant);
+			Assert.AreEqual (-1, baz.Constant);
+		}
 	}
 }
