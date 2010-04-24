@@ -67,6 +67,8 @@ namespace Mono.Cecil.Cil {
 			else
 				WriteResolvedMethodBody (method);
 
+			Align (4);
+
 			EndMethod ();
 			return rva;
 		}
@@ -84,8 +86,6 @@ namespace Mono.Cecil.Cil {
 			var buffer = code_reader.PatchRawMethodBody (method, this, out symbols);
 
 			WriteBytes (buffer);
-
-			Align (4);
 
 			if (symbols.Offsets.IsNullOrEmpty ())
 				return;
@@ -120,8 +120,6 @@ namespace Mono.Cecil.Cil {
 
 			if (body.HasExceptionHandlers)
 				WriteExceptionHandlers ();
-
-			Align (4);
 
 			var symbol_writer = metadata.symbol_writer;
 			if (symbol_writer != null)
@@ -461,6 +459,7 @@ namespace Mono.Cecil.Cil {
 		void WriteExceptionHandlers ()
 		{
 			Align (4);
+
 			var handlers = body.ExceptionHandlers;
 
 			if (handlers.Count < 0x15 && !RequiresFatSection (handlers))
