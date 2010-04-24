@@ -16,12 +16,8 @@ Mono.Cecil
 		to get them.
 
 	+ ReadingMode:
-		new, used by the AssemblyFactory to specify
-		if the assembly is either loaded in a deffered
+		specifies if the assembly is either loaded in a deffered
 		or immediate fashion.
-
-		has a ReadOnly flag, to be used to optimize
-		read only assemblies
 
 	+ ReaderParameters
 		+ ReadingMode
