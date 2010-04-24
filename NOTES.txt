@@ -189,6 +189,5 @@ TODO:
 
 	* Mono.Cecil.Rocks
 		* ILGenerator
-		* GetBaseMethod
 
 	* HOWTOs

@@ -56,6 +56,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mono.Cecil.Tests\MethodDefinitionRocksTests.cs" />
     <Compile Include="Mono.Cecil.Tests\ModuleDefinitionRocksTests.cs" />
     <Compile Include="Mono.Cecil.Tests\SecurityDeclarationRocksTests.cs" />
     <Compile Include="Mono.Cecil.Tests\TypeDefinitionRocksTests.cs" />
