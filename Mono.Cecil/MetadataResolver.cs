@@ -155,7 +155,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static MethodDefinition GetMethod (IList<MethodDefinition> methods, MethodReference reference)
+		public static MethodDefinition GetMethod (IList<MethodDefinition> methods, MethodReference reference)
 		{
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
