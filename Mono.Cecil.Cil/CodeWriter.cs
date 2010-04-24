@@ -248,9 +248,14 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		static int GetTargetOffset (Instruction instruction)
+		int GetTargetOffset (Instruction instruction)
 		{
-			return instruction != null ? instruction.offset : int.MaxValue;
+			if (instruction == null) {
+				var last = body.instructions [body.instructions.size - 1];
+				return last.offset + last.GetSize ();
+			}
+
+			return instruction.offset;
 		}
 
 		uint GetUserStringIndex (string @string)
