@@ -124,10 +124,10 @@ namespace Mono.Cecil {
 
 		public Collection<SecurityAttribute> SecurityAttributes {
 			get {
-				if (security_attributes != null)
-					return security_attributes;
-
 				Resolve ();
+
+				if (security_attributes == null)
+					return security_attributes = new Collection<SecurityAttribute> ();
 
 				return security_attributes;
 			}
