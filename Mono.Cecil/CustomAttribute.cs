@@ -182,7 +182,7 @@ namespace Mono.Cecil {
 			if (!HasImage || signature == 0)
 				throw new NotSupportedException ();
 
-			return blob = Module.Read (this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature)); ;
+			return blob = Module.Read (this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature));
 		}
 
 		void Resolve ()
