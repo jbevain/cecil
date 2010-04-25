@@ -52,10 +52,9 @@ namespace Mono.Cecil.Rocks {
 		void OnInlineMethod (OpCode opcode, MethodReference method);
 	}
 
-	public class ILParser {
+	public static class ILParser {
 
 		class ParseContext {
-			public MethodDefinition Method { get; set; }
 			public CodeReader Code { get; set; }
 			public MetadataReader Metadata { get; set; }
 			public Collection<VariableDefinition> Variables { get; set; }
@@ -97,7 +96,6 @@ namespace Mono.Cecil.Rocks {
 			var code = method.Module.Read (method, (_, reader) => CodeReader.CreateCodeReader (reader));
 
 			return new ParseContext {
-				Method = method,
 				Code = code,
 				Metadata = code.reader,
 				Visitor = visitor,
@@ -122,7 +120,6 @@ namespace Mono.Cecil.Rocks {
 		{
 			var code = context.Code;
 			var metadata = context.Metadata;
-			var method = context.Method;
 			var visitor = context.Visitor;
 
 			var start = code.position;
@@ -207,12 +204,16 @@ namespace Mono.Cecil.Rocks {
 						break;
 					case TokenType.MemberRef:
 						var field_ref = member as FieldReference;
-						if (field_ref != null)
+						if (field_ref != null) {
 							visitor.OnInlineField (opcode, field_ref);
+							break;
+						}
 
 						var method_ref = member as MethodReference;
-						if (method_ref != null)
+						if (method_ref != null) {
 							visitor.OnInlineMethod (opcode, method_ref);
+							break;
+						}
 
 						throw new InvalidOperationException ();
 					}
