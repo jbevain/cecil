@@ -103,7 +103,7 @@ namespace Mono.Cecil {
 				if (security_declarations != null)
 					return security_declarations;
 
-				return this.GetSecurityDeclarations (ref security_declarations, Module);
+				return security_declarations = this.GetSecurityDeclarations (Module);
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace Mono.Cecil {
 				if (custom_attributes != null)
 					return custom_attributes;
 
-				return this.GetCustomAttributes (ref custom_attributes, Module);
+				return custom_attributes = this.GetCustomAttributes (Module);
 			}
 		}
 
@@ -219,7 +219,7 @@ namespace Mono.Cecil {
 				if (generic_parameters != null)
 					return generic_parameters;
 
-				return this.GetGenericParameters (ref generic_parameters, Module);
+				return generic_parameters = this.GetGenericParameters (Module);
 			}
 		}
 

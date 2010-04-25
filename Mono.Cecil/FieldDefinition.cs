@@ -145,7 +145,7 @@ namespace Mono.Cecil {
 				if (custom_attributes != null)
 					return custom_attributes;
 
-				return this.GetCustomAttributes (ref custom_attributes, Module);
+				return custom_attributes = this.GetCustomAttributes (Module);
 			}
 		}
 
@@ -163,7 +163,7 @@ namespace Mono.Cecil {
 				if (marshal_info != null)
 					return marshal_info;
 
-				return this.GetMarshalInfo (ref marshal_info, Module);
+				return marshal_info = this.GetMarshalInfo (Module);
 			}
 			set { marshal_info = value; }
 		}

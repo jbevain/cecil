@@ -296,7 +296,7 @@ namespace Mono.Cecil {
 				if (custom_attributes != null)
 					return custom_attributes;
 
-				return this.GetCustomAttributes (ref custom_attributes, this);
+				return custom_attributes = this.GetCustomAttributes (this);
 			}
 		}
 

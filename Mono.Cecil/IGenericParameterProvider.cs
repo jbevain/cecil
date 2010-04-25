@@ -63,10 +63,9 @@ namespace Mono.Cecil {
 
 		public static Collection<GenericParameter> GetGenericParameters (
 			this IGenericParameterProvider self,
-			ref Collection<GenericParameter> generic_parameters,
 			ModuleDefinition module)
 		{
-			return generic_parameters = module.HasImage ()
+			return module.HasImage ()
 				? module.Read (self, (provider, reader) => reader.ReadGenericParameters (provider))
 				: new Collection<GenericParameter> ();
 		}

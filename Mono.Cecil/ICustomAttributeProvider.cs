@@ -52,10 +52,9 @@ namespace Mono.Cecil {
 
 		public static Collection<CustomAttribute> GetCustomAttributes (
 			this ICustomAttributeProvider self,
-			ref Collection<CustomAttribute> custom_attributes,
 			ModuleDefinition module)
 		{
-			return custom_attributes = module.HasImage ()
+			return module.HasImage ()
 				? module.Read (self, (provider, reader) => reader.ReadCustomAttributes (provider))
 				: new Collection<CustomAttribute> ();
 		}
