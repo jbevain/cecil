@@ -411,7 +411,7 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < length; i++) {
 				buffer.WriteUInt32 (rows [i].Col1);		// Offset
-				buffer.WriteRID (rows [i].Col2, Table.TypeDef);	// Parent
+				buffer.WriteRID (rows [i].Col2, Table.Field);	// Parent
 			}
 		}
 
