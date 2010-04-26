@@ -90,3 +90,15 @@ class Null {
 		return Comparer<T>.Default.Compare (x.t, y.t);
 	}
 }
+
+public class DoubleFuncClass {
+	public void Test () { Test<int> (); Test<int, int> (); }
+	public void Test<T> () { Test<T, int> (); Test<T, T> (); }
+	public void Test<T, T1> () { Test<T1> (); Test<T1, T> (); }
+}
+
+public class DoubleFuncClass<X> {
+	public void Test () { Test<int> (); Test<int, int> (); }
+	public void Test<T> () { Test<X, int> (); Test<T, X> (); }
+	public void Test<T, T1> () { Test<T1> (); Test<T1, T> (); }
+}

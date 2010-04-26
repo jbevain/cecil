@@ -2609,9 +2609,12 @@ namespace Mono.Cecil {
 			if (generic_context != null)
 				reader.context = generic_context;
 
-			if ((calling_convention & 0x10) != 0)
-				// TODO: adjust provider if not definition
-				ReadCompressedUInt32 ();
+			if ((calling_convention & 0x10) != 0) {
+				var arity = ReadCompressedUInt32 ();
+
+				if (generic_context != null && !generic_context.IsDefinition)
+					CheckGenericContext (generic_context, (int) arity -1 );
+			}
 
 			// TODO: more call_conv
 
