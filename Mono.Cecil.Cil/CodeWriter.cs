@@ -324,15 +324,24 @@ namespace Mono.Cecil.Cil {
 
 			for (int i = 0; i < exception_handlers.Count; i++) {
 				var exception_handler = exception_handlers [i];
+
+				Instruction instruction = null;
 				switch (exception_handler.HandlerType) {
 				case ExceptionHandlerType.Catch:
+					instruction = exception_handler.HandlerStart;
+					break;
 				case ExceptionHandlerType.Filter:
-					if (stack_sizes == null)
-						stack_sizes = new Dictionary<Instruction, int> ();
-
-					stack_sizes [exception_handler.HandlerStart] = 1;
+					instruction = exception_handler.FilterStart;
 					break;
 				}
+
+				if (instruction == null)
+					continue;
+
+				if (stack_sizes == null)
+					stack_sizes = new Dictionary<Instruction, int> ();
+
+				stack_sizes [instruction] = 1;
 			}
 		}
 
