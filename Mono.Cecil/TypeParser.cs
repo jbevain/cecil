@@ -448,7 +448,7 @@ namespace Mono.Cecil {
 			if (type.IsTypeSpecification ())
 				AppendTypeSpecification ((TypeSpecification) type, name);
 
-			if (RequiresFullyQualifiedName (type) || !top_level) {
+			if (RequiresFullyQualifiedName (type, top_level)) {
 				name.Append (", ");
 				name.Append (GetScopeFullName (type));
 			}
@@ -520,9 +520,15 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static bool RequiresFullyQualifiedName (TypeReference type)
+		static bool RequiresFullyQualifiedName (TypeReference type, bool top_level)
 		{
-			return type.Scope != type.Module && type.Scope.Name != "mscorlib";
+			if (type.Scope == type.Module)
+				return false;
+
+			if (type.Scope.Name == "mscorlib" && top_level)
+				return false;
+
+			return true;
 		}
 	}
 }
