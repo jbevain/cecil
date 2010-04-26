@@ -1657,6 +1657,12 @@ namespace Mono.Cecil {
 					return GetConstantType (constant.GetType ());
 
 				return ElementType.Class;
+			case ElementType.Array:
+			case ElementType.SzArray:
+				if (constant != null)
+					throw new ArgumentException ();
+
+				return ElementType.Class;
 			case ElementType.GenericInst:
 			case ElementType.CModOpt:
 			case ElementType.CModReqD:
@@ -1896,6 +1902,8 @@ namespace Mono.Cecil {
 			var signature = CreateSignatureWriter ();
 
 			switch (type) {
+			case ElementType.Array:
+			case ElementType.SzArray:
 			case ElementType.Class:
 			case ElementType.Object:
 				signature.WriteInt32 (0);

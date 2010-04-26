@@ -207,6 +207,17 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (field.Constant);
 		}
 
+		[TestCSharp ("Fields.cs")]
+		public void ArrayConstant (ModuleDefinition module)
+		{
+			var panpan = module.GetType ("PanPan");
+			Assert.IsNotNull (panpan);
+
+			var field = panpan.GetField ("ints");
+			Assert.IsTrue (field.HasConstant);
+			Assert.IsNull (field.Constant);
+		}
+
 		[TestCSharp ("Generics.cs")]
 		public void NestedEnumOfGenericTypeDefinition (ModuleDefinition module)
 		{
