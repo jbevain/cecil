@@ -162,10 +162,11 @@ namespace Mono.Cecil {
 			if (!method.HasParameters)
 				return parameters;
 
-			var end = method.Parameters.Count - bound;
+			var original_parameters = method.Parameters;
+			var end = original_parameters.Count - bound;
 
 			for (int i = 0; i < end; i++)
-				parameters.Add (new ParameterDefinition (method.Parameters [i].ParameterType));
+				parameters.Add (original_parameters [i]);
 
 			return parameters;
 		}
