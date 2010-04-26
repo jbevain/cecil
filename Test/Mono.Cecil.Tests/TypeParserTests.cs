@@ -98,14 +98,37 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (2, type.GenericParameters.Count);
 		}
 
+		public class ID {}
+
 		[Test]
-		public void NestedType ()
+		public void SimpleNestedType ()
+		{
+			var module = GetCurrentModule ();
+
+			const string fullname = "Mono.Cecil.Tests.TypeParserTests+ID";
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			Assert.IsNotNull (type);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual (module, type.Scope);
+			Assert.AreEqual ("", type.Namespace);
+			Assert.AreEqual ("ID", type.Name);
+
+			Assert.AreEqual ("Mono.Cecil.Tests.TypeParserTests/ID", type.FullName);
+			Assert.AreEqual (fullname, TypeParser.ToParseable (type));
+		}
+
+		[Test]
+		public void TripleNestedTypeWithScope ()
 		{
 			var module = GetCurrentModule ();
 
 			const string fullname = "Bingo.Foo`1+Bar`1+Baz`1, Bingo";
 
 			var type = TypeParser.ParseType (module, fullname);
+
+			Assert.AreEqual ("Bingo.Foo`1+Bar`1+Baz`1, Bingo, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
 
 			Assert.IsNotNull (type);
 			Assert.AreEqual ("Bingo", type.Scope.Name);
@@ -144,6 +167,8 @@ namespace Mono.Cecil.Tests {
 			const string fullname = "Bingo.Gazonk[], Bingo";
 
 			var type = TypeParser.ParseType (module, fullname);
+
+			Assert.AreEqual ("Bingo.Gazonk[], Bingo, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
 
 			var array = type as ArrayType;
 			Assert.IsNotNull (array);
@@ -193,6 +218,8 @@ namespace Mono.Cecil.Tests {
 				typeof (object).Assembly.FullName);
 
 			var type = TypeParser.ParseType (module, fullname);
+
+			Assert.AreEqual (fullname, TypeParser.ToParseable (type));
 
 			var instance = type as GenericInstanceType;
 			Assert.IsNotNull (instance);

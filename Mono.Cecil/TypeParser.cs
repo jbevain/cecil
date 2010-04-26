@@ -422,26 +422,33 @@ namespace Mono.Cecil {
 				return null;
 
 			var name = new StringBuilder ();
-			AppendType (type, name);
+			AppendType (type, name, true, true);
 			return name.ToString ();
 		}
 
-		static void AppendType (TypeReference type, StringBuilder name)
+		static void AppendType (TypeReference type, StringBuilder name, bool fq_name, bool top_level)
 		{
-			var start = name.Length;
+			var declaring_type = type.DeclaringType;
+			if (declaring_type != null) {
+				AppendType (declaring_type, name, false, top_level);
+				name.Append ('+');
+			}
+
+			var @namespace = type.Namespace;
+			if (!string.IsNullOrEmpty (@namespace)) {
+				name.Append (@namespace);
+				name.Append ('.');
+			}
+
 			name.Append (type.GetElementType ().Name);
 
-			TryPrependDeclaringType (type.DeclaringType, name, start);
-
-			if (!string.IsNullOrEmpty (type.Namespace)) {
-				name.Insert (start, ".");
-				name.Insert (start, type.Namespace);
-			}
+			if (!fq_name)
+				return;
 
 			if (type.IsTypeSpecification ())
 				AppendTypeSpecification ((TypeSpecification) type, name);
 
-			if (RequiresFullyQualifiedName (type)) {
+			if (RequiresFullyQualifiedName (type) || !top_level) {
 				name.Append (", ");
 				name.Append (GetScopeFullName (type));
 			}
@@ -500,7 +507,7 @@ namespace Mono.Cecil {
 					if (requires_fqname)
 						name.Append ('[');
 
-					AppendType (argument, name);
+					AppendType (argument, name, true, false);
 
 					if (requires_fqname)
 						name.Append (']');
@@ -516,17 +523,6 @@ namespace Mono.Cecil {
 		static bool RequiresFullyQualifiedName (TypeReference type)
 		{
 			return type.Scope != type.Module && type.Scope.Name != "mscorlib";
-		}
-
-		static void TryPrependDeclaringType (TypeReference type, StringBuilder name, int start)
-		{
-			if (type == null)
-				return;
-
-			name.Insert (start, "+");
-			name.Insert (start, type.Name);
-
-			TryPrependDeclaringType (type.DeclaringType, name, start);
 		}
 	}
 }
