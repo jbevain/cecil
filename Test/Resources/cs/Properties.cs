@@ -6,3 +6,8 @@ abstract class Foo {
 	public abstract string Baz { get; set; }
 	public abstract string Gazonk { set; }
 }
+
+abstract class Bar {
+
+	public abstract Foo this [int a, string s] { set; }
+}

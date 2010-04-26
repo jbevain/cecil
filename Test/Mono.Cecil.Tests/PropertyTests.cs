@@ -1,7 +1,4 @@
-using System;
-
-using Mono.Cecil;
-using Mono.Cecil.Metadata;
+using System.Linq;
 
 using NUnit.Framework;
 
@@ -83,6 +80,19 @@ namespace Mono.Cecil.Tests {
 
 			other = property.OtherMethods [1];
 			Assert.AreEqual ("bet_Context", other.Name);
+		}
+
+		[TestCSharp ("Properties.cs")]
+		public void SetOnlyIndexer (ModuleDefinition module)
+		{
+			var type = module.GetType ("Bar");
+			var indexer = type.Properties.Where (property => property.Name == "Item").First ();
+
+			var parameters = indexer.Parameters;
+
+			Assert.AreEqual (2, parameters.Count);
+			Assert.AreEqual ("System.Int32", parameters [0].ParameterType.FullName);
+			Assert.AreEqual ("System.String", parameters [1].ParameterType.FullName);
 		}
 	}
 }
