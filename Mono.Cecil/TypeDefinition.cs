@@ -39,8 +39,8 @@ namespace Mono.Cecil {
 		internal Range fields_range;
 		internal Range methods_range;
 
-		short? packing_size;
-		int? class_size;
+		short packing_size = Mixin.NotResolvedMarker;
+		int class_size = Mixin.NotResolvedMarker;
 
 		Collection<TypeReference> interfaces;
 		Collection<TypeDefinition> nested_types;
@@ -61,46 +61,54 @@ namespace Mono.Cecil {
 			set { base_type = value; }
 		}
 
+		void ResolveLayout ()
+		{
+			if (packing_size != Mixin.NotResolvedMarker || class_size != Mixin.NotResolvedMarker)
+				return;
+
+			if (!HasImage) {
+				packing_size = Mixin.NoDataMarker;
+				class_size = Mixin.NoDataMarker;
+				return;
+			}
+
+			var row = Module.Read (this, (type, reader) => reader.ReadTypeLayout (type));
+
+			packing_size = row.Col1;
+			class_size = row.Col2;
+		}
+
 		public bool HasLayoutInfo {
 			get {
-				if (packing_size.HasValue || class_size.HasValue)
+				if (packing_size >= 0 || class_size >= 0)
 					return true;
 
-				if (HasImage) {
-					Module.Read (this, (type, reader) => reader.ReadTypeLayout (type));
-					return packing_size.HasValue || class_size.HasValue;
-				}
+				ResolveLayout ();
 
-				return false;
+				return packing_size >= 0 || class_size >= 0;
 			}
 		}
 
 		public short PackingSize {
 			get {
-				if (packing_size.HasValue)
-					return packing_size.Value;
+				if (packing_size >= 0)
+					return packing_size;
 
-				if (HasImage) {
-					Module.Read (this, (type, reader) => reader.ReadTypeLayout (type));
-					return packing_size ?? 0;
-				}
+				ResolveLayout ();
 
-				return 0;
+				return packing_size >= 0 ? packing_size : (short) -1;
 			}
 			set { packing_size = value; }
 		}
 
 		public int ClassSize {
 			get {
-				if (class_size.HasValue)
-					return class_size.Value;
+				if (class_size >= 0)
+					return class_size;
 
-				if (HasImage) {
-					Module.Read (this, (type, reader) => reader.ReadTypeLayout (type));
-					return class_size ?? 0;
-				}
+				ResolveLayout ();
 
-				return 0;
+				return class_size >= 0 ? class_size : -1;
 			}
 			set { class_size = value; }
 		}

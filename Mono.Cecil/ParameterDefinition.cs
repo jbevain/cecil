@@ -71,10 +71,6 @@ namespace Mono.Cecil {
 			this.ResolveConstant (ref constant, parameter_type.Module);
 		}
 
-		internal bool HasImage {
-			get { return parameter_type != null && parameter_type.Module != null && parameter_type.Module.HasImage; }
-		}
-
 		public bool HasCustomAttributes {
 			get {
 				if (custom_attributes != null)

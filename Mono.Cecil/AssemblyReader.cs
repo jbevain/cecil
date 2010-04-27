@@ -848,20 +848,20 @@ namespace Mono.Cecil {
 			return list;
 		}
 
-		public TypeDefinition ReadTypeLayout (TypeDefinition type)
+		public Row<short, int> ReadTypeLayout (TypeDefinition type)
 		{
 			InitializeTypeLayouts ();
 			Row<ushort, uint> class_layout;
 			var rid = type.token.RID;
 			if (!metadata.ClassLayouts.TryGetValue (rid, out class_layout))
-				return type;
+				return new Row<short, int> (Mixin.NoDataMarker, Mixin.NoDataMarker);
 
 			type.PackingSize = (short) class_layout.Col1;
 			type.ClassSize = (int) class_layout.Col2;
 
 			metadata.ClassLayouts.Remove (rid);
 
-			return type;
+			return new Row<short, int> ((short) class_layout.Col1, (int) class_layout.Col2);
 		}
 
 		void InitializeTypeLayouts ()
@@ -1125,7 +1125,6 @@ namespace Mono.Cecil {
 
 			metadata.FieldRVAs.Remove (rid);
 
-			field.rva = (int?) rva;
 			field.InitialValue = GetFieldInitializeValue (size, rva);
 
 			return (int) rva;
@@ -1201,18 +1200,17 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public int? ReadFieldLayout (FieldDefinition field)
+		public int ReadFieldLayout (FieldDefinition field)
 		{
 			InitializeFieldLayouts ();
 			var rid = field.token.RID;
 			uint offset;
 			if (!metadata.FieldLayouts.TryGetValue (rid, out offset))
-				return null;
+				return Mixin.NoDataMarker;
 
 			metadata.FieldLayouts.Remove (rid);
 
-			field.Offset = (int) offset;
-			return (int?) offset;
+			return (int) offset;
 		}
 
 		void InitializeFieldLayouts ()

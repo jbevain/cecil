@@ -35,57 +35,70 @@ namespace Mono.Cecil {
 		ushort attributes;
 		Collection<CustomAttribute> custom_attributes;
 
-		int? offset;
+		int offset = Mixin.NotResolvedMarker;
 
-		internal int? rva;
+		internal int rva = Mixin.NotResolvedMarker;
 		byte [] initial_value;
 
 		object constant = Mixin.NotResolved;
 
 		MarshalInfo marshal_info;
 
+		void ResolveLayout ()
+		{
+			if (offset != Mixin.NotResolvedMarker)
+				return;
+
+			if (!HasImage) {
+				offset = Mixin.NoDataMarker;
+				return;
+			}
+
+			offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
+		}
+
 		public bool HasLayoutInfo {
 			get {
-				if (offset.HasValue)
+				if (offset >= 0)
 					return true;
 
-				if (HasImage) {
-					offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
-					return offset.HasValue;
-				}
+				ResolveLayout ();
 
-				return false;
+				return offset >= 0;
 			}
 		}
 
 		public int Offset {
 			get {
-				if (offset.HasValue)
-					return offset.Value;
+				if (offset >= 0)
+					return offset;
 
-				if (HasImage) {
-					offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
-					return offset ?? 0;
-				}
+				ResolveLayout ();
 
-				return 0;
+				return offset >= 0 ? offset : -1;
 			}
 			set { offset = value; }
 		}
 
+		void ResolveRVA ()
+		{
+			if (rva != Mixin.NotResolvedMarker)
+				return;
+
+			if (!HasImage)
+				return;
+
+			rva = Module.Read (this, (field, reader) => reader.ReadFieldRVA (field));
+		}
+
 		public int RVA {
 			get {
-				if (rva.HasValue)
-					return rva.Value;
+				if (rva > 0)
+					return rva;
 
-				if (HasImage) {
-					rva = Module.Read (this, (field, reader) => reader.ReadFieldRVA (field));
-					return rva.Value;
-				}
+				ResolveRVA ();
 
-				rva = 0;
-				return 0;
-
+				return rva > 0 ? rva : 0;
 			}
 		}
 
@@ -94,12 +107,12 @@ namespace Mono.Cecil {
 				if (initial_value != null)
 					return initial_value;
 
-				if (HasImage) {
-					Module.Read (this, (field, reader) => reader.ReadFieldRVA (field));
-					return initial_value;
-				}
+				ResolveRVA ();
 
-				return initial_value = Empty<byte>.Array;
+				if (initial_value == null)
+					initial_value = Empty<byte>.Array;
+
+				return initial_value;
 			}
 			set { initial_value = value; }
 		}
@@ -266,5 +279,11 @@ namespace Mono.Cecil {
 		{
 			return this;
 		}
+	}
+
+	static partial class Mixin {
+
+		public const int NotResolvedMarker = -2;
+		public const int NoDataMarker = -1;
 	}
 }
