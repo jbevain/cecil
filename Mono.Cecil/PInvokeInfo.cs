@@ -106,6 +106,26 @@ namespace Mono.Cecil {
 			set { attributes = attributes.SetMaskedAttributes ((ushort) PInvokeAttributes.CallConvMask, (ushort) PInvokeAttributes.CallConvFastcall, value); }
 		}
 
+		public bool IsBestFistEnabled {
+			get { return attributes.GetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.BestFitEnabled); }
+			set { attributes = attributes.SetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.BestFitEnabled, value); }
+		}
+
+		public bool IsBestFistDisabled {
+			get { return attributes.GetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.BestFidDisabled); }
+			set { attributes = attributes.SetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.BestFidDisabled, value); }
+		}
+
+		public bool IsThrowOnUnmappableCharEnabled {
+			get { return attributes.GetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.ThrowOnUnmappableCharEnabled); }
+			set { attributes = attributes.SetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.ThrowOnUnmappableCharEnabled, value); }
+		}
+
+		public bool IsThrowOnUnmappableCharDisabled {
+			get { return attributes.GetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.ThrowOnUnmappableCharDisabled); }
+			set { attributes = attributes.SetMaskedAttributes ((ushort) PInvokeAttributes.BestFitMask, (ushort) PInvokeAttributes.ThrowOnUnmappableCharDisabled, value); }
+		}
+
 		#endregion
 
 		public PInvokeInfo (PInvokeAttributes attributes, string entryPoint, ModuleReference module)
