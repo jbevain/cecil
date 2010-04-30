@@ -1477,11 +1477,18 @@ namespace Mono.Cecil {
 		{
 			var parameters = method.Parameters;
 
-			if (RequiresReturnParameter (method.MethodReturnType))
-				AddParameter (0, method.MethodReturnType.Parameter, param_table);
+			var return_parameter = method.MethodReturnType.parameter;
 
-			for (int i = 0; i < parameters.Count; i++)
-				AddParameter ((ushort) (i + 1), parameters [i], param_table);
+			if (return_parameter != null && RequiresParameterRow (return_parameter))
+				AddParameter (0, return_parameter, param_table);
+
+			for (int i = 0; i < parameters.Count; i++) {
+				var parameter = parameters [i];
+				if (!RequiresParameterRow (parameter))
+					continue;
+
+				AddParameter ((ushort) (i + 1), parameter, param_table);
+			}
 		}
 
 		void AddPInvokeInfo (MethodDefinition method)
@@ -1511,13 +1518,10 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static bool RequiresReturnParameter (MethodReturnType return_type)
+		static bool RequiresParameterRow (ParameterDefinition parameter)
 		{
-			var parameter = return_type.parameter;
-			if (parameter == null)
-				return false;
-
-			return parameter.Attributes != ParameterAttributes.None
+			return !string.IsNullOrEmpty (parameter.Name)
+				|| parameter.Attributes != ParameterAttributes.None
 				|| parameter.HasMarshalInfo
 				|| parameter.HasConstant
 				|| parameter.HasCustomAttributes;
