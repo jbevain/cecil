@@ -71,36 +71,45 @@ namespace Mono.Cecil {
 		internal Dictionary<MetadataToken, Range> GenericParameters;
 		internal Dictionary<uint, MetadataToken []> GenericConstraints;
 
-		static readonly Dictionary<string, bool> PrimitiveValueTypes = new Dictionary<string, bool> {
-			{ "Boolean", true },
-			{ "Char", true },
-			{ "SByte", true },
-			{ "Byte", true },
-			{ "Int16", true },
-			{ "UInt16", true },
-			{ "Int32", true },
-			{ "UInt32", true },
-			{ "Int64", true },
-			{ "UInt64", true },
-			{ "Single", true },
-			{ "Double", true },
-			{ "IntPtr", true },
-			{ "UIntPtr", true },
+		static readonly Dictionary<string, Row<ElementType, bool>> PrimitiveValueTypes = new Dictionary<string, Row<ElementType, bool>> {
+			{ "Void", new Row<ElementType, bool> (ElementType.Void, false) },
+			{ "Boolean", new Row<ElementType, bool> (ElementType.Boolean, true) },
+			{ "Char", new Row<ElementType, bool> (ElementType.Char, true) },
+			{ "SByte", new Row<ElementType, bool> (ElementType.I1, true) },
+			{ "Byte", new Row<ElementType, bool> (ElementType.U1, true) },
+			{ "Int16", new Row<ElementType, bool> (ElementType.I2, true) },
+			{ "UInt16", new Row<ElementType, bool> (ElementType.U2, true) },
+			{ "Int32", new Row<ElementType, bool> (ElementType.I4, true) },
+			{ "UInt32", new Row<ElementType, bool> (ElementType.U4, true) },
+			{ "Int64", new Row<ElementType, bool> (ElementType.I8, true) },
+			{ "UInt64", new Row<ElementType, bool> (ElementType.U8, true) },
+			{ "Single", new Row<ElementType, bool> (ElementType.R4, true) },
+			{ "Double", new Row<ElementType, bool> (ElementType.R8, true) },
+			{ "String", new Row<ElementType, bool> (ElementType.String, false) },
+			{ "TypedReference", new Row<ElementType, bool> (ElementType.TypedByRef, false) },
+			{ "IntPtr", new Row<ElementType, bool> (ElementType.I, true) },
+			{ "UIntPtr", new Row<ElementType, bool> (ElementType.U, true) },
+			{ "Object", new Row<ElementType, bool> (ElementType.Object, false) },
 		};
 
-		public static bool IsPrimitiveValueType (TypeReference type)
+		public static void TryProcessPrimitiveType (TypeReference type)
 		{
 			var scope = type.scope;
 			if (scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
-				return false;
+				return;
 
 			if (scope.Name != "mscorlib")
-				return false;
+				return;
 
 			if (type.Namespace != "System")
-				return false;
+				return;
 
-			return PrimitiveValueTypes.ContainsKey (type.Name);
+			Row<ElementType, bool> primitive_data;
+			if (!PrimitiveValueTypes.TryGetValue (type.Name, out primitive_data))
+				return;
+
+			type.etype = primitive_data.Col1;
+			type.IsValueType = primitive_data.Col2;
 		}
 
 		public void Clear ()

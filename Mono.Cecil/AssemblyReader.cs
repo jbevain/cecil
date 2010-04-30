@@ -974,8 +974,7 @@ namespace Mono.Cecil {
 			type.token = new MetadataToken (TokenType.TypeRef, rid);
 			type.module = module;
 
-			if (MetadataSystem.IsPrimitiveValueType (type))
-				type.IsValueType = true;
+			MetadataSystem.TryProcessPrimitiveType (type);
 
 			return type;
 		}

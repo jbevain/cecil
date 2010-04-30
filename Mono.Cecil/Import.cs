@@ -307,27 +307,6 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		static readonly Dictionary<string, ElementType> string_etype_mapping = new Dictionary<string, ElementType> {
-			{ "Void", ElementType.Void },
-			{ "Boolean", ElementType.Boolean },
-			{ "Char", ElementType.Char },
-			{ "SByte", ElementType.I1 },
-			{ "Byte", ElementType.U1 },
-			{ "Int16", ElementType.I2 },
-			{ "UInt16", ElementType.U2 },
-			{ "Int32", ElementType.I4 },
-			{ "UInt32", ElementType.U4 },
-			{ "Int64", ElementType.I8 },
-			{ "UInt64", ElementType.U8 },
-			{ "Single", ElementType.R4 },
-			{ "Double", ElementType.R8 },
-			{ "String", ElementType.String },
-			{ "TypedReference", ElementType.TypedByRef },
-			{ "IntPtr", ElementType.I },
-			{ "UIntPtr", ElementType.U },
-			{ "Object", ElementType.Object },
-		};
-
 		public TypeReference ImportType (TypeReference type, IGenericContext context)
 		{
 			if (type.IsTypeSpecification ())
@@ -339,8 +318,9 @@ namespace Mono.Cecil {
 				ImportScope (type.Scope),
 				type.IsValueType);
 
-			reference.etype = ImportElementType (type);
 			reference.module = module;
+
+			MetadataSystem.TryProcessPrimitiveType (reference);
 
 			if (type.IsNested)
 				reference.DeclaringType = ImportType (type.DeclaringType, context);
@@ -349,27 +329,6 @@ namespace Mono.Cecil {
 				ImportGenericParameters (reference, type);
 
 			return reference;
-		}
-
-		static ElementType ImportElementType (TypeReference type)
-		{
-			if (type.etype != ElementType.None)
-				return type.etype;
-
-			ElementType etype;
-			if (IsCorlibSystemType (type) && string_etype_mapping.TryGetValue (type.Name, out etype))
-				return etype;
-
-			return ElementType.None;
-		}
-
-		static bool IsCorlibSystemType (TypeReference type)
-		{
-			if (type.Namespace != "System")
-				return false;
-
-			var assembly = type.Module.Assembly;
-			return assembly != null && assembly.Name.Name == "mscorlib";
 		}
 
 		IMetadataScope ImportScope (IMetadataScope scope)
