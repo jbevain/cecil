@@ -29,14 +29,18 @@
 using System;
 using System.Collections.Generic;
 
+using Mono.Cecil.Metadata;
+
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
+	using Slot = Row<string, string>;
+
 	sealed class TypeDefinitionCollection : Collection<TypeDefinition> {
 
 		readonly ModuleDefinition container;
-		readonly Dictionary<string, TypeDefinition> name_cache = new Dictionary<string, TypeDefinition> ();
+		readonly Dictionary<Slot, TypeDefinition> name_cache = new Dictionary<Slot, TypeDefinition> (new RowEqualityComparer ());
 
 		internal TypeDefinitionCollection (ModuleDefinition container)
 		{
@@ -82,20 +86,23 @@ namespace Mono.Cecil {
 
 			type.module = container;
 			type.scope = container;
-			name_cache [type.FullName] = type;
+			name_cache [new Slot (type.Namespace, type.Name)] = type;
 		}
 
 		void Detach (TypeDefinition type)
 		{
 			type.module = null;
 			type.scope = null;
-			name_cache.Remove (type.FullName);
+			name_cache.Remove (new Slot (type.Namespace, type.Name));
 		}
 
 		public TypeDefinition GetType (string fullname)
 		{
+			string @namespace, name;
+			TypeParser.SplitFullName (fullname, out @namespace, out name);
+
 			TypeDefinition type;
-			if (name_cache.TryGetValue (fullname, out type))
+			if (name_cache.TryGetValue (new Slot (@namespace, name), out type))
 				return type;
 
 			return null;

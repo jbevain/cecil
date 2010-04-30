@@ -684,7 +684,19 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class RowEqualityComparer : IEqualityComparer<Row<uint, uint>>, IEqualityComparer<Row<uint, uint, uint>> {
+	class RowEqualityComparer : IEqualityComparer<Row<string, string>>, IEqualityComparer<Row<uint, uint>>, IEqualityComparer<Row<uint, uint, uint>> {
+
+		public bool Equals (Row<string, string> x, Row<string, string> y)
+		{
+			return x.Col1 == y.Col1
+				&& x.Col2 == y.Col2;
+		}
+
+		public int GetHashCode (Row<string, string> obj)
+		{
+			string x = obj.Col1, y = obj.Col2;
+			return (x != null ? x.GetHashCode () : 0) ^ (y != null ? y.GetHashCode () : 0);
+		}
 
 		public bool Equals (Row<uint, uint> x, Row<uint, uint> y)
 		{

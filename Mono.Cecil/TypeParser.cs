@@ -319,9 +319,8 @@ namespace Mono.Cecil {
 			return instance;
 		}
 
-		static TypeReference CreateReference (Type type_info, ModuleDefinition module, IMetadataScope scope)
+		public static void SplitFullName (string fullname, out string @namespace, out string name)
 		{
-			string @namespace, name, fullname = type_info.type_fullname;
 			var last_dot = fullname.LastIndexOf ('.');
 
 			if (last_dot == -1) {
@@ -331,6 +330,12 @@ namespace Mono.Cecil {
 				@namespace = fullname.Substring (0, last_dot);
 				name = fullname.Substring (last_dot + 1);
 			}
+		}
+
+		static TypeReference CreateReference (Type type_info, ModuleDefinition module, IMetadataScope scope)
+		{
+			string @namespace, name;
+			SplitFullName (type_info.type_fullname, out @namespace, out name);
 
 			var type = new TypeReference (@namespace, name, scope) {
 				module = module,
