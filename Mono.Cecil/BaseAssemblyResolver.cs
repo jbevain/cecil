@@ -135,8 +135,10 @@ namespace Mono.Cecil {
 #if !SILVERLIGHT && !CF
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference)
 		{
+			var version = reference.Version;
 			var corlib = typeof (object).Assembly.GetName ();
-			if (corlib.Version == reference.Version || IsZero (reference.Version))
+
+			if (corlib.Version == version || IsZero (version))
 				return GetAssembly (typeof (object).Module.FullyQualifiedName);
 
 			var path = Directory.GetParent (
@@ -145,28 +147,34 @@ namespace Mono.Cecil {
 				).FullName;
 
 			if (on_mono) {
-				if (reference.Version.Major == 1)
+				if (version.Major == 1)
 					path = Path.Combine (path, "1.0");
-				else if (reference.Version.Major == 2) {
-					if (reference.Version.Minor == 1)
+				else if (version.Major == 2) {
+					if (version.MajorRevision == 5)
 						path = Path.Combine (path, "2.1");
 					else
 						path = Path.Combine (path, "2.0");
-				} else if (reference.Version.Major == 4)
+				} else if (version.Major == 4)
 					path = Path.Combine (path, "4.0");
 				else
-					throw new NotSupportedException ("Version not supported: " + reference.Version);
+					throw new NotSupportedException ("Version not supported: " + version);
 			} else {
-				if (reference.Version.ToString () == "1.0.3300.0")
-					path = Path.Combine (path, "v1.0.3705");
-				else if (reference.Version.ToString () == "1.0.5000.0")
-					path = Path.Combine (path, "v1.1.4322");
-				else if (reference.Version.ToString () == "2.0.0.0")
+				switch (version.Major) {
+				case 1:
+					if (version.MajorRevision == 3300)
+						path = Path.Combine (path, "v1.0.3705");
+					else
+						path = Path.Combine (path, "v1.0.5000.0");
+					break;
+				case 2:
 					path = Path.Combine (path, "v2.0.50727");
-				else if (reference.Version.ToString () == "4.0.0.0")
+					break;
+				case 4:
 					path = Path.Combine (path, "v4.0.30319");
-				else
-					throw new NotSupportedException ("Version not supported: " + reference.Version);
+					break;
+				default:
+					throw new NotSupportedException ("Version not supported: " + version);
+				}
 			}
 
 			var file = Path.Combine (path, "mscorlib.dll");
