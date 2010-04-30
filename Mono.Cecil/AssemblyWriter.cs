@@ -684,7 +684,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class RowEqualityComparer : IEqualityComparer<Row<string, string>>, IEqualityComparer<Row<uint, uint>>, IEqualityComparer<Row<uint, uint, uint>> {
+	sealed class RowEqualityComparer : IEqualityComparer<Row<string, string>>, IEqualityComparer<Row<uint, uint>>, IEqualityComparer<Row<uint, uint, uint>> {
 
 		public bool Equals (Row<string, string> x, Row<string, string> y)
 		{
