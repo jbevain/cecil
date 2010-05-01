@@ -189,6 +189,13 @@ namespace Mono.Collections.Generic {
 			Array.Copy (items, 0, array, arrayIndex, size);
 		}
 
+		public T [] ToArray ()
+		{
+			var array = new T [size];
+			Array.Copy (items, 0, array, 0, size);
+			return array;
+		}
+
 		void CheckIndex (int index)
 		{
 			if (index < 0 || index > size)
