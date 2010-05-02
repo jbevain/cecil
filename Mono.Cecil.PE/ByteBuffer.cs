@@ -328,8 +328,11 @@ namespace Mono.Cecil.PE {
 
 		void Grow (int desired)
 		{
-			var buffer = new byte [System.Math.Max (this.buffer.Length + desired, this.buffer.Length * 2)];
-			Buffer.BlockCopy (this.buffer, 0, buffer, 0, this.buffer.Length);
+			var current = this.buffer;
+			var current_length = current.Length;
+
+			var buffer = new byte [System.Math.Max (current_length + desired, current_length * 2)];
+			Buffer.BlockCopy (current, 0, buffer, 0, current_length);
 			this.buffer = buffer;
 		}
 
