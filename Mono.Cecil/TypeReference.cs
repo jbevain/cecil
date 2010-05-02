@@ -69,11 +69,14 @@ namespace Mono.Cecil {
 
 		public override ModuleDefinition Module {
 			get {
+				if (module != null)
+					return module;
+
 				var declaring_type = this.DeclaringType;
 				if (declaring_type != null)
 					return declaring_type.Module;
 
-				return module;
+				return null;
 			}
 		}
 
