@@ -1199,7 +1199,7 @@ namespace Mono.Cecil {
 
 		MetadataToken GetTypeRefToken (TypeReference type)
 		{
-			var row = GetTypeRefRow (type);
+			var row = CreateTypeRefRow (type);
 
 			MetadataToken token;
 			if (type_ref_map.TryGetValue (row, out token))
@@ -1208,7 +1208,7 @@ namespace Mono.Cecil {
 			return AddTypeReference (type, row);
 		}
 
-		TypeRefRow GetTypeRefRow (TypeReference type)
+		TypeRefRow CreateTypeRefRow (TypeReference type)
 		{
 			var scope_token = type.IsNested
 				? GetTypeRefToken (type.DeclaringType)
