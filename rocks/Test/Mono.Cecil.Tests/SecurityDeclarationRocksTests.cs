@@ -1,3 +1,5 @@
+using System.Security.Permissions;
+
 using NUnit.Framework;
 
 using Mono.Cecil.Rocks;
@@ -21,11 +23,11 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsNotNull (permission_set);
 
-			const string permission_set_value = "<PermissionSet class=\"System.Security.PermissionSe"
-	+ "t\"\r\nversion=\"1\">\r\n<IPermission class=\"System.Security.Permis"
-	+ "sions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture"
-	+ "=neutral, PublicKeyToken=b77a5c561934e089\"\r\nversion=\"1\"\r\nFla"
+			string permission_set_value = "<PermissionSet class=\"System.Security.PermissionSe"
+	+ "t\"\r\nversion=\"1\">\r\n<IPermission class=\"{0}\"\r\nversion=\"1\"\r\nFla"
 	+ "gs=\"UnmanagedCode\"/>\r\n</PermissionSet>\r\n";
+
+			permission_set_value = string.Format (permission_set_value, typeof (SecurityPermission).AssemblyQualifiedName);
 
 			Assert.AreEqual (Normalize (permission_set_value), Normalize (permission_set.ToXml ().ToString ()));
 		}
@@ -44,11 +46,11 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsNotNull (permission_set);
 
-			const string permission_set_value = "<PermissionSet class=\"System.Security.PermissionSe"
-	+ "t\"\r\nversion=\"1\">\r\n<IPermission class=\"System.Security.Permis"
-	+ "sions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture"
-	+ "=neutral, PublicKeyToken=b77a5c561934e089\"\r\nversion=\"1\"\r\nFla"
+			string permission_set_value = "<PermissionSet class=\"System.Security.PermissionSe"
+	+ "t\"\r\nversion=\"1\">\r\n<IPermission class=\"{0}\"\r\nversion=\"1\"\r\nFla"
 	+ "gs=\"UnmanagedCode\"/>\r\n</PermissionSet>\r\n";
+
+			permission_set_value = string.Format (permission_set_value, typeof (SecurityPermission).AssemblyQualifiedName);
 
 			Assert.AreEqual (Normalize (permission_set_value), Normalize (permission_set.ToXml ().ToString ()));
 		}
