@@ -83,7 +83,7 @@ class FooAttribute : Attribute {
 class Hamster {
 }
 
-[Foo (null as string)]
+[Foo ((string) null)]
 class Dentist {
 }
 
