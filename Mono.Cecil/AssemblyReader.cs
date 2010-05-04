@@ -501,8 +501,7 @@ namespace Mono.Cecil {
 
 		public MethodDefinition ReadEntryPoint ()
 		{
-			if (module.Kind != ModuleKind.Console
-				&& module.Kind != ModuleKind.Windows)
+			if (module.Kind != ModuleKind.Console && module.Kind != ModuleKind.Windows)
 				return null;
 
 			var token = new MetadataToken (module.Image.EntryPointToken);
