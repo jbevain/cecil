@@ -35,6 +35,22 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
+	public delegate AssemblyDefinition AssemblyResolveEventHandler (object sender, AssemblyNameReference reference);
+
+	public sealed class AssemblyResolveEventArgs : EventArgs {
+
+		readonly AssemblyNameReference reference;
+
+		public AssemblyNameReference AssemblyReference {
+			get { return reference; }
+		}
+
+		public AssemblyResolveEventArgs (AssemblyNameReference reference)
+		{
+			this.reference = reference;
+		}
+	}
+
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
 
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
@@ -66,6 +82,8 @@ namespace Mono.Cecil {
 		{
 			return Resolve (AssemblyNameReference.Parse (fullName));
 		}
+
+		public event AssemblyResolveEventHandler ResolveFailure;
 
 		protected BaseAssemblyResolver ()
 		{
@@ -109,6 +127,12 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 #endif
+
+			if (ResolveFailure != null) {
+				assembly = ResolveFailure (this, name);
+				if (assembly != null)
+					return assembly;
+			}
 
 			throw new FileNotFoundException ("Could not resolve: " + name);
 		}
