@@ -43,10 +43,6 @@ namespace Mono.Cecil {
 			get { return field_type.FullName + " " + MemberFullName (); }
 		}
 
-		public virtual bool IsDefinition {
-			get { return false; }
-		}
-
 		internal FieldReference ()
 		{
 			this.token = new MetadataToken (TokenType.MemberRef);

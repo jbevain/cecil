@@ -217,6 +217,10 @@ namespace Mono.Cecil {
 			set { base.DeclaringType = value; }
 		}
 
+		public override bool IsDefinition {
+			get { return true; }
+		}
+
 		public override string FullName {
 			get {
 				var builder = new StringBuilder ();

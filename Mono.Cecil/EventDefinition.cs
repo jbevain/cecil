@@ -140,6 +140,10 @@ namespace Mono.Cecil {
 			set { base.DeclaringType = value; }
 		}
 
+		public override bool IsDefinition {
+			get { return true; }
+		}
+
 		public EventDefinition (string name, EventAttributes attributes, TypeReference eventType)
 			: base (name, eventType)
 		{

@@ -128,10 +128,6 @@ namespace Mono.Cecil {
 			get { return false; }
 		}
 
-		public virtual bool IsDefinition {
-			get { return false; }
-		}
-
 		internal MethodReference ()
 		{
 			this.return_type = new MethodReturnType (this);

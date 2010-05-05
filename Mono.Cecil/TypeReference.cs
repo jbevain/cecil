@@ -182,10 +182,6 @@ namespace Mono.Cecil {
 			get { return false; }
 		}
 
-		public virtual bool IsDefinition {
-			get { return false; }
-		}
-
 		protected TypeReference (string @namespace, string name)
 			: base (name)
 		{

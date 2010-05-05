@@ -68,6 +68,10 @@ namespace Mono.Cecil {
 			get { return declaring_type != null ? declaring_type.Module : null; }
 		}
 
+		public virtual bool IsDefinition {
+			get { return false; }
+		}
+
 		internal MemberReference ()
 		{
 		}
