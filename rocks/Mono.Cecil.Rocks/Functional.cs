@@ -54,7 +54,6 @@ namespace Mono.Cecil.Rocks {
 
 			foreach (var item in source)
 				yield return item;
-
 		}
 	}
 }
