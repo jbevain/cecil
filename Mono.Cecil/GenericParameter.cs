@@ -126,7 +126,7 @@ namespace Mono.Cecil {
 
 				return base.Name = (owner.GenericParameterType == GenericParameterType.Type ? "!" : "!!") + Position;
 			}
-			set { throw new InvalidOperationException (); }
+			//set { throw new InvalidOperationException (); }
 		}
 
 		public override string Namespace {
