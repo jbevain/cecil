@@ -103,11 +103,11 @@ namespace Mono.Cecil {
 				switch (module.Runtime) {
 				case TargetRuntime.Net_1_0:
 				case TargetRuntime.Net_1_1:
-					return new Version (1, 0);
+					return new Version (1, 0, 0, 0);
 				case TargetRuntime.Net_2_0:
-					return new Version (2, 0);
+					return new Version (2, 0, 0, 0);
 				case TargetRuntime.Net_4_0:
-					return new Version (4, 0);
+					return new Version (4, 0, 0, 0);
 				default:
 					throw new NotSupportedException ();
 				}
