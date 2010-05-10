@@ -406,7 +406,7 @@ namespace Mono.Cecil {
 				return new PointerType (ImportType (pointer.ElementType, context));
 			case ElementType.ByRef:
 				var byref = (ByReferenceType) type;
-				return new PointerType (ImportType (byref.ElementType, context));
+				return new ByReferenceType (ImportType (byref.ElementType, context));
 			case ElementType.Pinned:
 				var pinned = (PinnedType) type;
 				return new PinnedType (ImportType (pinned.ElementType, context));
