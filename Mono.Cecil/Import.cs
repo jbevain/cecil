@@ -426,6 +426,8 @@ namespace Mono.Cecil {
 			case ElementType.Array:
 				var array = (ArrayType) type;
 				var imported_array = new ArrayType (ImportType (array.ElementType, context));
+				if (array.IsVector)
+					return imported_array;
 
 				var dimensions = array.Dimensions;
 
