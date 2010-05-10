@@ -60,12 +60,11 @@ namespace Mono.Cecil {
 
 		public virtual FieldDefinition Resolve ()
 		{
-			var declaring_type = this.DeclaringType;
-
-			if (declaring_type == null || declaring_type.Module == null)
+			var module = this.Module;
+			if (module == null)
 				throw new NotSupportedException ();
 
-			return declaring_type.Module.Resolve (this);
+			return module.Resolve (this);
 		}
 	}
 }
