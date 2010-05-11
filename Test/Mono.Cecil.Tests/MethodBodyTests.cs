@@ -234,5 +234,89 @@ namespace Mono.Cecil.Tests {
 		{
 			return str.Trim ().Replace ("\r\n", "\n");
 		}
+
+		[Test]
+		public void AddInstruction ()
+		{
+			var object_ref = new TypeReference ("System", "Object", null, false);
+			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
+			var body = new MethodBody (method);
+
+			var il = body.GetILProcessor ();
+
+			var first = il.Create (OpCodes.Nop);
+			var second = il.Create (OpCodes.Nop);
+
+			body.Instructions.Add (first);
+			body.Instructions.Add (second);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (second, first.Next);
+			Assert.AreEqual (first, second.Previous);
+			Assert.IsNull (second.Next);
+		}
+
+		[Test]
+		public void InsertInstruction ()
+		{
+			var object_ref = new TypeReference ("System", "Object", null, false);
+			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
+			var body = new MethodBody (method);
+
+			var il = body.GetILProcessor ();
+
+			var first = il.Create (OpCodes.Nop);
+			var second = il.Create (OpCodes.Nop);
+			var third = il.Create (OpCodes.Nop);
+
+			body.Instructions.Add (first);
+			body.Instructions.Add (third);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (third, first.Next);
+			Assert.AreEqual (first, third.Previous);
+			Assert.IsNull (third.Next);
+
+			body.Instructions.Insert (1, second);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (second, first.Next);
+			Assert.AreEqual (first, second.Previous);
+			Assert.AreEqual (third, second.Next);
+			Assert.AreEqual (second, third.Previous);
+			Assert.IsNull (third.Next);
+		}
+
+		[Test]
+		public void RemoveInstruction ()
+		{
+			var object_ref = new TypeReference ("System", "Object", null, false);
+			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
+			var body = new MethodBody (method);
+
+			var il = body.GetILProcessor ();
+
+			var first = il.Create (OpCodes.Nop);
+			var second = il.Create (OpCodes.Nop);
+			var third = il.Create (OpCodes.Nop);
+
+			body.Instructions.Add (first);
+			body.Instructions.Add (second);
+			body.Instructions.Add (third);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (second, first.Next);
+			Assert.AreEqual (first, second.Previous);
+			Assert.AreEqual (third, second.Next);
+			Assert.AreEqual (second, third.Previous);
+			Assert.IsNull (third.Next);
+
+			body.Instructions.Remove (second);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (third, first.Next);
+			Assert.AreEqual (first, third.Previous);
+			Assert.IsNull (third.Next);
+		}
 	}
 }

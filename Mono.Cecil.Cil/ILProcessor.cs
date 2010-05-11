@@ -338,11 +338,6 @@ namespace Mono.Cecil.Cil {
 				throw new ArgumentOutOfRangeException ("target");
 
 			instructions.Insert (index, instruction);
-			instruction.Previous = target.Previous;
-			if (target.Previous != null)
-				target.Previous.Next = instruction;
-			target.Previous = instruction;
-			instruction.Next = target;
 		}
 
 		public void InsertAfter (Instruction target, Instruction instruction)
@@ -352,25 +347,11 @@ namespace Mono.Cecil.Cil {
 				throw new ArgumentOutOfRangeException ("target");
 
 			instructions.Insert (index + 1, instruction);
-			instruction.Next = target.Next;
-			if (target.Next != null)
-				target.Next.Previous = instruction;
-			target.Next = instruction;
-			instruction.Previous = target;
 		}
 
 		public void Append (Instruction instruction)
 		{
-			Instruction last = null, current = instruction;
-			if (instructions.Count > 0)
-				last = instructions [instructions.Count - 1];
-
-			if (last != null) {
-				last.Next = instruction;
-				current.Previous = last;
-			}
-
-			instructions.Add (current);
+			instructions.Add (instruction);
 		}
 
 		public void Replace (Instruction target, Instruction instruction)
@@ -383,12 +364,6 @@ namespace Mono.Cecil.Cil {
 		{
 			if (!instructions.Remove (instruction))
 				throw new ArgumentOutOfRangeException ("instruction");
-
-			if (instruction.Previous != null)
-				instruction.Previous.Next = instruction.Next;
-			if (instruction.Next != null)
-				instruction.Next.Previous = instruction.Previous;
-
 		}
 	}
 }

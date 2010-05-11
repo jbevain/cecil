@@ -73,7 +73,7 @@ namespace Mono.Cecil.Cil {
 		public Collection<Instruction> Instructions {
 			get {
 				if (instructions == null)
-					instructions = new Collection<Instruction> ();
+					instructions = new InstructionCollection ();
 
 				return instructions;
 			}
@@ -173,6 +173,69 @@ namespace Mono.Cecil.Cil {
 
 			for (int i = index + 1; i < this.Count; i++)
 				this [i].index = i - 1;
+		}
+	}
+
+	class InstructionCollection : Collection<Instruction> {
+
+		internal InstructionCollection ()
+		{
+		}
+
+		internal InstructionCollection (int capacity)
+			: base (capacity)
+		{
+		}
+
+		protected override void OnAdd (Instruction item, int index)
+		{
+			if (index == 0)
+				return;
+
+			var previous = items [index - 1];
+			previous.next = item;
+			item.previous = previous;
+		}
+
+		protected override void OnInsert (Instruction item, int index)
+		{
+			if (size == 0)
+				return;
+
+			var current = items [index];
+			var previous = current.previous;
+			if (previous != null) {
+				previous.next = item;
+				item.previous = previous;
+			}
+
+			current.previous = item;
+			item.next = current;
+		}
+
+		protected override void OnSet (Instruction item, int index)
+		{
+			var current = items [index];
+
+			item.previous = current.previous;
+			item.next = current.next;
+
+			current.previous = null;
+			current.next = null;
+		}
+
+		protected override void OnRemove (Instruction item, int index)
+		{
+			var previous = item.previous;
+			if (previous != null)
+				previous.next = item.next;
+
+			var next = item.next;
+			if (next != null)
+				next.previous = item.previous;
+
+			item.previous = null;
+			item.next = null;
 		}
 	}
 }
