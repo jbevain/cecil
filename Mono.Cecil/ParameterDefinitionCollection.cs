@@ -34,7 +34,7 @@ namespace Mono.Cecil {
 
 	sealed class ParameterDefinitionCollection : Collection<ParameterDefinition> {
 
-		IMethodSignature method;
+		readonly IMethodSignature method;
 
 		internal ParameterDefinitionCollection (IMethodSignature method)
 		{
@@ -56,8 +56,10 @@ namespace Mono.Cecil {
 		protected override void OnInsert (ParameterDefinition item, int index)
 		{
 			item.method = method;
-			if (index != Count - 1)
-				ComputeIndexes ();
+			item.index = index;
+
+			for (int i = index; i < this.Count; i++)
+				this [i].index = i + 1;
 		}
 
 		protected override void OnSet (ParameterDefinition item, int index)
@@ -69,14 +71,10 @@ namespace Mono.Cecil {
 		protected override void OnRemove (ParameterDefinition item, int index)
 		{
 			item.method = null;
-			if (index != Count - 1)
-				ComputeIndexes ();
-		}
+			item.index = -1;
 
-		void ComputeIndexes ()
-		{
-			for (int i = 0; i < this.Count; i++)
-				this [i].index = i;
+			for (int i = index + 1; i < this.Count; i++)
+				this [i].index = i - 1;
 		}
 	}
 }

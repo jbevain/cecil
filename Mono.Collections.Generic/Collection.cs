@@ -140,8 +140,9 @@ namespace Mono.Collections.Generic {
 			if (size == items.Length)
 				Grow (1);
 
-			Shift (index, 1);
 			OnInsert (item, index);
+
+			Shift (index, 1);
 			items [index] = item;
 			version++;
 		}
