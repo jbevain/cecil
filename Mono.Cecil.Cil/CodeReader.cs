@@ -146,24 +146,17 @@ namespace Mono.Cecil.Cil {
 			start = position;
 			var code_size = body.code_size;
 			var end = start + code_size;
-			Instruction previous = null;
-			var instructions = body.instructions = new Collection<Instruction> ((code_size / 3));
+			var instructions = body.instructions = new InstructionCollection (code_size / 3);
 
 			while (position < end) {
 				var offset = base.position - start;
 				var opcode = ReadOpCode ();
 				var current = new Instruction (offset, opcode);
-				if (previous != null) {
-					current.previous = previous;
-					previous.next = current;
-				}
 
 				if (opcode.OperandType != OperandType.InlineNone)
 					current.operand = ReadOperand (current);
 
 				instructions.Add (current);
-
-				previous = current;
 			}
 
 			ResolveBranches (instructions);
