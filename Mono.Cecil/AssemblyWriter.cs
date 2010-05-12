@@ -99,6 +99,7 @@ namespace Mono.Cecil {
 				var name = module.assembly.Name;
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
 				name.HasPublicKey = true;
+				module.Attributes |= ModuleAttributes.StrongNameSigned;
 			}
 #endif
 			var metadata = new MetadataBuilder (module, fq_name,
