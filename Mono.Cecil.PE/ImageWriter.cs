@@ -60,7 +60,6 @@ namespace Mono.Cecil.PE {
 		readonly uint time_stamp;
 
 		internal Section text;
-		internal Section sdata;
 		internal Section rsrc;
 		internal Section reloc;
 
@@ -119,23 +118,12 @@ namespace Mono.Cecil.PE {
 
 		void BuildSections ()
 		{
-			var has_sdata = metadata.data.length > 0;
-			if (has_sdata)
-				sections++;
-
 			var has_win32_resources = win32_resources != null;
 			if (has_win32_resources)
 				sections++;
 
 			text = CreateSection (".text", text_map.GetLength (), null);
 			var previous = text;
-
-			if (has_sdata) {
-				sdata = CreateSection (".sdata", (uint) metadata.data.length, previous);
-
-				metadata.table_heap.FixupData (sdata.VirtualAddress);
-				previous = sdata;
-			}
 
 			if (has_win32_resources) {
 				rsrc = CreateSection (".rsrc", (uint) win32_resources.length, previous);
@@ -235,7 +223,6 @@ namespace Mono.Cecil.PE {
 			WriteByte (0);	// LMinor
 			WriteUInt32 (text.SizeOfRawData);	// CodeSize
 			WriteUInt32 (reloc.SizeOfRawData
-				+ (sdata != null ? sdata.SizeOfRawData : 0)
 				+ (rsrc != null ? rsrc.SizeOfRawData : 0));	// InitializedDataSize
 			WriteUInt32 (0);	// UninitializedDataSize
 
@@ -246,7 +233,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (text_rva);	// BaseOfCode
 
 			if (!pe64) {
-				WriteUInt32 (sdata != null ? sdata.VirtualAddress : 0);	// BaseOfData
+				WriteUInt32 (0);	// BaseOfData
 				WriteUInt32 ((uint) image_base);	// ImageBase
 			} else {
 				WriteUInt64 (image_base);	// ImageBase
@@ -344,9 +331,6 @@ namespace Mono.Cecil.PE {
 		{
 			WriteSection (text, 0x60000020);
 
-			if (sdata != null)
-				WriteSection (sdata, 0xc0000040);
-
 			if (rsrc != null)
 				WriteSection (rsrc, 0x40000040);
 
@@ -430,6 +414,13 @@ namespace Mono.Cecil.PE {
 
 			MoveToRVA (TextSegment.Resources);
 			WriteBuffer (metadata.resources);
+
+			// Data
+
+			if (metadata.data.length > 0) {
+				MoveToRVA (TextSegment.Data);
+				WriteBuffer (metadata.data);
+			}
 
 			// StrongNameSignature
 			// stays blank
@@ -629,12 +620,6 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		void WriteSData ()
-		{
-			MoveTo (sdata.PointerToRawData);
-			WriteBuffer (metadata.data);
-		}
-
 		void WriteRsrc ()
 		{
 			MoveTo (rsrc.PointerToRawData);
@@ -675,8 +660,6 @@ namespace Mono.Cecil.PE {
 			WriteOptionalHeaders ();
 			WriteSectionHeaders ();
 			WriteText ();
-			if (sdata != null)
-				WriteSData ();
 			if (rsrc != null)
 				WriteRsrc ();
 			WriteReloc ();
@@ -688,6 +671,9 @@ namespace Mono.Cecil.PE {
 
 			map.AddMap (TextSegment.Code, metadata.code.length, !pe64 ? 4 : 16);
 			map.AddMap (TextSegment.Resources, metadata.resources.length, 8);
+			map.AddMap (TextSegment.Data, metadata.data.length, 4);
+			if (metadata.data.length > 0)
+				metadata.table_heap.FixupData (map.GetRVA (TextSegment.Data));
 			map.AddMap (TextSegment.StrongNameSignature, GetStrongNameLength (), 4);
 
 			map.AddMap (TextSegment.MetadataHeader, GetMetadataHeaderLength ());

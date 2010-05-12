@@ -39,6 +39,7 @@ namespace Mono.Cecil.PE {
 		CLIHeader,
 		Code,
 		Resources,
+		Data,
 		StrongNameSignature,
 
 		// Metadata
@@ -58,7 +59,7 @@ namespace Mono.Cecil.PE {
 
 	sealed class TextMap {
 
-		readonly Range [] map = new Range [15 /*Enum.GetValues (typeof (TextSegment)).Length*/];
+		readonly Range [] map = new Range [16 /*Enum.GetValues (typeof (TextSegment)).Length*/];
 
 		public void AddMap (TextSegment segment, int length)
 		{
