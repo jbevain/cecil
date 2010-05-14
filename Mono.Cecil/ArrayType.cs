@@ -142,12 +142,12 @@ namespace Mono.Cecil {
 			this.etype = MD.ElementType.Array;
 		}
 
-		public ArrayType (TypeReference type, int ranks)
+		public ArrayType (TypeReference type, int rank)
 			: this (type)
 		{
 			Mixin.CheckType (type);
-			dimensions = new Collection<ArrayDimension> ();
-			for (int i = 0; i < ranks; i++)
+			dimensions = new Collection<ArrayDimension> (rank);
+			for (int i = 0; i < rank; i++)
 				dimensions.Add (new ArrayDimension ());
 			this.etype = MD.ElementType.Array;
 		}
