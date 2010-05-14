@@ -203,6 +203,13 @@ namespace Mono.Cecil.Cil {
 				return;
 
 			var current = items [index];
+			if (current == null) {
+				var last = items [index - 1];
+				last.next = item;
+				item.previous = last;
+				return;
+			}
+
 			var previous = current.previous;
 			if (previous != null) {
 				previous.next = item;
