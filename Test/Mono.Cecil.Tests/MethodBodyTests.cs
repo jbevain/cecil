@@ -288,6 +288,37 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void InsertAfterLastInstruction ()
+		{
+			var object_ref = new TypeReference ("System", "Object", null, false);
+			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
+			var body = new MethodBody (method);
+
+			var il = body.GetILProcessor ();
+
+			var first = il.Create (OpCodes.Nop);
+			var second = il.Create (OpCodes.Nop);
+			var third = il.Create (OpCodes.Nop);
+
+			body.Instructions.Add (first);
+			body.Instructions.Add (second);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (second, first.Next);
+			Assert.AreEqual (first, second.Previous);
+			Assert.IsNull (second.Next);
+
+			body.Instructions.Insert (2, third);
+
+			Assert.IsNull (first.Previous);
+			Assert.AreEqual (second, first.Next);
+			Assert.AreEqual (first, second.Previous);
+			Assert.AreEqual (third, second.Next);
+			Assert.AreEqual (second, third.Previous);
+			Assert.IsNull (third.Next);
+		}
+
+		[Test]
 		public void RemoveInstruction ()
 		{
 			var object_ref = new TypeReference ("System", "Object", null, false);
