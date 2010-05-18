@@ -1997,7 +1997,7 @@ namespace Mono.Cecil {
 			case TokenType.Field:
 			case TokenType.Event:
 			case TokenType.Property:
-				return provider.MetadataToken;
+				return token;
 			case TokenType.TypeRef:
 			case TokenType.TypeSpec:
 			case TokenType.GenericParam:
