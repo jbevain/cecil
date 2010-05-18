@@ -153,5 +153,18 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsTrue (int32.IsValueType);
 		}
+
+		[TestModule ("gifaceref.exe")]
+		public void GenericInterfaceReference (ModuleDefinition module)
+		{
+			var type = module.GetType ("Program");
+			var iface = type.Interfaces [0];
+
+			var instance = (GenericInstanceType) iface;
+			var owner = instance.ElementType;
+
+			Assert.AreEqual (1, instance.GenericArguments.Count);
+			Assert.AreEqual (1, owner.GenericParameters.Count);
+		}
 	}
 }
