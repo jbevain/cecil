@@ -1952,14 +1952,10 @@ namespace Mono.Cecil {
 				ReadMetadataToken (CodedIndex.MethodDefOrRef));
 			var signature = ReadBlobIndex ();
 
-			var instance = new GenericInstanceMethod (method);
-
-			ReadMethodSpecSignature (signature, instance);
-
-			return instance;
+			return ReadMethodSpecSignature (signature, method);
 		}
 
-		void ReadMethodSpecSignature (uint signature, GenericInstanceMethod instance)
+		MethodSpecification ReadMethodSpecSignature (uint signature, MethodReference method)
 		{
 			var reader = ReadSignature (signature);
 			const byte methodspec_sig = 0x0a;
@@ -1969,7 +1965,11 @@ namespace Mono.Cecil {
 			if (call_conv != methodspec_sig)
 				throw new NotSupportedException ();
 
-			reader.ReadGenericInstanceSignature (instance);
+			var instance = new GenericInstanceMethod (method);
+
+			reader.ReadGenericInstanceSignature (method, instance);
+
+			return instance;
 		}
 
 		MemberReference GetMemberReference (uint rid)
@@ -2483,11 +2483,12 @@ namespace Mono.Cecil {
 				owner.GenericParameters.Add (new GenericParameter (owner));
 		}
 
-		public void ReadGenericInstanceSignature (IGenericInstance instance)
+		public void ReadGenericInstanceSignature (IGenericParameterProvider provider, IGenericInstance instance)
 		{
 			var arity = ReadCompressedUInt32 ();
 
-			// TODO: adjust provider if not definition ?
+			if (!provider.IsDefinition)
+				CheckGenericContext (provider, (int) arity - 1);
 
 			for (int i = 0; i < arity; i++)
 				instance.GenericArguments.Add (ReadTypeSignature ());
@@ -2576,7 +2577,7 @@ namespace Mono.Cecil {
 				var element_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
 				var generic_instance = new GenericInstanceType (element_type);
 
-				ReadGenericInstanceSignature (generic_instance);
+				ReadGenericInstanceSignature (element_type, generic_instance);
 
 				if (is_value_type) {
 					generic_instance.IsValueType = true;
