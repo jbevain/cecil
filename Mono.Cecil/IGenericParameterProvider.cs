@@ -34,6 +34,7 @@ namespace Mono.Cecil {
 	public interface IGenericParameterProvider : IMetadataTokenProvider {
 
 		bool HasGenericParameters { get; }
+		bool IsDefinition { get; }
 		Collection<GenericParameter> GenericParameters { get; }
 		GenericParameterType GenericParameterType { get; }
 	}
