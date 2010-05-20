@@ -58,8 +58,12 @@ namespace Mono.Cecil.Pdb {
 			var method_token = body.Method.MetadataToken;
 			var sym_token = new SymbolToken (method_token.ToInt32 ());
 
+			var instructions = CollectInstructions (body);
+			if (instructions.Count == 0)
+				return;
+
 			writer.OpenMethod (sym_token);
-			DefineSequencePoints (body);
+			DefineSequencePoints (instructions);
 			DefineVariables (body);
 			writer.CloseMethod ();
 		}
@@ -103,12 +107,9 @@ namespace Mono.Cecil.Pdb {
 			writer.CloseScope (end_offset);
 		}
 
-		void DefineSequencePoints (MethodBody body)
+		void DefineSequencePoints (Collection<Instruction> instructions)
 		{
-			var instructions = CollectInstructions (body);
 			var count = instructions.Count;
-			if (count == 0)
-				return;
 
 			Document document = null;
 
