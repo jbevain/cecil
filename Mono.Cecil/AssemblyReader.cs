@@ -2188,6 +2188,9 @@ namespace Mono.Cecil {
 			if (constructor.HasParameters)
 				reader.ReadCustomAttributeConstructorArguments (attribute, constructor.Parameters);
 
+			if (!reader.CanReadMore ())
+				return;
+
 			var named = reader.ReadUInt16 ();
 
 			if (named == 0)
@@ -2930,7 +2933,7 @@ namespace Mono.Cecil {
 			return @string;
 		}
 
-		bool CanReadMore ()
+		public bool CanReadMore ()
 		{
 			return position - start < sig_length;
 		}
