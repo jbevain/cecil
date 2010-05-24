@@ -74,7 +74,13 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public sealed class CustomAttribute {
+	public interface ICustomAttribute {
+		TypeReference AttributeType { get; }
+		Collection<CustomAttributeNamedArgument> Fields { get; }
+		Collection<CustomAttributeNamedArgument> Properties { get; }
+	}
+
+	public sealed class CustomAttribute : ICustomAttribute {
 
 		readonly internal uint signature;
 		internal bool resolved;
@@ -87,6 +93,10 @@ namespace Mono.Cecil {
 		public MethodReference Constructor {
 			get { return constructor; }
 			set { constructor = value; }
+		}
+
+		public TypeReference AttributeType {
+			get { return constructor.DeclaringType; }
 		}
 
 		public bool HasConstructorArguments {

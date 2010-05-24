@@ -56,7 +56,7 @@ namespace Mono.Cecil {
 		Collection<SecurityDeclaration> SecurityDeclarations { get; }
 	}
 
-	public sealed class SecurityAttribute {
+	public sealed class SecurityAttribute : ICustomAttribute {
 
 		TypeReference attribute_type;
 
