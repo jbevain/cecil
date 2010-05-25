@@ -53,11 +53,23 @@ namespace Mono.Cecil.Tests {
 			return instance;
 		}
 
-		public static MethodReference MakeGeneric (this MethodReference self, TypeReference declaringType)
+		public static MethodReference MakeGenericMethod (this MethodReference self, params TypeReference [] arguments)
+		{
+			if (self.GenericParameters.Count != arguments.Length)
+				throw new ArgumentException ();
+
+			var instance = new GenericInstanceMethod (self);
+			foreach (var argument in arguments)
+				instance.GenericArguments.Add (argument);
+
+			return instance;
+		}
+
+		public static MethodReference MakeGeneric (this MethodReference self, params TypeReference [] arguments)
 		{
 			var reference = new MethodReference {
 				Name = self.Name,
-				DeclaringType = declaringType,
+				DeclaringType = self.DeclaringType.MakeGenericType (arguments),
 				HasThis = self.HasThis,
 				ExplicitThis = self.ExplicitThis,
 				ReturnType = self.ReturnType,
@@ -68,16 +80,16 @@ namespace Mono.Cecil.Tests {
 				reference.Parameters.Add (new ParameterDefinition (parameter.ParameterType));
 
 			foreach (var generic_parameter in self.GenericParameters)
-				reference.GenericParameters.Add (new GenericParameter (reference));
+				reference.GenericParameters.Add (new GenericParameter (generic_parameter.Name, reference));
 
 			return reference;
 		}
 
-		public static FieldReference MakeGeneric (this FieldReference self, TypeReference declaringType)
+		public static FieldReference MakeGeneric (this FieldReference self, params TypeReference [] arguments)
 		{
 			return new FieldReference {
 				Name = self.Name,
-				DeclaringType = declaringType,
+				DeclaringType = self.DeclaringType.MakeGenericType (arguments),
 				FieldType = self.FieldType,
 			};
 		}
