@@ -96,7 +96,7 @@ namespace Mono.Cecil.Pdb {
 
 		public Cil.ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
-			return new PdbWriter (PdbHelper.CreateWriter (PdbHelper.GetPdbFileName (fileName)));
+			return new PdbWriter (module, PdbHelper.CreateWriter (PdbHelper.GetPdbFileName (fileName)));
 		}
 
 		public Cil.ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)

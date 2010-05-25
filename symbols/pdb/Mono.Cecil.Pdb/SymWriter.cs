@@ -136,6 +136,11 @@ namespace Mono.Cecil.Pdb
 			m_writer.Initialize (emitter, filename, null, fFullBuild);
 		}
 
+		public void SetUserEntryPoint (SymbolToken method)
+		{
+			m_writer.SetUserEntryPoint (method);
+		}
+
 		public void OpenMethod (SymbolToken method)
 		{
 			m_writer.OpenMethod (method);

@@ -38,11 +38,13 @@ namespace Mono.Cecil.Pdb {
 #if !READ_ONLY
 	public class PdbWriter : Cil.ISymbolWriter {
 
+		readonly ModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
 
-		internal PdbWriter (SymWriter writer)
+		internal PdbWriter (ModuleDefinition module, SymWriter writer)
 		{
+			this.module = module;
 			this.writer = writer;
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
 		}
@@ -62,9 +64,16 @@ namespace Mono.Cecil.Pdb {
 			if (instructions.Count == 0)
 				return;
 
+			var start_offset = 0;
+			var end_offset = body.Instructions [body.Instructions.Count - 1].Offset;
+
 			writer.OpenMethod (sym_token);
+			writer.OpenScope (start_offset);
+
 			DefineSequencePoints (instructions);
-			DefineVariables (body);
+			DefineVariables (body, start_offset, end_offset);
+
+			writer.CloseScope (end_offset);
 			writer.CloseMethod ();
 		}
 
@@ -86,15 +95,10 @@ namespace Mono.Cecil.Pdb {
 			return collection;
 		}
 
-		void DefineVariables (MethodBody body)
+		void DefineVariables (MethodBody body, int start_offset, int end_offset)
 		{
 			if (!body.HasVariables)
 				return;
-
-			var start_offset = 0;
-			var end_offset = body.Instructions [body.Instructions.Count - 1].Offset;
-
-			writer.OpenScope (start_offset);
 
 			var sym_token = new SymbolToken (body.LocalVarToken.ToInt32 ());
 
@@ -103,8 +107,6 @@ namespace Mono.Cecil.Pdb {
 				var variable = variables [i];
 				CreateLocalVariable (variable, sym_token, start_offset, end_offset);
 			}
-
-			writer.CloseScope (end_offset);
 		}
 
 		void DefineSequencePoints (Collection<Instruction> instructions)
@@ -219,6 +221,10 @@ namespace Mono.Cecil.Pdb {
 
 		public void Dispose ()
 		{
+			var entry_point = module.EntryPoint;
+			if (entry_point != null)
+				writer.SetUserEntryPoint (new SymbolToken (entry_point.MetadataToken.ToInt32 ()));
+
 			writer.Close ();
 		}
 	}

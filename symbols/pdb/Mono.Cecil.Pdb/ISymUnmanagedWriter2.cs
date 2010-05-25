@@ -46,7 +46,7 @@ namespace Mono.Cecil.Pdb {
 			[In] ref Guid languageVendor,
 			[In] ref Guid documentType,
 			[Out, MarshalAs (UnmanagedType.Interface)] out ISymUnmanagedDocumentWriter pRetVal);
-		void SetUserEntryPoint_Placeholder ();
+		void SetUserEntryPoint ([In] SymbolToken method);
 		void OpenMethod ([In] SymbolToken method);
 		void CloseMethod ();
 		void OpenScope ([In] int startOffset, [Out] out int pRetVal);
