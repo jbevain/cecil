@@ -249,6 +249,11 @@ namespace Mono.Cecil.Cil {
 
 		public void InsertBefore (Instruction target, Instruction instruction)
 		{
+			if (target == null)
+				throw new ArgumentNullException ("target");
+			if (instruction == null)
+				throw new ArgumentNullException ("instruction");
+
 			var index = instructions.IndexOf (target);
 			if (index == -1)
 				throw new ArgumentOutOfRangeException ("target");
@@ -258,6 +263,11 @@ namespace Mono.Cecil.Cil {
 
 		public void InsertAfter (Instruction target, Instruction instruction)
 		{
+			if (target == null)
+				throw new ArgumentNullException ("target");
+			if (instruction == null)
+				throw new ArgumentNullException ("instruction");
+
 			var index = instructions.IndexOf (target);
 			if (index == -1)
 				throw new ArgumentOutOfRangeException ("target");
@@ -267,17 +277,28 @@ namespace Mono.Cecil.Cil {
 
 		public void Append (Instruction instruction)
 		{
+			if (instruction == null)
+				throw new ArgumentNullException ("instruction");
+
 			instructions.Add (instruction);
 		}
 
 		public void Replace (Instruction target, Instruction instruction)
 		{
+			if (target == null)
+				throw new ArgumentNullException ("target");
+			if (instruction == null)
+				throw new ArgumentNullException ("instruction");
+
 			InsertAfter (target, instruction);
 			Remove (target);
 		}
 
 		public void Remove (Instruction instruction)
 		{
+			if (instruction == null)
+				throw new ArgumentNullException ("instruction");
+
 			if (!instructions.Remove (instruction))
 				throw new ArgumentOutOfRangeException ("instruction");
 		}
