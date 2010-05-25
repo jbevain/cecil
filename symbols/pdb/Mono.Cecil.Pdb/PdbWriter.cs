@@ -65,7 +65,7 @@ namespace Mono.Cecil.Pdb {
 				return;
 
 			var start_offset = 0;
-			var end_offset = body.Instructions [body.Instructions.Count - 1].Offset + 1;
+			var end_offset = body.CodeSize;
 
 			writer.OpenMethod (sym_token);
 			writer.OpenScope (start_offset);
@@ -181,9 +181,16 @@ namespace Mono.Cecil.Pdb {
 		{
 			var sym_token = new SymbolToken (symbols.MethodToken.ToInt32 ());
 
+			var start_offset = 0;
+			var end_offset = symbols.CodeSize;
+
 			writer.OpenMethod (sym_token);
+			writer.OpenScope (start_offset);
+
 			DefineSequencePoints (symbols);
-			DefineVariables (symbols);
+			DefineVariables (symbols, start_offset, end_offset);
+
+			writer.CloseScope (end_offset);
 			writer.CloseMethod ();
 		}
 
@@ -198,15 +205,10 @@ namespace Mono.Cecil.Pdb {
 				symbols.EndColumns);
 		}
 
-		void DefineVariables (MethodSymbols symbols)
+		void DefineVariables (MethodSymbols symbols, int start_offset, int end_offset)
 		{
 			if (!symbols.HasVariables)
 				return;
-
-			var start_offset = 0;
-			var end_offset = symbols.CodeSize;
-
-			writer.OpenScope (start_offset);
 
 			var sym_token = new SymbolToken (symbols.LocalVarToken.ToInt32 ());
 
@@ -215,8 +217,6 @@ namespace Mono.Cecil.Pdb {
 				var variable = variables [i];
 				CreateLocalVariable (variable, sym_token, start_offset, end_offset);
 			}
-
-			writer.CloseScope (end_offset);
 		}
 
 		public void Dispose ()
