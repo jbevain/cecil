@@ -65,7 +65,7 @@ namespace Mono.Cecil.Pdb {
 				return;
 
 			var start_offset = 0;
-			var end_offset = body.Instructions [body.Instructions.Count - 1].Offset;
+			var end_offset = body.Instructions [body.Instructions.Count - 1].Offset + 1;
 
 			writer.OpenMethod (sym_token);
 			writer.OpenScope (start_offset);
