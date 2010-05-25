@@ -159,11 +159,9 @@ namespace Mono.Cecil.Tests {
 				var generic_def = module.Import (typeof (Generic<>)).Resolve ();
 				var method_def = generic_def.Methods.Where (m => m.Name == "GenericMethod").First ();
 
-				var generic_string = generic_def.MakeGenericType (generic_def.Module.Import (typeof (string)));
-				var method_string = method_def.MakeGeneric (generic_string);
+				var method_string = method_def.MakeGeneric (module.Import (typeof (string)));
 
-				var method_instance = new GenericInstanceMethod (method_string);
-				method_instance.GenericArguments.Add (module.Import (typeof (int)));
+				var method_instance = method_string.MakeGenericMethod (module.Import (typeof (int)));
 
 				var method_ref = module.Import (method_instance);
 
