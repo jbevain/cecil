@@ -45,178 +45,94 @@ namespace Mono.Cecil.Cil {
 
 		public Instruction Create (OpCode opcode)
 		{
-			if (opcode.OperandType != OperandType.InlineNone)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode);
+			return Instruction.Create (opcode);
 		}
 
 		public Instruction Create (OpCode opcode, TypeReference type)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-			if (opcode.OperandType != OperandType.InlineType &&
-				opcode.OperandType != OperandType.InlineTok)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, type);
+			return Instruction.Create (opcode, type);
 		}
 
 		public Instruction Create (OpCode opcode, CallSite site)
 		{
-			if (site == null)
-				throw new ArgumentNullException ("site");
-			if (opcode.Code != Code.Calli)
-				throw new ArgumentException ("code");
-
-			return FinalCreate (opcode, site);
+			return Instruction.Create (opcode, site);
 		}
 
 		public Instruction Create (OpCode opcode, MethodReference method)
 		{
-			if (method == null)
-				throw new ArgumentNullException ("method");
-			if (opcode.OperandType != OperandType.InlineMethod &&
-				opcode.OperandType != OperandType.InlineTok)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, method);
+			return Instruction.Create (opcode, method);
 		}
 
 		public Instruction Create (OpCode opcode, FieldReference field)
 		{
-			if (field == null)
-				throw new ArgumentNullException ("field");
-			if (opcode.OperandType != OperandType.InlineField &&
-				opcode.OperandType != OperandType.InlineTok)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, field);
+			return Instruction.Create (opcode, field);
 		}
 
 		public Instruction Create (OpCode opcode, string value)
 		{
-			if (value == null)
-				throw new ArgumentNullException ("value");
-			if (opcode.OperandType != OperandType.InlineString)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
 		public Instruction Create (OpCode opcode, sbyte value)
 		{
-			if (opcode.OperandType != OperandType.ShortInlineI &&
-				opcode != OpCodes.Ldc_I4_S)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
 		public Instruction Create (OpCode opcode, byte value)
 		{
 			if (opcode.OperandType == OperandType.ShortInlineVar)
-				return Create (opcode, body.Variables [value]);
+				return Instruction.Create (opcode, body.Variables [value]);
 
 			if (opcode.OperandType == OperandType.ShortInlineArg)
-				return Create (opcode, body.GetParameter (value));
+				return Instruction.Create (opcode, body.GetParameter (value));
 
-			if (opcode.OperandType != OperandType.ShortInlineI ||
-				opcode == OpCodes.Ldc_I4_S)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
 		public Instruction Create (OpCode opcode, int value)
 		{
 			if (opcode.OperandType == OperandType.InlineVar)
-				return Create (opcode, body.Variables [value]);
+				return Instruction.Create (opcode, body.Variables [value]);
 
 			if (opcode.OperandType == OperandType.InlineArg)
-				return Create (opcode, body.GetParameter (value));
+				return Instruction.Create (opcode, body.GetParameter (value));
 
-			if (opcode.OperandType != OperandType.InlineI)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
 		public Instruction Create (OpCode opcode, long value)
 		{
-			if (opcode.OperandType != OperandType.InlineI8)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
 		public Instruction Create (OpCode opcode, float value)
 		{
-			if (opcode.OperandType != OperandType.ShortInlineR)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
 		public Instruction Create (OpCode opcode, double value)
 		{
-			if (opcode.OperandType != OperandType.InlineR)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, value);
+			return Instruction.Create (opcode, value);
 		}
 
-		public Instruction Create (OpCode opcode, Instruction label)
+		public Instruction Create (OpCode opcode, Instruction target)
 		{
-			if (label == null)
-				throw new ArgumentNullException ("label");
-			if (opcode.OperandType != OperandType.InlineBrTarget &&
-				opcode.OperandType != OperandType.ShortInlineBrTarget)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, label);
+			return Instruction.Create (opcode, target);
 		}
 
 		public Instruction Create (OpCode opcode, Instruction [] targets)
 		{
-			if (targets == null)
-				throw new ArgumentNullException ("targets");
-			if (opcode.OperandType != OperandType.InlineSwitch)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, targets);
+			return Instruction.Create (opcode, targets);
 		}
 
 		public Instruction Create (OpCode opcode, VariableDefinition variable)
 		{
-			if (variable == null)
-				throw new ArgumentNullException ("variable");
-			if (opcode.OperandType != OperandType.ShortInlineVar &&
-				opcode.OperandType != OperandType.InlineVar)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, variable);
+			return Instruction.Create (opcode, variable);
 		}
 
 		public Instruction Create (OpCode opcode, ParameterDefinition parameter)
 		{
-			if (parameter == null)
-				throw new ArgumentNullException ("parameter");
-			if (opcode.OperandType != OperandType.ShortInlineArg &&
-				opcode.OperandType != OperandType.InlineArg)
-				throw new ArgumentException ("opcode");
-
-			return FinalCreate (opcode, parameter);
-		}
-
-		static Instruction FinalCreate (OpCode opcode)
-		{
-			return FinalCreate (opcode, null);
-		}
-
-		static Instruction FinalCreate (OpCode opcode, object operand)
-		{
-			return new Instruction (opcode, operand);
+			return Instruction.Create (opcode, parameter);
 		}
 
 		public Instruction Emit (OpCode opcode)
