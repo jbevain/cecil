@@ -54,6 +54,7 @@ namespace Mono.Cecil.PE {
 		const uint file_alignment = 0x200;
 		const uint section_alignment = 0x2000;
 		const ulong image_base = 0x00400000;
+
 		internal const RVA text_rva = 0x2000;
 
 		readonly bool pe64;
