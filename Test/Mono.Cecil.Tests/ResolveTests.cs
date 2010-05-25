@@ -144,9 +144,8 @@ namespace Mono.Cecil.Tests {
 
 		static MethodDefinition GetMethodFromDelegate (Delegate @delegate)
 		{
-			var module = GetCurrentModule ();
 			var method = @delegate.Method;
-			var type = module.GetType (method.DeclaringType.GetILFullName ());
+			var type = (TypeDefinition) TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);
 
 			Assert.IsNotNull (type);
 

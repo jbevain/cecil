@@ -21,7 +21,7 @@ namespace Mono.Cecil.Tests {
 		public static TypeDefinition ToDefinition (this Type self)
 		{
 			var module = ModuleDefinition.ReadModule (self.Module.FullyQualifiedName);
-			return module.GetType (self.GetILFullName ());
+			return (TypeDefinition) TypeParser.ParseType (module, self.FullName);
 		}
 
 		public static MethodDefinition ToDefinition (this SR.MethodBase method)
@@ -34,11 +34,6 @@ namespace Mono.Cecil.Tests {
 		{
 			var declaring_type = field.DeclaringType.ToDefinition ();
 			return (FieldDefinition) declaring_type.Module.LookupToken (field.MetadataToken);
-		}
-
-		public static string GetILFullName (this Type self)
-		{
-			return self.FullName.Replace ('+', '/');
 		}
 
 		public static TypeReference MakeGenericType (this TypeReference self, params TypeReference [] arguments)

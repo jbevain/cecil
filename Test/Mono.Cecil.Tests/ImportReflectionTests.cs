@@ -116,6 +116,8 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Call, module.Import (typeof (string).GetMethod ("Concat", new [] { typeof (string), typeof (string) })));
 				il.Emit (OpCodes.Ret);
 			});
+
+			Assert.AreEqual ("FooBar", concat ("Foo", "Bar"));
 		}
 
 		public class Generic<T> {
