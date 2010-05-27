@@ -162,17 +162,21 @@ namespace Mono.Cecil.Mdb {
 		{
 			var method = new SourceMethodSymbol (symbols);
 
-			var file = GetSourceFile (symbols.Document);
+			var file = GetSourceFile (symbols.Instructions [0].SequencePoint.Document);
 			var builder = writer.OpenMethod (file.CompilationUnit, 0, method);
-			var count = symbols.Offsets.Length;
+			var count = symbols.Instructions.Count;
 
-			for (int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++) {
+				var instruction = symbols.Instructions [i];
+				var sequence_point = instruction.SequencePoint;
+
 				builder.MarkSequencePoint (
-					symbols.Offsets [i],
-					file.CompilationUnit.SourceFile,
-					symbols.StartRows [i],
-					symbols.StartColumns [i],
+					instruction.Offset,
+					GetSourceFile (sequence_point.Document).CompilationUnit.SourceFile,
+					sequence_point.StartLine,
+					sequence_point.EndLine,
 					false);
+			}
 
 			if (symbols.HasVariables)
 				AddVariables (symbols.Variables);
