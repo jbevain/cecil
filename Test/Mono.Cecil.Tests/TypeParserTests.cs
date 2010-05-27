@@ -284,6 +284,42 @@ namespace Mono.Cecil.Tests {
 		public class Foo<TX, TY> {
 		}
 
+		public class Bar {}
+
+		[Test]
+		public void GenericInstanceTwoNonFqArguments ()
+		{
+			var module = GetCurrentModule ();
+
+			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[Mono.Cecil.Tests.TypeParserTests+Bar,Mono.Cecil.Tests.TypeParserTests+Bar], {0}", typeof (object).Assembly.FullName);
+
+			var type = TypeParser.ParseType (module, fullname);
+
+			var instance = type as GenericInstanceType;
+			Assert.IsNotNull (instance);
+			Assert.AreEqual (2, instance.GenericArguments.Count);
+			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
+			Assert.AreEqual ("Dictionary`2", type.Name);
+
+			type = instance.ElementType;
+
+			Assert.AreEqual (2, type.GenericParameters.Count);
+
+			var argument = instance.GenericArguments [0];
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("", argument.Namespace);
+			Assert.AreEqual ("Bar", argument.Name);
+			Assert.IsInstanceOfType (typeof (TypeDefinition), argument);
+
+			argument = instance.GenericArguments [1];
+			Assert.AreEqual (module, argument.Module);
+			Assert.AreEqual ("", argument.Namespace);
+			Assert.AreEqual ("Bar", argument.Name);
+			Assert.IsInstanceOfType (typeof (TypeDefinition), argument);
+		}
+
 		[Test]
 		public void ComplexGenericInstanceMixedArguments ()
 		{
