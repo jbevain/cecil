@@ -59,7 +59,7 @@ namespace Mono.Cecil {
 			this.length = fullname.Length;
 		}
 
-		Type ParseType ()
+		Type ParseType (bool fq_name)
 		{
 			var type = new Type ();
 			type.type_fullname = ParsePart ();
@@ -71,7 +71,8 @@ namespace Mono.Cecil {
 
 			type.specs = ParseSpecs ();
 
-			type.assembly = ParseAssemblyName ();
+			if (fq_name)
+				type.assembly = ParseAssemblyName ();
 
 			return type;
 		}
@@ -222,7 +223,7 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < arity; i++) {
 				var fq_argument = TryParse ('[');
-				Add (ref generic_arguments, ParseType ());
+				Add (ref generic_arguments, ParseType (fq_argument));
 				if (fq_argument)
 					TryParse (']');
 
@@ -260,7 +261,7 @@ namespace Mono.Cecil {
 				return null;
 
 			var parser = new TypeParser (fullname);
-			return GetTypeReference (module, parser.ParseType ());
+			return GetTypeReference (module, parser.ParseType (true));
 		}
 
 		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info)
