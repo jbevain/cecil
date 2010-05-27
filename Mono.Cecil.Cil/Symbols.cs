@@ -92,20 +92,26 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	public sealed class MethodSymbols {
+	public struct InstructionSymbol {
 
-		Document document;
-		int [] offsets;
-		int [] start_rows;
-		int [] start_columns;
-		int [] end_rows;
-		int [] end_columns;
+		public readonly int Offset;
+		public readonly SequencePoint SequencePoint;
+
+		public InstructionSymbol (int offset, SequencePoint sequencePoint)
+		{
+			this.Offset = offset;
+			this.SequencePoint = sequencePoint;
+		}
+	}
+
+	public sealed class MethodSymbols {
 
 		internal int code_size;
 		internal string method_name;
 		internal MetadataToken method_token;
 		internal MetadataToken local_var_token;
 		internal Collection<VariableDefinition> variables;
+		internal Collection<InstructionSymbol> instructions;
 
 		public bool HasVariables {
 			get { return !variables.IsNullOrEmpty (); }
@@ -117,6 +123,15 @@ namespace Mono.Cecil.Cil {
 					variables = new Collection<VariableDefinition> ();
 
 				return variables;
+			}
+		}
+
+		public Collection<InstructionSymbol> Instructions {
+			get {
+				if (instructions == null)
+					instructions = new Collection<InstructionSymbol> ();
+
+				return instructions;
 			}
 		}
 
@@ -134,36 +149,6 @@ namespace Mono.Cecil.Cil {
 
 		public MetadataToken LocalVarToken {
 			get { return local_var_token; }
-		}
-
-		public Document Document {
-			get { return document; }
-			set { document = value; }
-		}
-
-		public int [] Offsets {
-			get { return offsets; }
-			set { offsets = value; }
-		}
-
-		public int [] StartRows {
-			get { return start_rows; }
-			set { start_rows = value; }
-		}
-
-		public int [] StartColumns {
-			get { return start_columns; }
-			set { start_columns = value; }
-		}
-
-		public int [] EndRows {
-			get { return end_rows; }
-			set { end_rows = value; }
-		}
-
-		public int [] EndColumns {
-			get { return end_columns; }
-			set { end_columns = value; }
 		}
 
 		public MethodSymbols (string methodName)

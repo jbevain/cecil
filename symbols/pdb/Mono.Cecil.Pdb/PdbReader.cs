@@ -262,24 +262,15 @@ namespace Mono.Cecil.Pdb {
 
 		void ReadLines (PdbLines lines, MethodSymbols symbols)
 		{
-			symbols.Document = GetDocument (lines.file);
-
-			var count = lines.lines.Length;
-
-			symbols.Offsets = new int [count];
-			symbols.StartRows = new int [count];
-			symbols.StartColumns = new int [count];
-			symbols.EndRows = new int [count];
-			symbols.EndColumns = new int [count];
-
 			for (int i = 0; i < lines.lines.Length; i++) {
 				var line = lines.lines [i];
 
-				symbols.Offsets [i] = (int) line.offset;
-				symbols.StartRows [i] = (int) line.lineBegin;
-				symbols.StartColumns [i] = line.colBegin;
-				symbols.EndRows [i] = (int) line.lineEnd;
-				symbols.EndColumns [i] = line.colEnd;
+				symbols.Instructions.Add (new InstructionSymbol ((int) line.offset, new SequencePoint (GetDocument (lines.file)) {
+					StartLine = (int) line.lineBegin,
+					StartColumn = (int) line.colBegin,
+					EndLine = (int) line.lineEnd,
+					EndColumn = (int) line.colEnd,
+				}));
 			}
 		}
 

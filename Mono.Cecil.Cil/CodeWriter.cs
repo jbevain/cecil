@@ -87,7 +87,7 @@ namespace Mono.Cecil.Cil {
 
 			WriteBytes (buffer);
 
-			if (symbols.Offsets.IsNullOrEmpty ())
+			if (symbols.instructions.IsNullOrEmpty ())
 				return;
 
 			symbols.method_token = method.token;

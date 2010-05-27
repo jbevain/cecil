@@ -31,7 +31,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using Mono.Cecil.Cil;
-
+using Mono.Collections.Generic;
 using Mono.CompilerServices.SymbolWriter;
 
 namespace Mono.Cecil.Mdb {
@@ -185,26 +185,16 @@ namespace Mono.Cecil.Mdb {
 			var table = entry.GetLineNumberTable ();
 			var lines = table.LineNumbers;
 
-			symbols.Offsets = new int [lines.Length];
-			symbols.StartRows = new int [lines.Length];
-			symbols.StartColumns = new int [lines.Length];
-			symbols.EndRows = new int [lines.Length];
-			symbols.EndColumns = new int [lines.Length];
-
-			Document document = null;
+			var instructions = symbols.instructions = new Collection<InstructionSymbol> (lines.Length);
 
 			for (int i = 0; i < lines.Length; i++) {
 				var line = lines [i];
 
-				if (document == null)
-					document = GetDocument (entry.CompileUnit.SourceFile);
-
-				symbols.Offsets [i] = line.Offset;
-				symbols.StartRows [i] = line.Row;
-				symbols.EndRows [i] = line.Row;
+				instructions.Add (new InstructionSymbol (line.Offset, new SequencePoint (GetDocument (entry.CompileUnit.SourceFile)) {
+					StartLine = line.Row,
+					EndLine = line.Row,
+				}));
 			}
-
-			symbols.Document = document;
 		}
 
 		static void ReadLocalVariables (MethodEntry entry, MethodSymbols symbols)

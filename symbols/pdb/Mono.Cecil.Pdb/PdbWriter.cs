@@ -111,37 +111,18 @@ namespace Mono.Cecil.Pdb {
 
 		void DefineSequencePoints (Collection<Instruction> instructions)
 		{
-			var count = instructions.Count;
-
-			Document document = null;
-
-			var offsets = new int [count];
-			var start_rows = new int [count];
-			var start_columns = new int [count];
-			var end_rows = new int [count];
-			var end_columns = new int [count];
-
-			for (int i = 0; i < count; i++) {
+			for (int i = 0; i < instructions.Count; i++) {
 				var instruction = instructions [i];
-				offsets [i] = instruction.Offset;
-
 				var sequence_point = instruction.SequencePoint;
-				if (document == null)
-					document = sequence_point.Document;
 
-				start_rows [i] = sequence_point.StartLine;
-				start_columns [i] = sequence_point.StartColumn;
-				end_rows [i] = sequence_point.EndLine;
-				end_columns [i] = sequence_point.EndColumn;
+				writer.DefineSequencePoints (
+					GetDocument (sequence_point.Document),
+					new [] { instruction.Offset },
+					new [] { sequence_point.StartLine },
+					new [] { sequence_point.StartColumn },
+					new [] { sequence_point.EndLine },
+					new [] { sequence_point.EndColumn });
 			}
-
-			writer.DefineSequencePoints (
-				GetDocument (document),
-			    offsets,
-				start_rows,
-				start_columns,
-				end_rows,
-				end_columns);
 		}
 
 		void CreateLocalVariable (VariableDefinition variable, SymbolToken local_var_token, int start_offset, int end_offset)
@@ -196,13 +177,20 @@ namespace Mono.Cecil.Pdb {
 
 		void DefineSequencePoints (MethodSymbols symbols)
 		{
-			writer.DefineSequencePoints (
-				GetDocument (symbols.Document),
-				symbols.Offsets,
-				symbols.StartRows,
-				symbols.StartColumns,
-				symbols.EndRows,
-				symbols.EndColumns);
+			var instructions = symbols.instructions;
+
+			for (int i = 0; i < instructions.Count; i++) {
+				var instruction = instructions [i];
+				var sequence_point = instruction.SequencePoint;
+
+				writer.DefineSequencePoints (
+					GetDocument (sequence_point.Document),
+					new [] { instruction.Offset },
+					new [] { sequence_point.StartLine },
+					new [] { sequence_point.StartColumn },
+					new [] { sequence_point.EndLine },
+					new [] { sequence_point.EndColumn });
+			}
 		}
 
 		void DefineVariables (MethodSymbols symbols, int start_offset, int end_offset)
