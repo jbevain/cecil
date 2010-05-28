@@ -75,6 +75,7 @@
     <Compile Include="Mono.Cecil.Pdb\IMetadataDispenser.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedDocumentWriter.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedWriter2.cs" />
+    <Compile Include="Mono.Cecil.Pdb\ModuleMetadata.cs" />
     <Compile Include="Mono.Cecil.Pdb\PdbHelper.cs" />
     <Compile Include="Mono.Cecil.Pdb\PdbReader.cs" />
     <Compile Include="Mono.Cecil.Pdb\PdbWriter.cs" />

@@ -29,7 +29,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 using Mono.Cecil.Cil;
 
@@ -37,38 +36,14 @@ namespace Mono.Cecil.Pdb {
 
 	class PdbHelper {
 
-		[DllImport("ole32.dll")]
-		static extern int CoCreateInstance (
-			[In] ref Guid rclsid,
-			[In, MarshalAs (UnmanagedType.IUnknown)] object pUnkOuter,
-			[In] uint dwClsContext,
-			[In] ref Guid riid,
-			[Out, MarshalAs(UnmanagedType.Interface)] out object ppv);
-
-		static Guid s_dispenserClassID = new Guid (0xe5cb7a31, 0x7512, 0x11d2, 0x89, 0xce, 0x00, 0x80, 0xc7, 0x92, 0xe5, 0xd8);
-		static Guid s_dispenserIID = new Guid (0x809c652e, 0x7396, 0x11d2, 0x97, 0x71, 0x00, 0xa0, 0xc9, 0xb4, 0xd5, 0x0c);
-		static Guid CLSID_CorMetaDataRuntime = new Guid ("005023ca-72b1-11d3-9fc4-00c04f79a0a3");
-		static Guid IID_IMetaDataEmit = new Guid ("ba3fee4c-ecb9-4e41-83b7-183fa41cd859");
-
-		public static SymWriter CreateWriter (string pdb)
+		public static SymWriter CreateWriter (ModuleDefinition module, string pdb)
 		{
-			SymWriter writer = new SymWriter ();
+			var writer = new SymWriter ();
 
-			object objDispenser;
-			CoCreateInstance (ref s_dispenserClassID, null, 1, ref s_dispenserIID, out objDispenser);
+			if (File.Exists (pdb))
+				File.Delete (pdb);
 
-			object emitter;
-			IMetaDataDispenser dispenser = (IMetaDataDispenser) objDispenser;
-			dispenser.DefineScope (ref CLSID_CorMetaDataRuntime, 0, ref IID_IMetaDataEmit, out emitter);
-
-			try {
-				if (File.Exists (pdb))
-					File.Delete (pdb);
-
-				writer.Initialize (emitter, pdb, true);
-			} finally {
-				Marshal.ReleaseComObject (dispenser);
-			}
+			writer.Initialize (new ModuleMetadata (module), pdb, true);
 
 			return writer;
 		}
@@ -79,27 +54,27 @@ namespace Mono.Cecil.Pdb {
 		}
 	}
 
-	public class PdbReaderProvider : Cil.ISymbolReaderProvider {
+	public class PdbReaderProvider : ISymbolReaderProvider {
 
-		public Cil.ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			return new PdbReader (File.OpenRead (PdbHelper.GetPdbFileName (fileName)));
 		}
 
-		public Cil.ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}
 	}
 
-	public class PdbWriterProvider : Cil.ISymbolWriterProvider {
+	public class PdbWriterProvider : ISymbolWriterProvider {
 
-		public Cil.ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
-			return new PdbWriter (module, PdbHelper.CreateWriter (PdbHelper.GetPdbFileName (fileName)));
+			return new PdbWriter (module, PdbHelper.CreateWriter (module, PdbHelper.GetPdbFileName (fileName)));
 		}
 
-		public Cil.ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}
