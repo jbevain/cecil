@@ -72,7 +72,6 @@
     <Compile Include="Microsoft.Cci.Pdb\PdbWriter.cs" />
     <Compile Include="Microsoft.Cci.Pdb\SourceLocationProvider.cs" />
     <Compile Include="Mono.Cecil.Pdb\AssemblyInfo.cs" />
-    <Compile Include="Mono.Cecil.Pdb\IMetadataDispenser.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedDocumentWriter.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedWriter2.cs" />
     <Compile Include="Mono.Cecil.Pdb\ModuleMetadata.cs" />
