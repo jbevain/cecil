@@ -480,12 +480,29 @@ namespace Mono.Cecil {
 				throw new ArgumentNullException ("method");
 		}
 
+		static void CheckContext (IGenericParameterProvider context, ModuleDefinition module)
+		{
+			if (context == null)
+				return;
+
+			if (context.Module != module)
+				throw new ArgumentException ();
+		}
+
 #if !CF
 		public TypeReference Import (Type type)
 		{
 			CheckType (type);
 
 			return MetadataImporter.ImportType (type, null);
+		}
+
+		public TypeReference Import (Type type, IGenericParameterProvider context)
+		{
+			CheckType (type);
+			CheckContext (context, this);
+
+			return MetadataImporter.ImportType (type, (IGenericContext) context);
 		}
 
 		public FieldReference Import (SR.FieldInfo field)
@@ -511,6 +528,18 @@ namespace Mono.Cecil {
 				return type;
 
 			return MetadataImporter.ImportType (type, null);
+		}
+
+		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
+		{
+			CheckType (type);
+
+			if (type.Module == this)
+				return type;
+
+			CheckContext (context, this);
+
+			return MetadataImporter.ImportType (type, (IGenericContext) context);
 		}
 
 		public FieldReference Import (FieldReference field)
