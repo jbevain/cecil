@@ -132,6 +132,11 @@ namespace Mono.Cecil.Tests {
 			{
 				return s;
 			}
+
+			public Generic<TS> ComplexGenericMethod<TS> (T t, TS s)
+			{
+				return new Generic<TS> { Field = s };
+			}
 		}
 
 		[Test]
@@ -174,6 +179,22 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
 				il.Emit (OpCodes.Callvirt, module.Import (typeof (Generic<string>).GetMethod ("GenericMethod").MakeGenericMethod (typeof (int))));
+				il.Emit (OpCodes.Ret);
+			});
+
+			Assert.AreEqual (42, gen_spec_id (new Generic<string> (), 42));
+		}
+
+		[Test]
+		public void ImportComplexGenericMethodSpec ()
+		{
+			var gen_spec_id = Compile<Func<Generic<string>, int, int>> ((module, body) => {
+				var il = body.GetILProcessor ();
+				il.Emit (OpCodes.Ldarg_0);
+				il.Emit (OpCodes.Ldnull);
+				il.Emit (OpCodes.Ldarg_1);
+				il.Emit (OpCodes.Callvirt, module.Import (typeof (Generic<string>).GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
+				il.Emit (OpCodes.Ldfld, module.Import (typeof (Generic<string>).GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 

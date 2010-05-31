@@ -107,6 +107,11 @@ namespace Mono.Cecil.Tests {
 			{
 				return s;
 			}
+
+			public Generic<TS> ComplexGenericMethod<TS> (T t, TS s)
+			{
+				return new Generic<TS> { Field = s };
+			}
 		}
 
 		[Test]
@@ -141,7 +146,6 @@ namespace Mono.Cecil.Tests {
 				var method_def = generic_def.Methods.Where (m => m.Name == "Method").First ();
 
 				var method_int = method_def.MakeGeneric (module.Import (typeof (int)));
-
 				var method_ref = module.Import (method_int);
 
 				var il = body.GetILProcessor ();
@@ -172,6 +176,33 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
 				il.Emit (OpCodes.Callvirt, method_ref);
+				il.Emit (OpCodes.Ret);
+			});
+
+			Assert.AreEqual (42, gen_spec_id (new Generic<string> (), 42));
+		}
+
+		[Test]
+		public void ImportComplexGenericMethodSpec ()
+		{
+			var gen_spec_id = Compile<Func<Generic<string>, int, int>> ((module, body) => {
+				var generic_def = module.Import (typeof (Generic<>)).Resolve ();
+				var method_def = generic_def.Methods.Where (m => m.Name == "ComplexGenericMethod").First ();
+
+				var method_string = method_def.MakeGeneric (module.Import (typeof (string)));
+				var method_instance = method_string.MakeGenericMethod (module.Import (typeof (int)));
+				var method_ref = module.Import (method_instance);
+
+				var field_def = generic_def.Fields.Where (f => f.Name == "Field").First ();
+				var field_int = field_def.MakeGeneric (module.Import (typeof (int)));
+				var field_ref = module.Import (field_int);
+
+				var il = body.GetILProcessor ();
+				il.Emit (OpCodes.Ldarg_0);
+				il.Emit (OpCodes.Ldnull);
+				il.Emit (OpCodes.Ldarg_1);
+				il.Emit (OpCodes.Callvirt, method_ref);
+				il.Emit (OpCodes.Ldfld, field_ref);
 				il.Emit (OpCodes.Ret);
 			});
 
