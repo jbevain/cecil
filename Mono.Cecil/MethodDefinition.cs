@@ -441,6 +441,7 @@ namespace Mono.Cecil {
 			: base (name, returnType)
 		{
 			this.attributes = (ushort) attributes;
+			this.HasThis = !this.IsStatic;
 			this.token = new MetadataToken (TokenType.Method);
 		}
 
