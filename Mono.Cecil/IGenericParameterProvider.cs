@@ -35,6 +35,7 @@ namespace Mono.Cecil {
 
 		bool HasGenericParameters { get; }
 		bool IsDefinition { get; }
+		ModuleDefinition Module { get; }
 		Collection<GenericParameter> GenericParameters { get; }
 		GenericParameterType GenericParameterType { get; }
 	}
