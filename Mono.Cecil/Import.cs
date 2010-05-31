@@ -121,7 +121,7 @@ namespace Mono.Cecil {
 				var arguments = type.GetGenericArguments ();
 
 				for (int i = 0; i < arguments.Length; i++)
-					instance.GenericArguments.Add (ImportType (arguments [i], element_type));
+					instance.GenericArguments.Add (ImportType (arguments [i], context));
 
 				return instance;
 			}
@@ -133,6 +133,9 @@ namespace Mono.Cecil {
 				var owner = type.DeclaringMethod != null
 					? context.Method
 					: context.Type;
+
+				if (owner == null)
+					throw new InvalidOperationException ();
 
 				return owner.GenericParameters [type.GenericParameterPosition];
 			}
