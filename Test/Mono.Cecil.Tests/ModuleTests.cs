@@ -178,6 +178,12 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("0.0.0.0", version.FileVersion);
 		}
 
+		[TestModule ("noblob.dll")]
+		public void ModuleWithoutBlob (ModuleDefinition module)
+		{
+			Assert.IsNull (module.Image.BlobHeap);
+		}
+
 		[Test]
 		[ExpectedException (typeof (BadImageFormatException))]
 		public void OpenIrrelevantFile ()

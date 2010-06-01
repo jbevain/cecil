@@ -392,17 +392,28 @@ namespace Mono.Cecil {
 
 		byte [] ReadBlob ()
 		{
-			return image.BlobHeap.Read (ReadBlobIndex ());
+			var blob_heap = image.BlobHeap;
+			if (blob_heap == null) {
+				position += 2;
+				return Empty<byte>.Array;
+			}
+
+			return blob_heap.Read (ReadBlobIndex ());
 		}
 
 		byte [] ReadBlob (uint signature)
 		{
-			return image.BlobHeap.Read (signature);
+			var blob_heap = image.BlobHeap;
+			if (blob_heap == null)
+				return Empty<byte>.Array;
+
+			return blob_heap.Read (signature);
 		}
 
 		uint ReadBlobIndex ()
 		{
-			return ReadByIndexSize (image.BlobHeap.IndexSize);
+			var blob_heap = image.BlobHeap;
+			return ReadByIndexSize (blob_heap != null ? blob_heap.IndexSize : 2);
 		}
 
 		string ReadString ()
