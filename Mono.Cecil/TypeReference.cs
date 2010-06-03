@@ -182,6 +182,30 @@ namespace Mono.Cecil {
 			get { return false; }
 		}
 
+		public bool IsPrimitive {
+			get {
+				switch (etype) {
+				case ElementType.Boolean:
+				case ElementType.Char:
+				case ElementType.I:
+				case ElementType.U:
+				case ElementType.I1:
+				case ElementType.U1:
+				case ElementType.I2:
+				case ElementType.U2:
+				case ElementType.I4:
+				case ElementType.U4:
+				case ElementType.I8:
+				case ElementType.U8:
+				case ElementType.R4:
+				case ElementType.R8:
+					return true;
+				default:
+					return false;
+				}
+			}
+		}
+
 		protected TypeReference (string @namespace, string name)
 			: base (name)
 		{
