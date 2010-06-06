@@ -102,41 +102,57 @@ namespace Mono.Cecil {
 		TypeReference ImportTypeSpecification (Type type, IGenericContext context)
 		{
 			if (type.IsByRef)
-				return new ByReferenceType (ImportType (type.GetElementType (), context));
+				return new ByReferenceType (ImportTypeSpecificationElement (type.GetElementType (), context));
 
 			if (type.IsPointer)
-				return new PointerType (ImportType (type.GetElementType (), context));
+				return new PointerType (ImportTypeSpecificationElement (type.GetElementType (), context));
 
 			if (type.IsArray)
-				return new ArrayType (ImportType (type.GetElementType (), context), type.GetArrayRank ());
+				return new ArrayType (ImportTypeSpecificationElement (type.GetElementType (), context), type.GetArrayRank ());
 
-			if (IsGenericInstance (type)) {
-				var element_type = ImportType (type.GetGenericTypeDefinition (), context);
-				var instance = new GenericInstanceType (element_type);
-				var arguments = type.GetGenericArguments ();
-				var instance_arguments = instance.GenericArguments;
+			if (IsGenericInstance (type))
+				return ImportGenericInstance (type, context);
 
-				for (int i = 0; i < arguments.Length; i++)
-					instance_arguments.Add (ImportType (arguments [i], context));
-
-				return instance;
-			}
-
-			if (type.IsGenericParameter) {
-				if (context == null)
-					throw new InvalidOperationException ();
-
-				var owner = type.DeclaringMethod != null
-					? context.Method
-					: context.Type;
-
-				if (owner == null)
-					throw new InvalidOperationException ();
-
-				return owner.GenericParameters [type.GenericParameterPosition];
-			}
+			if (type.IsGenericParameter)
+				return ImportGenericParameter (type, context);
 
 			throw new NotSupportedException (type.FullName);
+		}
+
+		static TypeReference ImportGenericParameter (Type type, IGenericContext context)
+		{
+			if (context == null)
+				throw new InvalidOperationException ();
+
+			var owner = type.DeclaringMethod != null
+				? context.Method
+				: context.Type;
+
+			if (owner == null)
+				throw new InvalidOperationException ();
+
+			return owner.GenericParameters [type.GenericParameterPosition];
+		}
+
+		TypeReference ImportGenericInstance (Type type, IGenericContext context)
+		{
+			var element_type = ImportType (type.GetGenericTypeDefinition (), context);
+			var instance = new GenericInstanceType (element_type);
+			var arguments = type.GetGenericArguments ();
+			var instance_arguments = instance.GenericArguments;
+
+			for (int i = 0; i < arguments.Length; i++)
+				instance_arguments.Add (ImportTypeSpecificationElement (arguments [i], context));
+
+			return instance;
+		}
+
+		TypeReference ImportTypeSpecificationElement (Type type, IGenericContext context)
+		{
+			if (type.IsGenericTypeDefinition)
+				return ImportGenericInstance (type, context);
+
+			return ImportType (type, context);
 		}
 
 		static bool IsTypeSpecification (Type type)
