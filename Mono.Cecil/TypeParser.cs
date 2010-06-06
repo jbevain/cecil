@@ -314,8 +314,10 @@ namespace Mono.Cecil {
 				return type;
 
 			var instance = new GenericInstanceType (type);
+			var instance_arguments = instance.GenericArguments;
+
 			for (int i = 0; i < generic_arguments.Length; i++)
-				instance.GenericArguments.Add (GetTypeReference (type.Module, generic_arguments [i]));
+				instance_arguments.Add (GetTypeReference (type.Module, generic_arguments [i]));
 
 			return instance;
 		}

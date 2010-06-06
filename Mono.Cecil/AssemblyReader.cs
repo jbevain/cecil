@@ -2493,8 +2493,10 @@ namespace Mono.Cecil {
 
 		static void CheckGenericContext (IGenericParameterProvider owner, int index)
 		{
-			for (int i = owner.GenericParameters.Count; i <= index; i++)
-				owner.GenericParameters.Add (new GenericParameter (owner));
+			var owner_parameters = owner.GenericParameters;
+
+			for (int i = owner_parameters.Count; i <= index; i++)
+				owner_parameters.Add (new GenericParameter (owner));
 		}
 
 		public void ReadGenericInstanceSignature (IGenericParameterProvider provider, IGenericInstance instance)
@@ -2504,8 +2506,10 @@ namespace Mono.Cecil {
 			if (!provider.IsDefinition)
 				CheckGenericContext (provider, (int) arity - 1);
 
+			var instance_arguments = instance.GenericArguments;
+
 			for (int i = 0; i < arity; i++)
-				instance.GenericArguments.Add (ReadTypeSignature ());
+				instance_arguments.Add (ReadTypeSignature ());
 		}
 
 		ArrayType ReadArrayTypeSignature ()
