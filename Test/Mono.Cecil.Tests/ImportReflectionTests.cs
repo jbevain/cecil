@@ -222,6 +222,36 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void ImportGenericTypeDefFromContext ()
+		{
+			var foo_open = typeof (Foo<>).MakeGenericType (typeof (Foo<>).GetGenericArguments () [0]);
+			var generic_foo_open = typeof (Generic<>).MakeGenericType (foo_open);
+
+			var foo_def = typeof (Foo<>).ToDefinition ();
+			var module = foo_def.Module;
+
+			var generic_foo = module.Import (generic_foo_open, foo_def);
+
+			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Generic`1<Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>>",
+				generic_foo.FullName);
+		}
+
+		[Test]
+		public void ImportArrayTypeDefFromContext ()
+		{
+			var foo_open = typeof (Foo<>).MakeGenericType (typeof (Foo<>).GetGenericArguments () [0]);
+			var foo_open_array = foo_open.MakeArrayType ();
+
+			var foo_def = typeof (Foo<>).ToDefinition ();
+			var module = foo_def.Module;
+
+			var array_foo = module.Import (foo_open_array, foo_def);
+
+			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>[]",
+				array_foo.FullName);
+		}
+
+		[Test]
 		public void ImportGenericFieldFromContext ()
 		{
 			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
