@@ -107,21 +107,17 @@ namespace Mono.Cecil {
 			if (type.IsPointer)
 				return new PointerType (ImportType (type.GetElementType (), context));
 
-			if (type.IsArray) {
-				var array_type = new ArrayType (ImportType (type.GetElementType (), context));
-				for (int i = 1; i < type.GetArrayRank (); i++)
-					array_type.Dimensions.Add (new ArrayDimension ());
-
-				return array_type;
-			}
+			if (type.IsArray)
+				return new ArrayType (ImportType (type.GetElementType (), context), type.GetArrayRank ());
 
 			if (IsGenericInstance (type)) {
 				var element_type = ImportType (type.GetGenericTypeDefinition (), context);
 				var instance = new GenericInstanceType (element_type);
 				var arguments = type.GetGenericArguments ();
+				var instance_arguments = instance.GenericArguments;
 
 				for (int i = 0; i < arguments.Length; i++)
-					instance.GenericArguments.Add (ImportType (arguments [i], context));
+					instance_arguments.Add (ImportType (arguments [i], context));
 
 				return instance;
 			}
@@ -268,8 +264,10 @@ namespace Mono.Cecil {
 				: ImportType (typeof (void), null);
 
 			var parameters = method.GetParameters ();
+			var reference_parameters = reference.Parameters;
+
 			for (int i = 0; i < parameters.Length; i++)
-				reference.Parameters.Add (
+				reference_parameters.Add (
 					new ParameterDefinition (ImportType (parameters [i].ParameterType, context ?? reference)));
 
 			reference.DeclaringType = declaring_type;
@@ -279,8 +277,10 @@ namespace Mono.Cecil {
 
 		static void ImportGenericParameters (IGenericParameterProvider provider, Type [] arguments)
 		{
+			var provider_parameters = provider.GenericParameters;
+
 			for (int i = 0; i < arguments.Length; i++)
-				provider.GenericParameters.Add (new GenericParameter (arguments [i].Name, provider));
+				provider_parameters.Add (new GenericParameter (arguments [i].Name, provider));
 		}
 
 		static bool IsMethodSpecification (SR.MethodBase method)
@@ -297,9 +297,10 @@ namespace Mono.Cecil {
 			var element_method = ImportMethod (method_info.GetGenericMethodDefinition (), context);
 			var instance = new GenericInstanceMethod (element_method);
 			var arguments = method.GetGenericArguments ();
+			var instance_arguments = instance.GenericArguments;
 
 			for (int i = 0; i < arguments.Length; i++)
-				instance.GenericArguments.Add (ImportType (arguments [i], context));
+				instance_arguments.Add (ImportType (arguments [i], context));
 
 			return instance;
 		}
@@ -393,9 +394,10 @@ namespace Mono.Cecil {
 		static void ImportGenericParameters (IGenericParameterProvider imported, IGenericParameterProvider original)
 		{
 			var parameters = original.GenericParameters;
+			var imported_parameters = imported.GenericParameters;
 
 			for (int i = 0; i < parameters.Count; i++)
-				imported.GenericParameters.Add (new GenericParameter (parameters [i].Name, imported));
+				imported_parameters.Add (new GenericParameter (parameters [i].Name, imported));
 		}
 
 		TypeReference ImportTypeSpecification (TypeReference type, IGenericContext context)
@@ -433,12 +435,14 @@ namespace Mono.Cecil {
 					return imported_array;
 
 				var dimensions = array.Dimensions;
+				var imported_dimensions = imported_array.Dimensions;
 
-				imported_array.Dimensions.Clear ();
+				imported_dimensions.Clear ();
 
 				for (int i = 0; i < dimensions.Count; i++) {
 					var dimension = dimensions [i];
-					imported_array.Dimensions.Add (new ArrayDimension (dimension.LowerBound, dimension.UpperBound));
+
+					imported_dimensions.Add (new ArrayDimension (dimension.LowerBound, dimension.UpperBound));
 				}
 
 				return imported_array;
@@ -447,9 +451,10 @@ namespace Mono.Cecil {
 				var imported_instance = new GenericInstanceType (ImportType (instance.ElementType, context));
 
 				var arguments = instance.GenericArguments;
+				var imported_arguments = imported_instance.GenericArguments;
 
 				for (int i = 0; i < arguments.Count; i++)
-					imported_instance.GenericArguments.Add (ImportType (arguments [i], context));
+					imported_arguments.Add (ImportType (arguments [i], context));
 
 				return imported_instance;
 			case ElementType.Var:
@@ -503,9 +508,11 @@ namespace Mono.Cecil {
 			if (!method.HasParameters)
 				return reference;
 
+			var reference_parameters = reference.Parameters;
+
 			var parameters = method.Parameters;
 			for (int i = 0; i < parameters.Count; i++)
-				reference.Parameters.Add (
+				reference_parameters.Add (
 					new ParameterDefinition (ImportType (parameters [i].ParameterType, context ?? reference)));
 
 			return reference;
@@ -521,9 +528,10 @@ namespace Mono.Cecil {
 			var imported_instance = new GenericInstanceMethod (element_method);
 
 			var arguments = instance.GenericArguments;
+			var imported_arguments = imported_instance.GenericArguments;
 
 			for (int i = 0; i < arguments.Count; i++)
-				imported_instance.GenericArguments.Add (ImportType (arguments [i], context));
+				imported_arguments.Add (ImportType (arguments [i], context));
 
 			return imported_instance;
 		}
