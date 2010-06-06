@@ -212,12 +212,10 @@ namespace Mono.Cecil.Tests {
 			var module = typeof (Foo<>).ToDefinition ().Module;
 
 			var foo_def = module.Import (typeof (Foo<>));
-			var foo_open = module.Import (typeof (Foo<>), foo_def, false);
-			var foo_def_2 = module.Import (typeof (Foo<>), foo_def, true);
+			var foo_open = module.Import (typeof (Foo<>), foo_def);
 
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1", foo_def.FullName);
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>", foo_open.FullName);
-			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1", foo_def_2.FullName);
 		}
 
 		[Test]

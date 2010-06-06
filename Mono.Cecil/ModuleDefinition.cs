@@ -499,30 +499,20 @@ namespace Mono.Cecil {
 
 		public TypeReference Import (Type type, TypeReference context)
 		{
-			return Import (type, (IGenericParameterProvider) context, true);
+			return Import (type, (IGenericParameterProvider) context);
 		}
 
 		public TypeReference Import (Type type, MethodReference context)
 		{
-			return Import (type, (IGenericParameterProvider) context, true);
+			return Import (type, (IGenericParameterProvider) context);
 		}
 
-		public TypeReference Import (Type type, TypeReference context, bool genericTypeDefinition)
-		{
-			return Import (type, (IGenericParameterProvider) context, genericTypeDefinition);
-		}
-
-		public TypeReference Import (Type type, MethodReference context, bool genericTypeDefinition)
-		{
-			return Import (type, (IGenericParameterProvider) context, genericTypeDefinition);
-		}
-
-		TypeReference Import (Type type, IGenericParameterProvider context, bool genericTypeDefinition)
+		TypeReference Import (Type type, IGenericParameterProvider context)
 		{
 			CheckType (type);
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportType (type, (IGenericContext) context, genericTypeDefinition);
+			return MetadataImporter.ImportType (type, (IGenericContext) context, context == null);
 		}
 
 		public FieldReference Import (SR.FieldInfo field)
