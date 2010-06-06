@@ -497,6 +497,13 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportType (type, null, true);
 		}
 
+		public TypeReference Import (Type type, bool genericTypeDefinition)
+		{
+			CheckType (type);
+
+			return MetadataImporter.ImportType (type, null, genericTypeDefinition);
+		}
+
 		public TypeReference Import (Type type, TypeReference context)
 		{
 			return Import (type, (IGenericParameterProvider) context);

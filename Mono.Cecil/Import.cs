@@ -72,7 +72,7 @@ namespace Mono.Cecil {
 
 		public TypeReference ImportType (Type type, IGenericContext context, bool import_generic_type_definition)
 		{
-			if (IsTypeSpecification (type) || (type.IsGenericType && type.IsGenericTypeDefinition && !import_generic_type_definition))
+			if (IsTypeSpecification (type) || ImportOpenGenericType (type, import_generic_type_definition))
 				return ImportTypeSpecification (type, context);
 
 			var reference = new TypeReference (
@@ -93,6 +93,11 @@ namespace Mono.Cecil {
 				ImportGenericParameters (reference, type.GetGenericArguments ());
 
 			return reference;
+		}
+
+		static bool ImportOpenGenericType (Type type, bool import_generic_type_definition)
+		{
+			return type.IsGenericType && type.IsGenericTypeDefinition && !import_generic_type_definition;
 		}
 
 		static bool IsNestedType (Type type)
