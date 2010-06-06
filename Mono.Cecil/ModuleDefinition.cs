@@ -494,7 +494,7 @@ namespace Mono.Cecil {
 		{
 			CheckType (type);
 
-			return MetadataImporter.ImportType (type, null);
+			return MetadataImporter.ImportType (type, null, true);
 		}
 
 		public TypeReference Import (Type type, TypeReference context)
@@ -512,7 +512,7 @@ namespace Mono.Cecil {
 			CheckType (type);
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportType (type, (IGenericContext) context);
+			return MetadataImporter.ImportType (type, (IGenericContext) context, true);
 		}
 
 		public FieldReference Import (SR.FieldInfo field)
