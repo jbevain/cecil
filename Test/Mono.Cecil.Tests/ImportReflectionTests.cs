@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using SR = System.Reflection;
@@ -199,6 +200,57 @@ namespace Mono.Cecil.Tests {
 			});
 
 			Assert.AreEqual (42, gen_spec_id (new Generic<string> (), 42));
+		}
+
+		public class Foo<TFoo> {
+			public List<TFoo> list;
+		}
+
+		[Test]
+		public void ImportGenericTypeFromContext ()
+		{
+			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
+			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
+
+			var foo_def = typeof (Foo<>).ToDefinition ();
+			var module = foo_def.Module;
+
+			var generic_foo = module.Import (generic_list_foo_open, foo_def);
+
+			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>",
+				generic_foo.FullName);
+		}
+
+		[Test]
+		public void ImportGenericFieldFromContext ()
+		{
+			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
+			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
+			var generic_list_foo_open_field = generic_list_foo_open.GetField ("Field");
+
+			var foo_def = typeof (Foo<>).ToDefinition ();
+			var module = foo_def.Module;
+
+			var generic_field = module.Import (generic_list_foo_open_field, foo_def);
+
+			Assert.AreEqual ("TFoo Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Field",
+				generic_field.FullName);
+		}
+
+		[Test]
+		public void ImportGenericMethodFromContext ()
+		{
+			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
+			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
+			var generic_list_foo_open_method = generic_list_foo_open.GetMethod ("Method");
+
+			var foo_def = typeof (Foo<>).ToDefinition ();
+			var module = foo_def.Module;
+
+			var generic_method = module.Import (generic_list_foo_open_method, foo_def);
+
+			Assert.AreEqual ("TFoo Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Method(TFoo)",
+				generic_method.FullName);
 		}
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
