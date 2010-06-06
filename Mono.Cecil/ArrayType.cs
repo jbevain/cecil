@@ -146,6 +146,10 @@ namespace Mono.Cecil {
 			: this (type)
 		{
 			Mixin.CheckType (type);
+
+			if (rank == 1)
+				return;
+
 			dimensions = new Collection<ArrayDimension> (rank);
 			for (int i = 0; i < rank; i++)
 				dimensions.Add (new ArrayDimension ());
