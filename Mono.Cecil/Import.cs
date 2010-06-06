@@ -67,7 +67,12 @@ namespace Mono.Cecil {
 
 		public TypeReference ImportType (Type type, IGenericContext context)
 		{
-			if (IsTypeSpecification (type))
+			return ImportType (type, context, false);
+		}
+
+		public TypeReference ImportType (Type type, IGenericContext context, bool import_generic_type_definition)
+		{
+			if (IsTypeSpecification (type) || ImportOpenGenericType (type, import_generic_type_definition))
 				return ImportTypeSpecification (type, context);
 
 			var reference = new TypeReference (
@@ -90,6 +95,11 @@ namespace Mono.Cecil {
 			return reference;
 		}
 
+		static bool ImportOpenGenericType (Type type, bool import_generic_type_definition)
+		{
+			return type.IsGenericType && type.IsGenericTypeDefinition && !import_generic_type_definition;
+		}
+
 		static bool IsNestedType (Type type)
 		{
 #if !SILVERLIGHT
@@ -102,15 +112,15 @@ namespace Mono.Cecil {
 		TypeReference ImportTypeSpecification (Type type, IGenericContext context)
 		{
 			if (type.IsByRef)
-				return new ByReferenceType (ImportTypeSpecificationElement (type.GetElementType (), context));
+				return new ByReferenceType (ImportType (type.GetElementType (), context));
 
 			if (type.IsPointer)
-				return new PointerType (ImportTypeSpecificationElement (type.GetElementType (), context));
+				return new PointerType (ImportType (type.GetElementType (), context));
 
 			if (type.IsArray)
-				return new ArrayType (ImportTypeSpecificationElement (type.GetElementType (), context), type.GetArrayRank ());
+				return new ArrayType (ImportType (type.GetElementType (), context), type.GetArrayRank ());
 
-			if (IsGenericInstance (type))
+			if (type.IsGenericType)
 				return ImportGenericInstance (type, context);
 
 			if (type.IsGenericParameter)
@@ -136,23 +146,15 @@ namespace Mono.Cecil {
 
 		TypeReference ImportGenericInstance (Type type, IGenericContext context)
 		{
-			var element_type = ImportType (type.GetGenericTypeDefinition (), context);
+			var element_type = ImportType (type.GetGenericTypeDefinition (), context, true);
 			var instance = new GenericInstanceType (element_type);
 			var arguments = type.GetGenericArguments ();
 			var instance_arguments = instance.GenericArguments;
 
 			for (int i = 0; i < arguments.Length; i++)
-				instance_arguments.Add (ImportTypeSpecificationElement (arguments [i], context));
+				instance_arguments.Add (ImportType (arguments [i], context));
 
 			return instance;
-		}
-
-		TypeReference ImportTypeSpecificationElement (Type type, IGenericContext context)
-		{
-			if (type.IsGenericTypeDefinition)
-				return ImportGenericInstance (type, context);
-
-			return ImportType (type, context);
 		}
 
 		static bool IsTypeSpecification (Type type)
@@ -265,7 +267,7 @@ namespace Mono.Cecil {
 				Name = method.Name,
 				HasThis = HasCallingConvention (method, SR.CallingConventions.HasThis),
 				ExplicitThis = HasCallingConvention (method, SR.CallingConventions.ExplicitThis),
-				DeclaringType = ImportType (method.DeclaringType, context),
+				DeclaringType = ImportType (method.DeclaringType, context, true),
 			};
 
 			if (HasCallingConvention (method, SR.CallingConventions.VarArgs))

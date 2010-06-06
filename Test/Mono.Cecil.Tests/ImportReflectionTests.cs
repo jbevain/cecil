@@ -207,6 +207,18 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void ImportGenericTypeDefOrOpen ()
+		{
+			var module = typeof (Foo<>).ToDefinition ().Module;
+
+			var foo_def = module.Import (typeof (Foo<>));
+			var foo_open = module.Import (typeof (Foo<>), foo_def);
+
+			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1", foo_def.FullName);
+			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>", foo_open.FullName);
+		}
+
+		[Test]
 		public void ImportGenericTypeFromContext ()
 		{
 			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
