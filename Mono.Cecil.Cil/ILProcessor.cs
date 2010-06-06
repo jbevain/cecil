@@ -135,116 +135,84 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode, parameter);
 		}
 
-		public Instruction Emit (OpCode opcode)
+		public void Emit (OpCode opcode)
 		{
-			var instruction = Create (opcode);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode));
 		}
 
-		public Instruction Emit (OpCode opcode, TypeReference type)
+		public void Emit (OpCode opcode, TypeReference type)
 		{
-			var instruction = Create (opcode, type);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, type));
 		}
 
-		public Instruction Emit (OpCode opcode, MethodReference method)
+		public void Emit (OpCode opcode, MethodReference method)
 		{
-			var instruction = Create (opcode, method);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, method));
 		}
 
-		public Instruction Emit (OpCode opcode, CallSite site)
+		public void Emit (OpCode opcode, CallSite site)
 		{
-			var instruction = Create (opcode, site);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, site));
 		}
 
-		public Instruction Emit (OpCode opcode, FieldReference field)
+		public void Emit (OpCode opcode, FieldReference field)
 		{
-			var instruction = Create (opcode, field);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, field));
 		}
 
-		public Instruction Emit (OpCode opcode, string value)
+		public void Emit (OpCode opcode, string value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, byte value)
+		public void Emit (OpCode opcode, byte value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, sbyte value)
+		public void Emit (OpCode opcode, sbyte value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, int value)
+		public void Emit (OpCode opcode, int value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, long value)
+		public void Emit (OpCode opcode, long value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, float value)
+		public void Emit (OpCode opcode, float value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, double value)
+		public void Emit (OpCode opcode, double value)
 		{
-			var instruction = Create (opcode, value);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, value));
 		}
 
-		public Instruction Emit (OpCode opcode, Instruction target)
+		public void Emit (OpCode opcode, Instruction target)
 		{
-			var instruction = Create (opcode, target);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, target));
 		}
 
-		public Instruction Emit (OpCode opcode, Instruction [] targets)
+		public void Emit (OpCode opcode, Instruction [] targets)
 		{
-			var instruction = Create (opcode, targets);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, targets));
 		}
 
-		public Instruction Emit (OpCode opcode, VariableDefinition variable)
+		public void Emit (OpCode opcode, VariableDefinition variable)
 		{
-			var instruction = Create (opcode, variable);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, variable));
 		}
 
-		public Instruction Emit (OpCode opcode, ParameterDefinition parameter)
+		public void Emit (OpCode opcode, ParameterDefinition parameter)
 		{
-			var instruction = Create (opcode, parameter);
-			Append (instruction);
-			return instruction;
+			Append (Create (opcode, parameter));
 		}
 
 		public void InsertBefore (Instruction target, Instruction instruction)
