@@ -34,6 +34,11 @@ using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
 
+	enum ImportGenericType {
+		TypeDefinition,
+		OpenType,
+	}
+
 	class MetadataImporter {
 
 		readonly ModuleDefinition module;
@@ -67,12 +72,12 @@ namespace Mono.Cecil {
 
 		public TypeReference ImportType (Type type, IGenericContext context)
 		{
-			return ImportType (type, context, false);
+			return ImportType (type, context, ImportGenericType.OpenType);
 		}
 
-		public TypeReference ImportType (Type type, IGenericContext context, bool import_generic_type_definition)
+		public TypeReference ImportType (Type type, IGenericContext context, ImportGenericType import_type)
 		{
-			if (IsTypeSpecification (type) || ImportOpenGenericType (type, import_generic_type_definition))
+			if (IsTypeSpecification (type) || ImportOpenGenericType (type, import_type))
 				return ImportTypeSpecification (type, context);
 
 			var reference = new TypeReference (
@@ -95,9 +100,9 @@ namespace Mono.Cecil {
 			return reference;
 		}
 
-		static bool ImportOpenGenericType (Type type, bool import_generic_type_definition)
+		static bool ImportOpenGenericType (Type type, ImportGenericType import_type)
 		{
-			return type.IsGenericType && type.IsGenericTypeDefinition && !import_generic_type_definition;
+			return type.IsGenericType && type.IsGenericTypeDefinition && import_type == ImportGenericType.OpenType;
 		}
 
 		static bool IsNestedType (Type type)
@@ -146,7 +151,7 @@ namespace Mono.Cecil {
 
 		TypeReference ImportGenericInstance (Type type, IGenericContext context)
 		{
-			var element_type = ImportType (type.GetGenericTypeDefinition (), context, true);
+			var element_type = ImportType (type.GetGenericTypeDefinition (), context, ImportGenericType.TypeDefinition);
 			var instance = new GenericInstanceType (element_type);
 			var arguments = type.GetGenericArguments ();
 			var instance_arguments = instance.GenericArguments;
@@ -267,7 +272,7 @@ namespace Mono.Cecil {
 				Name = method.Name,
 				HasThis = HasCallingConvention (method, SR.CallingConventions.HasThis),
 				ExplicitThis = HasCallingConvention (method, SR.CallingConventions.ExplicitThis),
-				DeclaringType = ImportType (method.DeclaringType, context, true),
+				DeclaringType = ImportType (method.DeclaringType, context, ImportGenericType.TypeDefinition),
 			};
 
 			if (HasCallingConvention (method, SR.CallingConventions.VarArgs))
