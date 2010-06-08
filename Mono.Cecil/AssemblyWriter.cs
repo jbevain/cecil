@@ -89,19 +89,21 @@ namespace Mono.Cecil {
 
 			module.MetadataSystem.Clear ();
 
+			var name = module.assembly != null ? module.assembly.Name : null;
 			var fq_name = stream.GetFullyQualifiedName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider);
+
 #if !SILVERLIGHT && !CF
-			if (parameters.StrongNameKeyPair != null && module.assembly != null) {
-				var name = module.assembly.Name;
+			if (parameters.StrongNameKeyPair != null && name != null)
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
-				name.HasPublicKey = true;
-				module.Attributes |= ModuleAttributes.StrongNameSigned;
-			}
 #endif
+
+			if (name != null && name.HasPublicKey)
+				module.Attributes |= ModuleAttributes.StrongNameSigned;
+
 			var metadata = new MetadataBuilder (module, fq_name,
 				symbol_writer_provider, symbol_writer);
 

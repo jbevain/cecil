@@ -96,7 +96,8 @@ namespace Mono.Cecil {
 			get { return public_key; }
 			set {
 				public_key = value;
-				public_key_token = null;
+				HasPublicKey = !public_key.IsNullOrEmpty ();
+				public_key_token = Empty<byte>.Array;
 				full_name = null;
 			}
 		}
