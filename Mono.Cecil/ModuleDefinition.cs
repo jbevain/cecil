@@ -867,11 +867,15 @@ namespace Mono.Cecil {
 
 		public static string GetFullyQualifiedName (this Stream self)
 		{
+#if !SILVERLIGHT
 			var file_stream = self as FileStream;
 			if (file_stream == null)
 				return string.Empty;
 
 			return Path.GetFullPath (file_stream.Name);
+#else
+			return string.Empty;
+#endif
 		}
 
 		public static TargetRuntime ParseRuntime (this string self)
