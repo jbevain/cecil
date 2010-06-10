@@ -370,7 +370,7 @@ namespace Mono.Cecil.PE {
 			// Size			4
 			uint size = ReadUInt32 ();
 
-			var name = ReadAlignedString (12);
+			var name = ReadAlignedString (16);
 			switch (name) {
 			case "#~":
 			case "#-":
