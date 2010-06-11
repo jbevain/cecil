@@ -417,6 +417,13 @@ namespace Mono.Cecil {
 			return ((TypeDefinitionCollection) this.Types).GetType (fullName);
 		}
 
+		public TypeDefinition GetType (string @namespace, string name)
+		{
+			Mixin.CheckName (name);
+
+			return ((TypeDefinitionCollection) this.Types).GetType (@namespace ?? string.Empty, name);
+		}
+
 		static void CheckFullName (string fullName)
 		{
 			if (fullName == null)

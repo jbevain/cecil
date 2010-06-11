@@ -101,6 +101,11 @@ namespace Mono.Cecil {
 			string @namespace, name;
 			TypeParser.SplitFullName (fullname, out @namespace, out name);
 
+			return GetType (@namespace, name);
+		}
+
+		public TypeDefinition GetType (string @namespace, string name)
+		{
 			TypeDefinition type;
 			if (name_cache.TryGetValue (new Slot (@namespace, name), out type))
 				return type;
