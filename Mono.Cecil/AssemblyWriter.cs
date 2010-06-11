@@ -1421,12 +1421,9 @@ namespace Mono.Cecil {
 
 		void AddFieldRVA (FieldDefinition field)
 		{
-			var rva = data.AddData (field.InitialValue);
-			field.rva = (int) rva;
-
 			var table = GetTable<FieldRVATable> (Table.FieldRVA);
 			table.AddRow (new FieldRVARow (
-				rva,
+				data.AddData (field.InitialValue),
 				field.token.RID));
 		}
 
@@ -1446,11 +1443,8 @@ namespace Mono.Cecil {
 
 		void AddMethod (MethodDefinition method)
 		{
-			var rva = method.HasBody ? code.WriteMethodBody (method) : 0;
-			method.rva = rva;
-
 			method_table.AddRow (new MethodRow (
-				rva,
+				method.HasBody ? code.WriteMethodBody (method) : 0,
 				method.ImplAttributes,
 				method.Attributes,
 				GetStringIndex (method.Name),
