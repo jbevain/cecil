@@ -204,6 +204,15 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void GetTypeNamespacePlusName ()
+		{
+			var module = GetResourceModule ("moda.netmodule");
+
+			var type = module.GetType ("Module.A", "Foo");
+			Assert.IsNotNull (type);
+		}
+
+		[Test]
 		public void OpenModuleImmediate ()
 		{
 			var module = GetResourceModule ("hello.exe", ReadingMode.Immediate);
