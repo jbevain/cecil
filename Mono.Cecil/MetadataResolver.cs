@@ -71,7 +71,7 @@ namespace Mono.Cecil {
 		static TypeDefinition GetType (ModuleDefinition module, TypeReference type)
 		{
 			if (!type.IsNested)
-				return module.GetType (type.FullName);
+				return module.GetType (type.Namespace, type.Name);
 
 			var declaring_type = type.DeclaringType.Resolve ();
 			if (declaring_type == null)
