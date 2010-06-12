@@ -90,12 +90,10 @@ namespace Mono.Cecil.Cil {
 
 			switch (opcode.OperandType) {
 			case OperandType.InlineSwitch:
-				size += (1 + ((Instruction []) operand).Length) * 4;
-				break;
+				return size + (1 + ((Instruction []) operand).Length) * 4;
 			case OperandType.InlineI8:
 			case OperandType.InlineR:
-				size += 8;
-				break;
+				return size + 8;
 			case OperandType.InlineBrTarget:
 			case OperandType.InlineField:
 			case OperandType.InlineI:
@@ -105,21 +103,18 @@ namespace Mono.Cecil.Cil {
 			case OperandType.InlineType:
 			case OperandType.ShortInlineR:
 			case OperandType.InlineSig:
-				size += 4;
-				break;
+				return size + 4;
 			case OperandType.InlineArg:
 			case OperandType.InlineVar:
-				size += 2;
-				break;
+				return size + 2;
 			case OperandType.ShortInlineBrTarget:
 			case OperandType.ShortInlineI:
 			case OperandType.ShortInlineArg:
 			case OperandType.ShortInlineVar:
-				size += 1;
-				break;
+				return size + 1;
+			default:
+				return size;
 			}
-
-			return size;
 		}
 
 		public override string ToString ()
