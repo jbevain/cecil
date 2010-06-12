@@ -47,6 +47,7 @@ namespace Mono.Cecil {
 		PreserveSig			= 0x0080,	// Reserved: conforming implementations may ignore
 		InternalCall		= 0x1000,	// Reserved: shall be zero in conforming implementations
 		Synchronized		= 0x0020,	// Method is single threaded through the body
+		NoOptimization		= 0x0040,	// Method is not optimized by the JIT.
 		NoInlining			= 0x0008,	// Method may not be inlined
 		MaxMethodImplVal	= 0xffff	 // Range check value
 	}

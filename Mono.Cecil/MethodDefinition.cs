@@ -379,6 +379,11 @@ namespace Mono.Cecil {
 			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.NoInlining, value); }
 		}
 
+		public bool NoOptimization {
+			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.NoOptimization); }
+			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.NoOptimization, value); }
+		}
+
 		#endregion
 
 		#region MethodSemanticsAttributes
