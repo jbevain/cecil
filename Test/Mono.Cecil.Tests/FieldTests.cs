@@ -233,7 +233,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (12, field.Constant);
 		}
 
-		[TestCSharp ("Fields.cs")]
+		[TestModule ("marshal.dll")]
 		public void MarshalAsFixedStr (ModuleDefinition module)
 		{
 			var boc = module.GetType ("Boc");
@@ -248,7 +248,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (42, info.Size);
 		}
 
-		[TestCSharp ("Fields.cs")]
+		[TestModule ("marshal.dll")]
 		public void MarshalAsFixedArray (ModuleDefinition module)
 		{
 			var boc = module.GetType ("Boc");

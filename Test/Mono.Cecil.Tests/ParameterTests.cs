@@ -11,7 +11,7 @@ namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class ParameterTests : BaseTestFixture {
 
-		[TestCSharp ("Methods.cs")]
+		[TestModule ("marshal.dll")]
 		public void MarshalAsI4 (ModuleDefinition module)
 		{
 			var bar = module.GetType ("Bar");
@@ -28,7 +28,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (NativeType.I4, info.NativeType);
 		}
 
-		[TestCSharp ("Methods.cs")]
+		[TestModule ("marshal.dll")]
 		public void CustomMarshaler (ModuleDefinition module)
 		{
 			var bar = module.GetType ("Bar");
@@ -45,11 +45,11 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (NativeType.CustomMarshaler, info.NativeType);
 			Assert.AreEqual ("nomnom", info.Cookie);
 
-			Assert.AreEqual ("Foo", info.ManagedType.FullName);
+			Assert.AreEqual ("Boc", info.ManagedType.FullName);
 			Assert.AreEqual (module, info.ManagedType.Scope);
 		}
 
-		[TestCSharp ("Methods.cs")]
+		[TestModule ("marshal.dll")]
 		public void SafeArrayMarshaler (ModuleDefinition module)
 		{
 			var bar = module.GetType ("Bar");
@@ -62,7 +62,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (VariantType.Dispatch, info.ElementType);
 		}
 
-		[TestCSharp ("Methods.cs")]
+		[TestModule ("marshal.dll")]
 		public void ArrayMarshaler (ModuleDefinition module)
 		{
 			var bar = module.GetType ("Bar");
@@ -87,6 +87,20 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (NativeType.I2, info.ElementType);
 			Assert.AreEqual (-1, info.Size);
 			Assert.AreEqual (-1, info.SizeParameterIndex);
+		}
+
+		[TestModule ("marshal.dll")]
+		public void ArrayMarshalerSized (ModuleDefinition module)
+		{
+			var delegate_type = module.GetType ("SomeMethod");
+			var parameter = delegate_type.GetMethod ("Invoke").Parameters [1];
+
+			Assert.IsTrue (parameter.HasMarshalInfo);
+			var array_info = (ArrayMarshalInfo) parameter.MarshalInfo;
+
+			Assert.IsNotNull (array_info);
+
+			Assert.AreEqual (0, array_info.SizeParameterMultiplier);
 		}
 
 		[TestModule ("boxedoptarg.dll")]
