@@ -39,13 +39,3 @@ class PanPan {
 	public const object obj = null;
 	public const int [] ints = null;
 }
-
-[StructLayout (LayoutKind.Sequential)]
-struct Boc {
-
-	[MarshalAs (UnmanagedType.ByValTStr, SizeConst = 42)]
-	public object a;
-
-	[MarshalAs (UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Bool, SizeConst = 12)]
-	public object b;
-}
