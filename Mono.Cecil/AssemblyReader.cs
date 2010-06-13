@@ -2879,42 +2879,42 @@ namespace Mono.Cecil {
 			case NativeType.Array: {
 				var array = new ArrayMarshalInfo ();
 				if (CanReadMore ())
-					array.ElementType = ReadNativeType ();
+					array.element_type = ReadNativeType ();
 				if (CanReadMore ())
-					array.SizeParameterIndex = (int) ReadCompressedUInt32 ();
+					array.size_parameter_index = (int) ReadCompressedUInt32 ();
 				if (CanReadMore ())
-					array.Size = (int) ReadCompressedUInt32 ();
+					array.size = (int) ReadCompressedUInt32 ();
 				if (CanReadMore ())
-					array.SizeParameterMultiplier = (int) ReadCompressedUInt32 ();
+					array.size_parameter_multiplier = (int) ReadCompressedUInt32 ();
 				return array;
 			}
 			case NativeType.SafeArray: {
 				var array = new SafeArrayMarshalInfo ();
 				if (CanReadMore ())
-					array.ElementType = ReadVariantType ();
+					array.element_type = ReadVariantType ();
 				return array;
 			}
 			case NativeType.FixedArray: {
 				var array = new FixedArrayMarshalInfo ();
 				if (CanReadMore ())
-					array.Size = (int) ReadCompressedUInt32 ();
+					array.size = (int) ReadCompressedUInt32 ();
 				if (CanReadMore ())
-					array.ElementType = ReadNativeType ();
+					array.element_type = ReadNativeType ();
 				return array;
 			}
 			case NativeType.FixedSysString: {
 				var sys_string = new FixedSysStringMarshalInfo ();
 				if (CanReadMore ())
-					sys_string.Size = (int) ReadCompressedUInt32 ();
+					sys_string.size = (int) ReadCompressedUInt32 ();
 				return sys_string;
 			}
 			case NativeType.CustomMarshaler: {
 				var marshaler = new CustomMarshalInfo ();
 				var guid_value = ReadUTF8String ();
-				marshaler.Guid = !string.IsNullOrEmpty (guid_value) ? new Guid (guid_value) : Guid.Empty;
-				marshaler.UnmanagedType = ReadUTF8String ();
-				marshaler.ManagedType = ReadTypeReference ();
-				marshaler.Cookie = ReadUTF8String ();
+				marshaler.guid = !string.IsNullOrEmpty (guid_value) ? new Guid (guid_value) : Guid.Empty;
+				marshaler.unmanaged_type = ReadUTF8String ();
+				marshaler.managed_type = ReadTypeReference ();
+				marshaler.cookie = ReadUTF8String ();
 				return marshaler;
 			}
 			default:

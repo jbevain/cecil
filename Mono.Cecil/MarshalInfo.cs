@@ -32,7 +32,7 @@ namespace Mono.Cecil {
 
 	public class MarshalInfo {
 
-		NativeType native;
+		internal NativeType native;
 
 		public NativeType NativeType {
 			get { return native; }
@@ -47,10 +47,10 @@ namespace Mono.Cecil {
 
 	public sealed class ArrayMarshalInfo : MarshalInfo {
 
-		NativeType element_type;
-		int size_parameter_index;
-		int size;
-		int size_parameter_multiplier;
+		internal NativeType element_type;
+		internal int size_parameter_index;
+		internal int size;
+		internal int size_parameter_multiplier;
 
 		public NativeType ElementType {
 			get { return element_type; }
@@ -84,10 +84,10 @@ namespace Mono.Cecil {
 
 	public sealed class CustomMarshalInfo : MarshalInfo {
 
-		Guid guid;
-		string unmanaged_type;
-		TypeReference managed_type;
-		string cookie;
+		internal Guid guid;
+		internal string unmanaged_type;
+		internal TypeReference managed_type;
+		internal string cookie;
 
 		public Guid Guid {
 			get { return guid; }
@@ -117,7 +117,7 @@ namespace Mono.Cecil {
 
 	public sealed class SafeArrayMarshalInfo : MarshalInfo {
 
-		VariantType element_type;
+		internal VariantType element_type;
 
 		public VariantType ElementType {
 			get { return element_type; }
@@ -133,8 +133,8 @@ namespace Mono.Cecil {
 
 	public sealed class FixedArrayMarshalInfo : MarshalInfo {
 
-		NativeType element_type;
-		int size;
+		internal NativeType element_type;
+		internal int size;
 
 		public NativeType ElementType {
 			get { return element_type; }
@@ -155,7 +155,7 @@ namespace Mono.Cecil {
 
 	public sealed class FixedSysStringMarshalInfo : MarshalInfo {
 
-		int size;
+		internal int size;
 
 		public int Size {
 			get { return size; }
