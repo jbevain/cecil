@@ -2884,6 +2884,8 @@ namespace Mono.Cecil {
 					array.SizeParameterIndex = (int) ReadCompressedUInt32 ();
 				if (CanReadMore ())
 					array.Size = (int) ReadCompressedUInt32 ();
+				if (CanReadMore ())
+					array.SizeParameterMultiplier = (int) ReadCompressedUInt32 ();
 				return array;
 			}
 			case NativeType.SafeArray: {

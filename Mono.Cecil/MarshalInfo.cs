@@ -50,6 +50,7 @@ namespace Mono.Cecil {
 		NativeType element_type;
 		int size_parameter_index;
 		int size;
+		int size_parameter_multiplier;
 
 		public NativeType ElementType {
 			get { return element_type; }
@@ -66,12 +67,18 @@ namespace Mono.Cecil {
 			set { size = value; }
 		}
 
+		public int SizeParameterMultiplier {
+			get { return size_parameter_multiplier; }
+			set { size_parameter_multiplier = value; }
+		}
+
 		public ArrayMarshalInfo ()
 			: base (NativeType.Array)
 		{
 			element_type = NativeType.None;
 			size_parameter_index = -1;
 			size = -1;
+			size_parameter_multiplier = -1;
 		}
 	}
 

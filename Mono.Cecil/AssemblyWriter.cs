@@ -2492,6 +2492,8 @@ namespace Mono.Cecil {
 					WriteCompressedUInt32 ((uint) array.SizeParameterIndex);
 				if (array.Size > -1)
 					WriteCompressedUInt32 ((uint) array.Size);
+				if (array.SizeParameterMultiplier > -1)
+					WriteCompressedUInt32 ((uint) array.SizeParameterMultiplier);
 				return;
 			}
 			case NativeType.SafeArray: {
