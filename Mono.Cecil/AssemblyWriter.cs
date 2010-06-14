@@ -2241,12 +2241,10 @@ namespace Mono.Cecil {
 
 		public void WriteCustomAttributeConstructorArguments (CustomAttribute attribute)
 		{
-			var constructor = attribute.Constructor;
-			var arguments = attribute.ConstructorArguments;
-
-			if (!constructor.HasParameters)
+			if (!attribute.HasConstructorArguments)
 				return;
 
+			var arguments = attribute.ConstructorArguments;
 			var parameters = attribute.Constructor.Parameters;
 
 			if (parameters.Count != arguments.Count)
