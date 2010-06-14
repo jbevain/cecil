@@ -54,7 +54,7 @@ namespace Mono.Cecil.Debug {
 
 		static ModuleDefinition GetCurrentModule ()
 		{
-			return GetModule (typeof (ModuleDefinition).Module.FullyQualifiedName);
+			return GetModule (typeof (object).Module.FullyQualifiedName);
 		}
 	}
 }

@@ -123,12 +123,13 @@ namespace Mono.Cecil {
 	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider {
 
 		internal Image Image;
-		internal TypeSystem TypeSystem;
 		internal MetadataSystem MetadataSystem;
 		internal ReadingMode ReadingMode;
 		internal IAssemblyResolver AssemblyResolver;
 		internal ISymbolReaderProvider SymbolReaderProvider;
 		internal ISymbolReader SymbolReader;
+
+		TypeSystem type_system;
 
 		readonly MetadataReader reader;
 		readonly string fq_name;
@@ -210,6 +211,16 @@ namespace Mono.Cecil {
 			}
 		}
 #endif
+
+		internal TypeSystem TypeSystem {
+			get {
+				if (type_system == null)
+					type_system = TypeSystem.CreateTypeSystem (this);
+
+				return type_system;
+			}
+		}
+
 		public bool HasAssemblyReferences {
 			get {
 				if (references != null)
@@ -363,7 +374,6 @@ namespace Mono.Cecil {
 
 		internal ModuleDefinition ()
 		{
-			this.TypeSystem = TypeSystem.CreateTypeSystem (this);
 			this.MetadataSystem = new MetadataSystem ();
 			this.token = new MetadataToken (TokenType.Module, 1);
 			this.AssemblyResolver = GlobalAssemblyResolver.Instance;
