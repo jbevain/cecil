@@ -431,10 +431,33 @@ namespace Mono.CompilerServices.SymbolWriter
 			compile_unit_hash = new Hashtable ();
 		}
 
+		void CheckGuidMatch (Guid other, string filename, string assembly)
+		{
+			if (other == guid)
+				return;
+
+			throw new MonoSymbolFileException (
+				"Symbol file `{0}' does not match assembly `{1}'",
+				filename, assembly);
+		}
+
 #if CECIL
+		protected MonoSymbolFile (string filename, Mono.Cecil.ModuleDefinition module)
+			: this (filename)
+		{
+			CheckGuidMatch (module.Mvid, filename, module.FullyQualifiedName);
+		}
+
 		public static MonoSymbolFile ReadSymbolFile (Mono.Cecil.ModuleDefinition module)
 		{
-			return ReadSymbolFile (module.FullyQualifiedName);
+			return ReadSymbolFile (module, module.FullyQualifiedName);
+		}
+
+		public static MonoSymbolFile ReadSymbolFile (Mono.Cecil.ModuleDefinition module, string filename)
+		{
+			string name = filename + ".mdb";
+
+			return new MonoSymbolFile (name, module);
 		}
 #else
 		protected MonoSymbolFile (string filename, Assembly assembly) : this (filename)
@@ -461,7 +484,7 @@ namespace Mono.CompilerServices.SymbolWriter
 
 		public static MonoSymbolFile ReadSymbolFile (string mdbFilename)
 		{
-			return new MonoSymbolFile (mdbFilename);
+			return new MonoSymbolFile (mdbFilename, null);
 		}
 
 		public int CompileUnitCount {

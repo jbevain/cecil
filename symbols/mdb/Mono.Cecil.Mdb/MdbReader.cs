@@ -40,7 +40,7 @@ namespace Mono.Cecil.Mdb {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
-			return new MdbReader (MonoSymbolFile.ReadSymbolFile (fileName + ".mdb"), module);
+			return new MdbReader (MonoSymbolFile.ReadSymbolFile (module, fileName));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
@@ -52,19 +52,17 @@ namespace Mono.Cecil.Mdb {
 	public class MdbReader : ISymbolReader {
 
 		readonly MonoSymbolFile symbol_file;
-		readonly ModuleDefinition module;
 		readonly Dictionary<string, Document> documents;
 
-		public MdbReader (MonoSymbolFile symbol_file, ModuleDefinition module)
+		public MdbReader (MonoSymbolFile symFile)
 		{
-			this.symbol_file = symbol_file;
-			this.module = module;
-			this.documents = new Dictionary<string, Document> ();
+			symbol_file = symFile;
+			documents = new Dictionary<string, Document> ();
 		}
 
 		public bool ProcessDebugHeader (ImageDebugDirectory directory, byte [] header)
 		{
-			return symbol_file.Guid == module.Mvid;
+			return true;
 		}
 
 		public void Read (MethodBody body, InstructionMapper mapper)
