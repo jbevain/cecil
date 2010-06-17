@@ -62,9 +62,12 @@ namespace Mono.Cecil.Cil {
 		{
 			var rva = BeginMethod ();
 
-			if (IsUnresolved (method))
+			if (IsUnresolved (method)) {
+				if (method.rva == 0)
+					return 0;
+
 				WriteUnresolvedMethodBody (method);
-			else
+			}  else
 				WriteResolvedMethodBody (method);
 
 			Align (4);
