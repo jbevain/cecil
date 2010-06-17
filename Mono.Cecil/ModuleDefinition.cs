@@ -88,6 +88,62 @@ namespace Mono.Cecil {
 
 #if !READ_ONLY
 
+	public sealed class ModuleParameters {
+
+		ModuleKind kind;
+		TargetRuntime runtime;
+		TargetArchitecture architecture;
+		IAssemblyResolver assembly_resolver;
+
+		public ModuleKind Kind {
+			get { return kind; }
+			set { kind = value; }
+		}
+
+		public TargetRuntime Runtime {
+			get { return runtime; }
+			set { runtime = value; }
+		}
+
+		public TargetArchitecture Architecture {
+			get { return architecture; }
+			set { architecture = value; }
+		}
+
+		public IAssemblyResolver AssemblyResolver {
+			get { return assembly_resolver; }
+			set { assembly_resolver = value; }
+		}
+
+		public ModuleParameters ()
+		{
+			this.kind = ModuleKind.Dll;
+			this.runtime = GetCurrentRuntime ();
+			this.architecture = TargetArchitecture.I386;
+		}
+
+		static TargetRuntime GetCurrentRuntime ()
+		{
+#if !CF
+			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
+#else
+			var corlib_version = typeof (object).Assembly.GetName ().Version;
+			switch (corlib_version.Major) {
+			case 1:
+				return corlib_version.Minor == 0
+					? TargetRuntime.Net_1_0
+					: TargetRuntime.Net_1_1;
+			case 2:
+				return TargetRuntime.Net_2_0;
+			case 4:
+				return TargetRuntime.Net_4_0;
+			default:
+				throw new NotSupportedException ();
+			}
+#endif
+		}
+	}
+
 	public sealed class WriterParameters {
 
 		Stream symbol_stream;
@@ -725,28 +781,27 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition CreateModule (string name, ModuleKind kind)
 		{
-			return CreateModule (name, kind, GetCurrentRuntime ());
+			return CreateModule (name, new ModuleParameters { Kind = kind });
 		}
 
-		public static ModuleDefinition CreateModule (string name, ModuleKind kind, TargetRuntime runtime)
-		{
-			return CreateModule (name, kind, runtime, TargetArchitecture.I386);
-		}
-
-		public static ModuleDefinition CreateModule (string name, ModuleKind kind, TargetRuntime runtime, TargetArchitecture architecture)
+		public static ModuleDefinition CreateModule (string name, ModuleParameters parameters)
 		{
 			Mixin.CheckName (name);
+			Mixin.CheckParameters (parameters);
 
 			var module = new ModuleDefinition {
 				Name = name,
-				kind = kind,
-				runtime = runtime,
-				architecture = architecture,
+				kind = parameters.Kind,
+				runtime = parameters.Runtime,
+				architecture = parameters.Architecture,
 				mvid = Guid.NewGuid (),
 				Attributes = ModuleAttributes.ILOnly,
 			};
 
-			if (kind != ModuleKind.NetModule) {
+			if (parameters.AssemblyResolver != null)
+				module.AssemblyResolver = parameters.AssemblyResolver;
+
+			if (parameters.Kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();
 				module.assembly = assembly;
 				module.assembly.Name = new AssemblyNameDefinition (name, new Version (0, 0));
@@ -756,27 +811,6 @@ namespace Mono.Cecil {
 			module.Types.Add (new TypeDefinition (string.Empty, "<Module>", TypeAttributes.NotPublic));
 
 			return module;
-		}
-
-		static TargetRuntime GetCurrentRuntime ()
-		{
-#if !CF
-			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
-#else
-			var corlib_version = typeof (object).Assembly.GetName ().Version;
-			switch (corlib_version.Major) {
-			case 1:
-				return corlib_version.Minor == 0
-					? TargetRuntime.Net_1_0
-					: TargetRuntime.Net_1_1;
-			case 2:
-				return TargetRuntime.Net_2_0;
-			case 4:
-				return TargetRuntime.Net_4_0;
-			default:
-				throw new NotSupportedException ();
-			}
-#endif
 		}
 
 #endif
@@ -808,12 +842,6 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void CheckParameters (object parameters)
-		{
-			if (parameters == null)
-				throw new ArgumentNullException ("parameters");
-		}
-
 		static void CheckStream (object stream)
 		{
 			if (stream == null)
@@ -825,7 +853,7 @@ namespace Mono.Cecil {
 			CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)
 				throw new ArgumentException ();
-			CheckParameters (parameters);
+			Mixin.CheckParameters (parameters);
 
 			return ModuleReader.CreateModuleFrom (
 				ImageReader.ReadImageFrom (stream),
@@ -866,7 +894,7 @@ namespace Mono.Cecil {
 			CheckStream (stream);
 			if (!stream.CanWrite || !stream.CanSeek)
 				throw new ArgumentException ();
-			CheckParameters (parameters);
+			Mixin.CheckParameters (parameters);
 
 			ModuleWriter.WriteModuleTo (this, stream, parameters);
 		}
@@ -876,6 +904,12 @@ namespace Mono.Cecil {
 	}
 
 	static partial class Mixin {
+
+		public static void CheckParameters (object parameters)
+		{
+			if (parameters == null)
+				throw new ArgumentNullException ("parameters");
+		}
 
 		public static bool HasImage (this ModuleDefinition self)
 		{

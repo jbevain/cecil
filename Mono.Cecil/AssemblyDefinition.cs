@@ -116,14 +116,20 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 		public static AssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
 		{
+			return CreateAssembly (assemblyName, moduleName, new ModuleParameters { Kind = kind });
+		}
+
+		public static AssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
+		{
 			if (assemblyName == null)
 				throw new ArgumentNullException ("assemblyName");
 			if (moduleName == null)
 				throw new ArgumentNullException ("moduleName");
-			if (kind == ModuleKind.NetModule)
+			Mixin.CheckParameters (parameters);
+			if (parameters.Kind == ModuleKind.NetModule)
 				throw new ArgumentException ("kind");
 
-			var assembly = ModuleDefinition.CreateModule (moduleName, kind).Assembly;
+			var assembly = ModuleDefinition.CreateModule (moduleName, parameters).Assembly;
 			assembly.Name = assemblyName;
 
 			return assembly;
