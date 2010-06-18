@@ -47,6 +47,10 @@ namespace Mono.Cecil {
 			set { name = value; }
 		}
 
+		public string FullName {
+			get { return name != null ? name.FullName : string.Empty; }
+		}
+
 		public MetadataToken MetadataToken {
 			get { return new MetadataToken (TokenType.Assembly, 1); }
 			set { }
@@ -189,7 +193,7 @@ namespace Mono.Cecil {
 
 		public override string ToString ()
 		{
-			return name != null ? name.FullName : string.Empty;
+			return this.FullName;
 		}
 	}
 }
