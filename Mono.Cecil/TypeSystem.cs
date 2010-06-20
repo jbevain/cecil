@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 			{
 			}
 
-			public override TypeReference LookupType (string @namespace, string name)
+			internal override TypeReference LookupType (string @namespace, string name)
 			{
 				var types = module.MetadataSystem.Types;
 
@@ -67,7 +67,7 @@ namespace Mono.Cecil {
 			{
 			}
 
-			public override TypeReference LookupType (string @namespace, string name)
+			internal override TypeReference LookupType (string @namespace, string name)
 			{
 				return CreateTypeReference (@namespace, name);
 			}
@@ -142,12 +142,12 @@ namespace Mono.Cecil {
 		TypeReference type_string;
 		TypeReference type_typedref;
 
-		protected TypeSystem (ModuleDefinition module)
+		TypeSystem (ModuleDefinition module)
 		{
 			this.module = module;
 		}
 
-		public static TypeSystem CreateTypeSystem (ModuleDefinition module)
+		internal static TypeSystem CreateTypeSystem (ModuleDefinition module)
 		{
 			if (IsCorlib (module))
 				return new CorlibTypeSystem (module);
@@ -163,7 +163,7 @@ namespace Mono.Cecil {
 			return module.Assembly.Name.Name == "mscorlib";
 		}
 
-		public abstract TypeReference LookupType (string @namespace, string name);
+		internal abstract TypeReference LookupType (string @namespace, string name);
 
 		TypeReference LookupSystemType (string name, ElementType element_type)
 		{
