@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil.Rocks;
 
@@ -36,12 +37,21 @@ namespace Mono.Cecil.Tests {
 		public void GetConstructors ()
 		{
 			var foo = typeof (Foo).ToDefinition ();
-			var ctors = foo.GetConstructors ().ToArray ();
+			var ctors = foo.GetConstructors ().Select (ctor => ctor.FullName);
 
-			Assert.AreEqual (3, ctors.Length);
-			Assert.AreEqual ("System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::.cctor()", ctors [0].FullName);
-			Assert.AreEqual ("System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::.ctor(System.Int32)", ctors [1].FullName);
-			Assert.AreEqual ("System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::.ctor(System.Int32,System.String)", ctors [2].FullName);
+			var expected = new [] {
+				"System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::.cctor()",
+				"System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::.ctor(System.Int32)",
+				"System.Void Mono.Cecil.Tests.TypeDefinitionRocksTests/Foo::.ctor(System.Int32,System.String)",
+			};
+
+			AssertSet (expected, ctors);
+		}
+
+		static void AssertSet<T> (IEnumerable<T> expected, IEnumerable<T> actual)
+		{
+			Assert.IsFalse (expected.Except (actual).Any ());
+			Assert.IsTrue (expected.Intersect (actual).SequenceEqual (expected));
 		}
 
 		[Test]
