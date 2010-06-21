@@ -204,6 +204,16 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (method.Body.ThisParameter, method.Body.Instructions [0].Operand);
 		}
 
+		[TestIL ("hello.il")]
+		public void FilterMaxStack (ModuleDefinition module)
+		{
+			var type = module.GetType ("Foo");
+			var method = type.GetMethod ("TestFilter");
+
+			Assert.IsNotNull (method);
+			Assert.AreEqual (2, method.Body.MaxStackSize);
+		}
+
 		[TestModule ("iterator.exe")]
 		public void Iterator (ModuleDefinition module)
 		{
