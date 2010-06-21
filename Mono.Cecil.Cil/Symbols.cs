@@ -222,11 +222,16 @@ namespace Mono.Cecil.Cil {
 			if (reader_provider != null)
 				return reader_provider;
 
-			var type = GetPlatformType ("Mono.Cecil." + symbol_kind + ".ReaderProvider");
+			var type = GetPlatformType (GetProviderTypeName ("ReaderProvider"));
 			if (type == null)
 				return null;
 
 			return reader_provider = (ISymbolReaderProvider) Activator.CreateInstance (type);
+		}
+
+		static string GetProviderTypeName (string name)
+		{
+			return "Mono.Cecil." + symbol_kind + "." + symbol_kind + name;
 		}
 
 #if !READ_ONLY
@@ -238,7 +243,7 @@ namespace Mono.Cecil.Cil {
 			if (writer_provider != null)
 				return writer_provider;
 
-			var type = GetPlatformType ("Mono.Cecil." + symbol_kind + ".WriterProvider");
+			var type = GetPlatformType (GetProviderTypeName ("WriterProvider"));
 			if (type == null)
 				return null;
 
