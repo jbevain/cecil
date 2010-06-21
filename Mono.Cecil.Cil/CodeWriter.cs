@@ -328,24 +328,27 @@ namespace Mono.Cecil.Cil {
 			for (int i = 0; i < exception_handlers.Count; i++) {
 				var exception_handler = exception_handlers [i];
 
-				Instruction instruction = null;
 				switch (exception_handler.HandlerType) {
 				case ExceptionHandlerType.Catch:
-					instruction = exception_handler.HandlerStart;
+					AddExceptionStackSize (exception_handler.HandlerStart, ref stack_sizes);
 					break;
 				case ExceptionHandlerType.Filter:
-					instruction = exception_handler.FilterStart;
+					AddExceptionStackSize (exception_handler.FilterStart, ref stack_sizes);
+					AddExceptionStackSize (exception_handler.HandlerStart, ref stack_sizes);
 					break;
 				}
-
-				if (instruction == null)
-					continue;
-
-				if (stack_sizes == null)
-					stack_sizes = new Dictionary<Instruction, int> ();
-
-				stack_sizes [instruction] = 1;
 			}
+		}
+
+		static void AddExceptionStackSize (Instruction handler_start, ref Dictionary<Instruction, int> stack_sizes)
+		{
+			if (handler_start == null)
+				return;
+
+			if (stack_sizes == null)
+				stack_sizes = new Dictionary<Instruction, int> ();
+
+			stack_sizes [handler_start] = 1;
 		}
 
 		static void ComputeStackSize (Instruction instruction, ref Dictionary<Instruction, int> stack_sizes, ref int stack_size, ref int max_stack)
