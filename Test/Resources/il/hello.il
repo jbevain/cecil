@@ -47,4 +47,30 @@
 		call void [mscorlib]System.Console::WriteLine(string)
 		ret
 	}
+
+	.method public static bool TestFilter (bool b) cil managed
+	{
+		.maxstack 2
+		.locals init (bool flag)
+	beginTry:
+		newobj instance void [mscorlib]System.Exception::.ctor ()
+		throw
+		leave endCatch
+	startFilter:
+		pop
+		ldarg.0
+		endfilter
+	startCatch:
+		ldc.i4.1
+		stloc.0
+		leave return
+		leave endCatch
+	endCatch:
+		L_001b: ldc.i4.0
+		L_001c: stloc.0
+	return:
+		L_001d: ldloc.0
+		L_001e: ret
+		.try beginTry to startFilter filter startFilter handler startCatch to endCatch
+	}
 }
