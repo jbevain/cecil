@@ -331,57 +331,57 @@ namespace Mono.Cecil {
 
 		public bool IsIL {
 			get { return impl_attributes.GetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.IL); }
-			set { impl_attributes = attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.IL, value); }
+			set { impl_attributes = impl_attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.IL, value); }
 		}
 
 		public bool IsNative {
 			get { return impl_attributes.GetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.Native); }
-			set { impl_attributes = attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.Native, value); }
+			set { impl_attributes = impl_attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.Native, value); }
 		}
 
 		public bool IsRuntime {
 			get { return impl_attributes.GetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.Runtime); }
-			set { impl_attributes = attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.Runtime, value); }
+			set { impl_attributes = impl_attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.CodeTypeMask, (ushort) MethodImplAttributes.Runtime, value); }
 		}
 
 		public bool IsUnmanaged {
 			get { return impl_attributes.GetMaskedAttributes ((ushort) MethodImplAttributes.ManagedMask, (ushort) MethodImplAttributes.Unmanaged); }
-			set { impl_attributes = attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.ManagedMask, (ushort) MethodImplAttributes.Unmanaged, value); }
+			set { impl_attributes = impl_attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.ManagedMask, (ushort) MethodImplAttributes.Unmanaged, value); }
 		}
 
 		public bool IsManaged {
 			get { return impl_attributes.GetMaskedAttributes ((ushort) MethodImplAttributes.ManagedMask, (ushort) MethodImplAttributes.Managed); }
-			set { impl_attributes = attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.ManagedMask, (ushort) MethodImplAttributes.Managed, value); }
+			set { impl_attributes = impl_attributes.SetMaskedAttributes ((ushort) MethodImplAttributes.ManagedMask, (ushort) MethodImplAttributes.Managed, value); }
 		}
 
 		public bool IsForwardRef {
 			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.ForwardRef); }
-			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.ForwardRef, value); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.ForwardRef, value); }
 		}
 
 		public bool IsPreserveSig {
 			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.PreserveSig); }
-			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.PreserveSig, value); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.PreserveSig, value); }
 		}
 
 		public bool IsInternalCall {
 			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.InternalCall); }
-			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.InternalCall, value); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.InternalCall, value); }
 		}
 
 		public bool IsSynchronized {
 			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.Synchronized); }
-			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.Synchronized, value); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.Synchronized, value); }
 		}
 
 		public bool NoInlining {
 			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.NoInlining); }
-			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.NoInlining, value); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.NoInlining, value); }
 		}
 
 		public bool NoOptimization {
 			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.NoOptimization); }
-			set { impl_attributes = attributes.SetAttributes ((ushort) MethodImplAttributes.NoOptimization, value); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.NoOptimization, value); }
 		}
 
 		#endregion
