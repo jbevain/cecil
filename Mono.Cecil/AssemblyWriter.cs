@@ -2408,6 +2408,18 @@ namespace Mono.Cecil {
 
 		public void WriteCustomAttributeNamedArguments (CustomAttribute attribute)
 		{
+			var count = GetNamedArgumentCount (attribute);
+
+			WriteUInt16 ((ushort) count);
+
+			if (count == 0)
+				return;
+
+			WriteICustomAttributeNamedArguments (attribute);
+		}
+
+		static int GetNamedArgumentCount (ICustomAttribute attribute)
+		{
 			int count = 0;
 
 			if (attribute.HasFields)
@@ -2416,15 +2428,16 @@ namespace Mono.Cecil {
 			if (attribute.HasProperties)
 				count += attribute.Properties.Count;
 
-			WriteUInt16 ((ushort) count);
+			return count;
+		}
 
-			if (count == 0)
-				return;
-
+		void WriteICustomAttributeNamedArguments (ICustomAttribute attribute)
+		{
 			if (attribute.HasFields)
-				WriteCustomAttributeNamedArguments (0x53, attribute.fields);
+				WriteCustomAttributeNamedArguments (0x53, attribute.Fields);
+
 			if (attribute.HasProperties)
-				WriteCustomAttributeNamedArguments (0x54, attribute.properties);
+				WriteCustomAttributeNamedArguments (0x54, attribute.Properties);
 		}
 
 		void WriteCustomAttributeNamedArguments (byte kind, Collection<CustomAttributeNamedArgument> named_arguments)
@@ -2447,13 +2460,7 @@ namespace Mono.Cecil {
 		{
 			WriteTypeReference (attribute.AttributeType);
 
-			int count = 0;
-
-			if (attribute.HasFields)
-				count += attribute.Fields.Count;
-
-			if (attribute.HasProperties)
-				count += attribute.Properties.Count;
+			var count = GetNamedArgumentCount (attribute);
 
 			if (count == 0) {
 				WriteCompressedUInt32 (0); // length
@@ -2463,10 +2470,7 @@ namespace Mono.Cecil {
 
             var buffer = new SignatureWriter (metadata);
 			buffer.WriteCompressedUInt32 ((uint) count);
-			if (attribute.HasFields)
-				buffer.WriteCustomAttributeNamedArguments (0x53, attribute.fields);
-			if (attribute.HasProperties)
-				buffer.WriteCustomAttributeNamedArguments (0x54, attribute.properties);
+			buffer.WriteICustomAttributeNamedArguments (attribute);
 
 			WriteCompressedUInt32 ((uint) buffer.length);
 			WriteBytes (buffer);
