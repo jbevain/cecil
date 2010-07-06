@@ -77,7 +77,7 @@ namespace Mono.Cecil {
 	using MethodSpecRow = Row<CodedRID, BlobIndex>;
 	using GenericParamConstraintRow = Row<RID, CodedRID>;
 
-	sealed class ModuleWriter {
+	static class ModuleWriter {
 
 		public static void WriteModuleTo (ModuleDefinition module, Stream stream, WriterParameters parameters)
 		{
@@ -162,7 +162,7 @@ namespace Mono.Cecil {
 
 		internal TRow row;
 
-		public override int Length {
+		public sealed override int Length {
 			get { return 1; }
 		}
 
@@ -176,7 +176,7 @@ namespace Mono.Cecil {
 		internal TRow [] rows = new TRow [2];
 		internal int length;
 
-		public override int Length {
+		public sealed override int Length {
 			get { return length; }
 		}
 
