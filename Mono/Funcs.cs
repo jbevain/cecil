@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if !NET_4_0
+#if !NET_3_5 && !NET_4_0
 
 namespace Mono {
 	delegate TResult Func<TResult> ();
