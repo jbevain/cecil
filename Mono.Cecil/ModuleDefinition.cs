@@ -815,6 +815,18 @@ namespace Mono.Cecil {
 
 #endif
 
+		public void ReadSymbols ()
+		{
+			if (string.IsNullOrEmpty (fq_name))
+				throw new InvalidOperationException ();
+
+			var provider = SymbolProvider.GetPlatformReaderProvider ();
+
+			SymbolReader = provider.GetSymbolReader (this, fq_name);
+
+			ProcessDebugHeader ();
+		}
+
 		public void ReadSymbols (ISymbolReader reader)
 		{
 			if (reader == null)
