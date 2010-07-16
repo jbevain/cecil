@@ -241,8 +241,8 @@ namespace Mono.Cecil {
 		}
 
 		public bool IsAssembly {
-			get { return attributes.GetMaskedAttributes ((ushort) MethodAttributes.MemberAccessMask, (ushort) MethodAttributes.Assem); }
-			set { attributes = attributes.SetMaskedAttributes ((ushort) MethodAttributes.MemberAccessMask, (ushort) MethodAttributes.Assem, value); }
+			get { return attributes.GetMaskedAttributes ((ushort) MethodAttributes.MemberAccessMask, (ushort) MethodAttributes.Assembly); }
+			set { attributes = attributes.SetMaskedAttributes ((ushort) MethodAttributes.MemberAccessMask, (ushort) MethodAttributes.Assembly, value); }
 		}
 
 		public bool IsFamily {
