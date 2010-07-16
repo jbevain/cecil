@@ -74,11 +74,11 @@
 		.try beginTry to startFilter filter startFilter handler startCatch to endCatch
 	}
 
-    .method public static !!T GetState<T>(string var, [opt] !!T defaultValue) cil managed
-    {
-        .param [2] = nullref
+	.method public static !!T GetState<T>(string var, [opt] !!T defaultValue) cil managed
+	{
+		.param [2] = nullref
 
 		ldarg.1
 		ret
-    }
+	}
 }
