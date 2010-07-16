@@ -1672,6 +1672,8 @@ namespace Mono.Cecil {
 				return ElementType.Class;
 			case ElementType.Array:
 			case ElementType.SzArray:
+			case ElementType.MVar:
+			case ElementType.Var:
 				if (constant != null)
 					throw new ArgumentException ();
 
@@ -1919,6 +1921,8 @@ namespace Mono.Cecil {
 			case ElementType.SzArray:
 			case ElementType.Class:
 			case ElementType.Object:
+			case ElementType.Var:
+			case ElementType.MVar:
 				signature.WriteInt32 (0);
 				break;
 			case ElementType.String:
