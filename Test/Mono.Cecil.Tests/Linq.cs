@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Mono;
 
-#if !NET_4_0
+#if !NET_3_5 && !NET_4_0
 
 namespace System.Linq {
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-#if !NET_4_0
+#if !NET_3_5 && !NET_4_0
 
 namespace System {
 
