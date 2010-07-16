@@ -206,5 +206,19 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (1, y.Index);
 			Assert.AreEqual (2, z.Index);
 		}
+
+		[TestIL ("hello.il")]
+		public void GenericParameterConstant (ModuleDefinition module)
+		{
+			var foo = module.GetType ("Foo");
+			var method = foo.GetMethod ("GetState");
+
+			Assert.IsNotNull (method);
+
+			var parameter = method.Parameters [1];
+
+			Assert.IsTrue (parameter.HasConstant);
+			Assert.IsNull (parameter.Constant);
+		}
 	}
 }
