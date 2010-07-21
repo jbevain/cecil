@@ -209,6 +209,17 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (42, gen_spec_id (new Generic<string> (), 42));
 		}
 
+		[Test]
+		public void ImportMethodOnOpenGeneric ()
+		{
+			var generic = typeof (Generic<>).ToDefinition ();
+			var module = ModuleDefinition.CreateModule ("foo", ModuleKind.Dll);
+
+			var method = module.Import (generic.GetMethod ("Method"));
+
+			Assert.AreEqual ("T Mono.Cecil.Tests.ImportCecilTests/Generic`1::Method(T)", method.FullName);
+		}
+
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
 		[MethodImpl (MethodImplOptions.NoInlining)]

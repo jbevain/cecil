@@ -295,6 +295,30 @@ namespace Mono.Cecil.Tests {
 				generic_method.FullName);
 		}
 
+		[Test]
+		public void ImportMethodOnOpenGenericType ()
+		{
+			var module = typeof (Generic<>).ToDefinition ().Module;
+
+			var method = module.Import (typeof (Generic<>).GetMethod ("Method"));
+
+			Assert.AreEqual ("T Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::Method(T)", method.FullName);
+		}
+
+		[Test]
+		public void ImportGenericMethodOnOpenGenericType ()
+		{
+			var module = typeof (Generic<>).ToDefinition ().Module;
+
+			var generic_method = module.Import (typeof (Generic<>).GetMethod ("GenericMethod"));
+
+			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod(T,TS)", generic_method.FullName);
+
+			generic_method = module.Import (typeof (Generic<>).GetMethod ("GenericMethod"), generic_method);
+
+			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
+		}
+
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
 		[MethodImpl (MethodImplOptions.NoInlining)]
