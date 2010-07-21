@@ -567,7 +567,7 @@ namespace Mono.Cecil {
 		{
 			CheckType (type);
 
-			return MetadataImporter.ImportType (type, null, ImportGenericType.TypeDefinition);
+			return MetadataImporter.ImportType (type, null, ImportGenericKind.Definition);
 		}
 
 		public TypeReference Import (Type type, TypeReference context)
@@ -589,8 +589,8 @@ namespace Mono.Cecil {
 				type,
 				(IGenericContext) context,
 				context != null
-					? ImportGenericType.OpenType
-					: ImportGenericType.TypeDefinition);
+					? ImportGenericKind.Open
+					: ImportGenericKind.Definition);
 		}
 
 		public FieldReference Import (SR.FieldInfo field)
@@ -622,7 +622,7 @@ namespace Mono.Cecil {
 		{
 			CheckMethod (method);
 
-			return MetadataImporter.ImportMethod (method, null);
+			return MetadataImporter.ImportMethod (method, null, ImportGenericKind.Definition);
 		}
 
 		public MethodReference Import (SR.MethodBase method, TypeReference context)
@@ -640,7 +640,11 @@ namespace Mono.Cecil {
 			CheckMethod (method);
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportMethod (method, (IGenericContext) context);
+			return MetadataImporter.ImportMethod (method,
+				(IGenericContext) context,
+				context != null
+					? ImportGenericKind.Open
+					: ImportGenericKind.Definition);
 		}
 #endif
 
