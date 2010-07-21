@@ -72,7 +72,14 @@ namespace Mono.Cecil {
 		}
 
 		IGenericParameterProvider IGenericContext.Type {
-			get { return DeclaringType; }
+			get {
+				var declaring_type = this.DeclaringType;
+				var instance = declaring_type as GenericInstanceType;
+				if (instance != null)
+					return instance.ElementType;
+
+				return declaring_type;
+			}
 		}
 
 		IGenericParameterProvider IGenericContext.Method {
