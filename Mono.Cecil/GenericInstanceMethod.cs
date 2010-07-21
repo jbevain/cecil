@@ -58,23 +58,29 @@ namespace Mono.Cecil {
 			get { return ElementMethod; }
 		}
 
+		IGenericParameterProvider IGenericContext.Type {
+			get { return ElementMethod.DeclaringType; }
+		}
+
+		public override string FullName {
+			get {
+				var signature = new StringBuilder ();
+				var method = this.ElementMethod;
+				signature.Append (method.ReturnType.FullName);
+				signature.Append (" ");
+				signature.Append (method.DeclaringType.FullName);
+				signature.Append ("::");
+				signature.Append (method.Name);
+				this.GenericInstanceFullName (signature);
+				this.MethodSignatureFullName (signature);
+				return signature.ToString ();
+
+			}
+		}
+
 		public GenericInstanceMethod (MethodReference method)
 			: base (method)
 		{
-		}
-
-		public override string ToString ()
-		{
-			var signature = new StringBuilder ();
-			var method = this.ElementMethod;
-			signature.Append (method.ReturnType.FullName);
-			signature.Append (" ");
-			signature.Append (method.DeclaringType.FullName);
-			signature.Append ("::");
-			signature.Append (method.Name);
-			this.GenericInstanceFullName (signature);
-			this.MethodSignatureFullName (signature);
-			return signature.ToString ();
 		}
 	}
 }
