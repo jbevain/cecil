@@ -33,12 +33,13 @@ namespace Mono.Cecil {
 
 	public sealed class CallSite : MethodReference {
 
-		public override string ToString ()
-		{
-			var signature = new StringBuilder ();
-			signature.Append (ReturnType.FullName);
-			this.MethodSignatureFullName (signature);
-			return signature.ToString ();
+		public override string FullName {
+			get {
+				var signature = new StringBuilder ();
+				signature.Append (ReturnType.FullName);
+				this.MethodSignatureFullName (signature);
+				return signature.ToString ();
+			}
 		}
 	}
 }
