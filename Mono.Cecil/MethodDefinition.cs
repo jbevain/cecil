@@ -99,12 +99,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<SecurityDeclaration> SecurityDeclarations {
-			get {
-				if (security_declarations != null)
-					return security_declarations;
-
-				return security_declarations = this.GetSecurityDeclarations (Module);
-			}
+			get { return security_declarations ?? (security_declarations = this.GetSecurityDeclarations (Module)); }
 		}
 
 		public bool HasCustomAttributes {
@@ -117,12 +112,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get {
-				if (custom_attributes != null)
-					return custom_attributes;
-
-				return custom_attributes = this.GetCustomAttributes (Module);
-			}
+			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (Module)); }
 		}
 
 		public int RVA {
@@ -215,12 +205,7 @@ namespace Mono.Cecil {
 		}
 
 		public override Collection<GenericParameter> GenericParameters {
-			get {
-				if (generic_parameters != null)
-					return generic_parameters;
-
-				return generic_parameters = this.GetGenericParameters (Module);
-			}
+			get { return generic_parameters ?? (generic_parameters = this.GetGenericParameters (Module)); }
 		}
 
 		#region MethodAttributes

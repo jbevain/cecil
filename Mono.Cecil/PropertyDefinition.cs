@@ -76,12 +76,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get {
-				if (custom_attributes != null)
-					return custom_attributes;
-
-				return custom_attributes = this.GetCustomAttributes (Module);
-			}
+			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (Module)); }
 		}
 
 		public MethodDefinition GetMethod {

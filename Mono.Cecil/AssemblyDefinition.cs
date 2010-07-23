@@ -87,12 +87,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get {
-				if (custom_attributes != null)
-					return custom_attributes;
-
-				return custom_attributes = this.GetCustomAttributes (main_module);
-			}
+			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (main_module)); }
 		}
 
 		public bool HasSecurityDeclarations {
@@ -105,12 +100,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<SecurityDeclaration> SecurityDeclarations {
-			get {
-				if (security_declarations != null)
-					return security_declarations;
-
-				return security_declarations = this.GetSecurityDeclarations (main_module);
-			}
+			get { return security_declarations ?? (security_declarations = this.GetSecurityDeclarations (main_module)); }
 		}
 
 		internal AssemblyDefinition ()

@@ -46,12 +46,7 @@ namespace Mono.Cecil {
 		}
 
 		internal ParameterDefinition Parameter {
-			get {
-				if (parameter == null)
-					parameter = new ParameterDefinition (return_type);
-
-				return parameter;
-			}
+			get { return parameter ?? (parameter = new ParameterDefinition (return_type)); }
 			set { parameter = value; }
 		}
 

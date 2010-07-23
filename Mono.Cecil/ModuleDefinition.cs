@@ -259,22 +259,12 @@ namespace Mono.Cecil {
 
 #if !READ_ONLY
 		internal MetadataImporter MetadataImporter {
-			get {
-				if (importer == null)
-					importer = new MetadataImporter (this);
-
-				return importer;
-			}
+			get { return importer ?? (importer = new MetadataImporter (this)); }
 		}
 #endif
 
 		internal TypeSystem TypeSystem {
-			get {
-				if (type_system == null)
-					type_system = TypeSystem.CreateTypeSystem (this);
-
-				return type_system;
-			}
+			get { return type_system ?? (type_system = TypeSystem.CreateTypeSystem (this)); }
 		}
 
 		public bool HasAssemblyReferences {
@@ -282,10 +272,7 @@ namespace Mono.Cecil {
 				if (references != null)
 					return references.Count > 0;
 
-				if (HasImage)
-					return Image.HasTable (Table.AssemblyRef);
-
-				return false;
+				return HasImage && Image.HasTable (Table.AssemblyRef);
 			}
 		}
 
@@ -306,10 +293,7 @@ namespace Mono.Cecil {
 				if (modules != null)
 					return modules.Count > 0;
 
-				if (HasImage)
-					return Image.HasTable (Table.ModuleRef);
-
-				return false;
+				return HasImage && Image.HasTable (Table.ModuleRef);
 			}
 		}
 
@@ -359,12 +343,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get {
-				if (custom_attributes != null)
-					return custom_attributes;
-
-				return custom_attributes = this.GetCustomAttributes (this);
-			}
+			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (this)); }
 		}
 
 		public bool HasTypes {
@@ -372,10 +351,7 @@ namespace Mono.Cecil {
 				if (types != null)
 					return types.Count > 0;
 
-				if (HasImage)
-					return Image.HasTable (Table.TypeDef);
-
-				return false;
+				return HasImage && Image.HasTable (Table.TypeDef);
 			}
 		}
 
@@ -396,10 +372,7 @@ namespace Mono.Cecil {
 				if (exported_types != null)
 					return exported_types.Count > 0;
 
-				if (HasImage)
-					return Image.HasTable (Table.ExportedType);
-
-				return false;
+				return HasImage && Image.HasTable (Table.ExportedType);
 			}
 		}
 

@@ -71,12 +71,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public Collection<Instruction> Instructions {
-			get {
-				if (instructions == null)
-					instructions = new InstructionCollection ();
-
-				return instructions;
-			}
+			get { return instructions ?? (instructions = new InstructionCollection ()); }
 		}
 
 		public bool HasExceptionHandlers {
@@ -84,12 +79,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public Collection<ExceptionHandler> ExceptionHandlers {
-			get {
-				if (exceptions == null)
-					exceptions = new Collection<ExceptionHandler> ();
-
-				return exceptions;
-			}
+			get { return exceptions ?? (exceptions = new Collection<ExceptionHandler> ()); }
 		}
 
 		public bool HasVariables {
@@ -97,12 +87,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public Collection<VariableDefinition> Variables {
-			get {
-				if (variables == null)
-					variables = new VariableDefinitionCollection ();
-
-				return variables;
-			}
+			get { return variables ?? (variables = new VariableDefinitionCollection ()); }
 		}
 
 		public Scope Scope {
@@ -115,10 +100,7 @@ namespace Mono.Cecil.Cil {
 				if (method == null || method.DeclaringType == null)
 					throw new NotSupportedException ();
 
-				if (this_parameter == null)
-					this_parameter = new ParameterDefinition ("0", ParameterAttributes.None, method.DeclaringType);
-
-				return this_parameter;
+				return this_parameter ?? (this_parameter = new ParameterDefinition ("0", ParameterAttributes.None, method.DeclaringType));
 			}
 		}
 

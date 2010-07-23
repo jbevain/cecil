@@ -73,12 +73,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttributeNamedArgument> Fields {
-			get {
-				if (fields == null)
-					fields = new Collection<CustomAttributeNamedArgument> ();
-
-				return fields;
-			}
+			get { return fields ?? (fields = new Collection<CustomAttributeNamedArgument> ()); }
 		}
 
 		public bool HasProperties {
@@ -86,12 +81,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttributeNamedArgument> Properties {
-			get {
-				if (properties == null)
-					properties = new Collection<CustomAttributeNamedArgument> ();
-
-				return properties;
-			}
+			get { return properties ?? (properties = new Collection<CustomAttributeNamedArgument> ()); }
 		}
 
 		public SecurityAttribute (TypeReference attributeType)
@@ -126,10 +116,7 @@ namespace Mono.Cecil {
 			get {
 				Resolve ();
 
-				if (security_attributes == null)
-					return security_attributes = new Collection<SecurityAttribute> ();
-
-				return security_attributes;
+				return security_attributes ?? (security_attributes = new Collection<SecurityAttribute> ());
 			}
 		}
 
