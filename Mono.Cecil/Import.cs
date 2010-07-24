@@ -49,7 +49,7 @@ namespace Mono.Cecil {
 		}
 
 #if !CF
-		static readonly Dictionary<Type, ElementType> type_etype_mapping = new Dictionary<Type, ElementType> {
+		static readonly Dictionary<Type, ElementType> type_etype_mapping = new Dictionary<Type, ElementType> (18) {
 			{ typeof (void), ElementType.Void },
 			{ typeof (bool), ElementType.Boolean },
 			{ typeof (char), ElementType.Char },
@@ -261,11 +261,6 @@ namespace Mono.Cecil {
 				| SR.BindingFlags.NonPublic
 				| (field.IsStatic ? SR.BindingFlags.Static : SR.BindingFlags.Instance));
 #endif
-		}
-
-		MethodReference ImportMethod (SR.MethodBase method, IGenericContext context)
-		{
-			return ImportMethod (method, context, ImportGenericKind.Open);
 		}
 
 		public MethodReference ImportMethod (SR.MethodBase method, IGenericContext context, ImportGenericKind import_kind)

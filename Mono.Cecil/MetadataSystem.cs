@@ -71,7 +71,7 @@ namespace Mono.Cecil {
 		internal Dictionary<MetadataToken, Range> GenericParameters;
 		internal Dictionary<uint, MetadataToken []> GenericConstraints;
 
-		static readonly Dictionary<string, Row<ElementType, bool>> PrimitiveValueTypes = new Dictionary<string, Row<ElementType, bool>> {
+		static readonly Dictionary<string, Row<ElementType, bool>> PrimitiveValueTypes = new Dictionary<string, Row<ElementType, bool>> (18) {
 			{ "Void", new Row<ElementType, bool> (ElementType.Void, false) },
 			{ "Boolean", new Row<ElementType, bool> (ElementType.Boolean, true) },
 			{ "Char", new Row<ElementType, bool> (ElementType.Char, true) },

@@ -40,17 +40,19 @@ namespace Mono.Cecil {
 	sealed class TypeDefinitionCollection : Collection<TypeDefinition> {
 
 		readonly ModuleDefinition container;
-		readonly Dictionary<Slot, TypeDefinition> name_cache = new Dictionary<Slot, TypeDefinition> (new RowEqualityComparer ());
+		readonly Dictionary<Slot, TypeDefinition> name_cache;
 
 		internal TypeDefinitionCollection (ModuleDefinition container)
 		{
 			this.container = container;
+			this.name_cache = new Dictionary<Slot, TypeDefinition> (new RowEqualityComparer ());
 		}
 
 		internal TypeDefinitionCollection (ModuleDefinition container, int capacity)
 			: base (capacity)
 		{
 			this.container = container;
+			this.name_cache = new Dictionary<Slot, TypeDefinition> (capacity, new RowEqualityComparer ());
 		}
 
 		protected override void OnAdd (TypeDefinition item, int index)

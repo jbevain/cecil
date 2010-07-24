@@ -671,7 +671,8 @@ namespace Mono.Cecil {
 		{
 			InitializeTypeDefinitions ();
 			var mtypes = metadata.Types;
-			var types = new TypeDefinitionCollection (module, mtypes.Length);
+			var type_count = mtypes.Length - metadata.NestedTypes.Count;
+			var types = new TypeDefinitionCollection (module, type_count);
 
 			for (int i = 0; i < mtypes.Length; i++) {
 				var type = mtypes [i];
@@ -752,10 +753,11 @@ namespace Mono.Cecil {
 			if (metadata.NestedTypes != null)
 				return;
 
-			metadata.NestedTypes = new Dictionary<uint, uint []> ();
-			metadata.ReverseNestedTypes = new Dictionary<uint, uint> ();
-
 			var length = MoveTo (Table.NestedClass);
+
+			metadata.NestedTypes = new Dictionary<uint, uint []> (length);
+			metadata.ReverseNestedTypes = new Dictionary<uint, uint> (length);
+
 			if (length == 0)
 				return;
 
@@ -879,9 +881,10 @@ namespace Mono.Cecil {
 			if (metadata.ClassLayouts != null)
 				return;
 
-			var class_layouts = metadata.ClassLayouts = new Dictionary<uint, Row<ushort, uint>> ();
-
 			int length = MoveTo (Table.ClassLayout);
+
+			var class_layouts = metadata.ClassLayouts = new Dictionary<uint, Row<ushort, uint>> (length);
+
 			for (uint i = 0; i < length; i++) {
 				var packing_size = ReadUInt16 ();
 				var class_size = ReadUInt32 ();
@@ -1053,9 +1056,10 @@ namespace Mono.Cecil {
 			if (metadata.Interfaces != null)
 				return;
 
-			metadata.Interfaces = new Dictionary<uint, MetadataToken []> ();
-
 			int length = MoveTo (Table.InterfaceImpl);
+
+			metadata.Interfaces = new Dictionary<uint, MetadataToken []> (length);
+
 			for (int i = 0; i < length; i++) {
 				var type = ReadTableIndex (Table.TypeDef);
 				var @interface = ReadMetadataToken (CodedIndex.TypeDefOrRef);
@@ -1198,9 +1202,10 @@ namespace Mono.Cecil {
 			if (metadata.FieldRVAs != null)
 				return;
 
-			var field_rvas = metadata.FieldRVAs = new Dictionary<uint, uint> ();
-
 			int length = MoveTo (Table.FieldRVA);
+
+			var field_rvas = metadata.FieldRVAs = new Dictionary<uint, uint> (length);
+
 			for (int i = 0; i < length; i++) {
 				var rva = ReadUInt32 ();
 				var field = ReadTableIndex (Table.Field);
@@ -1227,9 +1232,10 @@ namespace Mono.Cecil {
 			if (metadata.FieldLayouts != null)
 				return;
 
-			var field_layouts = metadata.FieldLayouts = new Dictionary<uint, uint> ();
-
 			int length = MoveTo (Table.FieldLayout);
+
+			var field_layouts = metadata.FieldLayouts = new Dictionary<uint, uint> (length);
+
 			for (int i = 0; i < length; i++) {
 				var offset = ReadUInt32 ();
 				var field = ReadTableIndex (Table.Field);
@@ -1288,9 +1294,9 @@ namespace Mono.Cecil {
 			if (metadata.Events != null)
 				return;
 
-			metadata.Events = new Dictionary<uint, Range> ();
-
 			int length = MoveTo (Table.EventMap);
+
+			metadata.Events = new Dictionary<uint, Range> (length);
 
 			for (uint i = 1; i <= length; i++) {
 				var type_rid = ReadTableIndex (Table.TypeDef);
@@ -1369,9 +1375,9 @@ namespace Mono.Cecil {
 			if (metadata.Properties != null)
 				return;
 
-			metadata.Properties = new Dictionary<uint, Range> ();
-
 			int length = MoveTo (Table.PropertyMap);
+
+			metadata.Properties = new Dictionary<uint, Range> (length);
 
 			for (uint i = 1; i <= length; i++) {
 				var type_rid = ReadTableIndex (Table.TypeDef);
@@ -1475,9 +1481,10 @@ namespace Mono.Cecil {
 			if (metadata.Semantics != null)
 				return;
 
-			var semantics = metadata.Semantics = new Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> ();
-
 			int length = MoveTo (Table.MethodSemantics);
+
+			var semantics = metadata.Semantics = new Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> (0);
+
 			for (uint i = 0; i < length; i++) {
 				var attributes = (MethodSemanticsAttributes) ReadUInt16 ();
 				var method_rid = ReadTableIndex (Table.Method);
@@ -1610,9 +1617,10 @@ namespace Mono.Cecil {
 			if (metadata.PInvokes != null)
 				return;
 
-			var pinvokes = metadata.PInvokes = new Dictionary<uint, Row<PInvokeAttributes, uint, uint>> ();
-
 			int length = MoveTo (Table.ImplMap);
+
+			var pinvokes = metadata.PInvokes = new Dictionary<uint, Row<PInvokeAttributes, uint, uint>> (length);
+
 			for (int i = 1; i <= length; i++) {
 				var attributes = (PInvokeAttributes) ReadUInt16 ();
 				var method = ReadMetadataToken (CodedIndex.MemberForwarded);
@@ -1682,9 +1690,9 @@ namespace Mono.Cecil {
 
 		Dictionary<MetadataToken, Range> InitializeRanges (Table table, Func<MetadataToken> get_next)
 		{
-			var ranges = new Dictionary<MetadataToken, Range> ();
-
 			int length = MoveTo (table);
+			var ranges = new Dictionary<MetadataToken, Range> (length);
+
 			if (length == 0)
 				return ranges;
 
@@ -1748,9 +1756,9 @@ namespace Mono.Cecil {
 			if (metadata.GenericConstraints != null)
 				return;
 
-			metadata.GenericConstraints = new Dictionary<uint, MetadataToken []> ();
-
 			var length = MoveTo (Table.GenericParamConstraint);
+
+			metadata.GenericConstraints = new Dictionary<uint, MetadataToken []> (length);
 
 			for (int i = 1; i <= length; i++)
 				AddGenericConstraintMapping (
@@ -1801,9 +1809,9 @@ namespace Mono.Cecil {
 			if (metadata.Overrides != null)
 				return;
 
-			metadata.Overrides = new Dictionary<uint, MetadataToken []> ();
-
 			var length = MoveTo (Table.MethodImpl);
+
+			metadata.Overrides = new Dictionary<uint, MetadataToken []> (length);
 
 			for (int i = 1; i <= length; i++) {
 				ReadTableIndex (Table.TypeDef);
@@ -2081,11 +2089,9 @@ namespace Mono.Cecil {
 			if (metadata.Constants != null)
 				return;
 
-			var constants = metadata.Constants = new Dictionary<MetadataToken, Row<ElementType, uint>> ();
-
 			var length = MoveTo (Table.Constant);
-			if (length == 0)
-				return;
+
+			var constants = metadata.Constants = new Dictionary<MetadataToken, Row<ElementType, uint>> (length);
 
 			for (uint i = 1; i <= length; i++) {
 				var type = (ElementType) ReadUInt16 ();
@@ -2215,9 +2221,10 @@ namespace Mono.Cecil {
 			if (metadata.FieldMarshals != null)
 				return;
 
-			var marshals = metadata.FieldMarshals = new Dictionary<MetadataToken, uint> ();
-
 			var length = MoveTo (Table.FieldMarshal);
+
+			var marshals = metadata.FieldMarshals = new Dictionary<MetadataToken, uint> (length);
+
 			for (int i = 0; i < length; i++) {
 				var token = ReadMetadataToken (CodedIndex.HasFieldMarshal);
 				var signature = ReadBlobIndex ();
