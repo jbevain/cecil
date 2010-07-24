@@ -2433,7 +2433,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class SignatureReader : ByteBuffer {
+	sealed class SignatureReader : ByteBuffer {
 
 		readonly MetadataReader reader;
 		readonly uint start, sig_length;
