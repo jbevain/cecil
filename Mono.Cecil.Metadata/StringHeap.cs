@@ -57,7 +57,7 @@ namespace Mono.Cecil.Metadata {
 
 			@string = ReadStringAt (index);
 			if (@string.Length != 0)
-				strings [index] = @string;
+				strings.Add (index, @string);
 
 			return @string;
 		}
@@ -66,15 +66,16 @@ namespace Mono.Cecil.Metadata {
 		{
 			int length = 0;
 			byte [] data = Section.Data;
+			int start = (int) (index + Offset);
 
-			for (uint i = index + Offset; ; i++) {
+			for (int i = start; ; i++) {
 				if (data [i] == 0)
 					break;
 
 				length++;
 			}
 
-			return Encoding.UTF8.GetString (data, (int) index + (int) Offset, length);
+			return Encoding.UTF8.GetString (data, start, length);
 		}
 	}
 }
