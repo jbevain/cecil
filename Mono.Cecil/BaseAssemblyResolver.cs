@@ -58,7 +58,7 @@ namespace Mono.Cecil {
 		readonly Collection<string> directories;
 
 #if !SILVERLIGHT && !CF
-		readonly Collection<string> gac_paths;
+		Collection<string> gac_paths;
 #endif
 
 		public void AddSearchDirectory (string directory)
@@ -87,10 +87,7 @@ namespace Mono.Cecil {
 
 		protected BaseAssemblyResolver ()
 		{
-			directories = new Collection<string> { ".", "bin" };
-#if !SILVERLIGHT && !CF
-			gac_paths = GetGacPaths ();
-#endif
+			directories = new Collection<string> (2) { ".", "bin" };
 		}
 
 		AssemblyDefinition GetAssembly (string file)
@@ -256,6 +253,9 @@ namespace Mono.Cecil {
 		{
 			if (reference.PublicKeyToken == null || reference.PublicKeyToken.Length == 0)
 				return null;
+
+			if (gac_paths == null)
+				gac_paths = GetGacPaths ();
 
 			if (on_mono)
 				return GetAssemblyInMonoGac (reference);
