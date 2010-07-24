@@ -71,26 +71,31 @@ namespace Mono.Cecil {
 		internal Dictionary<MetadataToken, Range> GenericParameters;
 		internal Dictionary<uint, MetadataToken []> GenericConstraints;
 
-		static readonly Dictionary<string, Row<ElementType, bool>> PrimitiveValueTypes = new Dictionary<string, Row<ElementType, bool>> (18) {
-			{ "Void", new Row<ElementType, bool> (ElementType.Void, false) },
-			{ "Boolean", new Row<ElementType, bool> (ElementType.Boolean, true) },
-			{ "Char", new Row<ElementType, bool> (ElementType.Char, true) },
-			{ "SByte", new Row<ElementType, bool> (ElementType.I1, true) },
-			{ "Byte", new Row<ElementType, bool> (ElementType.U1, true) },
-			{ "Int16", new Row<ElementType, bool> (ElementType.I2, true) },
-			{ "UInt16", new Row<ElementType, bool> (ElementType.U2, true) },
-			{ "Int32", new Row<ElementType, bool> (ElementType.I4, true) },
-			{ "UInt32", new Row<ElementType, bool> (ElementType.U4, true) },
-			{ "Int64", new Row<ElementType, bool> (ElementType.I8, true) },
-			{ "UInt64", new Row<ElementType, bool> (ElementType.U8, true) },
-			{ "Single", new Row<ElementType, bool> (ElementType.R4, true) },
-			{ "Double", new Row<ElementType, bool> (ElementType.R8, true) },
-			{ "String", new Row<ElementType, bool> (ElementType.String, false) },
-			{ "TypedReference", new Row<ElementType, bool> (ElementType.TypedByRef, false) },
-			{ "IntPtr", new Row<ElementType, bool> (ElementType.I, true) },
-			{ "UIntPtr", new Row<ElementType, bool> (ElementType.U, true) },
-			{ "Object", new Row<ElementType, bool> (ElementType.Object, false) },
-		};
+		static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
+
+		static void InitializePrimitives ()
+		{
+			primitive_value_types = new Dictionary<string, Row<ElementType, bool>> (18) {
+				{ "Void", new Row<ElementType, bool> (ElementType.Void, false) },
+				{ "Boolean", new Row<ElementType, bool> (ElementType.Boolean, true) },
+				{ "Char", new Row<ElementType, bool> (ElementType.Char, true) },
+				{ "SByte", new Row<ElementType, bool> (ElementType.I1, true) },
+				{ "Byte", new Row<ElementType, bool> (ElementType.U1, true) },
+				{ "Int16", new Row<ElementType, bool> (ElementType.I2, true) },
+				{ "UInt16", new Row<ElementType, bool> (ElementType.U2, true) },
+				{ "Int32", new Row<ElementType, bool> (ElementType.I4, true) },
+				{ "UInt32", new Row<ElementType, bool> (ElementType.U4, true) },
+				{ "Int64", new Row<ElementType, bool> (ElementType.I8, true) },
+				{ "UInt64", new Row<ElementType, bool> (ElementType.U8, true) },
+				{ "Single", new Row<ElementType, bool> (ElementType.R4, true) },
+				{ "Double", new Row<ElementType, bool> (ElementType.R8, true) },
+				{ "String", new Row<ElementType, bool> (ElementType.String, false) },
+				{ "TypedReference", new Row<ElementType, bool> (ElementType.TypedByRef, false) },
+				{ "IntPtr", new Row<ElementType, bool> (ElementType.I, true) },
+				{ "UIntPtr", new Row<ElementType, bool> (ElementType.U, true) },
+				{ "Object", new Row<ElementType, bool> (ElementType.Object, false) },
+			};
+		}
 
 		public static void TryProcessPrimitiveType (TypeReference type)
 		{
@@ -104,8 +109,11 @@ namespace Mono.Cecil {
 			if (type.Namespace != "System")
 				return;
 
+			if (primitive_value_types == null)
+				InitializePrimitives ();
+
 			Row<ElementType, bool> primitive_data;
-			if (!PrimitiveValueTypes.TryGetValue (type.Name, out primitive_data))
+			if (!primitive_value_types.TryGetValue (type.Name, out primitive_data))
 				return;
 
 			type.etype = primitive_data.Col1;
