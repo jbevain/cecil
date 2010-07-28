@@ -66,7 +66,7 @@ namespace Mono.Cecil {
 		}
 
 		internal override bool ContainsGenericParameter {
-			get { return this.ContainsGenericParameter () || ElementType.ContainsGenericParameter; }
+			get { return this.ContainsGenericParameter () || base.ContainsGenericParameter; }
 		}
 
 		IGenericParameterProvider IGenericContext.Type {

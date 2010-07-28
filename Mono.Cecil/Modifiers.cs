@@ -67,6 +67,10 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get { return modifier_type.ContainsGenericParameter || base.ContainsGenericParameter; }
+		}
+
 		public OptionalModifierType (TypeReference modifierType, TypeReference type)
 			: base (type)
 		{
@@ -104,6 +108,10 @@ namespace Mono.Cecil {
 
 		public override bool IsRequiredModifier {
 			get { return true; }
+		}
+
+		internal override bool ContainsGenericParameter {
+			get { return modifier_type.ContainsGenericParameter || base.ContainsGenericParameter; }
 		}
 
 		public RequiredModifierType (TypeReference modifierType, TypeReference type)

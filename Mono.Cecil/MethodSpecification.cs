@@ -82,6 +82,10 @@ namespace Mono.Cecil {
 			get { return method.Parameters; }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get { return method.ContainsGenericParameter; }
+		}
+
 		internal MethodSpecification (MethodReference method)
 		{
 			if (method == null)

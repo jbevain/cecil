@@ -60,6 +60,10 @@ namespace Mono.Cecil {
 			get { return element_type.FullName; }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get { return element_type.ContainsGenericParameter; }
+		}
+
 		internal TypeSpecification (TypeReference type)
 			: base (null, null)
 		{
