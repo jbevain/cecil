@@ -28,7 +28,9 @@
 
 using System;
 using System.Text;
+
 using Mono.Collections.Generic;
+
 using MD = Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
@@ -61,6 +63,10 @@ namespace Mono.Cecil {
 
 		public override bool IsGenericInstance {
 			get { return true; }
+		}
+
+		internal override bool ContainsGenericParameter {
+			get { return this.ContainsGenericParameter () || ElementType.ContainsGenericParameter; }
 		}
 
 		IGenericParameterProvider IGenericContext.Type {

@@ -62,6 +62,10 @@ namespace Mono.Cecil {
 			get { return ElementMethod.DeclaringType; }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get { return this.ContainsGenericParameter () || ElementMethod.ContainsGenericParameter; }
+		}
+
 		public override string FullName {
 			get {
 				var signature = new StringBuilder ();

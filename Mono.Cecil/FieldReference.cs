@@ -43,6 +43,10 @@ namespace Mono.Cecil {
 			get { return field_type.FullName + " " + MemberFullName (); }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get { return field_type.ContainsGenericParameter || base.ContainsGenericParameter; }
+		}
+
 		internal FieldReference ()
 		{
 			this.token = new MetadataToken (TokenType.MemberRef);

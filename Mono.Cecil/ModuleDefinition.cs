@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using SR = System.Reflection;
 
@@ -443,6 +444,16 @@ namespace Mono.Cecil {
 			CheckFullName (fullName);
 
 			return (type = Read (this, (_, reader) => reader.GetTypeReference (scope, fullName))) != null;
+		}
+
+		public IEnumerable<TypeReference> GetTypeReferences ()
+		{
+			return Read (this, (_, reader) => reader.GetTypeReferences ());
+		}
+
+		public IEnumerable<MemberReference> GetMemberReferences ()
+		{
+			return Read (this, (_, reader) => reader.GetMemberReferences ());
 		}
 
 		public TypeDefinition GetType (string fullName)

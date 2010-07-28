@@ -136,6 +136,10 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get { return true; }
+		}
+
 		#region GenericParameterAttributes
 
 		public bool IsNonVariant {

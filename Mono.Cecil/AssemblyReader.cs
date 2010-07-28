@@ -1009,6 +1009,20 @@ namespace Mono.Cecil {
 			}
 		}
 
+		public IEnumerable<TypeReference> GetTypeReferences ()
+		{
+			InitializeTypeReferences ();
+
+			var length = image.GetTableLength (Table.TypeRef);
+
+			var type_references = new TypeReference [length];
+
+			for (uint i = 1; i <= length; i++)
+				type_references [i - 1] = GetTypeReference (i);
+
+			return type_references;
+		}
+
 		TypeReference GetTypeSpecification (uint rid)
 		{
 			if (!MoveTo (Table.TypeSpec, rid))
@@ -2000,7 +2014,8 @@ namespace Mono.Cecil {
 				return member;
 
 			member = ReadMemberReference (rid);
-			metadata.AddMemberReference (member);
+			if (!member.ContainsGenericParameter)
+				metadata.AddMemberReference (member);
 			return member;
 		}
 
@@ -2082,6 +2097,27 @@ namespace Mono.Cecil {
 				return;
 
 			metadata.MemberReferences = new MemberReference [image.GetTableLength (Table.MemberRef)];
+		}
+
+		public IEnumerable<MemberReference> GetMemberReferences ()
+		{
+			InitializeMemberReferences ();
+
+			var length = image.GetTableLength (Table.MemberRef);
+
+			var type_system = module.TypeSystem;
+
+			var context = new MethodReference (string.Empty, type_system.Void);
+			context.DeclaringType = new TypeReference (string.Empty, string.Empty, type_system.Corlib);
+
+			var member_references = new MemberReference [length];
+
+			for (uint i = 1; i <= length; i++) {
+				this.context = context;
+				member_references [i - 1] = GetMemberReference (i);
+			}
+
+			return member_references;
 		}
 
 		void InitializeConstants ()

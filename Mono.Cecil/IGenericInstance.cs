@@ -40,6 +40,17 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
+		public static bool ContainsGenericParameter (this IGenericInstance self)
+		{
+			var arguments = self.GenericArguments;
+
+			for (int i = 0; i < arguments.Count; i++)
+				if (arguments [i].ContainsGenericParameter)
+					return true;
+
+			return false;
+		}
+
 		public static void GenericInstanceFullName (this IGenericInstance self, StringBuilder builder)
 		{
 			builder.Append ("<");

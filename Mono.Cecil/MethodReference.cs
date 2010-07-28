@@ -135,6 +135,21 @@ namespace Mono.Cecil {
 			get { return false; }
 		}
 
+		internal override bool ContainsGenericParameter {
+			get {
+				if (this.ReturnType.ContainsGenericParameter || base.ContainsGenericParameter)
+					return true;
+
+				var parameters = this.Parameters;
+
+				for (int i = 0; i < parameters.Count; i++)
+					if (parameters [i].ParameterType.ContainsGenericParameter)
+						return true;
+
+				return false;
+			}
+		}
+
 		internal MethodReference ()
 		{
 			this.return_type = new MethodReturnType (this);

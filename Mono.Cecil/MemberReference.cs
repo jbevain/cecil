@@ -72,6 +72,10 @@ namespace Mono.Cecil {
 			get { return false; }
 		}
 
+		internal virtual bool ContainsGenericParameter {
+			get { return declaring_type != null && declaring_type.ContainsGenericParameter; }
+		}
+
 		internal MemberReference ()
 		{
 		}
