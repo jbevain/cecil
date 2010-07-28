@@ -155,5 +155,19 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual (1, foo_reference.GetSentinelPosition ());
 		}
+
+		[TestCSharp ("Generics.cs")]
+		public void MethodRefDeclaredOnGenerics (ModuleDefinition module)
+		{
+			var type = module.GetType ("Tamtam");
+			var beta = type.GetMethod ("Beta");
+			var charlie = type.GetMethod ("Charlie");
+
+			var new_list_beta = (MethodReference) beta.Body.Instructions [0].Operand;
+			var new_list_charlie = (MethodReference) charlie.Body.Instructions [0].Operand;
+
+			Assert.AreEqual ("System.Collections.Generic.List`1<TBeta>", new_list_beta.DeclaringType.FullName);
+			Assert.AreEqual ("System.Collections.Generic.List`1<TCharlie>", new_list_charlie.DeclaringType.FullName);
+		}
 	}
 }

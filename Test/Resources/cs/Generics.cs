@@ -47,6 +47,16 @@ class Tamtam {
 	{
 		Foo (2);
 	}
+
+	static List<TBeta> Beta<TBeta> ()
+	{
+		return new List<TBeta> ();
+	}
+
+	static List<TCharlie> Charlie<TCharlie> ()
+	{
+		return new List<TCharlie> ();
+	}
 }
 
 class It {
