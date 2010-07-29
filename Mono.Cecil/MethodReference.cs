@@ -167,6 +167,15 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
+		public MethodReference (string name, TypeReference returnType, TypeReference declaringType)
+			: this (name, returnType)
+		{
+			if (declaringType == null)
+				throw new ArgumentNullException ("declaringType");
+
+			this.DeclaringType = declaringType;
+		}
+
 		public virtual MethodReference GetElementMethod ()
 		{
 			return this;
