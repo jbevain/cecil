@@ -487,16 +487,15 @@ namespace Mono.Cecil {
 			var names = fullname.Split ('/');
 			var type = GetType (names [0]);
 
-			for (int i = 1; i < names.Length; i++) {
-				var nested_types = type.NestedTypes;
-				for (int j = 0; j < nested_types.Count; j++) {
-					var nested_type = nested_types [j];
-					if (nested_type.Name != names [i])
-						continue;
+			if (type == null)
+				return null;
 
-					type = nested_type;
-					break;
-				}
+			for (int i = 1; i < names.Length; i++) {
+				var nested_type = type.GetNestedType (names [i]);
+				if (nested_type == null)
+					return null;
+
+				type = nested_type;
 			}
 
 			return type;
