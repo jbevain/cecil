@@ -148,7 +148,7 @@ namespace Mono.Cecil.PE {
 				PointerToRawData = buffer.ReadInt32 (),
 			};
 
-			buffer.position = (int) (directory.AddressOfRawData - section.VirtualAddress);
+			buffer.position = (int) (directory.PointerToRawData - section.PointerToRawData);
 
 			header = new byte [directory.SizeOfData];
 			Buffer.BlockCopy (buffer.buffer, buffer.position, header, 0, header.Length);
