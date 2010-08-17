@@ -63,6 +63,11 @@ namespace Mono.Cecil {
 			get { return Parameter.CustomAttributes; }
 		}
 
+		public bool HasDefault {
+			get { return parameter != null && parameter.HasDefault; }
+			set { Parameter.HasDefault = value; }
+		}
+
 		public bool HasConstant {
 			get { return parameter != null && parameter.HasConstant; }
 		}
@@ -70,6 +75,11 @@ namespace Mono.Cecil {
 		public object Constant {
 			get { return Parameter.Constant; }
 			set { Parameter.Constant = value; }
+		}
+
+		public bool HasFieldMarshal {
+			get { return parameter != null && parameter.HasFieldMarshal; }
+			set { Parameter.HasFieldMarshal = value; }
 		}
 
 		public bool HasMarshalInfo {

@@ -120,6 +120,11 @@ namespace Mono.Cecil {
 			set { attributes = attributes.SetAttributes ((ushort) ParameterAttributes.HasDefault, value); }
 		}
 
+		public bool HasFieldMarshal {
+			get { return attributes.GetAttributes ((ushort) ParameterAttributes.HasFieldMarshal); }
+			set { attributes = attributes.SetAttributes ((ushort) ParameterAttributes.HasFieldMarshal, value); }
+		}
+
 		#endregion
 
 		public ParameterDefinition (TypeReference parameterType)
