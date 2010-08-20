@@ -1487,7 +1487,7 @@ namespace Mono.Cecil {
 			return GetMember (type.Properties, token);
 		}
 
-		static TMember GetMember<TMember> (IList<TMember> members, MetadataToken token) where TMember : IMemberDefinition
+		static TMember GetMember<TMember> (Collection<TMember> members, MetadataToken token) where TMember : IMemberDefinition
 		{
 			for (int i = 0; i < members.Count; i++) {
 				var member = members [i];
@@ -1512,9 +1512,7 @@ namespace Mono.Cecil {
 				var method_rid = ReadTableIndex (Table.Method);
 				var association = ReadMetadataToken (CodedIndex.HasSemantics);
 
-				semantics.Add (
-					method_rid,
-					new Row<MethodSemanticsAttributes, MetadataToken> (attributes, association));
+				semantics [method_rid] = new Row<MethodSemanticsAttributes, MetadataToken> (attributes, association);
 			}
 		}
 
