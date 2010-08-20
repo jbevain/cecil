@@ -55,8 +55,6 @@ namespace Mono.Cecil {
 
 			var strong_name = CreateStrongName (key_pair, HashStream (stream, writer, out strong_name_pointer));
 			PatchStrongName (stream, strong_name_pointer, strong_name);
-
-			PatchChecksum (stream, ComputeChecksum (stream));
 		}
 
 		static void PatchStrongName (Stream stream, int strong_name_pointer, byte [] strong_name)
@@ -111,35 +109,6 @@ namespace Mono.Cecil {
 			}
 
 			return sha1.Hash;
-		}
-
-		static void PatchChecksum (Stream stream, int checksum)
-		{
-			stream.Seek (0xd8, SeekOrigin.Begin);
-			var buffer = new ByteBuffer (4);
-			buffer.WriteInt32 (checksum);
-
-			stream.Write (buffer.buffer, 0, 4);
-		}
-
-		static int ComputeChecksum (Stream stream)
-		{
-			stream.Seek (0, SeekOrigin.Begin);
-			int count = (int) stream.Length / 4;
-
-			var reader = new BinaryReader (stream);
-			long sum = 0;
-			for (int i = 0; i < count; i++) {
-				sum += reader.ReadUInt32 ();
-				int carry = (int) (sum >> 32);
-				sum &= 0xFFFFFFFFU;
-				sum += carry;
-			}
-
-			while ((sum >> 16) != 0)
-				sum = (sum & 0xFFFF) + (sum >> 16);
-
-			return (int) (sum + stream.Length);
 		}
 #endif
 		static void CopyStreamChunk (Stream stream, Stream dest_stream, byte [] buffer, int length)
