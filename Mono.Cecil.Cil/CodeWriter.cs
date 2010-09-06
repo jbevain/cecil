@@ -67,13 +67,23 @@ namespace Mono.Cecil.Cil {
 					return 0;
 
 				WriteUnresolvedMethodBody (method);
-			}  else
+			} else {
+				if (IsEmptyMethodBody (method.Body))
+					return 0;
+
 				WriteResolvedMethodBody (method);
+			}
 
 			Align (4);
 
 			EndMethod ();
 			return rva;
+		}
+
+		static bool IsEmptyMethodBody (MethodBody body)
+		{
+			return body.instructions.IsNullOrEmpty ()
+				&& body.variables.IsNullOrEmpty ();
 		}
 
 		static bool IsUnresolved (MethodDefinition method)
