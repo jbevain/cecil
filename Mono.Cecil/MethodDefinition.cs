@@ -37,7 +37,7 @@ namespace Mono.Cecil {
 
 		ushort attributes;
 		ushort impl_attributes;
-		internal MethodSemanticsAttributes? sem_attrs;
+		MethodSemanticsAttributes? sem_attrs;
 		Collection<CustomAttribute> custom_attributes;
 		Collection<SecurityDeclaration> security_declarations;
 
@@ -75,6 +75,9 @@ namespace Mono.Cecil {
 
 		internal void ReadSemantics ()
 		{
+			if (sem_attrs.HasValue)
+				return;
+
 			var type = DeclaringType;
 			if (type == null)
 				return;
