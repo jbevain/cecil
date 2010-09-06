@@ -1531,8 +1531,14 @@ namespace Mono.Cecil {
 		static void ReadAllSemantics (TypeDefinition type)
 		{
 			var methods = type.Methods;
-			for (int i = 0; i < methods.Count; i++)
-				methods [i].ReadSemantics ();
+			for (int i = 0; i < methods.Count; i++) {
+				var method = methods [i];
+
+				if (method.sem_attrs.HasValue)
+					continue;
+
+				method.ReadSemantics ();
+			}
 		}
 
 		Range ReadParametersRange (uint method_rid)

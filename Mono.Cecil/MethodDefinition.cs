@@ -37,7 +37,7 @@ namespace Mono.Cecil {
 
 		ushort attributes;
 		ushort impl_attributes;
-		MethodSemanticsAttributes? sem_attrs;
+		internal MethodSemanticsAttributes? sem_attrs;
 		Collection<CustomAttribute> custom_attributes;
 		Collection<SecurityDeclaration> security_declarations;
 
