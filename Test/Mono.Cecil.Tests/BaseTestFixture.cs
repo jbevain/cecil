@@ -53,7 +53,7 @@ namespace Mono.Cecil.Tests {
 
 		public static string FindResourcesDirectory (Assembly assembly)
 		{
-			var path = Path.GetDirectoryName (new Uri (assembly.CodeBase).AbsolutePath);
+			var path = Path.GetDirectoryName (new Uri (assembly.CodeBase).LocalPath);
 			while (!Directory.Exists (Path.Combine (path, "Resources"))) {
 				var old = path;
 				path = Path.GetDirectoryName (path);
