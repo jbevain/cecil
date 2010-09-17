@@ -28,6 +28,8 @@
 
 using System;
 
+using Mono.Cecil.Metadata;
+
 namespace Mono.Cecil {
 
 	public abstract class TypeSpecification : TypeReference {
@@ -62,6 +64,10 @@ namespace Mono.Cecil {
 
 		internal override bool ContainsGenericParameter {
 			get { return element_type.ContainsGenericParameter; }
+		}
+
+		public override MetadataType MetadataType {
+			get { return (MetadataType) etype; }
 		}
 
 		internal TypeSpecification (TypeReference type)

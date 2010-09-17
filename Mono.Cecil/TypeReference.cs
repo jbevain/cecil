@@ -206,6 +206,17 @@ namespace Mono.Cecil {
 			}
 		}
 
+		public virtual MetadataType MetadataType {
+			get {
+				switch (etype) {
+				case ElementType.None:
+					return IsValueType ? MetadataType.ValueType : MetadataType.Class;
+				default:
+					return (MetadataType) etype;
+				}
+			}
+		}
+
 		protected TypeReference (string @namespace, string name)
 			: base (name)
 		{
