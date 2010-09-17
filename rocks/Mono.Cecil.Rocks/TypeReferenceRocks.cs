@@ -32,7 +32,10 @@ using System.Linq;
 
 namespace Mono.Cecil.Rocks {
 
-	public static class TypeReferenceRocks {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class TypeReferenceRocks {
 
 		public static ArrayType MakeArrayType (this TypeReference self)
 		{

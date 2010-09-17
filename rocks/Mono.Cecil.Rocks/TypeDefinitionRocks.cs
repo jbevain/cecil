@@ -32,7 +32,10 @@ using System.Linq;
 
 namespace Mono.Cecil.Rocks {
 
-	public static class TypeDefinitionRocks {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class TypeDefinitionRocks {
 
 		public static IEnumerable<MethodDefinition> GetConstructors (this TypeDefinition self)
 		{

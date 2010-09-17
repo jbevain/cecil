@@ -32,7 +32,10 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Cecil.Rocks {
 
-	public static class MethodBodyRocks {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class MethodBodyRocks {
 
 		public static void SimplifyMacros (this MethodBody self)
 		{

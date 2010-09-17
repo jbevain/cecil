@@ -32,7 +32,10 @@ using System.Linq;
 
 namespace Mono.Cecil.Rocks {
 
-	public static class ModuleDefinitionRocks {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class ModuleDefinitionRocks {
 
 		public static IEnumerable<TypeDefinition> GetAllTypes (this ModuleDefinition self)
 		{

@@ -33,7 +33,10 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Rocks {
 
-	public interface IILVisitor {
+#if INSIDE_ROCKS
+	public
+#endif
+	interface IILVisitor {
 		void OnInlineNone (OpCode opcode);
 		void OnInlineSByte (OpCode opcode, sbyte value);
 		void OnInlineByte (OpCode opcode, byte value);
@@ -52,7 +55,10 @@ namespace Mono.Cecil.Rocks {
 		void OnInlineMethod (OpCode opcode, MethodReference method);
 	}
 
-	public static class ILParser {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class ILParser {
 
 		class ParseContext {
 			public CodeReader Code { get; set; }

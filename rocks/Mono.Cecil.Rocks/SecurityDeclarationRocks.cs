@@ -32,7 +32,10 @@ using SSP = System.Security.Permissions;
 
 namespace Mono.Cecil.Rocks {
 
-	public static class SecurityDeclarationRocks {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class SecurityDeclarationRocks {
 
 		public static PermissionSet ToPermissionSet (this SecurityDeclaration self)
 		{

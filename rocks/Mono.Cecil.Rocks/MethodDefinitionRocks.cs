@@ -30,7 +30,10 @@ using System;
 
 namespace Mono.Cecil.Rocks {
 
-	public static class MethodDefinitionRocks {
+#if INSIDE_ROCKS
+	public
+#endif
+	static class MethodDefinitionRocks {
 
 		public static MethodDefinition GetBaseMethod (this MethodDefinition self)
 		{
