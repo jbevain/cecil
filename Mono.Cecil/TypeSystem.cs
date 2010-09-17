@@ -32,7 +32,7 @@ using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
 
-	abstract class TypeSystem {
+	public abstract class TypeSystem {
 
 		sealed class CorlibTypeSystem : TypeSystem {
 
@@ -43,7 +43,11 @@ namespace Mono.Cecil {
 
 			internal override TypeReference LookupType (string @namespace, string name)
 			{
-				var types = module.MetadataSystem.Types;
+				var metadata = module.MetadataSystem;
+				if (metadata.Types == null)
+					Initialize (module.Types);
+
+				var types = metadata.Types;
 
 				for (int i = 0; i < types.Length; i++) {
 					var type = types [i];
@@ -55,6 +59,10 @@ namespace Mono.Cecil {
 				}
 
 				return null;
+			}
+
+			static void Initialize (object obj)
+			{
 			}
 		}
 

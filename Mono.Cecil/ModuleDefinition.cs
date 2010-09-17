@@ -264,7 +264,7 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		internal TypeSystem TypeSystem {
+		public TypeSystem TypeSystem {
 			get { return type_system ?? (type_system = TypeSystem.CreateTypeSystem (this)); }
 		}
 
