@@ -1617,6 +1617,9 @@ namespace Mono.Cecil {
 
 		static ElementType GetConstantType (TypeReference constant_type, object constant)
 		{
+			if (constant == null)
+				return ElementType.Class;
+
 			var etype = constant_type.etype;
 			switch (etype) {
 			case ElementType.None:
@@ -1626,19 +1629,13 @@ namespace Mono.Cecil {
 
 				return ElementType.Class;
 			case ElementType.String:
-				return constant != null ? ElementType.String : ElementType.Class;
+				return ElementType.String;
 			case ElementType.Object:
-				if (constant != null)
-					return GetConstantType (constant.GetType ());
-
-				return ElementType.Class;
+				return GetConstantType (constant.GetType ());
 			case ElementType.Array:
 			case ElementType.SzArray:
 			case ElementType.MVar:
 			case ElementType.Var:
-				if (constant != null)
-					throw new ArgumentException ();
-
 				return ElementType.Class;
 			case ElementType.GenericInst:
 			case ElementType.CModOpt:
@@ -1660,7 +1657,7 @@ namespace Mono.Cecil {
 			case ElementType.U8:
 			case ElementType.R4:
 			case ElementType.R8:
-				return constant == null ? etype : GetConstantType (constant.GetType ());
+				return GetConstantType (constant.GetType ());
 			default:
 				return etype;
 			}
