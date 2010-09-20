@@ -207,6 +207,16 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (field.Constant);
 		}
 
+		[TestIL ("types.il")]
+		public void NullPrimitiveConstant (ModuleDefinition module)
+		{
+			var fields = module.GetType ("Fields");
+
+			var field = fields.GetField ("int32_nullref");
+			Assert.IsTrue (field.HasConstant);
+			Assert.AreEqual (null, field.Constant);
+		}
+
 		[TestCSharp ("Fields.cs")]
 		public void ArrayConstant (ModuleDefinition module)
 		{
