@@ -2015,9 +2015,7 @@ namespace Mono.Cecil {
 
 		public void WriteMethodSignature (IMethodSignature method)
 		{
-			byte calling_convention = 0;
-			if (method.IsVarArg ())
-				calling_convention |= 0x5;
+			byte calling_convention = (byte) method.CallingConvention;
 			if (method.HasThis)
 				calling_convention |= 0x20;
 			if (method.ExplicitThis)
