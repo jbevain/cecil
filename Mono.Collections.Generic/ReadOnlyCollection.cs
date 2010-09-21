@@ -49,12 +49,18 @@ namespace Mono.Collections.Generic {
 
 		public ReadOnlyCollection (T [] array)
 		{
+			if (array == null)
+				throw new ArgumentNullException ();
+
 			this.items = array;
 			this.size = array.Length;
 		}
 
 		public ReadOnlyCollection (Collection<T> collection)
 		{
+			if (collection == null)
+				throw new ArgumentNullException ();
+
 			this.items = collection.items;
 			this.size = collection.size;
 		}
