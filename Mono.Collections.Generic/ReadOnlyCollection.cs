@@ -39,26 +39,21 @@ namespace Mono.Collections.Generic {
 			get { return empty ?? (empty = new ReadOnlyCollection<T> ()); }
 		}
 
-		readonly bool initialized;
-
 		bool IList.IsReadOnly {
 			get { return true; }
 		}
 
-		public ReadOnlyCollection ()
+		private ReadOnlyCollection ()
 		{
-			initialized = true;
 		}
 
 		public ReadOnlyCollection (T [] array)
-			: this ()
 		{
 			this.items = array;
 			this.size = array.Length;
 		}
 
 		public ReadOnlyCollection (Collection<T> collection)
-			: this ()
 		{
 			this.items = collection.items;
 			this.size = collection.size;
@@ -66,14 +61,12 @@ namespace Mono.Collections.Generic {
 
 		internal override void Grow (int desired)
 		{
-			if (initialized)
-				throw new InvalidOperationException ();
+			throw new InvalidOperationException ();
 		}
 
 		protected override void OnAdd (T item, int index)
 		{
-			if (initialized)
-				throw new InvalidOperationException ();
+			throw new InvalidOperationException ();
 		}
 
 		protected override void OnClear ()
