@@ -237,7 +237,7 @@ namespace Mono.Collections.Generic {
 		{
 		}
 
-		void Grow (int desired)
+		internal virtual void Grow (int desired)
 		{
 			int new_size = size + desired;
 			if (new_size <= items.Length)
