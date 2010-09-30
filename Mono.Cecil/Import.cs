@@ -83,11 +83,11 @@ namespace Mono.Cecil {
 			var reference = new TypeReference (
 				string.Empty,
 				type.Name,
+				module,
 				ImportScope (type.Assembly),
 				type.IsValueType);
 
 			reference.etype = ImportElementType (type);
-			reference.module = module;
 
 			if (IsNestedType (type))
 				reference.DeclaringType = ImportType (type.DeclaringType, context, import_kind);
@@ -347,10 +347,9 @@ namespace Mono.Cecil {
 			var reference = new TypeReference (
 				type.Namespace,
 				type.Name,
+				module,
 				ImportScope (type.Scope),
 				type.IsValueType);
-
-			reference.module = module;
 
 			MetadataSystem.TryProcessPrimitiveType (reference);
 
