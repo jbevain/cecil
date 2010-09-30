@@ -14,7 +14,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void AddVariableIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
@@ -31,7 +31,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void RemoveAtVariableIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
@@ -57,7 +57,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void RemoveVariableIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
@@ -83,7 +83,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InsertVariableIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 

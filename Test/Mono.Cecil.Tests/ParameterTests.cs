@@ -117,7 +117,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void AddParameterIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 
 			var x = new ParameterDefinition ("x", ParameterAttributes.None, object_ref);
@@ -136,7 +136,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void RemoveAtParameterIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 
 			var x = new ParameterDefinition ("x", ParameterAttributes.None, object_ref);
@@ -161,7 +161,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void RemoveParameterIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 
 			var x = new ParameterDefinition ("x", ParameterAttributes.None, object_ref);
@@ -186,7 +186,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InsertParameterIndex ()
 		{
-			var object_ref = new TypeReference ("System", "Object", null, false);
+			var object_ref = new TypeReference ("System", "Object", null, null, false);
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 
 			var x = new ParameterDefinition ("x", ParameterAttributes.None, object_ref);

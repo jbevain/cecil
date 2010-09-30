@@ -185,6 +185,7 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual ((byte) 0x04, attribute.ConstructorArguments [0].Value);
 			Assert.AreEqual ("System.Security.AccessControl.AceFlags", attribute.ConstructorArguments [0].Type.FullName);
+			Assert.AreEqual (module, attribute.ConstructorArguments [0].Type.Module);
 		}
 
 		[TestCSharp ("CustomAttributes.cs")]
