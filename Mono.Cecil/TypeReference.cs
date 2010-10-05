@@ -273,6 +273,7 @@ namespace Mono.Cecil {
 			case ElementType.Pinned:
 			case ElementType.Ptr:
 			case ElementType.SzArray:
+			case ElementType.Sentinel:
 			case ElementType.Var:
 				return true;
 			}
