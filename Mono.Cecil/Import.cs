@@ -525,8 +525,7 @@ namespace Mono.Cecil {
 				DeclaringType = declaring_type,
 			};
 
-			if (method.IsVarArg ())
-				reference.CallingConvention &= MethodCallingConvention.VarArg;
+			reference.CallingConvention = method.CallingConvention;
 
 			if (method.HasGenericParameters)
 				ImportGenericParameters (reference, method);
