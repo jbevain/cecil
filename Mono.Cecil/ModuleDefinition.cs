@@ -216,6 +216,7 @@ namespace Mono.Cecil {
 
 		public ModuleKind Kind {
 			get { return kind; }
+			set { kind = value; }
 		}
 
 		public TargetRuntime Runtime {
