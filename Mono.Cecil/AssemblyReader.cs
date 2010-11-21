@@ -83,7 +83,7 @@ namespace Mono.Cecil {
 			ReadSymbols (module, parameters);
 
 			if (parameters.AssemblyResolver != null)
-				module.AssemblyResolver = parameters.AssemblyResolver;
+				module.assembly_resolver = parameters.AssemblyResolver;
 
 			return module;
 		}
