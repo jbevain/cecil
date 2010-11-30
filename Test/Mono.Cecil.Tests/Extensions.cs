@@ -68,7 +68,7 @@ namespace Mono.Cecil.Tests {
 				HasThis = self.HasThis,
 				ExplicitThis = self.ExplicitThis,
 				ReturnType = self.ReturnType,
-				CallingConvention = MethodCallingConvention.Generic,
+				CallingConvention = self.CallingConvention,
 			};
 
 			foreach (var parameter in self.Parameters)
