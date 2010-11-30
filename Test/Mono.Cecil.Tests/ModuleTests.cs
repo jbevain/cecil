@@ -185,6 +185,15 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void MixedModeModule ()
+		{
+			var module = GetResourceModule ("cppcli.dll");
+
+			Assert.AreEqual (1, module.ModuleReferences.Count);
+			Assert.AreEqual (string.Empty, module.ModuleReferences [0].Name);
+		}
+
+		[Test]
 		[ExpectedException (typeof (BadImageFormatException))]
 		public void OpenIrrelevantFile ()
 		{
