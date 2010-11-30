@@ -104,6 +104,33 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (get_a_b.Resolve ());
 		}
 
+		[Test]
+		public void ResolveFunctionPointer ()
+		{
+			var module = GetResourceModule ("cppcli.dll");
+			var global = module.GetType ("<Module>");
+			var field = global.GetField ("__onexitbegin_app_domain");
+
+			var type = field.FieldType as PointerType;
+			Assert.IsNotNull(type);
+
+			var fnptr = type.ElementType as FunctionPointerType;
+			Assert.IsNotNull (fnptr);
+
+			Assert.IsNull (fnptr.Resolve ());
+		}
+
+		[Test]
+		public void ResolveGenericParameter ()
+		{
+			var collection = typeof (Mono.Collections.Generic.Collection<>).ToDefinition ();
+			var parameter = collection.GenericParameters [0];
+
+			Assert.IsNotNull (parameter);
+
+			Assert.IsNull (parameter.Resolve ());
+		}
+
 		static TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
