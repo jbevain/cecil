@@ -11,3 +11,8 @@ abstract class Bar {
 
 	public abstract Foo this [int a, string s] { set; }
 }
+
+class Baz {
+
+	public string Bingo { get; set; }
+}

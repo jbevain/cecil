@@ -94,5 +94,19 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System.Int32", parameters [0].ParameterType.FullName);
 			Assert.AreEqual ("System.String", parameters [1].ParameterType.FullName);
 		}
+
+		[TestCSharp ("Properties.cs")]
+		public void ReadSemanticsFirst (ModuleDefinition module)
+		{
+			var type = module.GetType ("Baz");
+			var setter = type.GetMethod ("set_Bingo");
+
+			Assert.AreEqual (MethodSemanticsAttributes.Setter, setter.SemanticsAttributes);
+
+			var property = type.Properties.Where (p => p.Name == "Bingo").First ();
+
+			Assert.AreEqual (setter, property.SetMethod);
+			Assert.AreEqual (type.GetMethod ("get_Bingo"), property.GetMethod);
+		}
 	}
 }
