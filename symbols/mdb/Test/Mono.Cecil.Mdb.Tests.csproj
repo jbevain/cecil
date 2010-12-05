@@ -33,11 +33,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.core" />
-    <Reference Include="nunit.core.interfaces" />
-    <Reference Include="nunit.framework" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Mono.Cecil.csproj">
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
@@ -58,6 +53,20 @@
   <ItemGroup>
     <Content Include="Resources\assemblies\hello.exe" />
     <Content Include="Resources\assemblies\hello.exe.mdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="nunit.core, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Test\libs\nunit-2.4.8\nunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.core.interfaces, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Test\libs\nunit-2.4.8\nunit.core.interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Test\libs\nunit-2.4.8\nunit.framework.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
