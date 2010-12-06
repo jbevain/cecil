@@ -157,6 +157,26 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[TestCSharp ("Generics.cs")]
+		public void GenericInstanceMethod (ModuleDefinition module)
+		{
+			var type = module.GetType ("It");
+			var method = type.GetMethod ("ReadPwow");
+
+			GenericInstanceMethod instance = null;
+
+			foreach (var instruction in method.Body.Instructions) {
+				instance = instruction.Operand as GenericInstanceMethod;
+				if (instance != null)
+					break;
+			}
+
+			Assert.IsNotNull (instance);
+
+			Assert.AreEqual (TokenType.MethodSpec, instance.MetadataToken.TokenType);
+			Assert.AreNotEqual (0, instance.MetadataToken.RID);
+		}
+
+		[TestCSharp ("Generics.cs")]
 		public void MethodRefDeclaredOnGenerics (ModuleDefinition module)
 		{
 			var type = module.GetType ("Tamtam");
