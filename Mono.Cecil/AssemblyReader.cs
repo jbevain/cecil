@@ -2000,11 +2000,13 @@ namespace Mono.Cecil {
 			if (!MoveTo (Table.MethodSpec, rid))
 				return null;
 
-			var method = (MethodReference) LookupToken (
+			var element_method = (MethodReference) LookupToken (
 				ReadMetadataToken (CodedIndex.MethodDefOrRef));
 			var signature = ReadBlobIndex ();
 
-			return ReadMethodSpecSignature (signature, method);
+			var method_spec = ReadMethodSpecSignature (signature, element_method);
+			method_spec.token = new MetadataToken (TokenType.MethodSpec, rid);
+			return method_spec;
 		}
 
 		MethodSpecification ReadMethodSpecSignature (uint signature, MethodReference method)
