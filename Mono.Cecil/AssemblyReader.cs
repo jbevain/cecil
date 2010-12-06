@@ -1037,7 +1037,9 @@ namespace Mono.Cecil {
 				return null;
 
 			var reader = ReadSignature (ReadBlobIndex ());
-			return reader.ReadTypeSignature ();
+			var type = reader.ReadTypeSignature ();
+			type.token = new MetadataToken (TokenType.TypeSpec, rid);
+			return type;
 		}
 
 		SignatureReader ReadSignature (uint signature)
