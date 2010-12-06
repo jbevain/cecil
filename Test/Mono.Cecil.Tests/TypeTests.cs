@@ -91,6 +91,7 @@ namespace Mono.Cecil.Tests {
 
 			var instance = child.BaseType as GenericInstanceType;
 			Assert.IsNotNull (instance);
+			Assert.AreNotEqual (0, instance.MetadataToken.RID);
 
 			Assert.AreEqual (child_t, instance.GenericArguments [0]);
 		}
