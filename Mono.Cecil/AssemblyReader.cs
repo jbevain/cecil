@@ -957,11 +957,7 @@ namespace Mono.Cecil {
 			if (type != null)
 				return type;
 
-			type = ReadTypeReference (rid);
-			if (type != null)
-				 metadata.AddTypeReference (type);
-
-			return type;
+			return ReadTypeReference (rid);
 		}
 
 		TypeReference ReadTypeReference (uint rid)
@@ -974,6 +970,19 @@ namespace Mono.Cecil {
 
 			var scope_token = ReadMetadataToken (CodedIndex.ResolutionScope);
 
+			var name = ReadString ();
+			var @namespace = ReadString ();
+
+			var type = new TypeReference (
+				@namespace,
+				name,
+				module,
+				null);
+
+			type.token = new MetadataToken (TokenType.TypeRef, rid);
+
+			metadata.AddTypeReference (type);
+
 			if (scope_token.TokenType == TokenType.TypeRef) {
 				declaring_type = GetTypeDefOrRef (scope_token);
 
@@ -983,17 +992,8 @@ namespace Mono.Cecil {
 			} else
 				scope = GetTypeReferenceScope (scope_token);
 
-			var name = ReadString ();
-			var @namespace = ReadString ();
-
-			var type = new TypeReference (
-				@namespace,
-				name,
-				module,
-				scope);
-
+			type.scope = scope;
 			type.DeclaringType = declaring_type;
-			type.token = new MetadataToken (TokenType.TypeRef, rid);
 
 			MetadataSystem.TryProcessPrimitiveType (type);
 
