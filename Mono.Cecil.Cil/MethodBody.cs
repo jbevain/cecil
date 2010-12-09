@@ -107,7 +107,6 @@ namespace Mono.Cecil.Cil {
 		public MethodBody (MethodDefinition method)
 		{
 			this.method = method;
-			this.init_locals = true;
 		}
 
 		public ILProcessor GetILProcessor ()
