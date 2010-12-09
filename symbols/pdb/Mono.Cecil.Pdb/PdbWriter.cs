@@ -33,9 +33,10 @@ using System.Diagnostics.SymbolStore;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
+#if !READ_ONLY
+
 namespace Mono.Cecil.Pdb {
 
-#if !READ_ONLY
 	public class PdbWriter : Cil.ISymbolWriter {
 
 		readonly ModuleDefinition module;
@@ -216,5 +217,6 @@ namespace Mono.Cecil.Pdb {
 			writer.Close ();
 		}
 	}
-#endif
 }
+
+#endif

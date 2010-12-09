@@ -33,6 +33,8 @@ using System.Runtime.InteropServices.ComTypes;
 
 using Mono.Cecil.Cil;
 
+#if !READ_ONLY
+
 namespace Mono.Cecil.Pdb {
 
 	[Guid ("0B97726E-9E6D-4f05-9A26-424022093CAA")]
@@ -97,3 +99,5 @@ namespace Mono.Cecil.Pdb {
 			[In] int endOffset);
 	}
 }
+
+#endif

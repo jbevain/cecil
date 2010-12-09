@@ -2,6 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if !READ_ONLY
+
 namespace Mono.Cecil.Pdb {
 
 	[ComImport, InterfaceType (ComInterfaceType.InterfaceIsIUnknown), Guid ("BA3FEE4C-ECB9-4e41-83B7-183FA41CD859")]
@@ -709,3 +711,5 @@ namespace Mono.Cecil.Pdb {
 		}
 	}
 }
+
+#endif
