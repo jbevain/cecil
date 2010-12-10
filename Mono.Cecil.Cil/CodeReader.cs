@@ -123,7 +123,7 @@ namespace Mono.Cecil.Cil {
 			body.local_var_token = new MetadataToken (ReadUInt32 ());
 			body.init_locals = (flags & 0x10) != 0;
 
-			if (body.LocalVarToken.RID != 0)
+			if (body.local_var_token.RID != 0)
 				body.variables = ReadVariables (body.local_var_token);
 
 			ReadCode ();
@@ -145,6 +145,10 @@ namespace Mono.Cecil.Cil {
 		{
 			start = position;
 			var code_size = body.code_size;
+
+			if (code_size < 0 || (code_size + position) > buffer.Length)
+				code_size = 0;
+
 			var end = start + code_size;
 			var instructions = body.instructions = new InstructionCollection (code_size / 3);
 
