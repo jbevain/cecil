@@ -146,7 +146,7 @@ namespace Mono.Cecil.Cil {
 			start = position;
 			var code_size = body.code_size;
 
-			if (code_size < 0 || (code_size + position) > buffer.Length)
+			if (code_size < 0 || buffer.Length <= (uint) (code_size + position))
 				code_size = 0;
 
 			var end = start + code_size;
