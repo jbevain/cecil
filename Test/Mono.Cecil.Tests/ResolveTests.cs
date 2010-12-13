@@ -131,6 +131,16 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (parameter.Resolve ());
 		}
 
+		[Test]
+		public void ResolveNullVersionAssembly ()
+		{
+			var reference = AssemblyNameReference.Parse ("System.Core");
+			reference.Version = null;
+
+			var resolver = new DefaultAssemblyResolver ();
+			Assert.IsNotNull (resolver.Resolve (reference));
+		}
+
 		static TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
