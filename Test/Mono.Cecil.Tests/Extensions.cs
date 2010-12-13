@@ -21,7 +21,7 @@ namespace Mono.Cecil.Tests {
 		public static TypeDefinition ToDefinition (this Type self)
 		{
 			var module = ModuleDefinition.ReadModule (self.Module.FullyQualifiedName);
-			return (TypeDefinition) TypeParser.ParseType (module, self.FullName);
+			return (TypeDefinition) module.LookupToken (self.MetadataToken);
 		}
 
 		public static MethodDefinition ToDefinition (this SR.MethodBase method)
