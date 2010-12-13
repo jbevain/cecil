@@ -235,7 +235,7 @@ namespace Mono.Cecil.Cil {
 
 		public VariableDefinition GetVariable (int index)
 		{
-			return body.Variables [index];
+			return body.GetVariable (index);
 		}
 
 		public CallSite GetCallSite (MetadataToken token)
