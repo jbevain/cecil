@@ -1944,7 +1944,7 @@ namespace Mono.Cecil {
 				element = GetMethodSpecification (rid);
 				break;
 			default:
-				throw new NotSupportedException ();
+				return null;
 			}
 
 			this.position = position;
@@ -1968,7 +1968,7 @@ namespace Mono.Cecil {
 		{
 			var type = metadata.GetFieldDeclaringType (rid);
 			if (type == null)
-				throw new NotSupportedException ();
+				return null;
 
 			InitializeCollection (type.Fields);
 
@@ -1990,7 +1990,7 @@ namespace Mono.Cecil {
 		{
 			var type = metadata.GetMethodDeclaringType (rid);
 			if (type == null)
-				throw new NotSupportedException ();
+				return null;
 
 			InitializeCollection (type.Methods);
 
@@ -2037,7 +2037,7 @@ namespace Mono.Cecil {
 				return member;
 
 			member = ReadMemberReference (rid);
-			if (!member.ContainsGenericParameter)
+			if (member != null && !member.ContainsGenericParameter)
 				metadata.AddMemberReference (member);
 			return member;
 		}

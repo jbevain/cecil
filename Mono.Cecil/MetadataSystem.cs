@@ -371,7 +371,7 @@ namespace Mono.Cecil {
 					return type;
 			}
 
-			throw new ArgumentException ();
+			return null;
 		}
 	}
 }
