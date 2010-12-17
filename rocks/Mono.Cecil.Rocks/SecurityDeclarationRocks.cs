@@ -26,6 +26,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if !SILVERLIGHT && !CF
+
 using System;
 using System.Security;
 using SSP = System.Security.Permissions;
@@ -168,3 +170,5 @@ namespace Mono.Cecil.Rocks {
 		}
 	}
 }
+
+#endif
