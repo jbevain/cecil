@@ -111,6 +111,10 @@ class Sheep {
 class Angola {
 }
 
+[Foo (Pan = "fiouuu")]
+class BoxedStringField {
+}
+
 [Foo (Bingo.Fuel)]
 class Zero {
 }
@@ -122,7 +126,6 @@ class Ace {
 [Foo (new object [] { Bingo.Fuel, Bingo.Binga }, null, Pan = System.Security.AccessControl.AceFlags.NoPropagateInherit)]
 class Bzzz {
 }
-
 
 [Foo (typeof (Bingo))]
 class Typed {
@@ -143,7 +146,6 @@ class Machin {
 [Foo (typeof (Dictionary<,>))]
 class OpenGeneric<X, Y> {
 }
-
 
 [Foo (typeof (Dictionary<string, OpenGeneric<Machin, int>[,]>))]
 class ClosedGeneric {

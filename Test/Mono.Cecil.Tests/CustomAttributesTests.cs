@@ -119,7 +119,7 @@ namespace Mono.Cecil.Tests {
 			var attribute = GetAttribute (worm, "Foo");
 			Assert.IsNotNull (attribute);
 
-			Assert.AreEqual (".ctor ((String:\"2\"), (I4:2))", PrettyPrint (attribute));
+			Assert.AreEqual (".ctor ((Object:(String:\"2\")), (Object:(I4:2)))", PrettyPrint (attribute));
 		}
 
 		[TestCSharp ("CustomAttributes.cs")]
@@ -131,7 +131,7 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (attribute);
 
 			// [Foo (new object [] { "2", 2, 'c' }, new object [] { new object [] { 1, 2, 3}, null })]
-			AssertCustomAttribute (".ctor ((Object[]:{(String:\"2\"), (I4:2), (Char:'c')}), (Object[]:{(Object[]:{(I4:1), (I4:2), (I4:3)}), (String:null)}))", attribute);
+			AssertCustomAttribute (".ctor ((Object:(Object[]:{(Object:(String:\"2\")), (Object:(I4:2)), (Object:(Char:'c'))})), (Object:(Object[]:{(Object:(Object[]:{(Object:(I4:1)), (Object:(I4:2)), (Object:(I4:3))})), (Object:(String:null))})))", attribute);
 		}
 
 		[TestCSharp ("CustomAttributes.cs")]
@@ -145,7 +145,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (2, attribute.Fields.Count);
 
 			var argument = attribute.Fields.Where (a => a.Name == "Pan").First ();
-			AssertCustomAttributeArgument ("(Object[]:{(I4:1), (String:\"2\"), (Char:'3')})", argument);
+			AssertCustomAttributeArgument ("(Object:(Object[]:{(Object:(I4:1)), (Object:(String:\"2\")), (Object:(Char:'3'))}))", argument);
 
 			argument = attribute.Fields.Where (a => a.Name == "PanPan").First ();
 			AssertCustomAttributeArgument ("(String[]:{(String:\"yo\"), (String:\"yo\")})", argument);
@@ -157,6 +157,20 @@ namespace Mono.Cecil.Tests {
 
 			argument = attribute.Properties.Where (a => a.Name == "Fiou").First ();
 			AssertArgument<string> (null, argument);
+		}
+
+		[TestCSharp ("CustomAttributes.cs")]
+		public void BoxedStringField (ModuleDefinition module)
+		{
+			var type = module.GetType ("BoxedStringField");
+
+			var attribute = GetAttribute (type, "Foo");
+			Assert.IsNotNull (attribute);
+
+			Assert.AreEqual (1, attribute.Fields.Count);
+
+			var argument = attribute.Fields.Where (a => a.Name == "Pan").First ();
+			AssertCustomAttributeArgument ("(Object:(String:\"fiouuu\"))", argument);
 		}
 
 		[TestCSharp ("CustomAttributes.cs")]
@@ -202,15 +216,15 @@ namespace Mono.Cecil.Tests {
 
 			var argument = attribute.ConstructorArguments [0];
 
-			AssertCustomAttributeArgument ("(Object[]:{(Bingo:2), (Bingo:4)})", argument);
+			AssertCustomAttributeArgument ("(Object:(Object[]:{(Object:(Bingo:2)), (Object:(Bingo:4))}))", argument);
 
 			argument = attribute.ConstructorArguments [1];
 
-			AssertCustomAttributeArgument ("(String:null)", argument);
+			AssertCustomAttributeArgument ("(Object:(String:null))", argument);
 
 			argument = attribute.Fields.Where (a => a.Name == "Pan").First ().Argument;
 
-			AssertCustomAttributeArgument ("(System.Security.AccessControl.AceFlags:4)", argument);
+			AssertCustomAttributeArgument ("(Object:(System.Security.AccessControl.AceFlags:4))", argument);
 		}
 
 		[TestCSharp ("CustomAttributes.cs")]
