@@ -29,10 +29,11 @@
 namespace Mono.Cecil.Cil {
 
 	public static class OpCodes {
-
+        //0xfe = OneByteOpCode, goes up to 30
+        //0xff = TwoBytesOpCode, goes up to 224
 		internal static readonly OpCode [] OneByteOpCode = new OpCode [0xe0 + 1];
 		internal static readonly OpCode [] TwoBytesOpCode = new OpCode [0x1e + 1];
-
+        //Gaps are between 186-194, 198-208, 165-179
 		public static readonly OpCode Nop = new OpCode (
 			0xff << 0 | 0x00 << 8 | (byte) Code.Nop << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Push0 << 24);
@@ -562,7 +563,7 @@ namespace Mono.Cecil.Cil {
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_U2_Un = new OpCode (
-			0xff << 0 | 0x87 << 8 | (byte) Code.Conv_Ovf_U2_Un << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 135 << 8 | (byte) Code.Conv_Ovf_U2_Un << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_U4_Un = new OpCode (
@@ -642,7 +643,7 @@ namespace Mono.Cecil.Cil {
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Popref_popi << 16 | (byte) StackBehaviour.Pushref << 24);
 
 		public static readonly OpCode Stelem_I = new OpCode (
-			0xff << 0 | 0x9b << 8 | (byte) Code.Stelem_I << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 155 << 8 | (byte) Code.Stelem_I << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Popref_popi_popi << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Stelem_I1 = new OpCode (
@@ -658,15 +659,15 @@ namespace Mono.Cecil.Cil {
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Popref_popi_popi << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Stelem_I8 = new OpCode (
-			0xff << 0 | 0x9f << 8 | (byte) Code.Stelem_I8 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 159 << 8 | (byte) Code.Stelem_I8 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Popref_popi_popi8 << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Stelem_R4 = new OpCode (
-			0xff << 0 | 0xa0 << 8 | (byte) Code.Stelem_R4 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 160 << 8 | (byte) Code.Stelem_R4 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Popref_popi_popr4 << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Stelem_R8 = new OpCode (
-			0xff << 0 | 0xa1 << 8 | (byte) Code.Stelem_R8 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 161 << 8 | (byte) Code.Stelem_R8 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Popref_popi_popr8 << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Stelem_Ref = new OpCode (
@@ -682,19 +683,19 @@ namespace Mono.Cecil.Cil {
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineType << 8 | (byte) StackBehaviour.Popref_popi_popref << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Unbox_Any = new OpCode (
-			0xff << 0 | 0xa5 << 8 | (byte) Code.Unbox_Any << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 165 << 8 | (byte) Code.Unbox_Any << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Objmodel << 0 | (byte) OperandType.InlineType << 8 | (byte) StackBehaviour.Popref << 16 | (byte) StackBehaviour.Push1 << 24);
 
 		public static readonly OpCode Conv_Ovf_I1 = new OpCode (
-			0xff << 0 | 0xb3 << 8 | (byte) Code.Conv_Ovf_I1 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 179 << 8 | (byte) Code.Conv_Ovf_I1 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_U1 = new OpCode (
-			0xff << 0 | 0xb4 << 8 | (byte) Code.Conv_Ovf_U1 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 180 << 8 | (byte) Code.Conv_Ovf_U1 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_I2 = new OpCode (
-			0xff << 0 | 0xb5 << 8 | (byte) Code.Conv_Ovf_I2 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 181 << 8 | (byte) Code.Conv_Ovf_I2 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_U2 = new OpCode (
@@ -710,39 +711,39 @@ namespace Mono.Cecil.Cil {
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_I8 = new OpCode (
-			0xff << 0 | 0xb9 << 8 | (byte) Code.Conv_Ovf_I8 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 185 << 8 | (byte) Code.Conv_Ovf_I8 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi8 << 24);
 
 		public static readonly OpCode Conv_Ovf_U8 = new OpCode (
-			0xff << 0 | 0xba << 8 | (byte) Code.Conv_Ovf_U8 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 186 << 8 | (byte) Code.Conv_Ovf_U8 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi8 << 24);
 
 		public static readonly OpCode Refanyval = new OpCode (
-			0xff << 0 | 0xc2 << 8 | (byte) Code.Refanyval << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 194 << 8 | (byte) Code.Refanyval << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineType << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Ckfinite = new OpCode (
-			0xff << 0 | 0xc3 << 8 | (byte) Code.Ckfinite << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 195 << 8 | (byte) Code.Ckfinite << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushr8 << 24);
 
 		public static readonly OpCode Mkrefany = new OpCode (
-			0xff << 0 | 0xc6 << 8 | (byte) Code.Mkrefany << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 198 << 8 | (byte) Code.Mkrefany << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineType << 8 | (byte) StackBehaviour.Popi << 16 | (byte) StackBehaviour.Push1 << 24);
 
 		public static readonly OpCode Ldtoken = new OpCode (
-			0xff << 0 | 0xd0 << 8 | (byte) Code.Ldtoken << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 208 << 8 | (byte) Code.Ldtoken << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineTok << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_U2 = new OpCode (
-			0xff << 0 | 0xd1 << 8 | (byte) Code.Conv_U2 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 209 << 8 | (byte) Code.Conv_U2 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_U1 = new OpCode (
-			0xff << 0 | 0xd2 << 8 | (byte) Code.Conv_U1 << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 210 << 8 | (byte) Code.Conv_U1 << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_I = new OpCode (
-			0xff << 0 | 0xd3 << 8 | (byte) Code.Conv_I << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 211 << 8 | (byte) Code.Conv_I << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1 << 16 | (byte) StackBehaviour.Pushi << 24);
 
 		public static readonly OpCode Conv_Ovf_I = new OpCode (
@@ -766,7 +767,7 @@ namespace Mono.Cecil.Cil {
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1_pop1 << 16 | (byte) StackBehaviour.Push1 << 24);
 
 		public static readonly OpCode Mul_Ovf_Un = new OpCode (
-			0xff << 0 | 0xd9 << 8 | (byte) Code.Mul_Ovf_Un << 16 | (byte) FlowControl.Next << 24,
+			0xff << 0 | 217 << 8 | (byte) Code.Mul_Ovf_Un << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop1_pop1 << 16 | (byte) StackBehaviour.Push1 << 24);
 
 		public static readonly OpCode Sub_Ovf = new OpCode (

@@ -25,9 +25,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-
+using System.Windows.Forms;
 using System;
-
 using Mono.Cecil.PE;
 using Mono.Collections.Generic;
 
@@ -153,9 +152,9 @@ namespace Mono.Cecil.Cil {
 			var instructions = body.instructions = new InstructionCollection (code_size / 3);
 
 			while (position < end) {
-				var offset = base.position - start;
-				var opcode = ReadOpCode ();
-				var current = new Instruction (offset, opcode);
+				int offset = base.position - start;
+				OpCode opcode = ReadOpCode ();
+				Instruction current = new Instruction (offset, opcode);
 
 				if (opcode.OperandType != OperandType.InlineNone)
 					current.operand = ReadOperand (current);
@@ -165,16 +164,25 @@ namespace Mono.Cecil.Cil {
 
 			ResolveBranches (instructions);
 		}
-
+        bool isValidByte(byte bytez)
+        {
+            //Gaps are between 186-194, 198-208, 165-179
+            if (186 < bytez && bytez < 194) return false;
+            if (198 < bytez && bytez < 208) return false;
+            if (165 < bytez && bytez < 179) return false;
+            return true;
+        }
 		OpCode ReadOpCode ()
 		{
-			var il_opcode = ReadByte ();
-			return il_opcode != 0xfe
-				? OpCodes.OneByteOpCode [il_opcode]
-				: OpCodes.TwoBytesOpCode [ReadByte ()];
+		    byte il_opcode = ReadByte ();
+            if (il_opcode != 0xfe)
+            {
+                return isValidByte(il_opcode) ? OpCodes.OneByteOpCode[il_opcode] : OpCodes.OneByteOpCode[0x00];
+            }
+            return OpCodes.TwoBytesOpCode[ReadByte()];
 		}
 
-		object ReadOperand (Instruction instruction)
+	    object ReadOperand (Instruction instruction)
 		{
 			switch (instruction.opcode.OperandType) {
 			case OperandType.InlineSwitch:

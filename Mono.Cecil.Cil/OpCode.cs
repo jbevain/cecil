@@ -171,10 +171,15 @@ namespace Mono.Cecil.Cil {
 			this.stack_behavior_pop = (byte) ((y >> 16) & 0xff);
 			this.stack_behavior_push = (byte) ((y >> 24) & 0xff);
 
-			if (op1 == 0xff)
-				OpCodes.OneByteOpCode [op2] = this;
-			else
-				OpCodes.TwoBytesOpCode [op2] = this;
+			switch (op1)
+			{
+			    case 0xff:
+			        OpCodes.OneByteOpCode [op2] = this;
+			        break;
+			    default:
+			        OpCodes.TwoBytesOpCode [op2] = this;
+			        break;
+			}
 		}
 
 		public override int GetHashCode ()
