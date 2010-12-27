@@ -29,6 +29,7 @@
 namespace Mono.Cecil.Cil {
 
 	public enum Code {
+        Invalid,
 		Nop,
 		Break,
 		Ldarg_0,
