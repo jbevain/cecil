@@ -207,6 +207,13 @@ namespace Mono.Cecil {
 
 				resolved = true;
 			} catch (ResolutionException) {
+				if (arguments != null)
+					arguments.Clear ();
+				if (fields != null)
+					fields.Clear ();
+				if (properties != null)
+					properties.Clear ();
+
 				resolved = false;
 			}
 		}
