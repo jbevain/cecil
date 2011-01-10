@@ -1884,6 +1884,8 @@ namespace Mono.Cecil {
 
 			ReadMethodSignature (signature, call_site);
 
+			call_site.MetadataToken = token;
+
 			return call_site;
 		}
 
