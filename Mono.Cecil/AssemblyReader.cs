@@ -487,14 +487,17 @@ namespace Mono.Cecil {
 			return module;
 		}
 
-		public Collection<AssemblyNameReference> ReadAssemblyReferences ()
+		void InitializeAssemblyReferences ()
 		{
-			int length = MoveTo (Table.AssemblyRef);
-			var references = new Collection<AssemblyNameReference> (length);
+			if (metadata.AssemblyReferences != null)
+				return;
 
-			for (uint i = 1; i <= length; i++) {
+			int length = MoveTo (Table.AssemblyRef);
+			var references = metadata.AssemblyReferences = new AssemblyNameReference [length];
+
+			for (uint i = 0; i < length; i++) {
 				var reference = new AssemblyNameReference ();
-				reference.token = new MetadataToken (TokenType.AssemblyRef, i);
+				reference.token = new MetadataToken (TokenType.AssemblyRef, i + 1);
 
 				PopulateVersionAndFlags (reference);
 
@@ -504,10 +507,15 @@ namespace Mono.Cecil {
 
 				reference.Hash = ReadBlob ();
 
-				references.Add (reference);
+				references [i] = reference;
 			}
+		}
 
-			return references;
+		public Collection<AssemblyNameReference> ReadAssemblyReferences ()
+		{
+			InitializeAssemblyReferences ();
+
+			return new Collection<AssemblyNameReference> (metadata.AssemblyReferences);
 		}
 
 		public MethodDefinition ReadEntryPoint ()
@@ -555,19 +563,27 @@ namespace Mono.Cecil {
 			return Path.Combine (path, name);
 		}
 
+		void InitializeModuleReferences ()
+		{
+			if (metadata.ModuleReferences != null)
+				return;
+
+			int length = MoveTo (Table.ModuleRef);
+			var references = metadata.ModuleReferences = new ModuleReference [length];
+
+			for (uint i = 0; i < length; i++) {
+				var reference = new ModuleReference (ReadString ());
+				reference.token = new MetadataToken (TokenType.ModuleRef, i + 1);
+
+				references [i] = reference;
+			}
+		}
+
 		public Collection<ModuleReference> ReadModuleReferences ()
 		{
-			int length = MoveTo (Table.ModuleRef);
-			var references = new Collection<ModuleReference> (length);
+			InitializeModuleReferences ();
 
-			for (uint i = 1; i <= length; i++) {
-				var reference = new ModuleReference (ReadString ());
-				reference.token = new MetadataToken (TokenType.ModuleRef, i);
-
-				references.Add (reference);
-			}
-
-			return references;
+			return new Collection<ModuleReference> (metadata.ModuleReferences);
 		}
 
 		public bool HasFileResource ()
@@ -1003,13 +1019,12 @@ namespace Mono.Cecil {
 		IMetadataScope GetTypeReferenceScope (MetadataToken scope)
 		{
 			switch (scope.TokenType) {
-			// FIXME: both assembly refs and module refs should be in their
-			// own arrays, in case of someone modify the collections before
-			// this code is called
 			case TokenType.AssemblyRef:
-				return module.AssemblyReferences [(int) scope.RID - 1];
+				InitializeAssemblyReferences ();
+				return metadata.AssemblyReferences [(int) scope.RID - 1];
 			case TokenType.ModuleRef:
-				return module.ModuleReferences [(int) scope.RID - 1];
+				InitializeModuleReferences ();
+				return metadata.ModuleReferences [(int) scope.RID - 1];
 			case TokenType.Module:
 				return module;
 			default:
@@ -2459,7 +2474,8 @@ namespace Mono.Cecil {
 		{
 			switch (token.TokenType) {
 			case TokenType.AssemblyRef:
-				return module.AssemblyReferences [(int) token.RID - 1];
+				InitializeAssemblyReferences ();
+				return metadata.AssemblyReferences [(int) token.RID - 1];
 			case TokenType.File:
 				var position = this.position;
 				var reference = GetModuleReferenceFromFile (token);
