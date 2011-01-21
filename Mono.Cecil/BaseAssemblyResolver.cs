@@ -318,10 +318,11 @@ namespace Mono.Cecil {
 
 		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
-			var gac_folder = new StringBuilder ();
-			gac_folder.Append (prefix);
-			gac_folder.Append (reference.Version);
-			gac_folder.Append ("__");
+			var gac_folder = new StringBuilder ()
+				.Append (prefix)
+				.Append (reference.Version)
+				.Append ("__");
+
 			for (int i = 0; i < reference.PublicKeyToken.Length; i++)
 				gac_folder.Append (reference.PublicKeyToken [i].ToString ("x2"));
 
