@@ -9,7 +9,7 @@ namespace Mono.Cecil.Tests {
 	public class TypeParserTests : BaseTestFixture {
 
 		[Test]
-		public void SimpleTypeReference ()
+		public void SimpleStringReference ()
 		{
 			var module = GetCurrentModule ();
 			var corlib = module.TypeSystem.Corlib;
@@ -22,6 +22,27 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (module, type.Module);
 			Assert.AreEqual ("System", type.Namespace);
 			Assert.AreEqual ("String", type.Name);
+			Assert.AreEqual (MetadataType.String, type.MetadataType);
+			Assert.IsFalse (type.IsValueType);
+			Assert.IsInstanceOfType (typeof (TypeReference), type);
+		}
+
+		[Test]
+		public void SimpleInt32Reference ()
+		{
+			var module = GetCurrentModule ();
+			var corlib = module.TypeSystem.Corlib;
+
+			const string fullname = "System.Int32";
+
+			var type = TypeParser.ParseType (module, fullname);
+			Assert.IsNotNull (type);
+			Assert.AreEqual (corlib, type.Scope);
+			Assert.AreEqual (module, type.Module);
+			Assert.AreEqual ("System", type.Namespace);
+			Assert.AreEqual ("Int32", type.Name);
+			Assert.AreEqual (MetadataType.Int32, type.MetadataType);
+			Assert.IsTrue (type.IsValueType);
 			Assert.IsInstanceOfType (typeof (TypeReference), type);
 		}
 

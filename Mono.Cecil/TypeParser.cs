@@ -356,6 +356,7 @@ namespace Mono.Cecil {
 			SplitFullName (type_info.type_fullname, out @namespace, out name);
 
 			var type = new TypeReference (@namespace, name, module, scope);
+			MetadataSystem.TryProcessPrimitiveType (type);
 
 			AdjustGenericParameters (type);
 
