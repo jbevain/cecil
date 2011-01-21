@@ -28,15 +28,20 @@
 
 using System;
 using System.Collections;
+using System .Collections.Generic;
 
 namespace Mono.Collections.Generic {
 
-	public sealed class ReadOnlyCollection<T> : Collection<T>, IList {
+	public sealed class ReadOnlyCollection<T> : Collection<T>, ICollection<T>, IList {
 
 		static ReadOnlyCollection<T> empty;
 
 		public static ReadOnlyCollection<T> Empty {
 			get { return empty ?? (empty = new ReadOnlyCollection<T> ()); }
+		}
+
+		bool ICollection<T>.IsReadOnly {
+			get { return true; }
 		}
 
 		bool IList.IsReadOnly {
