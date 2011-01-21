@@ -51,5 +51,7 @@ namespace Mono.Cecil {
 
 			event_type = eventType;
 		}
+
+		public abstract EventDefinition Resolve ();
 	}
 }

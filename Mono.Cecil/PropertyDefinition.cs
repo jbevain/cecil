@@ -254,5 +254,10 @@ namespace Mono.Cecil {
 
 			module.Read (this, (property, reader) => reader.ReadMethods (property));
 		}
+
+		public override PropertyDefinition Resolve ()
+		{
+			return this;
+		}
 	}
 }

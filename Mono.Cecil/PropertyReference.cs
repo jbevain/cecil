@@ -53,5 +53,7 @@ namespace Mono.Cecil {
 
 			property_type = propertyType;
 		}
+
+		public abstract PropertyDefinition Resolve ();
 	}
 }

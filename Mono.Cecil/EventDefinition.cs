@@ -159,5 +159,10 @@ namespace Mono.Cecil {
 
 			module.Read (this, (@event, reader) => reader.ReadMethods (@event));
 		}
+
+		public override EventDefinition Resolve ()
+		{
+			return this;
+		}
 	}
 }
