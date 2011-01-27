@@ -35,6 +35,11 @@ namespace Mono.Cecil.Tests {
 			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly));
 		}
 
+		public static ModuleDefinition GetResourceModule (string name, ReaderParameters parameters)
+		{
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly), parameters);
+		}
+
 		public static ModuleDefinition GetResourceModule (string name, ReadingMode mode)
 		{
 			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly), new ReaderParameters (mode));
@@ -49,6 +54,11 @@ namespace Mono.Cecil.Tests {
 		public static ModuleDefinition GetCurrentModule ()
 		{
 			return ModuleDefinition.ReadModule (typeof (BaseTestFixture).Module.FullyQualifiedName);
+		}
+
+		public static ModuleDefinition GetCurrentModule (ReaderParameters parameters)
+		{
+			return ModuleDefinition.ReadModule (typeof (BaseTestFixture).Module.FullyQualifiedName, parameters);
 		}
 
 		public static string FindResourcesDirectory (Assembly assembly)

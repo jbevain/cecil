@@ -69,21 +69,51 @@ namespace Mono.Cecil {
 				if (assembly == null)
 					return null;
 
-				return GetType (assembly.MainModule, type);
+				return GetType (resolver, assembly.MainModule, type);
 			case MetadataScopeType.ModuleDefinition:
-				return GetType ((ModuleDefinition) scope, type);
+				return GetType (resolver, (ModuleDefinition) scope, type);
 			case MetadataScopeType.ModuleReference:
 				var modules = type.Module.Assembly.Modules;
 				var module_ref = (ModuleReference) scope;
 				for (int i = 0; i < modules.Count; i++) {
 					var netmodule = modules [i];
 					if (netmodule.Name == module_ref.Name)
-						return GetType (netmodule, type);
+						return GetType (resolver, netmodule, type);
 				}
 				break;
 			}
 
 			throw new NotSupportedException ();
+		}
+
+		static TypeDefinition GetType (IAssemblyResolver resolver, ModuleDefinition module, TypeReference reference)
+		{
+			var type = GetType (module, reference);
+			if (type != null)
+				return type;
+
+			if (!module.HasExportedTypes)
+				return null;
+
+			var exported_types = module.ExportedTypes;
+
+			for (int i = 0; i < exported_types.Count; i++) {
+				var exported_type = exported_types [i];
+				if (exported_type.Name != reference.Name)
+					continue;
+
+				if (exported_type.Namespace != reference.Namespace)
+					continue;
+
+				return Resolve (resolver, CreateReference (module, exported_type));
+			}
+
+			return null;
+		}
+
+		static TypeReference CreateReference (ModuleDefinition module, ExportedType exported_type)
+		{
+			return new TypeReference (exported_type.Namespace, exported_type.Name, module, exported_type.Scope, false);
 		}
 
 		static TypeDefinition GetType (ModuleDefinition module, TypeReference type)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Mono.Cecil;
@@ -91,6 +92,75 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (definition);
 
 			Assert.AreEqual ("System.Boolean System.Collections.Generic.Dictionary`2::TryGetValue(TKey,TValue&)", definition.FullName);
+			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+		}
+
+		class CustomResolver : DefaultAssemblyResolver {
+
+			public void Register (AssemblyDefinition assembly)
+			{
+				this.RegisterAssembly (assembly);
+				this.AddSearchDirectory (Path.GetDirectoryName (assembly.MainModule.FullyQualifiedName));
+			}
+		}
+
+		[Test]
+		public void ExportedTypeFromModule ()
+		{
+			var resolver = new CustomResolver ();
+			var parameters = new ReaderParameters { AssemblyResolver = resolver };
+			var mma = GetResourceModule ("mma.exe", parameters);
+
+			resolver.Register (mma.Assembly);
+
+			var current_module = GetCurrentModule (parameters);
+			var reference = new TypeReference ("Module.A", "Foo", current_module, AssemblyNameReference.Parse (mma.Assembly.FullName), false);
+
+			var definition = reference.Resolve ();
+			Assert.IsNotNull (definition);
+			Assert.AreEqual ("Module.A.Foo", definition.FullName);
+		}
+
+		[Test]
+		public void TypeForwarder ()
+		{
+			var resolver = new CustomResolver ();
+			var parameters = new ReaderParameters { AssemblyResolver = resolver };
+
+			var types = ModuleDefinition.ReadModule (
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				parameters);
+
+			resolver.Register (types.Assembly);
+
+			var current_module = GetCurrentModule (parameters);
+			var reference = new TypeReference ("System.Diagnostics", "DebuggableAttribute", current_module, AssemblyNameReference.Parse (types.Assembly.FullName), false);
+
+			var definition = reference.Resolve ();
+			Assert.IsNotNull (definition);
+			Assert.AreEqual ("System.Diagnostics.DebuggableAttribute", definition.FullName);
+			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+		}
+
+		[Test]
+		public void NestedTypeForwarder ()
+		{
+			var resolver = new CustomResolver ();
+			var parameters = new ReaderParameters { AssemblyResolver = resolver };
+
+			var types = ModuleDefinition.ReadModule (
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				parameters);
+
+			resolver.Register (types.Assembly);
+
+			var current_module = GetCurrentModule (parameters);
+			var reference = new TypeReference ("", "DebuggingModes", current_module, null, true);
+			reference.DeclaringType = new TypeReference ("System.Diagnostics", "DebuggableAttribute", current_module, AssemblyNameReference.Parse (types.Assembly.FullName), false);
+
+			var definition = reference.Resolve ();
+			Assert.IsNotNull (definition);
+			Assert.AreEqual ("System.Diagnostics.DebuggableAttribute/DebuggingModes", definition.FullName);
 			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
 		}
 
