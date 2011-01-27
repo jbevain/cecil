@@ -2472,22 +2472,26 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetExportedTypeScope (MetadataToken token)
 		{
+			var position = this.position;
+			IMetadataScope scope;
+
 			switch (token.TokenType) {
 			case TokenType.AssemblyRef:
 				InitializeAssemblyReferences ();
-				return metadata.AssemblyReferences [(int) token.RID - 1];
+				scope = metadata.AssemblyReferences [(int) token.RID - 1];
+				break;
 			case TokenType.File:
-				var position = this.position;
-				var reference = GetModuleReferenceFromFile (token);
-				this.position = position;
-
-				if (reference == null)
+				scope = GetModuleReferenceFromFile (token);
+				if (scope == null)
 					throw new NotSupportedException ();
 
-				return reference;
+				break;
 			default:
 				throw new NotSupportedException ();
 			}
+
+			this.position = position;
+			return scope;
 		}
 
 		ModuleReference GetModuleReferenceFromFile (MetadataToken token)
