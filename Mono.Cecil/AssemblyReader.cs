@@ -2457,7 +2457,7 @@ namespace Mono.Cecil {
 					break;
 				}
 
-				var exported_type = new ExportedType (@namespace, name, scope) {
+				var exported_type = new ExportedType (@namespace, name, module, scope) {
 					Attributes = attributes,
 					Identifier = (int) identifier,
 					DeclaringType = declaring_type,

@@ -105,15 +105,10 @@ namespace Mono.Cecil {
 				if (exported_type.Namespace != reference.Namespace)
 					continue;
 
-				return Resolve (resolver, CreateReference (module, exported_type));
+				return exported_type.Resolve ();
 			}
 
 			return null;
-		}
-
-		static TypeReference CreateReference (ModuleDefinition module, ExportedType exported_type)
-		{
-			return new TypeReference (exported_type.Namespace, exported_type.Name, module, exported_type.Scope, false);
 		}
 
 		static TypeDefinition GetType (ModuleDefinition module, TypeReference type)
