@@ -51,6 +51,21 @@ namespace Mono.Cecil {
 		}
 	}
 
+	public class AssemblyResolutionException : FileNotFoundException {
+
+		readonly AssemblyNameReference reference;
+
+		public AssemblyNameReference AssemblyReference {
+			get { return reference; }
+		}
+
+		public AssemblyResolutionException (AssemblyNameReference reference)
+			: base (string.Format ("Failed to resolve assembly: '{0}'", reference), reference.FullName)
+		{
+			this.reference = reference;
+		}
+	}
+
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
 
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
@@ -152,7 +167,7 @@ namespace Mono.Cecil {
 					return assembly;
 			}
 
-			throw new FileNotFoundException ("Could not resolve: " + name);
+			throw new AssemblyResolutionException (name);
 		}
 
 		AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
