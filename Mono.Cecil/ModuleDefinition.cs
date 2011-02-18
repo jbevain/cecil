@@ -210,6 +210,8 @@ namespace Mono.Cecil {
 		Collection<ExportedType> exported_types;
 		TypeDefinitionCollection types;
 
+		readonly object @lock = new object ();
+
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
 		}
@@ -760,15 +762,17 @@ namespace Mono.Cecil {
 
 		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
 		{
-			var position = reader.position;
-			var context = reader.context;
+			lock (@lock) {
+				var position = reader.position;
+				var context = reader.context;
 
-			var ret = read (item, reader);
+				var ret = read (item, reader);
 
-			reader.position = position;
-			reader.context = context;
+				reader.position = position;
+				reader.context = context;
 
-			return ret;
+				return ret;
+			}
 		}
 
 		void ProcessDebugHeader ()
