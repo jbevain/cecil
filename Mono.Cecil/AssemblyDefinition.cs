@@ -64,7 +64,7 @@ namespace Mono.Cecil {
 				if (main_module.HasImage)
 					return modules = main_module.Read (this, (_, reader) => reader.ReadModules ());
 
-				return modules = new Collection<ModuleDefinition> { main_module };
+				return modules = new Collection<ModuleDefinition> (1) { main_module };
 			}
 		}
 
