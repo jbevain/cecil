@@ -501,7 +501,12 @@ namespace Mono.Cecil {
 
 				PopulateVersionAndFlags (reference);
 
-				reference.PublicKeyToken = ReadBlob ();
+				var key_or_token = ReadBlob ();
+
+				if (reference.HasPublicKey)
+					reference.PublicKey = key_or_token;
+				else
+					reference.PublicKeyToken = key_or_token;
 
 				PopulateNameAndCulture (reference);
 
