@@ -44,12 +44,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<TypeReference> GenericArguments {
-			get {
-				if (arguments == null)
-					arguments = new Collection<TypeReference> ();
-
-				return arguments;
-			}
+			get { return arguments ?? (arguments = new Collection<TypeReference> ()); }
 		}
 
 		public override TypeReference DeclaringType {
