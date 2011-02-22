@@ -47,7 +47,7 @@ namespace Mono.Cecil {
 				if (metadata.Types == null)
 					Initialize (module.Types);
 
-				return module.Read (this, (_, reader) => {
+				return module.Read (new Row<string, string> (@namespace, name), (row, reader) => {
 					var types = reader.metadata.Types;
 
 					for (int i = 0; i < types.Length; i++) {
@@ -56,7 +56,7 @@ namespace Mono.Cecil {
 
 						var type = types [i];
 
-						if (type.Name == name && type.Namespace == @namespace)
+						if (type.Name == row.Col2 && type.Namespace == row.Col1)
 							return type;
 					}
 
