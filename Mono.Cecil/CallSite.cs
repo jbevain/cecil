@@ -115,5 +115,10 @@ namespace Mono.Cecil {
 
 			this.signature.ReturnType = returnType;
 		}
+
+		public override string ToString ()
+		{
+			return FullName;
+		}
 	}
 }
