@@ -60,7 +60,11 @@ namespace Mono.Cecil {
 		}
 
 		public AssemblyResolutionException (AssemblyNameReference reference)
+#if SILVERLIGHT
+      : base(string.Format("Failed to resolve assembly: '{0}'", reference))
+#else
 			: base (string.Format ("Failed to resolve assembly: '{0}'", reference), reference.FullName)
+#endif
 		{
 			this.reference = reference;
 		}
