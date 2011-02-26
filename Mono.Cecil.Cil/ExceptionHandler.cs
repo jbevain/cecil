@@ -40,7 +40,6 @@ namespace Mono.Cecil.Cil {
 		Instruction try_start;
 		Instruction try_end;
 		Instruction filter_start;
-		Instruction filter_end;
 		Instruction handler_start;
 		Instruction handler_end;
 
@@ -60,11 +59,6 @@ namespace Mono.Cecil.Cil {
 		public Instruction FilterStart {
 			get { return filter_start; }
 			set { filter_start = value; }
-		}
-
-		public Instruction FilterEnd {
-			get { return filter_end; }
-			set { filter_end = value; }
 		}
 
 		public Instruction HandlerStart {

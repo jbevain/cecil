@@ -364,7 +364,6 @@ namespace Mono.Cecil.Cil {
 				break;
 			case ExceptionHandlerType.Filter:
 				handler.FilterStart = GetInstruction (ReadInt32 ());
-				handler.FilterEnd = handler.HandlerStart.Previous;
 				break;
 			default:
 				Advance (4);

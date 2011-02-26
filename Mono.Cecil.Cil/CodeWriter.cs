@@ -510,7 +510,7 @@ namespace Mono.Cecil.Cil {
 					return true;
 
 				if (handler.HandlerType == ExceptionHandlerType.Filter
-					&& IsFatRange (handler.FilterStart, handler.FilterEnd))
+					&& IsFatRange (handler.FilterStart, handler.HandlerStart))
 					return true;
 			}
 
