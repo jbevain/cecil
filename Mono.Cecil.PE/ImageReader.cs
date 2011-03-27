@@ -416,12 +416,11 @@ namespace Mono.Cecil.PE {
 			// Sorted			8
 			heap.Sorted = ReadInt64 ();
 
-			for (int i = 0; i < TableHeap.TableIdentifiers.Length; i++) {
-				var table = TableHeap.TableIdentifiers [i];
-				if (!heap.HasTable (table))
+			for (int i = 0; i < TableHeap.TableCount; i++) {
+				if (!heap.HasTable ((Table) i))
 					continue;
 
-				heap.Tables [(int) table].Length = ReadUInt32 ();
+				heap.Tables [i].Length = ReadUInt32 ();
 			}
 
 			SetIndexSize (image.StringHeap, sizes, 0x1);
@@ -459,8 +458,8 @@ namespace Mono.Cecil.PE {
 			var heap = image.TableHeap;
 			var tables = heap.Tables;
 
-			for (int i = 0; i < TableHeap.TableIdentifiers.Length; i++) {
-				var table = TableHeap.TableIdentifiers [i];
+			for (int i = 0; i < TableHeap.TableCount; i++) {
+				var table = (Table) i;
 				if (!heap.HasTable (table))
 					continue;
 

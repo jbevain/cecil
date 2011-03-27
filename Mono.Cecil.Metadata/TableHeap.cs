@@ -90,15 +90,9 @@ namespace Mono.Cecil.Metadata {
 		public long Valid;
 		public long Sorted;
 
-		public static readonly Table [] TableIdentifiers;
-		public readonly TableInformation [] Tables = new TableInformation [45];
+		public const int TableCount = 45;
 
-		static TableHeap ()
-		{
-			TableIdentifiers = new Table [45];
-			for (int i = 0; i < TableIdentifiers.Length; i++)
-				TableIdentifiers [i] = (Table) i;
-		}
+		public readonly TableInformation [] Tables = new TableInformation [TableCount];
 
 		public TableInformation this [Table table] {
 			get { return Tables [(int) table]; }
