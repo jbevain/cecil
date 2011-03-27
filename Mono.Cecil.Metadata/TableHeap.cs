@@ -90,55 +90,15 @@ namespace Mono.Cecil.Metadata {
 		public long Valid;
 		public long Sorted;
 
-		public static readonly Table [] TableIdentifiers = new [] {
-			Table.Module,
-			Table.TypeRef,
-			Table.TypeDef,
-			Table.FieldPtr,
-			Table.Field,
-			Table.MethodPtr,
-			Table.Method,
-			Table.ParamPtr,
-			Table.Param,
-			Table.InterfaceImpl,
-			Table.MemberRef,
-			Table.Constant,
-			Table.CustomAttribute,
-			Table.FieldMarshal,
-			Table.DeclSecurity,
-			Table.ClassLayout,
-			Table.FieldLayout,
-			Table.StandAloneSig,
-			Table.EventMap,
-			Table.EventPtr,
-			Table.Event,
-			Table.PropertyMap,
-			Table.PropertyPtr,
-			Table.Property,
-			Table.MethodSemantics,
-			Table.MethodImpl,
-			Table.ModuleRef,
-			Table.TypeSpec,
-			Table.ImplMap,
-			Table.FieldRVA,
-			Table.EncLog,
-			Table.EncMap,
-			Table.Assembly,
-			Table.AssemblyProcessor,
-			Table.AssemblyOS,
-			Table.AssemblyRef,
-			Table.AssemblyRefProcessor,
-			Table.AssemblyRefOS,
-			Table.File,
-			Table.ExportedType,
-			Table.ManifestResource,
-			Table.NestedClass,
-			Table.GenericParam,
-			Table.MethodSpec,
-			Table.GenericParamConstraint,
-		};
-
+		public static readonly Table [] TableIdentifiers;
 		public readonly TableInformation [] Tables = new TableInformation [45];
+
+		static TableHeap ()
+		{
+			TableIdentifiers = new Table [45];
+			for (int i = 0; i < TableIdentifiers.Length; i++)
+				TableIdentifiers [i] = (Table) i;
+		}
 
 		public TableInformation this [Table table] {
 			get { return Tables [(int) table]; }
