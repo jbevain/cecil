@@ -595,8 +595,6 @@ namespace Mono.Cecil.PE {
 						+ GetTableIndexSize (Table.Field);	// Field
 					break;
 				case Table.EncLog:
-					size = 4;
-					break;
 				case Table.EncMap:
 					size = 4;
 					break;
