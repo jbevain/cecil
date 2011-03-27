@@ -595,6 +595,12 @@ namespace Mono.Cecil.PE {
 					size = 4	// RVA
 						+ GetTableIndexSize (Table.Field);	// Field
 					break;
+				case Table.EncLog:
+					size = 4;
+					break;
+				case Table.EncMap:
+					size = 4;
+					break;
 				case Table.Assembly:
 					size = 16 // HashAlgId 4, Version 4 * 2, Flags 4
 						+ blobidx_size	// PublicKey
