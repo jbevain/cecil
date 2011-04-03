@@ -97,10 +97,6 @@ namespace Mono.Cecil {
 			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (Module)); }
 		}
 
-		internal new bool HasImage {
-			get { return Module != null && Module.HasImage; }
-		}
-
 		public override IMetadataScope Scope {
 			get {
 				if (owner.GenericParameterType == GenericParameterType.Method)

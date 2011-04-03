@@ -161,10 +161,6 @@ namespace Mono.Cecil {
 			}
 		}
 
-		internal new bool HasImage {
-			get { return Module != null && Module.HasImage; }
-		}
-
 		public bool HasMethods {
 			get {
 				if (methods != null)
