@@ -44,6 +44,10 @@ namespace Mono.Collections.Generic {
 			get { return true; }
 		}
 
+		bool IList.IsFixedSize {
+			get { return true; }
+		}
+
 		bool IList.IsReadOnly {
 			get { return true; }
 		}
