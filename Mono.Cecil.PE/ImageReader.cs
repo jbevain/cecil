@@ -658,12 +658,10 @@ namespace Mono.Cecil.PE {
 					throw new NotSupportedException ();
 				}
 
-				int index = (int) table;
+				tables [i].RowSize = (uint) size;
+				tables [i].Offset = offset;
 
-				tables [index].RowSize = (uint) size;
-				tables [index].Offset = offset;
-
-				offset += (uint) size * tables [index].Length;
+				offset += (uint) size * tables [i].Length;
 			}
 		}
 
