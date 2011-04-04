@@ -49,16 +49,11 @@ namespace Mono.Cecil.Cil {
 			get { return base.position - start; }
 		}
 
-		CodeReader (Section section, MetadataReader reader)
+		public CodeReader (Section section, MetadataReader reader)
 			: base (section.Data)
 		{
 			this.code_section = section;
 			this.reader = reader;
-		}
-
-		public static CodeReader CreateCodeReader (MetadataReader metadata)
-		{
-			return new CodeReader (metadata.image.MetadataSection, metadata);
 		}
 
 		public MethodBody ReadMethodBody (MethodDefinition method)

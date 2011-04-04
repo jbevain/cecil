@@ -374,7 +374,7 @@ namespace Mono.Cecil {
 			this.image = module.Image;
 			this.module = module;
 			this.metadata = module.MetadataSystem;
-			this.code = CodeReader.CreateCodeReader (this);
+			this.code = new CodeReader (image.MetadataSection, this);
 		}
 
 		int GetCodedIndexSize (CodedIndex index)
