@@ -115,6 +115,9 @@ namespace Mono.Collections.Generic {
 
 		public Collection (ICollection<T> items)
 		{
+			if (items == null)
+				throw new ArgumentNullException ("items");
+
 			this.items = new T [items.Count];
 			items.CopyTo (this.items, 0);
 			this.size = this.items.Length;
