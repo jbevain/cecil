@@ -261,7 +261,7 @@ namespace Mono.Cecil.Metadata {
 	abstract class HeapBuffer : ByteBuffer {
 
 		public bool IsLarge {
-			get { return base.length > 65536; }
+			get { return base.length > 65535; }
 		}
 
 		public abstract bool IsEmpty { get; }
