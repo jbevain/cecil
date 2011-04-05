@@ -1678,20 +1678,42 @@ namespace Mono.Cecil {
 
 		void ReadParameters (MethodDefinition method, Range param_range)
 		{
-			MoveTo (Table.Param, param_range.Start);
-			for (uint i = 0; i < param_range.Length; i++) {
-				var attributes = (ParameterAttributes) ReadUInt16 ();
-				var sequence = ReadUInt16 ();
-				var name = ReadString ();
+			if (!MoveTo (Table.ParamPtr, param_range.Start)) {
+				if (!MoveTo (Table.Param, param_range.Start))
+					return;
 
-				var parameter = sequence == 0
-					? method.MethodReturnType.Parameter
-					: method.Parameters [sequence - 1];
+				for (uint i = 0; i < param_range.Length; i++)
+					ReadParameter (param_range.Start + i, method);
+			} else
+				ReadParameterPointers (method, param_range);
+		}
 
-				parameter.token = new MetadataToken (TokenType.Param, param_range.Start + i);
-				parameter.Name = name;
-				parameter.Attributes = attributes;
+		void ReadParameterPointers (MethodDefinition method, Range range)
+		{
+			for (uint i = 0; i < range.Length; i++) {
+				MoveTo (Table.ParamPtr, range.Start + i);
+
+				var rid = ReadTableIndex (Table.Param);
+
+				MoveTo (Table.Param, rid);
+
+				ReadParameter (rid, method);
 			}
+		}
+
+		void ReadParameter (uint param_rid, MethodDefinition method)
+		{
+			var attributes = (ParameterAttributes) ReadUInt16 ();
+			var sequence = ReadUInt16 ();
+			var name = ReadString ();
+
+			var parameter = sequence == 0
+				? method.MethodReturnType.Parameter
+				: method.Parameters [sequence - 1];
+
+			parameter.token = new MetadataToken (TokenType.Param, param_rid);
+			parameter.Name = name;
+			parameter.Attributes = attributes;
 		}
 
 		void ReadMethodSignature (uint signature, IMethodSignature method)
