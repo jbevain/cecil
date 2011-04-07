@@ -151,9 +151,14 @@ namespace Mono.Cecil.Cil {
 			get { return local_var_token; }
 		}
 
-		public MethodSymbols (string methodName)
+		internal MethodSymbols (string methodName)
 		{
 			this.method_name = methodName;
+		}
+
+		public MethodSymbols (MetadataToken methodToken)
+		{
+			this.method_token = methodToken;
 		}
 	}
 
