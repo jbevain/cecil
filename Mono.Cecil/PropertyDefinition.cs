@@ -127,6 +127,8 @@ namespace Mono.Cecil {
 
 		public bool HasParameters {
 			get {
+				InitializeMethods ();
+
 				if (get_method != null)
 					return get_method.HasParameters;
 
