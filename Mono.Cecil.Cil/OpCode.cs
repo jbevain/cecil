@@ -132,7 +132,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public short Value {
-			get { return (short) ((op1 << 8) | op2); }
+			get { return op1 == 0xff ? op2 : (short) ((op1 << 8) | op2); }
 		}
 
 		public Code Code {
