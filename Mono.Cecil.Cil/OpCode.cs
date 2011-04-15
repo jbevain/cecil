@@ -214,7 +214,7 @@ namespace Mono.Cecil.Cil {
 
 	static class OpCodeNames {
 
-		internal static readonly string[] names;
+		internal static readonly string [] names;
 
 		static OpCodeNames ()
 		{
