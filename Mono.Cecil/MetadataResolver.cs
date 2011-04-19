@@ -206,6 +206,12 @@ namespace Mono.Cecil {
 				if (method.Name != reference.Name)
 					continue;
 
+				if (method.HasGenericParameters != reference.HasGenericParameters)
+					continue;
+
+				if (method.HasGenericParameters && method.GenericParameters.Count != reference.GenericParameters.Count)
+					continue;
+
 				if (!AreSame (method.ReturnType, reference.ReturnType))
 					continue;
 
