@@ -1842,7 +1842,7 @@ namespace Mono.Cecil {
 					range.Length++;
 			}
 
-			if (owner != MetadataToken.Zero)
+			if (owner != MetadataToken.Zero && !ranges.ContainsKey (owner))
 				ranges.Add (owner, range);
 
 			return ranges;
@@ -2475,7 +2475,7 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			reader.ReadByte ();
+			reader.position++;
 			var count = reader.ReadCompressedUInt32 ();
 			var attributes = new Collection<SecurityAttribute> ((int) count);
 
