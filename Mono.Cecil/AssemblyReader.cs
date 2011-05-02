@@ -703,7 +703,22 @@ namespace Mono.Cecil {
 				types.Add (type);
 			}
 
+			if (image.HasTable (Table.MethodPtr) || image.HasTable (Table.FieldRVA))
+				CompleteTypes ();
+
 			return types;
+		}
+
+		void CompleteTypes ()
+		{
+			var types = metadata.Types;
+
+			for (int i = 0; i < types.Length; i++) {
+				var type = types [i];
+
+				InitializeCollection (type.Fields);
+				InitializeCollection (type.Methods);
+			}
 		}
 
 		void InitializeTypeDefinitions ()
