@@ -703,7 +703,7 @@ namespace Mono.Cecil {
 				types.Add (type);
 			}
 
-			if (image.HasTable (Table.MethodPtr) || image.HasTable (Table.FieldRVA))
+			if (image.HasTable (Table.MethodPtr) || image.HasTable (Table.FieldPtr))
 				CompleteTypes ();
 
 			return types;
