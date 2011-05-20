@@ -2574,10 +2574,8 @@ namespace Mono.Cecil {
 				scope = metadata.AssemblyReferences [(int) token.RID - 1];
 				break;
 			case TokenType.File:
+				InitializeModuleReferences ();
 				scope = GetModuleReferenceFromFile (token);
-				if (scope == null)
-					throw new NotSupportedException ();
-
 				break;
 			default:
 				throw new NotSupportedException ();
@@ -2604,6 +2602,11 @@ namespace Mono.Cecil {
 
 				reference = module_reference;
 				break;
+			}
+
+			if (reference == null) {
+				reference = new ModuleReference (file_name);
+				modules.Add (reference);
 			}
 
 			return reference;
