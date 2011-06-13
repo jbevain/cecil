@@ -935,11 +935,13 @@ namespace Mono.Cecil {
 					? reference.PublicKeyToken
 					: reference.PublicKey;
 
+				var version = reference.Version;
+
 				var rid = table.AddRow (new AssemblyRefRow (
-					(ushort) reference.Version.Major,
-					(ushort) reference.Version.Minor,
-					(ushort) reference.Version.Build,
-					(ushort) reference.Version.Revision,
+					(ushort) version.Major,
+					(ushort) version.Minor,
+					(ushort) version.Build,
+					(ushort) version.Revision,
 					reference.Attributes,
 					GetBlobIndex (key_or_token),
 					GetStringIndex (reference.Name),
