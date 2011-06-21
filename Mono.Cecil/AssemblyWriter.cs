@@ -2455,7 +2455,7 @@ namespace Mono.Cecil {
 				return;
 			}
 
-            var buffer = new SignatureWriter (metadata);
+			var buffer = new SignatureWriter (metadata);
 			buffer.WriteCompressedUInt32 ((uint) count);
 			buffer.WriteICustomAttributeNamedArguments (attribute);
 
