@@ -41,6 +41,9 @@ namespace Mono.Cecil {
 		AssemblyDefinition Resolve (string fullName, ReaderParameters parameters);
 	}
 
+#if !SILVERLIGHT && !CF
+	[Serializable]
+#endif
 	public class ResolutionException : Exception {
 
 		readonly MemberReference member;

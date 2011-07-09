@@ -51,6 +51,9 @@ namespace Mono.Cecil {
 		}
 	}
 
+#if !SILVERLIGHT && !CF
+	[Serializable]
+#endif
 	public class AssemblyResolutionException : FileNotFoundException {
 
 		readonly AssemblyNameReference reference;
