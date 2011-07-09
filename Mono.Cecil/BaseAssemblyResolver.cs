@@ -67,6 +67,15 @@ namespace Mono.Cecil {
 		{
 			this.reference = reference;
 		}
+
+#if !SILVERLIGHT && !CF
+		protected AssemblyResolutionException (
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+			: base (info, context)
+		{
+		}
+#endif
 	}
 
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
