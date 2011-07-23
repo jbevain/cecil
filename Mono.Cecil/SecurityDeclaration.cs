@@ -176,9 +176,7 @@ namespace Mono.Cecil {
 			this ISecurityDeclarationProvider self,
 			ModuleDefinition module)
 		{
-			return module.HasImage ()
-				? module.Read (self, (provider, reader) => reader.HasSecurityDeclarations (provider))
-				: false;
+			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasSecurityDeclarations (provider));
 		}
 
 		public static Collection<SecurityDeclaration> GetSecurityDeclarations (
