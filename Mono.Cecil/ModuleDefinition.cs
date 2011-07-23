@@ -47,6 +47,7 @@ namespace Mono.Cecil {
 
 		ReadingMode reading_mode;
 		IAssemblyResolver assembly_resolver;
+		IMetadataResolver metadata_resolver;
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
@@ -59,6 +60,11 @@ namespace Mono.Cecil {
 		public IAssemblyResolver AssemblyResolver {
 			get { return assembly_resolver; }
 			set { assembly_resolver = value; }
+		}
+
+		public IMetadataResolver MetadataResolver {
+			get { return metadata_resolver; }
+			set { metadata_resolver = value; }
 		}
 
 		public Stream SymbolStream {
@@ -95,6 +101,7 @@ namespace Mono.Cecil {
 		TargetRuntime runtime;
 		TargetArchitecture architecture;
 		IAssemblyResolver assembly_resolver;
+		IMetadataResolver metadata_resolver;
 
 		public ModuleKind Kind {
 			get { return kind; }
@@ -114,6 +121,11 @@ namespace Mono.Cecil {
 		public IAssemblyResolver AssemblyResolver {
 			get { return assembly_resolver; }
 			set { assembly_resolver = value; }
+		}
+
+		public IMetadataResolver MetadataResolver {
+			get { return metadata_resolver; }
+			set { metadata_resolver = value; }
 		}
 
 		public ModuleParameters ()
@@ -186,6 +198,7 @@ namespace Mono.Cecil {
 		internal ISymbolReader SymbolReader;
 
 		internal IAssemblyResolver assembly_resolver;
+		internal IMetadataResolver metadata_resolver;
 		internal TypeSystem type_system;
 
 		readonly MetadataReader reader;
@@ -267,6 +280,10 @@ namespace Mono.Cecil {
 
 		public IAssemblyResolver AssemblyResolver {
 			get { return assembly_resolver; }
+		}
+
+		public IMetadataResolver MetadataResolver {
+			get { return metadata_resolver ?? (metadata_resolver = new MetadataResolver (assembly_resolver)); }
 		}
 
 		public TypeSystem TypeSystem {
@@ -554,17 +571,17 @@ namespace Mono.Cecil {
 
 		internal FieldDefinition Resolve (FieldReference field)
 		{
-			return MetadataResolver.Resolve (AssemblyResolver, field);
+			return MetadataResolver.Resolve (field);
 		}
 
 		internal MethodDefinition Resolve (MethodReference method)
 		{
-			return MetadataResolver.Resolve (AssemblyResolver, method);
+			return MetadataResolver.Resolve (method);
 		}
 
 		internal TypeDefinition Resolve (TypeReference type)
 		{
-			return MetadataResolver.Resolve (AssemblyResolver, type);
+			return MetadataResolver.Resolve (type);
 		}
 
 #if !READ_ONLY
@@ -838,6 +855,9 @@ namespace Mono.Cecil {
 
 			if (parameters.AssemblyResolver != null)
 				module.assembly_resolver = parameters.AssemblyResolver;
+
+			if (parameters.MetadataResolver != null)
+				module.metadata_resolver = parameters.MetadataResolver;
 
 			if (parameters.Kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();

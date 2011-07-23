@@ -85,6 +85,9 @@ namespace Mono.Cecil {
 			if (parameters.AssemblyResolver != null)
 				module.assembly_resolver = parameters.AssemblyResolver;
 
+			if (parameters.MetadataResolver != null)
+				module.metadata_resolver = parameters.MetadataResolver;
+
 			return module;
 		}
 
