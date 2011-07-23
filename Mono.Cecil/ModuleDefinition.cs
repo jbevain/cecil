@@ -835,13 +835,21 @@ namespace Mono.Cecil {
 			if (parameters.Kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();
 				module.assembly = assembly;
-				module.assembly.Name = new AssemblyNameDefinition (name, new Version (0, 0));
+				module.assembly.Name = CreateAssemblyName (name);
 				assembly.main_module = module;
 			}
 
 			module.Types.Add (new TypeDefinition (string.Empty, "<Module>", TypeAttributes.NotPublic));
 
 			return module;
+		}
+
+		static AssemblyNameDefinition CreateAssemblyName (string name)
+		{
+			if (name.EndsWith (".dll") || name.EndsWith (".exe"))
+				name = name.Substring (0, name.Length - 4);
+
+			return new AssemblyNameDefinition (name, new Version (0, 0));
 		}
 
 #endif
