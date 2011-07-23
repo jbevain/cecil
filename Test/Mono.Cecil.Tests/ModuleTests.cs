@@ -30,6 +30,19 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System.Void Program::Main()", entry_point.ToString ());
 		}
 
+        [Test]
+        public void BadIlFromLambdaAndVirtual()
+        {
+            var module = GetResourceModule("BadIlFromLambdaAndVirtual.dll");
+            foreach (var typeDefinition in module.Types)
+            {
+                foreach (var methodDefinition in typeDefinition.Methods)
+                {
+                    Debug.WriteLine(methodDefinition);
+                }
+            }
+        }
+
 		[TestModule ("mma.exe")]
 		public void MultiModules (ModuleDefinition module)
 		{
