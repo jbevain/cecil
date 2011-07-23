@@ -27,7 +27,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 
 using Mono.Collections.Generic;
 
@@ -84,11 +83,17 @@ namespace Mono.Cecil {
 
 		public MetadataResolver (IAssemblyResolver assemblyResolver)
 		{
+			if (assemblyResolver == null)
+				throw new ArgumentNullException ("assemblyResolver");
+
 			assembly_resolver = assemblyResolver;
 		}
 
 		public virtual TypeDefinition Resolve (TypeReference type)
 		{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+
 			type = type.GetElementType ();
 
 			var scope = type.Scope;
@@ -154,6 +159,9 @@ namespace Mono.Cecil {
 
 		public virtual FieldDefinition Resolve (FieldReference field)
 		{
+			if (field == null)
+				throw new ArgumentNullException ("field");
+
 			var type = Resolve (field.DeclaringType);
 			if (type == null)
 				return null;
@@ -199,6 +207,9 @@ namespace Mono.Cecil {
 
 		public virtual MethodDefinition Resolve (MethodReference method)
 		{
+			if (method == null)
+				throw new ArgumentNullException ("method");
+
 			var type = Resolve (method.DeclaringType);
 			if (type == null)
 				return null;
