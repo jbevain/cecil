@@ -480,6 +480,13 @@ namespace Mono.Cecil {
 			return Read (this, (_, reader) => reader.GetMemberReferences ());
 		}
 
+		public TypeReference GetType (string fullName, bool runtimeName)
+		{
+			return runtimeName
+				? TypeParser.ParseType (this, fullName)
+				: GetType (fullName);
+		}
+
 		public TypeDefinition GetType (string fullName)
 		{
 			CheckFullName (fullName);
