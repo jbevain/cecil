@@ -167,5 +167,18 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (1, instance.GenericArguments.Count);
 			Assert.AreEqual (1, owner.GenericParameters.Count);
 		}
+
+		[TestModule ("cscgpbug.dll", Verify = false)]
+		public void UnboundGenericParameter (ModuleDefinition module)
+		{
+			var type = module.GetType ("ListViewModel");
+			var method = type.GetMethod ("<>n__FabricatedMethod1");
+
+			var parameter = method.ReturnType as GenericParameter;
+
+			Assert.IsNotNull (parameter);
+			Assert.AreEqual (0, parameter.Position);
+			Assert.IsNull (parameter.Owner);
+		}
 	}
 }
