@@ -67,7 +67,7 @@ namespace Mono.Cecil {
 		{
 			return module.HasImage ()
 				? module.Read (self, (provider, reader) => reader.ReadGenericParameters (provider))
-				: new Collection<GenericParameter> ();
+				: new GenericParameterCollection (self);
 		}
 	}
 }
