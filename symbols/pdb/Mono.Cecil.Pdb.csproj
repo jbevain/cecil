@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\mono.snk</AssemblyOriginatorKeyFile>
+    <NoWarn>0649</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net_2_0_Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
