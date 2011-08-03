@@ -876,7 +876,7 @@ namespace Mono.Cecil {
 			if (name.EndsWith (".dll") || name.EndsWith (".exe"))
 				name = name.Substring (0, name.Length - 4);
 
-			return new AssemblyNameDefinition (name, new Version (0, 0));
+			return new AssemblyNameDefinition (name, new Version (0, 0, 0, 0));
 		}
 
 #endif
