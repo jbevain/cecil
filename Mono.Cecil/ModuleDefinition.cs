@@ -887,10 +887,10 @@ namespace Mono.Cecil {
 				throw new InvalidOperationException ();
 
 			var provider = SymbolProvider.GetPlatformReaderProvider ();
+			if (provider == null)
+				throw new InvalidOperationException ();
 
-			SymbolReader = provider.GetSymbolReader (this, fq_name);
-
-			ProcessDebugHeader ();
+			ReadSymbols (provider.GetSymbolReader (this, fq_name));
 		}
 
 		public void ReadSymbols (ISymbolReader reader)
