@@ -180,5 +180,20 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (0, parameter.Position);
 			Assert.IsNull (parameter.Owner);
 		}
+
+		[TestCSharp ("Generics.cs")]
+		public void GenericMultidimensionalArray (ModuleDefinition module)
+		{
+			var type = module.GetType ("LaMatrix");
+			var method = type.GetMethod ("At");
+
+			var call = method.Body.Instructions.First (i => i.Operand is MethodReference);
+			var get = (MethodReference) call.Operand;
+
+			Assert.IsNotNull (get);
+			Assert.AreEqual (0, get.GenericParameters.Count);
+			Assert.AreEqual (MethodCallingConvention.Default, get.CallingConvention);
+			Assert.AreEqual (method.GenericParameters [0], get.ReturnType);
+		}
 	}
 }
