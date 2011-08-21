@@ -2188,7 +2188,8 @@ namespace Mono.Cecil {
 		{
 			var declaring_type = GetTypeDefOrRef (type);
 
-			this.context = declaring_type;
+			if (!declaring_type.IsArray)
+				this.context = declaring_type;
 
 			var member = ReadMemberReferenceSignature (signature, declaring_type);
 			member.Name = name;
@@ -2821,7 +2822,7 @@ namespace Mono.Cecil {
 			method.CallingConvention = (MethodCallingConvention) calling_convention;
 
 			var generic_context = method as MethodReference;
-			if (generic_context != null)
+			if (generic_context != null && !generic_context.DeclaringType.IsArray)
 				reader.context = generic_context;
 
 			if ((calling_convention & 0x10) != 0) {
