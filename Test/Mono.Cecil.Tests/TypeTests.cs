@@ -187,7 +187,7 @@ namespace Mono.Cecil.Tests {
 			var type = module.GetType ("LaMatrix");
 			var method = type.GetMethod ("At");
 
-			var call = method.Body.Instructions.First (i => i.Operand is MethodReference);
+			var call = method.Body.Instructions.Where (i => i.Operand is MethodReference).First ();
 			var get = (MethodReference) call.Operand;
 
 			Assert.IsNotNull (get);
