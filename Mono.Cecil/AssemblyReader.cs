@@ -2674,9 +2674,9 @@ namespace Mono.Cecil {
 			return provider.GenericParameters [index];
 		}
 
-		static GenericParameter GetUnboundGenericParameter (GenericParameterType type, int index)
+		GenericParameter GetUnboundGenericParameter (GenericParameterType type, int index)
 		{
-			return new GenericParameter (index, type);
+			return new GenericParameter (index, type, reader.module);
 		}
 
 		static void CheckGenericContext (IGenericParameterProvider owner, int index)
