@@ -35,7 +35,7 @@ namespace Mono.Cecil {
 
 	public sealed class CallSite : IMethodSignature {
 
-		readonly MethodReference signature;
+		public readonly MethodReference signature;
 
 		public bool HasThis {
 			get { return signature.HasThis; }

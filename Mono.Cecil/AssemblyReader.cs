@@ -35,6 +35,7 @@ using Mono.Collections.Generic;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
+using Mono.MyStuff;
 
 using RVA = System.UInt32;
 
@@ -45,10 +46,10 @@ namespace Mono.Cecil {
 		readonly protected Image image;
 		readonly protected ModuleDefinition module;
 
-		protected ModuleReader (Image image, ReadingMode mode)
+		protected ModuleReader (Image image, ReadingMode mode, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 		{
 			this.image = image;
-			this.module = new ModuleDefinition (image);
+			this.module = new ModuleDefinition (image, dumpedMethods);
 			this.module.ReadingMode = mode;
 		}
 
@@ -76,9 +77,9 @@ namespace Mono.Cecil {
 			assembly.main_module = module;
 		}
 
-		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters)
+		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 		{
-			var module = ReadModule (image, parameters);
+			var module = ReadModule (image, parameters, dumpedMethods);
 
 			ReadSymbols (module, parameters);
 
@@ -109,20 +110,20 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static ModuleDefinition ReadModule (Image image, ReaderParameters parameters)
+		static ModuleDefinition ReadModule (Image image, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 		{
-			var reader = CreateModuleReader (image, parameters.ReadingMode);
+			var reader = CreateModuleReader (image, parameters.ReadingMode, dumpedMethods);
 			reader.ReadModule ();
 			return reader.module;
 		}
 
-		static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
+		static ModuleReader CreateModuleReader (Image image, ReadingMode mode, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 		{
 			switch (mode) {
 			case ReadingMode.Immediate:
-				return new ImmediateModuleReader (image);
+				return new ImmediateModuleReader (image, dumpedMethods);
 			case ReadingMode.Deferred:
-				return new DeferredModuleReader (image);
+				return new DeferredModuleReader (image, dumpedMethods);
 			default:
 				throw new ArgumentException ();
 			}
@@ -131,8 +132,8 @@ namespace Mono.Cecil {
 
 	sealed class ImmediateModuleReader : ModuleReader {
 
-		public ImmediateModuleReader (Image image)
-			: base (image, ReadingMode.Immediate)
+		public ImmediateModuleReader (Image image, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+			: base (image, ReadingMode.Immediate, dumpedMethods)
 		{
 		}
 
@@ -343,8 +344,8 @@ namespace Mono.Cecil {
 
 	sealed class DeferredModuleReader : ModuleReader {
 
-		public DeferredModuleReader (Image image)
-			: base (image, ReadingMode.Deferred)
+		public DeferredModuleReader (Image image, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+			: base (image, ReadingMode.Deferred, dumpedMethods)
 		{
 		}
 
@@ -366,18 +367,21 @@ namespace Mono.Cecil {
 		internal IGenericContext context;
 		internal CodeReader code;
 
+		Dictionary<uint, DumpedMethod> dumpedMethods;
+
 		uint Position {
 			get { return (uint) base.position; }
 			set { base.position = (int) value; }
 		}
 
-		public MetadataReader (ModuleDefinition module)
+		public MetadataReader (ModuleDefinition module, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 			: base (module.Image.MetadataSection.Data)
 		{
 			this.image = module.Image;
 			this.module = module;
 			this.metadata = module.MetadataSystem;
-			this.code = new CodeReader (image.MetadataSection, this);
+			this.dumpedMethods = dumpedMethods;
+			this.code = new CodeReader (image.MetadataSection, this, dumpedMethods);
 		}
 
 		int GetCodedIndexSize (CodedIndex index)
@@ -877,9 +881,15 @@ namespace Mono.Cecil {
 
 		Range ReadListRange (uint current_index, Table current, Table target)
 		{
+			var table_index = ReadTableIndex (target);
+			return ReadListRange2 (current_index, current, target, table_index);
+		}
+
+		Range ReadListRange2 (uint current_index, Table current, Table target, uint table_index)
+		{
 			var list = new Range ();
 
-			list.Start = ReadTableIndex (target);
+			list.Start = table_index;
 
 			uint next_index;
 			var current_table = image.TableHeap [current];
@@ -1663,10 +1673,46 @@ namespace Mono.Cecil {
 			metadata.Methods = new MethodDefinition [image.GetTableLength (Table.Method)];
 		}
 
+		DumpedMethod getDumpedMethod (uint method_rid) {
+			if (dumpedMethods == null)
+				return null;
+
+			DumpedMethod dumpedMethod;
+			dumpedMethods.TryGetValue(0x06000000 + method_rid, out dumpedMethod);
+			return dumpedMethod;
+		}
+
 		void ReadMethod (uint method_rid, Collection<MethodDefinition> methods)
 		{
 			var method = new MethodDefinition ();
 			method.rva = ReadUInt32 ();
+
+			var dm = getDumpedMethod (method_rid);
+			byte[] bufferOrig = this.buffer;
+			int lengthOrig = this.length, positionOrig = this.position;
+			if (dm != null) {
+				var memStream = new MemoryStream (2 + 2 + 4 + 4 + 4);	// Everything except RVA
+				var binWriter = new BinaryWriter (memStream);
+				binWriter.Write ((UInt16) dm.mdImplFlags);
+				binWriter.Write ((UInt16) dm.mdFlags);
+				if (image.StringHeap.IndexSize == 4)
+					binWriter.Write ((UInt32) dm.mdName);
+				else
+					binWriter.Write ((UInt16) dm.mdName);
+				if (image.BlobHeap.IndexSize == 4)
+					binWriter.Write ((UInt32) dm.mdSignature);
+				else
+					binWriter.Write ((UInt16) dm.mdSignature);
+				if (image.GetTableIndexSize (Table.Param) == 4)
+					binWriter.Write ((UInt32) dm.mdParamList);
+				else
+					binWriter.Write ((UInt16) dm.mdParamList);
+
+				this.buffer = memStream.ToArray ();
+				this.length = this.buffer.Length;
+				this.position = 0;
+			}
+
 			method.ImplAttributes = (MethodImplAttributes) ReadUInt16 ();
 			method.Attributes = (MethodAttributes) ReadUInt16 ();
 			method.Name = ReadString ();
@@ -1678,7 +1724,15 @@ namespace Mono.Cecil {
 			methods.Add (method); // attach method
 
 			var signature = ReadBlobIndex ();
-			var param_range = ReadParametersRange (method_rid);
+			var table_index = ReadTableIndex (Table.Param);
+
+			if (dm != null) {
+				this.position = positionOrig + this.length;
+				this.length = lengthOrig;
+				this.buffer = bufferOrig;
+			}
+
+			var param_range = ReadListRange2 (method_rid, Table.Method, Table.Param, table_index);
 
 			this.context = method;
 

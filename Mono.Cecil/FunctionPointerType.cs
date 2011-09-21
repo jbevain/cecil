@@ -35,7 +35,7 @@ namespace Mono.Cecil {
 
 	public sealed class FunctionPointerType : TypeSpecification, IMethodSignature {
 
-		readonly MethodReference function;
+		public MethodReference function;
 
 		public bool HasThis {
 			get { return function.HasThis; }

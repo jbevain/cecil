@@ -45,7 +45,7 @@ namespace Mono.Cecil {
 			set { return_type = value; }
 		}
 
-		internal ParameterDefinition Parameter {
+		public ParameterDefinition Parameter {
 			get { return parameter ?? (parameter = new ParameterDefinition (return_type)); }
 			set { parameter = value; }
 		}
