@@ -35,6 +35,7 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
 using Mono.Collections.Generic;
+using Mono.MyStuff;
 
 namespace Mono.Cecil {
 
@@ -414,7 +415,7 @@ namespace Mono.Cecil {
 			this.assembly_resolver = GlobalAssemblyResolver.Instance;
 		}
 
-		internal ModuleDefinition (Image image)
+		internal ModuleDefinition (Image image, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 			: this ()
 		{
 			this.Image = image;
@@ -424,7 +425,7 @@ namespace Mono.Cecil {
 			this.attributes = image.Attributes;
 			this.fq_name = image.FileName;
 
-			this.reader = new MetadataReader (this);
+			this.reader = new MetadataReader (this, dumpedMethods);
 		}
 
 		public bool HasTypeReference (string fullName)
@@ -878,10 +879,10 @@ namespace Mono.Cecil {
 			return ReadModule (stream, new ReaderParameters (ReadingMode.Deferred));
 		}
 
-		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
+		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 		{
 			using (var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-				return ReadModule (stream, parameters);
+				return ReadModule (stream, parameters, dumpedMethods);
 			}
 		}
 
@@ -891,7 +892,7 @@ namespace Mono.Cecil {
 				throw new ArgumentNullException ("stream");
 		}
 
-		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
+		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 		{
 			CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)
@@ -900,7 +901,8 @@ namespace Mono.Cecil {
 
 			return ModuleReader.CreateModuleFrom (
 				ImageReader.ReadImageFrom (stream),
-				parameters);
+				parameters,
+				dumpedMethods);
 		}
 
 		static Stream GetFileStream (string fileName, FileMode mode, FileAccess access, FileShare share)

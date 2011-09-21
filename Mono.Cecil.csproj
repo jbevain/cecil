@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">net_4_0_Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">net_2_0_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -13,6 +13,9 @@
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>mono.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net_2_0_Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -60,7 +63,7 @@
     <DefineConstants>DEBUG;TRACE;NET_3_5;NET_4_0</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net_4_0_Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -111,13 +114,11 @@
     <DefineConstants>TRACE;NET_3_5;NET_4_0;SILVERLIGHT;CF</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TargetFrameworkProfile>WindowsPhone</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFrameworkVersion)' != 'v2.0' ">
-    <Reference Include="System.Core" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Mono.Cecil.Cil\Code.cs" />
     <Compile Include="Mono.Cecil.Cil\CodeWriter.cs" />
@@ -240,6 +241,8 @@
     <Compile Include="Mono.Cecil\TypeSystem.cs" />
     <Compile Include="Mono.Cecil\VariantType.cs" />
     <Compile Include="Mono.Collections.Generic\ReadOnlyCollection.cs" />
+    <Compile Include="Mono.MyStuff\DumpedMethod.cs" />
+    <Compile Include="Mono.MyStuff\DumpedMethodsReader.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoConvert.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoService.cs" />
     <Compile Include="System.Runtime.CompilerServices\ExtensionAttribute.cs" />

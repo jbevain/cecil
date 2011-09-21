@@ -72,6 +72,10 @@ namespace Mono.Cecil.Cil {
 			set { sequence_point = value; }
 		}
 
+		public Instruction ()
+		{
+		}
+
 		internal Instruction (int offset, OpCode opCode)
 		{
 			this.offset = offset;

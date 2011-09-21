@@ -27,9 +27,11 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 using Mono.Cecil.PE;
 using Mono.Collections.Generic;
+using Mono.MyStuff;
 
 using RVA = System.UInt32;
 
@@ -45,15 +47,18 @@ namespace Mono.Cecil.Cil {
 		MethodDefinition method;
 		MethodBody body;
 
+		Dictionary<uint, DumpedMethod> dumpedMethods;
+
 		int Offset {
 			get { return base.position - start; }
 		}
 
-		public CodeReader (Section section, MetadataReader reader)
+		public CodeReader (Section section, MetadataReader reader, Dictionary<uint, DumpedMethod> dumpedMethods = null)
 			: base (section.Data)
 		{
 			this.code_section = section;
 			this.reader = reader;
+			this.dumpedMethods = dumpedMethods;
 		}
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
@@ -81,6 +86,16 @@ namespace Mono.Cecil.Cil {
 		bool IsInSection (int rva)
 		{
 			return code_section.VirtualAddress <= rva && rva < code_section.VirtualAddress + code_section.SizeOfRawData;
+		}
+
+		DumpedMethod getDumpedMethod ()
+		{
+			if (dumpedMethods == null)
+				return null;
+
+			DumpedMethod dumpedMethod;
+			dumpedMethods.TryGetValue (this.method.MetadataToken.ToUInt32 (), out dumpedMethod);
+			return dumpedMethod;
 		}
 
 		void ReadMethodBody ()
@@ -112,10 +127,16 @@ namespace Mono.Cecil.Cil {
 
 		void ReadFatMethod ()
 		{
+			DumpedMethod dm = getDumpedMethod ();
+
 			var flags = ReadUInt16 ();
 			body.max_stack_size = ReadUInt16 ();
 			body.code_size = (int) ReadUInt32 ();
 			body.local_var_token = new MetadataToken (ReadUInt32 ());
+
+			if (dm != null)
+				flags = dm.mhFlags;
+
 			body.init_locals = (flags & 0x10) != 0;
 
 			if (body.local_var_token.RID != 0)
@@ -138,10 +159,27 @@ namespace Mono.Cecil.Cil {
 
 		void ReadCode ()
 		{
+			DumpedMethod dm = getDumpedMethod ();
+			var oldCodeSize = body.code_size;
+			byte[] bufferOrig = buffer;
+			int lengthOrig = length, positionOrig = position + oldCodeSize;
+			if (dm != null) {
+				body.code_size = (int) dm.mhCodeSize;
+				body.max_stack_size = dm.mhMaxStack;
+				if (dm.mhLocalVarSigTok != 0)
+					body.local_var_token = new MetadataToken (dm.mhLocalVarSigTok);
+				if (body.local_var_token.RID != 0)
+					body.variables = ReadVariables (body.local_var_token);
+
+				buffer = dm.code;
+				length = dm.code.Length;
+				position = 0;
+			}
+
 			start = position;
 			var code_size = body.code_size;
 
-			if (code_size < 0 || buffer.Length <= (uint) (code_size + position))
+			if (code_size < 0 || buffer.Length < (uint) (code_size + position))
 				code_size = 0;
 
 			var end = start + code_size;
@@ -156,6 +194,11 @@ namespace Mono.Cecil.Cil {
 					current.operand = ReadOperand (current);
 
 				instructions.Add (current);
+			}
+			if (dm != null) {
+				position = positionOrig;
+				length = lengthOrig;
+				buffer = bufferOrig;
 			}
 
 			ResolveBranches (instructions);
