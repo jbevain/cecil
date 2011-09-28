@@ -202,14 +202,14 @@ namespace Mono.Cecil {
 				if (parts.Length != 2)
 					throw new ArgumentException ("Malformed name");
 
-				switch (parts [0]) {
-				case "Version":
+				switch (parts [0].ToLowerInvariant ()) {
+				case "version":
 					name.Version = new Version (parts [1]);
 					break;
-				case "Culture":
+				case "culture":
 					name.Culture = parts [1];
 					break;
-				case "PublicKeyToken":
+				case "publickeytoken":
 					string pk_token = parts [1];
 					if (pk_token == "null")
 						break;
