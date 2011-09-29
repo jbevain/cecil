@@ -314,7 +314,7 @@ namespace Mono.Cecil.Cil {
 		{
 			var size = instructions.size;
 			var items = instructions.items;
-			if (offset < 0 || offset > items [size - 1].offset)
+			if (size == 0 || offset < 0 || offset > items [size - 1].offset)
 				return null;
 
 			int min = 0;
@@ -383,15 +383,21 @@ namespace Mono.Cecil.Cil {
 					(ExceptionHandlerType) (read_entry () & 0x7));
 
 				handler.TryStart = GetInstruction (read_entry ());
-				handler.TryEnd = GetInstruction (handler.TryStart.Offset + read_length ());
+				handler.TryEnd = GetInstruction (GetInstructionOffset (handler.TryStart) + read_length ());
 
 				handler.HandlerStart = GetInstruction (read_entry ());
-				handler.HandlerEnd = GetInstruction (handler.HandlerStart.Offset + read_length ());
+				handler.HandlerEnd = GetInstruction (GetInstructionOffset (handler.HandlerStart) + read_length ());
 
 				ReadExceptionHandlerSpecific (handler);
 
-				this.body.ExceptionHandlers.Add (handler);
+				if (handler.TryStart != null && handler.HandlerStart != null)
+					this.body.ExceptionHandlers.Add (handler);
 			}
+		}
+
+		int GetInstructionOffset (Instruction instruction)
+		{
+			return instruction == null ? 0 : instruction.Offset;
 		}
 
 		void ReadExceptionHandlerSpecific (ExceptionHandler handler)

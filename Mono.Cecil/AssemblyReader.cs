@@ -813,6 +813,9 @@ namespace Mono.Cecil {
 				var nested = ReadTableIndex (Table.TypeDef);
 				var declaring = ReadTableIndex (Table.TypeDef);
 
+				if (!IsValidTableIndex (Table.TypeDef, nested) || !IsValidTableIndex (Table.TypeDef, nested))
+					continue;
+
 				AddNestedMapping (declaring, nested);
 			}
 		}
