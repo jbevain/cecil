@@ -454,13 +454,17 @@ namespace Mono.Cecil {
 
 		bool MoveTo (Table table, uint row)
 		{
-			var info = image.TableHeap [table];
-			var length = info.Length;
-			if (length == 0 || row > length)
+			if (!IsValidTableIndex (table, row))
 				return false;
 
+			var info = image.TableHeap [table];
 			Position = info.Offset + (info.RowSize * (row - 1));
 			return true;
+		}
+
+		bool IsValidTableIndex (Table table, uint row)
+		{
+			return row != 0 && row <= image.TableHeap [table].Length;
 		}
 
 		public AssemblyNameDefinition ReadAssemblyNameDefinition ()
@@ -630,6 +634,8 @@ namespace Mono.Cecil {
 						Assembly = (AssemblyNameReference) GetTypeReferenceScope (implementation),
 					};
 				} else if (implementation.TokenType == TokenType.File) {
+					if (!IsValidTableIndex (Table.File, implementation.RID))
+						continue;
 					var file_record = ReadFileRecord (implementation.RID);
 
 					resource = new LinkedResource (name, flags) {
