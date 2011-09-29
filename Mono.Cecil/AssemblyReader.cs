@@ -889,8 +889,6 @@ namespace Mono.Cecil {
 		{
 			var list = new Range ();
 
-			list.Start = table_index;
-
 			uint next_index;
 			var current_table = image.TableHeap [current];
 
@@ -903,9 +901,22 @@ namespace Mono.Cecil {
 				Position = position;
 			}
 
+			table_index = FixTableIndex (target, table_index);
+			next_index = FixTableIndex (target, next_index);
+			if (next_index < table_index)
+				next_index = table_index;
+
+			list.Start = table_index;
 			list.Length = next_index - list.Start;
 
 			return list;
+		}
+
+		uint FixTableIndex (Table table, uint table_index)
+		{
+			if (table_index == 0 || table_index > image.TableHeap [table].Length + 1)
+				return image.TableHeap [table].Length + 1;
+			return table_index;
 		}
 
 		public Row<short, int> ReadTypeLayout (TypeDefinition type)
