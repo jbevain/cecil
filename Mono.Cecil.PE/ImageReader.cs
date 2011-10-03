@@ -292,7 +292,9 @@ namespace Mono.Cecil.PE {
 			var data = new byte [length];
 			int offset = 0, read;
 
-			while ((read = Read (data, offset, length - offset)) > 0)
+			// If the file is on the network, and we read more than 2MB, this Read() call will
+			// read data from the wrong offset in the file! Tested: VMware 8, Win7 x64.
+			while ((read = Read (data, offset, Math.Min (0x200000, length - offset))) > 0)
 				offset += read;
 
 			section.Data = data;
