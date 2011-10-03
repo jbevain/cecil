@@ -147,6 +147,22 @@ namespace Mono.Cecil {
 			if (GenericConstraints != null) GenericConstraints.Clear ();
 		}
 
+		public AssemblyNameReference GetAssemblyNameReference (uint rid)
+		{
+			if (rid < 1 || rid > AssemblyReferences.Length)
+				return null;
+
+			return AssemblyReferences [rid - 1];
+		}
+
+		public ModuleReference GetModuleReference (uint rid)
+		{
+			if (rid < 1 || rid > ModuleReferences.Length)
+				return null;
+
+			return ModuleReferences [rid - 1];
+		}
+
 		public TypeDefinition GetTypeDefinition (uint rid)
 		{
 			if (rid < 1 || rid > Types.Length)
