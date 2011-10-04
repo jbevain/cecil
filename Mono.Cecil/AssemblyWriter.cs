@@ -1611,7 +1611,14 @@ namespace Mono.Cecil {
 		void AddConstant (IConstantProvider owner, TypeReference type)
 		{
 			var constant = owner.Constant;
-			var etype = GetConstantType (type, constant);
+			ElementType etype;
+			try {
+				etype = GetConstantType (type, constant);
+			} catch (ResolutionException) {
+				//TODO: Should log this, not write to console
+				Console.WriteLine ("Could not resolve typeref {0:X8} in '{1}'. Output may not be runnable!", type.MetadataToken.ToInt32 (), type.Scope);
+				return;
+			}
 
 			constant_table.AddRow (new ConstantRow (
 				etype,
@@ -2281,7 +2288,12 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			WriteCustomAttributeValue (type, argument.Value);
+			try {
+				WriteCustomAttributeValue (type, argument.Value);
+			} catch (ResolutionException) {
+				//TODO: Should log this, not write to console
+				Console.WriteLine ("Could not resolve typeref {0:X8} in '{1}'. Output may not be runnable!", type.MetadataToken.ToInt32 (), type.Scope);
+			}
 		}
 
 		void WriteCustomAttributeValue (TypeReference type, object value)
