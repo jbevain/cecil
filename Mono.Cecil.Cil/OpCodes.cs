@@ -35,20 +35,25 @@ namespace Mono.Cecil.Cil {
 
 		static OpCodes ()
 		{
-			InitializeOpCodes (OneByteOpCode);
-			InitializeOpCodes (TwoBytesOpCode);
+			InitializeOpCodes (OneByteOpCode, Nop);
+			InitializeOpCodes (TwoBytesOpCode, Nop2);
 		}
 
-		static void InitializeOpCodes (OpCode[] opcodes)
+		static void InitializeOpCodes (OpCode[] opcodes, OpCode nop)
 		{
+			var defaultOpCode = new OpCode ();
 			for (int i = 0; i < opcodes.Length; i++) {
-				if (opcodes [i].Value == 0)
-					opcodes [i] = Nop;
+				if (opcodes [i] == defaultOpCode)
+					opcodes [i] = nop;
 			}
 		}
 
 		public static readonly OpCode Nop = new OpCode (
 			0xff << 0 | 0x00 << 8 | (byte) Code.Nop << 16 | (byte) FlowControl.Next << 24,
+			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Push0 << 24);
+
+		public static readonly OpCode Nop2 = new OpCode (
+			0xfe << 0 | 0xff << 8 | (byte) Code.Nop << 16 | (byte) FlowControl.Next << 24,
 			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Break = new OpCode (
