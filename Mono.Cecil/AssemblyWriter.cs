@@ -1616,7 +1616,7 @@ namespace Mono.Cecil {
 				etype = GetConstantType (type, constant);
 			} catch (ResolutionException) {
 				//TODO: Should log this, not write to console
-				Console.WriteLine ("Could not resolve typeref {0:X8} in '{1}'. Output may not be runnable!", type.MetadataToken.ToInt32 (), type.Scope);
+				Console.WriteLine ("Could not resolve typeref {0:X8} ({1}). Output assembly might be corrupted.", type.MetadataToken.ToInt32 (), type.Scope);
 				return;
 			}
 
@@ -2292,7 +2292,7 @@ namespace Mono.Cecil {
 				WriteCustomAttributeValue (type, argument.Value);
 			} catch (ResolutionException) {
 				//TODO: Should log this, not write to console
-				Console.WriteLine ("Could not resolve typeref {0:X8} in '{1}'. Output may not be runnable!", type.MetadataToken.ToInt32 (), type.Scope);
+				Console.WriteLine ("Could not resolve typeref {0:X8} ({1}). Output assembly might be corrupted.", type.MetadataToken.ToInt32 (), type.Scope);
 			}
 		}
 
