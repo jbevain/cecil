@@ -722,10 +722,16 @@ namespace Mono.Cecil {
 			var position = (rva - section.VirtualAddress) + offset;
 			var buffer = section.Data;
 
+			if (position + 4 > buffer.LongLength)
+				return new MemoryStream (buffer, 0, 0);
+
 			var length = buffer [position]
 				| (buffer [position + 1] << 8)
 				| (buffer [position + 2] << 16)
 				| (buffer [position + 3] << 24);
+
+			if (length < 0 || length + position + 4 > buffer.LongLength)
+				return new MemoryStream (buffer, 0, 0);
 
 			return new MemoryStream (buffer, (int) position + 4, length);
 		}
