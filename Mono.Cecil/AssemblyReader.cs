@@ -1018,7 +1018,7 @@ namespace Mono.Cecil {
 
 		public TypeReference GetTypeDefOrRef (MetadataToken token)
 		{
-			return (TypeReference) LookupToken (token);
+			return LookupToken (token) as TypeReference;
 		}
 
 		public TypeDefinition GetTypeDefinition (uint rid)
@@ -2274,8 +2274,7 @@ namespace Mono.Cecil {
 			if (!MoveTo (Table.MethodSpec, rid))
 				return null;
 
-			var element_method = (MethodReference) LookupToken (
-				ReadMetadataToken (CodedIndex.MethodDefOrRef));
+			var element_method = LookupToken (ReadMetadataToken (CodedIndex.MethodDefOrRef)) as MethodReference;
 			if (element_method == null)
 				return null;
 			var signature = ReadBlobIndex ();
@@ -2514,8 +2513,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < range.Length; i++) {
 				ReadMetadataToken (CodedIndex.HasCustomAttribute);
 
-				var constructor = (MethodReference) LookupToken (
-					ReadMetadataToken (CodedIndex.CustomAttributeType));
+				var constructor = LookupToken (ReadMetadataToken (CodedIndex.CustomAttributeType)) as MethodReference;
 
 				var signature = ReadBlobIndex ();
 
