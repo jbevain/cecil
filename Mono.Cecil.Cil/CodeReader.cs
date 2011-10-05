@@ -217,8 +217,16 @@ namespace Mono.Cecil.Cil {
 			switch (instruction.opcode.OperandType) {
 			case OperandType.InlineSwitch:
 				var length = ReadInt32 ();
+				if (length < 0)
+					return new int [0];
 				var base_offset = Offset + (4 * length);
-				var branches = new int [length];
+				int [] branches;
+				try {
+					branches = new int[length];
+				} catch (OutOfMemoryException) {
+					return new int [0];
+				}
+
 				for (int i = 0; i < length; i++)
 					branches [i] = base_offset + ReadInt32 ();
 				return branches;
