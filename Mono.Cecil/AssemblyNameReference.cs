@@ -210,14 +210,14 @@ namespace Mono.Cecil {
 					name.Culture = parts [1];
 					break;
 				case "publickeytoken":
-					string pk_token = parts [1];
+					var pk_token = parts [1];
 					if (pk_token == "null")
 						break;
 
 					name.PublicKeyToken = new byte [pk_token.Length / 2];
-					for (int j = 0; j < name.PublicKeyToken.Length; j++) {
+					for (int j = 0; j < name.PublicKeyToken.Length; j++)
 						name.PublicKeyToken [j] = Byte.Parse (pk_token.Substring (j * 2, 2), NumberStyles.HexNumber);
-					}
+
 					break;
 				}
 			}
