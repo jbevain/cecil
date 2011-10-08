@@ -868,6 +868,8 @@ namespace Mono.Cecil {
 
 				if (!IsValidTableIndex (Table.TypeDef, nested) || !IsValidTableIndex (Table.TypeDef, declaring))
 					continue;
+				if (nested == declaring)
+					continue;
 
 				AddNestedMapping (declaring, nested);
 			}
@@ -875,8 +877,10 @@ namespace Mono.Cecil {
 
 		void AddNestedMapping (uint declaring, uint nested)
 		{
-			metadata.SetNestedTypeMapping (declaring, AddMapping (metadata.NestedTypes, declaring, nested));
-			metadata.SetReverseNestedTypeMapping (nested, declaring);
+			if (!metadata.ReverseNestedTypes.ContainsKey (nested)) {
+				metadata.SetNestedTypeMapping (declaring, AddMapping (metadata.NestedTypes, declaring, nested));
+				metadata.SetReverseNestedTypeMapping (nested, declaring);
+			}
 		}
 
 		static TValue [] AddMapping<TKey, TValue> (Dictionary<TKey, TValue []> cache, TKey key, TValue value)
