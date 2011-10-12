@@ -128,44 +128,82 @@ namespace Mono.Cecil.Cil {
 			AppendLabel (instruction, this);
 			instruction.Append (':');
 			instruction.Append (' ');
-			instruction.Append (opcode.Name);
+			AppendInstruction (instruction, this);
 
-			if (operand == null)
-				return instruction.ToString ();
+			return instruction.ToString ();
+		}
 
-			instruction.Append (' ');
+		static void AppendInstruction (StringBuilder builder, Instruction instruction)
+		{
+			builder.Append (instruction.GetOpCodeString ());
 
-			switch (opcode.OperandType) {
+			if (instruction.operand == null)
+				return;
+
+			builder.Append (' ');
+			AppendOperand (builder, instruction);
+		}
+
+		static void AppendOperand (StringBuilder builder, Instruction instruction)
+		{
+			switch (instruction.opcode.OperandType) {
 			case OperandType.ShortInlineBrTarget:
 			case OperandType.InlineBrTarget:
-				AppendLabel (instruction, (Instruction) operand);
+				AppendLabel (builder, (Instruction) instruction.operand);
 				break;
 			case OperandType.InlineSwitch:
-				var labels = (Instruction []) operand;
+				var labels = (Instruction []) instruction.operand;
 				for (int i = 0; i < labels.Length; i++) {
 					if (i > 0)
-						instruction.Append (',');
+						builder.Append (',');
 
-					AppendLabel (instruction, labels [i]);
+					AppendLabel (builder, labels [i]);
 				}
 				break;
 			case OperandType.InlineString:
-				instruction.Append ('\"');
-				instruction.Append (operand);
-				instruction.Append ('\"');
+				builder.Append ('\"');
+				builder.Append (instruction.operand);
+				builder.Append ('\"');
 				break;
 			default:
-				instruction.Append (operand);
+				builder.Append (instruction.operand);
 				break;
 			}
-
-			return instruction.ToString ();
 		}
 
 		static void AppendLabel (StringBuilder builder, Instruction instruction)
 		{
 			builder.Append ("IL_");
 			builder.Append (instruction.offset.ToString ("x4"));
+		}
+
+		public string GetLabelString ()
+		{
+			var builder = new StringBuilder ();
+			AppendLabel (builder, this);
+			return builder.ToString ();
+		}
+
+		public string GetInstructionString ()
+		{
+			var builder = new StringBuilder ();
+			AppendInstruction (builder, this);
+			return builder.ToString ();
+		}
+
+		public string GetOpCodeString ()
+		{
+			return opcode.Name;
+		}
+
+		public string GetOperandString ()
+		{
+			if (operand == null)
+				return "";
+
+			var builder = new StringBuilder ();
+			AppendOperand (builder, this);
+			return builder.ToString ();
 		}
 
 		public static Instruction Create (OpCode opcode)
