@@ -52,6 +52,12 @@ namespace Mono.Cecil.PE {
 			this.length = this.buffer.Length;
 		}
 
+		public bool SizeAvailable (int length)
+		{
+			return length == 0 ||
+				(position >= 0 && position + length >= position && position + length <= buffer.Length);
+		}
+
 		public void Reset (byte [] buffer)
 		{
 			this.buffer = buffer ?? Empty<byte>.Array;

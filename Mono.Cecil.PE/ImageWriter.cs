@@ -783,6 +783,8 @@ namespace Mono.Cecil.PE {
 
 		void PatchResourceDirectoryTable (ByteBuffer resources)
 		{
+			if (!resources.SizeAvailable (16))
+				return;
 			resources.Advance (12);
 
 			var entries = resources.ReadUInt16 () + resources.ReadUInt16 ();
@@ -793,6 +795,8 @@ namespace Mono.Cecil.PE {
 
 		void PatchResourceDirectoryEntry (ByteBuffer resources)
 		{
+			if (!resources.SizeAvailable (8))
+				return;
 			resources.Advance (4);
 			var child = resources.ReadUInt32 ();
 
@@ -809,6 +813,8 @@ namespace Mono.Cecil.PE {
 
 		void PatchResourceDataEntry (ByteBuffer resources)
 		{
+			if (!resources.SizeAvailable (4))
+				return;
 			var old_rsrc = GetImageResourceSection ();
 			var rva = resources.ReadUInt32 ();
 			resources.position -= 4;
