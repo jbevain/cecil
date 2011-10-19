@@ -798,7 +798,7 @@ namespace Mono.Cecil.Cil {
 
 		public static readonly OpCode Endfinally = new OpCode (
 			0xff << 0 | 0xdc << 8 | (byte) Code.Endfinally << 16 | (byte) FlowControl.Return << 24,
-			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Push0 << 24);
+			(byte) OpCodeType.Primitive << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.PopAll << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Leave = new OpCode (
 			0xff << 0 | 0xdd << 8 | (byte) Code.Leave << 16 | (byte) FlowControl.Branch << 24,
