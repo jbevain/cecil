@@ -47,6 +47,7 @@ namespace Mono.Cecil.PE {
 		ImageDebugDirectory debug_directory;
 		byte [] debug_data;
 
+		RVA win32_rva;
 		ByteBuffer win32_resources;
 
 		const uint pe_header_size = 0x178u;
@@ -91,12 +92,19 @@ namespace Mono.Cecil.PE {
 
 		void GetWin32Resources ()
 		{
+			if (module.Win32Resources != null)
+			{
+				win32_rva = module.Win32RVA;
+				win32_resources = new ByteBuffer(module.Win32Resources);
+				return;
+			}
 			var rsrc = GetImageResourceSection ();
 			if (rsrc == null)
 				return;
 
 			var raw_resources = new byte [rsrc.Data.Length];
 			Buffer.BlockCopy (rsrc.Data, 0, raw_resources, 0, rsrc.Data.Length);
+			win32_rva = rsrc.VirtualAddress;
 			win32_resources = new ByteBuffer (raw_resources);
 		}
 
@@ -809,10 +817,9 @@ namespace Mono.Cecil.PE {
 
 		void PatchResourceDataEntry (ByteBuffer resources)
 		{
-			var old_rsrc = GetImageResourceSection ();
 			var rva = resources.ReadUInt32 ();
 			resources.position -= 4;
-			resources.WriteUInt32 (rva - old_rsrc.VirtualAddress + rsrc.VirtualAddress);
+			resources.WriteUInt32 (rva - win32_rva + rsrc.VirtualAddress);
 		}
 	}
 }

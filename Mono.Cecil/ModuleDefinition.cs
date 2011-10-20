@@ -222,6 +222,8 @@ namespace Mono.Cecil {
 		Collection<Resource> resources;
 		Collection<ExportedType> exported_types;
 		TypeDefinitionCollection types;
+		internal byte[] Win32Resources;
+		internal uint Win32RVA;
 
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
@@ -793,6 +795,15 @@ namespace Mono.Cecil {
 			CheckContext (context, this);
 
 			return MetadataImporter.ImportMethod (method, (IGenericContext) context);
+		}
+		
+		public void ImportWin32Resources(ModuleDefinition source)
+		{
+			Section rsrc = source.Image.GetSection(".rsrc");
+			var raw_resources = new byte[rsrc.Data.Length];
+			Buffer.BlockCopy(rsrc.Data, 0, raw_resources, 0, rsrc.Data.Length);
+			Win32Resources = raw_resources;
+			Win32RVA = rsrc.VirtualAddress;
 		}
 
 #endif
