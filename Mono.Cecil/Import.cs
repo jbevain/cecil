@@ -162,7 +162,7 @@ namespace Mono.Cecil {
 			var instance_arguments = instance.GenericArguments;
 
 			for (int i = 0; i < arguments.Length; i++)
-				instance_arguments.Add (ImportType (arguments [i], context ?? element_type));
+				instance_arguments.Add (ImportType (arguments [i], /* ILRepack // context ??*/ element_type));
 
 			return instance;
 		}
@@ -247,7 +247,7 @@ namespace Mono.Cecil {
 			return new FieldReference {
 				Name = field.Name,
 				DeclaringType = declaring_type,
-				FieldType = ImportType (field.FieldType, context ?? declaring_type),
+				FieldType = ImportType (field.FieldType, /* ILRepack // context ??*/ declaring_type),
 			};
 		}
 
@@ -288,7 +288,7 @@ namespace Mono.Cecil {
 
 			var method_info = method as SR.MethodInfo;
 			reference.ReturnType = method_info != null
-				? ImportType (method_info.ReturnType, context ?? reference)
+				? ImportType (method_info.ReturnType, /* ILRepack // context ??*/ reference)
 				: ImportType (typeof (void), null);
 
 			var parameters = method.GetParameters ();
@@ -296,7 +296,7 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < parameters.Length; i++)
 				reference_parameters.Add (
-					new ParameterDefinition (ImportType (parameters [i].ParameterType, context ?? reference)));
+					new ParameterDefinition (ImportType (parameters [i].ParameterType, /* ILRepack // context ??*/ reference)));
 
 			reference.DeclaringType = declaring_type;
 
@@ -328,7 +328,7 @@ namespace Mono.Cecil {
 			var instance_arguments = instance.GenericArguments;
 
 			for (int i = 0; i < arguments.Length; i++)
-				instance_arguments.Add (ImportType (arguments [i], context ?? element_method));
+				instance_arguments.Add (ImportType (arguments [i], /* ILRepack // context ??*/ element_method));
 
 			return instance;
 		}
@@ -507,7 +507,7 @@ namespace Mono.Cecil {
 			return new FieldReference {
 				Name = field.Name,
 				DeclaringType = declaring_type,
-				FieldType = ImportType (field.FieldType, context ?? declaring_type),
+				FieldType = ImportType (field.FieldType, /* ILRepack // context ??*/ declaring_type),
 			};
 		}
 
@@ -530,7 +530,7 @@ namespace Mono.Cecil {
 			if (method.HasGenericParameters)
 				ImportGenericParameters (reference, method);
 
-			reference.ReturnType = ImportType (method.ReturnType, context ?? reference);
+			reference.ReturnType = ImportType (method.ReturnType, /* ILRepack // context ??*/ reference);
 
 			if (!method.HasParameters)
 				return reference;
@@ -540,7 +540,7 @@ namespace Mono.Cecil {
 			var parameters = method.Parameters;
 			for (int i = 0; i < parameters.Count; i++)
 				reference_parameters.Add (
-					new ParameterDefinition (ImportType (parameters [i].ParameterType, context ?? reference)));
+					new ParameterDefinition (ImportType (parameters [i].ParameterType, /* ILRepack // context ??*/ reference)));
 
 			return reference;
 		}
