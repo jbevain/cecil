@@ -72,5 +72,10 @@ namespace Mono.Cecil {
 			this.name = name;
 			this.attributes = (uint) attributes;
 		}
+
+		public override string ToString ()
+		{
+			return Name;
+		}
 	}
 }
