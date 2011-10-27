@@ -189,7 +189,11 @@ namespace Mono.Cecil.Cil {
 				return;
 
 			var operand = instruction.operand;
-			if (operand == null)
+			if (operand == null &&
+				operand_type != OperandType.InlineType &&
+				operand_type != OperandType.InlineField &&
+				operand_type != OperandType.InlineMethod &&
+				operand_type != OperandType.InlineTok)
 				throw new ArgumentException ();
 
 			switch (operand_type) {
@@ -254,7 +258,25 @@ namespace Mono.Cecil.Cil {
 			case OperandType.InlineField:
 			case OperandType.InlineMethod:
 			case OperandType.InlineTok:
-				WriteMetadataToken (metadata.LookupToken ((IMetadataTokenProvider) operand));
+				if (operand == null) {
+					switch (operand_type) {
+					case OperandType.InlineType:
+						WriteMetadataToken (new MetadataToken (TokenType.TypeDef));
+						break;
+					case OperandType.InlineField:
+						WriteMetadataToken (new MetadataToken (TokenType.Field));
+						break;
+					case OperandType.InlineMethod:
+						WriteMetadataToken (new MetadataToken (TokenType.Method));
+						break;
+					case OperandType.InlineTok:
+					default:
+						WriteMetadataToken (new MetadataToken ());
+						break;
+					}
+				}
+				else
+					WriteMetadataToken (metadata.LookupToken ((IMetadataTokenProvider) operand));
 				break;
 			default:
 				throw new ArgumentException ();
@@ -424,6 +446,8 @@ namespace Mono.Cecil.Cil {
 			switch (instruction.opcode.FlowControl) {
 			case FlowControl.Call: {
 				var method = (IMethodSignature) instruction.operand;
+				if (method == null)
+					break;
 				stack_size -= (method.HasParameters ? method.Parameters.Count : 0)
 					+ (method.HasThis && instruction.opcode.Code != Code.Newobj ? 1 : 0);
 				stack_size += (method.ReturnType.etype == ElementType.Void ? 0 : 1)
