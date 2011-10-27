@@ -658,9 +658,10 @@ namespace Mono.Cecil {
 
 		public MemoryStream GetManagedResourceStream (uint offset)
 		{
-			var reader = image.GetReaderAt (image.Resources.VirtualAddress);
-			reader.Advance ((int) offset);
-			return new MemoryStream (reader.ReadBytes (reader.ReadInt32 ()));
+			return image.ReadAt (image.Resources.VirtualAddress, reader => {
+				reader.Advance ((int) offset);
+				return new MemoryStream (reader.ReadBytes (reader.ReadInt32 ()));
+			});
 		}
 
 		void PopulateVersionAndFlags (AssemblyNameReference name)
@@ -1206,8 +1207,7 @@ namespace Mono.Cecil {
 
 		byte [] GetFieldInitializeValue (int size, RVA rva)
 		{
-			var reader = image.GetReaderAt (rva);
-			return reader.ReadBytes (size);
+			return image.ReadAt (rva, reader => reader.ReadBytes (size));
 		}
 
 		static int GetFieldTypeSize (TypeReference type)
@@ -2602,19 +2602,15 @@ namespace Mono.Cecil {
 	sealed class SignatureReader : ByteBuffer {
 
 		readonly MetadataReader reader;
-		readonly uint start, sig_length;
 
 		TypeSystem TypeSystem {
 			get { return reader.module.TypeSystem; }
 		}
 
 		public SignatureReader (uint blob, MetadataReader reader)
-			: base (reader.image.BlobHeap.data)
+			: base (reader.image.BlobHeap.Read (blob))
 		{
 			this.reader = reader;
-			this.start = blob;
-			this.position = (int) this.start;
-			this.sig_length = ReadCompressedUInt32();
 		}
 
 		MetadataToken ReadTypeTokenSignature ()
@@ -3129,7 +3125,7 @@ namespace Mono.Cecil {
 
 		public bool CanReadMore ()
 		{
-			return position - start <= sig_length;
+			return position < length;
 		}
 	}
 }

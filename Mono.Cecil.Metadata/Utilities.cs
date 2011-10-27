@@ -34,26 +34,6 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static uint ReadCompressedUInt32 (this byte [] data, ref int position)
-		{
-			uint integer;
-			if ((data [position] & 0x80) == 0) {
-				integer = data [position];
-				position++;
-			} else if ((data [position] & 0x40) == 0) {
-				integer = (uint) (data [position] & ~0x80) << 8;
-				integer |= data [position + 1];
-				position += 2;
-			} else {
-				integer = (uint) (data [position] & ~0xc0) << 24;
-				integer |= (uint) data [position + 1] << 16;
-				integer |= (uint) data [position + 2] << 8;
-				integer |= (uint) data [position + 3];
-				position += 4;
-			}
-			return integer;
-		}
-
 		public static MetadataToken GetMetadataToken (this CodedIndex self, uint data)
 		{
 			uint rid;

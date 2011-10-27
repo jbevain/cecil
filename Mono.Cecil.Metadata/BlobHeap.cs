@@ -26,30 +26,23 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
 
 	sealed class BlobHeap : Heap {
 
-		public BlobHeap (byte [] data)
-			: base (data)
+		public BlobHeap (Image image, uint offset, uint size)
+			: base (image, offset, size)
 		{
 		}
 
 		public byte [] Read (uint index)
 		{
-			if (index == 0 || index > this.data.Length - 1)
+			if (index == 0 || index > Size - 1)
 				return Empty<byte>.Array;
 
-			int position = (int) index;
-			int length = (int) data.ReadCompressedUInt32 (ref position);
-
-			var buffer = new byte [length];
-
-			Buffer.BlockCopy (data, position, buffer, 0, length);
-
-			return buffer;
+			return ReadAt (index, reader => reader.ReadBytes ((int) reader.ReadCompressedUInt32 ()));
 		}
 	}
 }

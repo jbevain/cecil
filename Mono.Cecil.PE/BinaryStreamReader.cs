@@ -61,5 +61,21 @@ namespace Mono.Cecil.PE {
 		{
 			return new DataDirectory (ReadUInt32 (), ReadUInt32 ());
 		}
+
+		public uint ReadCompressedUInt32 ()
+		{
+			byte first = ReadByte ();
+			if ((first & 0x80) == 0)
+				return first;
+
+			if ((first & 0x40) == 0)
+				return ((uint) (first & ~0x80) << 8)
+					| ReadByte ();
+
+			return ((uint) (first & ~0xc0) << 24)
+				| (uint) ReadByte () << 16
+				| (uint) ReadByte () << 8
+				| ReadByte ();
+		}
 	}
 }

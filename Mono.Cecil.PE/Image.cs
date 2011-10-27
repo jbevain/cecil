@@ -132,30 +132,31 @@ namespace Mono.Cecil.PE {
 			return null;
 		}
 
-		public BinaryStreamReader GetReaderAt (RVA rva)
+		public TRet ReadAt<TRet> (RVA rva, Func<BinaryStreamReader, TRet> read)
 		{
+			var position = Stream.Position;
 			var reader = new BinaryStreamReader (Stream);
 			reader.MoveTo (ResolveVirtualAddress (rva));
-			return reader;
+			var ret = read (reader);
+			Stream.Position = position;
+			return ret;
 		}
 
 		public ImageDebugDirectory GetDebugHeader (out byte [] header)
 		{
-			var reader = GetReaderAt (Debug.VirtualAddress);
+			var directory = ReadAt (Debug.VirtualAddress, reader =>
+				new ImageDebugDirectory {
+					Characteristics = reader.ReadInt32 (),
+					TimeDateStamp = reader.ReadInt32 (),
+					MajorVersion = reader.ReadInt16 (),
+					MinorVersion = reader.ReadInt16 (),
+					Type = reader.ReadInt32 (),
+					SizeOfData = reader.ReadInt32 (),
+					AddressOfRawData = reader.ReadInt32 (),
+					PointerToRawData = reader.ReadInt32 (),
+				});
 
-			var directory = new ImageDebugDirectory {
-				Characteristics = reader.ReadInt32 (),
-				TimeDateStamp = reader.ReadInt32 (),
-				MajorVersion = reader.ReadInt16 (),
-				MinorVersion = reader.ReadInt16 (),
-				Type = reader.ReadInt32 (),
-				SizeOfData = reader.ReadInt32 (),
-				AddressOfRawData = reader.ReadInt32 (),
-				PointerToRawData = reader.ReadInt32 (),
-			};
-
-			reader = GetReaderAt ((uint) directory.AddressOfRawData);
-			header = reader.ReadBytes (directory.SizeOfData);
+			header = ReadAt ((RVA) directory.AddressOfRawData, reader => reader.ReadBytes (directory.SizeOfData));
 			return directory;
 		}
 

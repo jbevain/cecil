@@ -26,17 +26,29 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using Mono.Cecil.PE;
+
 namespace Mono.Cecil.Metadata {
 
 	abstract class Heap {
 
 		public int IndexSize;
 
-		internal byte [] data;
+		public readonly Image Image;
+		public readonly uint Offset;
+		public readonly uint Size;
 
-		protected Heap (byte [] data)
+		protected Heap (Image image, uint offset, uint size)
 		{
-			this.data = data;
+			this.Image = image;
+			this.Offset = offset;
+			this.Size = size;
+		}
+
+		public TRet ReadAt<TRet> (uint index, Func<BinaryStreamReader, TRet> read)
+		{
+			return Image.ReadAt(Image.MetadataSection.VirtualAddress, reader => { reader.Advance ((int)(Offset + index)); return read(reader); });
 		}
 	}
 }
