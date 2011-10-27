@@ -26,10 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Text;
-
-using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
 
@@ -37,8 +36,8 @@ namespace Mono.Cecil.Metadata {
 
 		readonly Dictionary<uint, string> strings = new Dictionary<uint, string> ();
 
-		public StringHeap (Image image, uint offset, uint size)
-			: base (image, offset, size)
+		public StringHeap (byte [] data)
+			: base (data)
 		{
 		}
 
@@ -51,7 +50,7 @@ namespace Mono.Cecil.Metadata {
 			if (strings.TryGetValue (index, out @string))
 				return @string;
 
-			if (index > Size - 1)
+			if (index > data.Length - 1)
 				return string.Empty;
 
 			@string = ReadStringAt (index);
@@ -63,20 +62,17 @@ namespace Mono.Cecil.Metadata {
 
 		protected virtual string ReadStringAt (uint index)
 		{
-			return ReadAt (index, reader => {
-				int length = 0;
-				var start = reader.Position;
+			int length = 0;
+			int start = (int) index;
 
-				for (int i = 0; ; i++) {
-					if (reader.ReadByte () == 0)
-						break;
+			for (int i = start; ; i++) {
+				if (data [i] == 0)
+					break;
 
-					length++;
-				}
+				length++;
+			}
 
-				reader.Position = start;
-				return Encoding.UTF8.GetString (reader.ReadBytes (length), 0, length);
-			});
+			return Encoding.UTF8.GetString (data, start, length);
 		}
 	}
 }

@@ -98,12 +98,9 @@ namespace Mono.Cecil.Metadata {
 			get { return Tables [(int) table]; }
 		}
 
-		internal byte [] data;
-
-		public TableHeap (Image image, uint offset, uint size, byte [] data)
-			: base (image, offset, size)
+		public TableHeap (byte [] data)
+			: base (data)
 		{
-			this.data = data;
 		}
 
 		public bool HasTable (Table table)

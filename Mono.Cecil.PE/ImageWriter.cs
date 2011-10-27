@@ -95,7 +95,8 @@ namespace Mono.Cecil.PE {
 			if (rsrc == null)
 				return;
 
-			win32_resources = module.Image.ReadAt (rsrc.VirtualAddress, reader => new ByteBuffer (reader.ReadBytes ((int) rsrc.SizeOfRawData)));
+			var reader = module.Image.GetReaderAt (rsrc.VirtualAddress);
+			win32_resources = new ByteBuffer (reader.ReadBytes ((int) rsrc.SizeOfRawData));
 		}
 
 		Section GetImageResourceSection ()

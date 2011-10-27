@@ -109,9 +109,9 @@ namespace Mono.Cecil.Cil {
 
 		public VariableDefinitionCollection ReadVariables (MetadataToken local_var_token)
 		{
-			var position = reader.Position;
+			var position = reader.position;
 			var variables = reader.ReadVariables (local_var_token);
-			reader.Position = position;
+			reader.position = position;
 
 			return variables;
 		}
@@ -215,11 +215,7 @@ namespace Mono.Cecil.Cil {
 
 		public CallSite GetCallSite (MetadataToken token)
 		{
-			var position = reader.Position;
-			var call = reader.ReadCallSite (token);
-			reader.Position = position;
-
-			return call;
+			return reader.ReadCallSite (token);
 		}
 
 		void ResolveBranches (Collection<Instruction> instructions)

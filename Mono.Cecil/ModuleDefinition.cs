@@ -815,12 +815,12 @@ namespace Mono.Cecil {
 
 		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
 		{
-			var position = reader.Position;
+			var position = reader.position;
 			var context = reader.context;
 
 			var ret = read (item, reader);
 
-			reader.Position = position;
+			reader.position = position;
 			reader.context = context;
 
 			return ret;

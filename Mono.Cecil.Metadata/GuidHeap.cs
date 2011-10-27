@@ -27,14 +27,13 @@
 //
 
 using System;
-using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
 
 	sealed class GuidHeap : Heap {
 
-		public GuidHeap (Image image, uint offset, uint size)
-			: base (image, offset, size)
+		public GuidHeap (byte [] data)
+			: base (data)
 		{
 		}
 
@@ -45,9 +44,13 @@ namespace Mono.Cecil.Metadata {
 
 			const int guid_size = 16;
 
+			var buffer = new byte [guid_size];
+
 			index--;
 
-			return ReadAt (index, reader => new Guid (reader.ReadBytes (guid_size)));
+			Buffer.BlockCopy (this.data, (int) index, buffer, 0, guid_size);
+
+			return new Guid (buffer);
 		}
 	}
 }

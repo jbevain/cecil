@@ -343,24 +343,26 @@ namespace Mono.Cecil.PE {
 			// Size			4
 			uint size = ReadUInt32 ();
 
+			var data = ReadHeapData (offset, size);
+
 			var name = ReadAlignedString (16);
 			switch (name) {
 			case "#~":
 			case "#-":
-				image.TableHeap = new TableHeap (image, offset, size, ReadHeapData (offset, size));
+				image.TableHeap = new TableHeap (data);
 				table_heap_offset = offset;
 				break;
 			case "#Strings":
-				image.StringHeap = new StringHeap (image, offset, size);
+				image.StringHeap = new StringHeap (data);
 				break;
 			case "#Blob":
-				image.BlobHeap = new BlobHeap (image, offset, size);
+				image.BlobHeap = new BlobHeap (data);
 				break;
 			case "#GUID":
-				image.GuidHeap = new GuidHeap (image, offset, size);
+				image.GuidHeap = new GuidHeap (data);
 				break;
 			case "#US":
-				image.UserStringHeap = new UserStringHeap (image, offset, size);
+				image.UserStringHeap = new UserStringHeap (data);
 				break;
 			}
 		}

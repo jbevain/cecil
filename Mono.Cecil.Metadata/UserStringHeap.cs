@@ -26,33 +26,29 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	sealed class UserStringHeap : StringHeap {
 
-		public UserStringHeap (Image image, uint offset, uint size)
-			: base (image, offset, size)
+		public UserStringHeap (byte [] data)
+			: base (data)
 		{
 		}
 
 		protected override string ReadStringAt (uint index)
 		{
-			return ReadAt (index, reader => {
-				uint length = (uint) (reader.ReadCompressedUInt32 () & ~1);
-				var data = reader.ReadBytes ((int) length);
+			int start = (int) index;
 
-				if (length < 1)
-					return string.Empty;
+			uint length = (uint) (data.ReadCompressedUInt32 (ref start) & ~1);
+			if (length < 1)
+				return string.Empty;
 
-				var chars = new char [length / 2];
+			var chars = new char [length / 2];
 
-				for (int i = 0, j = 0; i < length; i += 2)
-					chars [j++] = (char) (data [i] | (data [i + 1] << 8));
+			for (int i = start, j = 0; i < start + length; i += 2)
+				chars [j++] = (char) (data [i] | (data [i + 1] << 8));
 
-				return new string (chars);
-			});
+			return new string (chars);
 		}
 	}
 }

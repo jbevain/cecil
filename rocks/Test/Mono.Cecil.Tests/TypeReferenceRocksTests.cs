@@ -118,7 +118,7 @@ namespace Mono.Cecil.Tests {
 
 		static TypeReference GetTypeReference (Type type)
 		{
-			return ModuleDefinition.CreateModule ("Foo", ModuleKind.Dll).Import (type);
+			return ModuleDefinition.ReadModule (typeof (TypeReferenceRocksTests).Module.FullyQualifiedName).Import (type);
 		}
 	}
 }

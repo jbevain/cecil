@@ -357,7 +357,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataReader : BinaryStreamReader {
+	sealed class MetadataReader : ByteBuffer {
 
 		readonly internal Image image;
 		readonly internal ModuleDefinition module;
@@ -365,13 +365,13 @@ namespace Mono.Cecil {
 
 		internal IGenericContext context;
 
-		public new uint Position {
-			get { return (uint) (base.Position - (image.MetadataSection.PointerToRawData + image.TableHeap.Offset)); }
-			set { base.Position = (int) (value + image.MetadataSection.PointerToRawData + image.TableHeap.Offset); }
+		uint Position {
+			get { return (uint) base.position; }
+			set { base.position = (int) value; }
 		}
 
 		public MetadataReader (ModuleDefinition module)
-			: base (module.Image.Stream)
+			: base (module.Image.TableHeap.data)
 		{
 			this.image = module.Image;
 			this.module = module;
@@ -395,7 +395,7 @@ namespace Mono.Cecil {
 		{
 			var blob_heap = image.BlobHeap;
 			if (blob_heap == null) {
-				Advance (2);
+				position += 2;
 				return Empty<byte>.Array;
 			}
 
@@ -417,7 +417,7 @@ namespace Mono.Cecil {
 			return ReadByIndexSize (blob_heap != null ? blob_heap.IndexSize : 2);
 		}
 
-		new string ReadString ()
+		string ReadString ()
 		{
 			return image.StringHeap.Read (ReadByIndexSize (image.StringHeap.IndexSize));
 		}
@@ -641,7 +641,7 @@ namespace Mono.Cecil {
 
 		Row<FileAttributes, string, uint> ReadFileRecord (uint rid)
 		{
-			var position = this.Position;
+			var position = this.position;
 
 			if (!MoveTo (Table.File, rid))
 				throw new ArgumentException ();
@@ -651,17 +651,16 @@ namespace Mono.Cecil {
 				ReadString (),
 				ReadBlobIndex ());
 
-			this.Position = position;
+			this.position = position;
 
 			return record;
 		}
 
 		public MemoryStream GetManagedResourceStream (uint offset)
 		{
-			return image.ReadAt (image.Resources.VirtualAddress, reader => {
-				reader.Advance ((int) offset);
-				return new MemoryStream (reader.ReadBytes (reader.ReadInt32 ()));
-			});
+			var reader = image.GetReaderAt (image.Resources.VirtualAddress);
+			reader.Advance ((int) offset);
+			return new MemoryStream (reader.ReadBytes (reader.ReadInt32 ()));
 		}
 
 		void PopulateVersionAndFlags (AssemblyNameReference name)
@@ -878,10 +877,10 @@ namespace Mono.Cecil {
 			if (current_index == current_table.Length)
 				next_index = image.TableHeap [target].Length + 1;
 			else {
-				var pposition = Position;
+				var position = Position;
 				Position += (uint) (current_table.RowSize - image.GetTableIndexSize (target));
 				next_index = ReadTableIndex (target);
-				Position = pposition;
+				Position = position;
 			}
 
 			list.Length = next_index - list.Start;
@@ -1207,7 +1206,8 @@ namespace Mono.Cecil {
 
 		byte [] GetFieldInitializeValue (int size, RVA rva)
 		{
-			return image.ReadAt (rva, reader => reader.ReadBytes (size));
+			var reader = image.GetReaderAt (rva);
+			return reader.ReadBytes (size);
 		}
 
 		static int GetFieldTypeSize (TypeReference type)
@@ -1673,9 +1673,9 @@ namespace Mono.Cecil {
 			if (param_range.Length == 0)
 				return;
 
-			var position = this.Position;
+			var position = base.position;
 			ReadParameters (method, param_range);
-			this.Position = position;
+			base.position = position;
 		}
 
 		void ReadParameters (MethodDefinition method, Range param_range)
@@ -1965,10 +1965,7 @@ namespace Mono.Cecil {
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			var position = Position;
-			var body = CodeReader.ReadMethodBody (method, this);
-			Position = position;
-			return body;
+			return CodeReader.ReadMethodBody (method, this);
 		}
 
 		public CallSite ReadCallSite (MetadataToken token)
@@ -2018,7 +2015,7 @@ namespace Mono.Cecil {
 				return null;
 
 			IMetadataTokenProvider element;
-			var position = this.Position;
+			var position = this.position;
 			var context = this.context;
 
 			switch (token.TokenType) {
@@ -2047,7 +2044,7 @@ namespace Mono.Cecil {
 				return null;
 			}
 
-			this.Position = position;
+			this.position = position;
 			this.context = context;
 
 			return element;
@@ -2556,7 +2553,7 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetExportedTypeScope (MetadataToken token)
 		{
-			var position = this.Position;
+			var position = this.position;
 			IMetadataScope scope;
 
 			switch (token.TokenType) {
@@ -2572,7 +2569,7 @@ namespace Mono.Cecil {
 				throw new NotSupportedException ();
 			}
 
-			this.Position = position;
+			this.position = position;
 			return scope;
 		}
 
@@ -2605,15 +2602,19 @@ namespace Mono.Cecil {
 	sealed class SignatureReader : ByteBuffer {
 
 		readonly MetadataReader reader;
+		readonly uint start, sig_length;
 
 		TypeSystem TypeSystem {
 			get { return reader.module.TypeSystem; }
 		}
 
 		public SignatureReader (uint blob, MetadataReader reader)
-			: base (reader.image.BlobHeap.Read (blob))
+			: base (reader.image.BlobHeap.data)
 		{
 			this.reader = reader;
+			this.start = blob;
+			this.position = (int) this.start;
+			this.sig_length = ReadCompressedUInt32();
 		}
 
 		MetadataToken ReadTypeTokenSignature ()
@@ -3128,7 +3129,7 @@ namespace Mono.Cecil {
 
 		public bool CanReadMore ()
 		{
-			return position < length;
+			return position - start <= sig_length;
 		}
 	}
 }
