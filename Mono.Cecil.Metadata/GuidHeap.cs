@@ -28,14 +28,12 @@
 
 using System;
 
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	sealed class GuidHeap : Heap {
 
-		public GuidHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public GuidHeap (byte [] data)
+			: base (data)
 		{
 		}
 
@@ -50,10 +48,9 @@ namespace Mono.Cecil.Metadata {
 
 			index--;
 
-			Buffer.BlockCopy (Section.Data, (int) (Offset + index), buffer, 0, guid_size);
+			Buffer.BlockCopy (this.data, (int) index, buffer, 0, guid_size);
 
 			return new Guid (buffer);
-
 		}
 	}
 }

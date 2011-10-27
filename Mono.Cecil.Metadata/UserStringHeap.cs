@@ -26,23 +26,18 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	sealed class UserStringHeap : StringHeap {
 
-		public UserStringHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public UserStringHeap (byte [] data)
+			: base (data)
 		{
 		}
 
 		protected override string ReadStringAt (uint index)
 		{
-			byte [] data = Section.Data;
-			int start = (int) (index + Offset);
+			int start = (int) index;
 
 			uint length = (uint) (data.ReadCompressedUInt32 (ref start) & ~1);
 			if (length < 1)

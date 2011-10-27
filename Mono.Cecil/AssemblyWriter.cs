@@ -114,6 +114,9 @@ namespace Mono.Cecil {
 
 			var writer = ImageWriter.CreateWriter (module, metadata, stream);
 
+			if (module.HasImage)
+				module.Image.Dispose ();
+
 			writer.WriteImage ();
 
 #if !SILVERLIGHT && !CF

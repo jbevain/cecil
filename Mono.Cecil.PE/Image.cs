@@ -27,8 +27,8 @@
 //
 
 using System;
+using System.IO;
 
-using Mono;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 
@@ -36,12 +36,13 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
 
-	sealed class Image {
+	sealed class Image : IDisposable {
+
+		public Stream Stream;
 
 		public ModuleKind Kind;
 		public TargetRuntime Runtime;
 		public TargetArchitecture Architecture;
-		public string FileName;
 
 		public Section [] Sections;
 
@@ -131,29 +132,42 @@ namespace Mono.Cecil.PE {
 			return null;
 		}
 
+		public BinaryStreamReader GetReaderAt (RVA rva)
+		{
+			var reader = new BinaryStreamReader (Stream);
+			reader.MoveTo (ResolveVirtualAddress (rva));
+			return reader;
+		}
+
 		public ImageDebugDirectory GetDebugHeader (out byte [] header)
 		{
-			var section = GetSectionAtVirtualAddress (Debug.VirtualAddress);
-			var buffer = new ByteBuffer (section.Data);
-			buffer.position = (int) (Debug.VirtualAddress - section.VirtualAddress);
+			var reader = GetReaderAt (Debug.VirtualAddress);
 
 			var directory = new ImageDebugDirectory {
-				Characteristics = buffer.ReadInt32 (),
-				TimeDateStamp = buffer.ReadInt32 (),
-				MajorVersion = buffer.ReadInt16 (),
-				MinorVersion = buffer.ReadInt16 (),
-				Type = buffer.ReadInt32 (),
-				SizeOfData = buffer.ReadInt32 (),
-				AddressOfRawData = buffer.ReadInt32 (),
-				PointerToRawData = buffer.ReadInt32 (),
+				Characteristics = reader.ReadInt32 (),
+				TimeDateStamp = reader.ReadInt32 (),
+				MajorVersion = reader.ReadInt16 (),
+				MinorVersion = reader.ReadInt16 (),
+				Type = reader.ReadInt32 (),
+				SizeOfData = reader.ReadInt32 (),
+				AddressOfRawData = reader.ReadInt32 (),
+				PointerToRawData = reader.ReadInt32 (),
 			};
 
-			buffer.position = (int) (directory.PointerToRawData - section.PointerToRawData);
-
-			header = new byte [directory.SizeOfData];
-			Buffer.BlockCopy (buffer.buffer, buffer.position, header, 0, header.Length);
-
+			reader = GetReaderAt ((uint) directory.AddressOfRawData);
+			header = reader.ReadBytes (directory.SizeOfData);
 			return directory;
+		}
+
+		~Image ()
+		{
+			if (Stream != null)
+				Stream.Dispose ();
+		}
+
+		public void Dispose ()
+		{
+			Stream.Dispose ();
 		}
 	}
 }

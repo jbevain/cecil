@@ -153,19 +153,20 @@ namespace Mono.Cecil.Tests {
 
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
 		{
-			var module = ModuleDefinition.ReadModule (location, reader_parameters);
-			var rt_folder = Path.Combine (Path.GetTempPath (), folder);
-			if (!Directory.Exists (rt_folder))
-				Directory.CreateDirectory (rt_folder);
-			var rt_module = Path.Combine (rt_folder, Path.GetFileName (location));
+			var rt_folder = Path.Combine(Path.GetTempPath(), folder);
+			if (!Directory.Exists(rt_folder))
+				Directory.CreateDirectory(rt_folder);
+			var rt_module = Path.Combine(rt_folder, Path.GetFileName(location));
 
-			var writer_parameters = new WriterParameters {
-				SymbolWriterProvider = GetSymbolWriterProvider (attribute),
-			};
+			using (var module = ModuleDefinition.ReadModule (location, reader_parameters)) {
+				var writer_parameters = new WriterParameters {
+					SymbolWriterProvider = GetSymbolWriterProvider (attribute),
+				};
 
-			Reflect.InvokeMethod (Method, Fixture, new object [] { module });
+				Reflect.InvokeMethod (Method, Fixture, new object [] { module });
 
-			module.Write (rt_module, writer_parameters);
+				module.Write (rt_module, writer_parameters);
+			}
 
 			if (attribute.Verify)
 				CompilationService.Verify (rt_module);
@@ -176,11 +177,13 @@ namespace Mono.Cecil.Tests {
 		public override TestResult RunTest ()
 		{
 			var result = new TestResult (TestName);
-			var module = GetModule ();
-			if (module == null)
-				return result;
 
-			Reflect.InvokeMethod (Method, Fixture, new object [] { module });
+			using (var module = GetModule ()) {
+				if (module == null)
+					return result;
+
+				Reflect.InvokeMethod (Method, Fixture, new object [] { module });
+			}
 
 			result.Success ();
 			return result;

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using SR = System.Reflection;
 
@@ -20,7 +21,7 @@ namespace Mono.Cecil.Tests {
 
 		public static TypeDefinition ToDefinition (this Type self)
 		{
-			var module = ModuleDefinition.ReadModule (self.Module.FullyQualifiedName);
+			var module = ModuleDefinition.ReadModule (new MemoryStream (File.ReadAllBytes (self.Module.FullyQualifiedName)));
 			return (TypeDefinition) module.LookupToken (self.MetadataToken);
 		}
 

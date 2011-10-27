@@ -189,7 +189,7 @@ namespace Mono.Cecil {
 
 #endif
 
-	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider {
+	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider, IDisposable {
 
 		internal Image Image;
 		internal MetadataSystem MetadataSystem;
@@ -439,9 +439,15 @@ namespace Mono.Cecil {
 			this.runtime = image.Runtime;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
-			this.fq_name = image.FileName;
+			this.fq_name = image.Stream.GetFullyQualifiedName ();
 
 			this.reader = new MetadataReader (this);
+		}
+
+		public void Dispose ()
+		{
+			if (Image != null)
+				Image.Dispose ();
 		}
 
 		public bool HasTypeReference (string fullName)
@@ -915,9 +921,7 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			using (var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-				return ReadModule (stream, parameters);
-			}
+			return ReadModule (GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read), parameters);
 		}
 
 		static void CheckStream (object stream)

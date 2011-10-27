@@ -38,6 +38,5 @@ namespace Mono.Cecil.PE {
 		public uint VirtualSize;
 		public uint SizeOfRawData;
 		public uint PointerToRawData;
-		public byte [] Data;
 	}
 }

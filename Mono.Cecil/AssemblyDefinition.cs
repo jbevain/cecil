@@ -33,7 +33,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	public sealed class AssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
+	public sealed class AssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider, IDisposable {
 
 		AssemblyNameDefinition name;
 
@@ -105,6 +105,13 @@ namespace Mono.Cecil {
 
 		internal AssemblyDefinition ()
 		{
+		}
+
+		public void Dispose ()
+		{
+			var modules = this.Modules;
+			for (int i = 0; i < modules.Count; i++)
+				modules [i].Dispose ();
 		}
 
 #if !READ_ONLY
