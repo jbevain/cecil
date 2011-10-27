@@ -357,7 +357,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataReader : ByteBuffer {
+	sealed class MetadataReader : BinaryStreamReader {
 
 		readonly internal Image image;
 		readonly internal ModuleDefinition module;
@@ -365,13 +365,13 @@ namespace Mono.Cecil {
 
 		internal IGenericContext context;
 
-		uint Position {
-			get { return (uint) base.position; }
-			set { base.position = (int) value; }
+		public new uint Position {
+			get { return (uint) (base.Position - (image.MetadataSection.PointerToRawData + image.TableHeap.Offset)); }
+			set { base.Position = (int) (value + image.MetadataSection.PointerToRawData + image.TableHeap.Offset); }
 		}
 
 		public MetadataReader (ModuleDefinition module)
-			: base (module.Image.TableHeap.data)
+			: base (module.Image.Stream)
 		{
 			this.image = module.Image;
 			this.module = module;
@@ -395,7 +395,7 @@ namespace Mono.Cecil {
 		{
 			var blob_heap = image.BlobHeap;
 			if (blob_heap == null) {
-				position += 2;
+				Advance (2);
 				return Empty<byte>.Array;
 			}
 
@@ -417,7 +417,7 @@ namespace Mono.Cecil {
 			return ReadByIndexSize (blob_heap != null ? blob_heap.IndexSize : 2);
 		}
 
-		string ReadString ()
+		new string ReadString ()
 		{
 			return image.StringHeap.Read (ReadByIndexSize (image.StringHeap.IndexSize));
 		}
@@ -641,7 +641,7 @@ namespace Mono.Cecil {
 
 		Row<FileAttributes, string, uint> ReadFileRecord (uint rid)
 		{
-			var position = this.position;
+			var position = this.Position;
 
 			if (!MoveTo (Table.File, rid))
 				throw new ArgumentException ();
@@ -651,7 +651,7 @@ namespace Mono.Cecil {
 				ReadString (),
 				ReadBlobIndex ());
 
-			this.position = position;
+			this.Position = position;
 
 			return record;
 		}
@@ -878,10 +878,10 @@ namespace Mono.Cecil {
 			if (current_index == current_table.Length)
 				next_index = image.TableHeap [target].Length + 1;
 			else {
-				var position = Position;
+				var pposition = Position;
 				Position += (uint) (current_table.RowSize - image.GetTableIndexSize (target));
 				next_index = ReadTableIndex (target);
-				Position = position;
+				Position = pposition;
 			}
 
 			list.Length = next_index - list.Start;
@@ -1673,9 +1673,9 @@ namespace Mono.Cecil {
 			if (param_range.Length == 0)
 				return;
 
-			var position = base.position;
+			var position = this.Position;
 			ReadParameters (method, param_range);
-			base.position = position;
+			this.Position = position;
 		}
 
 		void ReadParameters (MethodDefinition method, Range param_range)
@@ -1965,7 +1965,10 @@ namespace Mono.Cecil {
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			return CodeReader.ReadMethodBody (method, this);
+			var position = Position;
+			var body = CodeReader.ReadMethodBody (method, this);
+			Position = position;
+			return body;
 		}
 
 		public CallSite ReadCallSite (MetadataToken token)
@@ -2015,7 +2018,7 @@ namespace Mono.Cecil {
 				return null;
 
 			IMetadataTokenProvider element;
-			var position = this.position;
+			var position = this.Position;
 			var context = this.context;
 
 			switch (token.TokenType) {
@@ -2044,7 +2047,7 @@ namespace Mono.Cecil {
 				return null;
 			}
 
-			this.position = position;
+			this.Position = position;
 			this.context = context;
 
 			return element;
@@ -2553,7 +2556,7 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetExportedTypeScope (MetadataToken token)
 		{
-			var position = this.position;
+			var position = this.Position;
 			IMetadataScope scope;
 
 			switch (token.TokenType) {
@@ -2569,7 +2572,7 @@ namespace Mono.Cecil {
 				throw new NotSupportedException ();
 			}
 
-			this.position = position;
+			this.Position = position;
 			return scope;
 		}
 
