@@ -92,8 +92,12 @@
     <Compile Include="Mono.Cecil.Tests\PdbTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\assemblies\fsapp.exe" />
+    <Content Include="Resources\assemblies\fsapp.pdb" />
     <Content Include="Resources\assemblies\test.exe" />
     <Content Include="Resources\assemblies\test.pdb" />
+    <Content Include="Resources\assemblies\VBConsApp.exe" />
+    <Content Include="Resources\assemblies\VBConsApp.pdb" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="nunit.core, Version=2.5.10.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">

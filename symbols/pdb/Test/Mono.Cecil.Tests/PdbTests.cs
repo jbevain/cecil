@@ -94,6 +94,24 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
 		}
 
+		[TestModule ("fsapp.exe", SymbolReaderProvider = typeof (PdbReaderProvider), SymbolWriterProvider = typeof (PdbWriterProvider))]
+		public void FSharpDocument (ModuleDefinition module)
+		{
+			var type = module.GetType ("Program");
+			var method = type.GetMethod ("fact");
+
+			var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+			var document = sequence_point.Document;
+
+			Assert.IsNotNull (document);
+
+			Assert.AreEqual (@"c:\tmp\fsapp\Program.fs", document.Url);
+			Assert.AreEqual (DocumentType.Text, document.Type);
+			Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+			Assert.AreEqual (DocumentLanguage.FSharp, document.Language);
+			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+		}
+
 		[Test]
 		public void CreateMethodFromScratch ()
 		{
