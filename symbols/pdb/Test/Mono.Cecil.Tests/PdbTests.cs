@@ -76,6 +76,24 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
 		}
 
+		[TestModule ("VBConsApp.exe", SymbolReaderProvider = typeof (PdbReaderProvider), SymbolWriterProvider = typeof (PdbWriterProvider))]
+		public void BasicDocument (ModuleDefinition module)
+		{
+			var type = module.GetType ("VBConsApp.Program");
+			var method = type.GetMethod ("Main");
+
+			var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+			var document = sequence_point.Document;
+
+			Assert.IsNotNull (document);
+
+			Assert.AreEqual (@"c:\tmp\VBConsApp\Program.vb", document.Url);
+			Assert.AreEqual (DocumentType.Text, document.Type);
+			Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+			Assert.AreEqual (DocumentLanguage.Basic, document.Language);
+			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+		}
+
 		[Test]
 		public void CreateMethodFromScratch ()
 		{
