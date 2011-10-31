@@ -31,12 +31,9 @@ using System.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	public static class GlobalAssemblyResolver {
+	class AssemblyResolver : BaseAssemblyResolver {}
 
-		public static readonly IAssemblyResolver Instance = new DefaultAssemblyResolver ();
-	}
-
-	public class DefaultAssemblyResolver : BaseAssemblyResolver {
+	public class DefaultAssemblyResolver : BaseAssemblyResolver, IDisposable {
 
 		readonly IDictionary<string, AssemblyDefinition> cache;
 
@@ -70,6 +67,14 @@ namespace Mono.Cecil {
 				return;
 
 			cache [name] = assembly;
+		}
+
+		public void Dispose ()
+		{
+			foreach (var assembly in cache.Values)
+				assembly.Dispose ();
+
+			cache.Clear ();
 		}
 	}
 }
