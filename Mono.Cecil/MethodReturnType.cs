@@ -50,6 +50,14 @@ namespace Mono.Cecil {
 			set { parameter = value; }
 		}
 
+		public ParameterDefinition Parameter2 {
+			get {
+				var parameter = new ParameterDefinition (return_type);
+				parameter.method = method;
+				return parameter;
+			}
+		}
+
 		public MetadataToken MetadataToken {
 			get { return Parameter.MetadataToken; }
 			set { Parameter.MetadataToken = value; }
