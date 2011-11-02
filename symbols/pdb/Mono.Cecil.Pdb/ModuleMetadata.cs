@@ -507,13 +507,14 @@ namespace Mono.Cecil.Pdb {
 		{
 			var length = str.Length + 1 >= bufferSize ? bufferSize - 1 : (uint) str.Length;
 			chars = length + 1;
+			var offset = 0;
 
 			for (int i = 0; i < length; i++) {
-				Marshal.WriteInt16 (buffer, str [i]);
-				buffer += 2;
+				Marshal.WriteInt16 (buffer, offset, str [i]);
+				offset += 2;
 			}
 
-			Marshal.WriteInt16 (buffer, 0);
+			Marshal.WriteInt16 (buffer, offset, 0);
 		}
 
 		public uint GetInterfaceImplProps (uint iiImpl, out uint pClass)
