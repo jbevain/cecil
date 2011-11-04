@@ -497,10 +497,7 @@ namespace Mono.Cecil.Pdb {
 			if (ptr == IntPtr.Zero)
 				return;
 
-			if (IntPtr.Size == 8)
-				Marshal.WriteInt64 (ptr, value);
-			else
-				Marshal.WriteInt32 (ptr, (int) value);
+			Marshal.WriteInt32 (ptr, (int) value);
 		}
 
 		static void WriteString (string str, IntPtr buffer, uint bufferSize, out uint chars)
