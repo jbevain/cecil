@@ -45,7 +45,7 @@ namespace Mono.Cecil {
 			cache = new Dictionary<string, AssemblyDefinition> (StringComparer.Ordinal);
 		}
 
-		public override AssemblyDefinition Resolve (AssemblyNameReference name)
+		public override AssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
@@ -54,7 +54,7 @@ namespace Mono.Cecil {
 			if (cache.TryGetValue (name.FullName, out assembly))
 				return assembly;
 
-			assembly = base.Resolve (name);
+			assembly = base.Resolve (name, parameters);
 			cache [name.FullName] = assembly;
 
 			return assembly;
