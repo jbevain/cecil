@@ -352,7 +352,11 @@ namespace Mono.Cecil {
 
 		AssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference, ReaderParameters parameters)
 		{
-			var gacs = new [] { "GAC_MSIL", "GAC_64", "GAC_32", "GAC" };
+			string[] gacs;
+			if (IntPtr.Size == 4)
+				gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
+			else
+				gacs = new [] { "GAC_MSIL", "GAC_64", "GAC_32", "GAC" };
 			var prefixes = new [] { string.Empty, "v4.0_" };
 
 			for (int i = 0; i < 2; i++) {
