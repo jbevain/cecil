@@ -45,17 +45,19 @@ namespace Mono.Cecil.Cil {
 		readonly RVA code_base;
 		internal readonly MetadataBuilder metadata;
 		readonly Dictionary<uint, MetadataToken> standalone_signatures;
+		bool update_max_stack;
 
 		RVA current;
 		MethodBody body;
 
-		public CodeWriter (MetadataBuilder metadata)
+		public CodeWriter (MetadataBuilder metadata, bool update_max_stack)
 			: base (0)
 		{
 			this.code_base = metadata.text_map.GetNextRVA (TextSegment.CLIHeader);
 			this.current = code_base;
 			this.metadata = metadata;
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
+			this.update_max_stack = update_max_stack;
 		}
 
 		public RVA WriteMethodBody (MethodDefinition method)
@@ -338,7 +340,7 @@ namespace Mono.Cecil.Cil {
 			var max_stack = 0;
 			Dictionary<Instruction, int> stack_sizes = null;
 
-			if (body.HasExceptionHandlers)
+			if (update_max_stack && body.HasExceptionHandlers)
 				ComputeExceptionHandlerStackSize (ref stack_sizes);
 
 			for (int i = 0; i < count; i++) {
@@ -346,11 +348,13 @@ namespace Mono.Cecil.Cil {
 				instruction.offset = offset;
 				offset += instruction.GetSize ();
 
-				ComputeStackSize (instruction, ref stack_sizes, ref stack_size, ref max_stack);
+				if (update_max_stack)
+					ComputeStackSize (instruction, ref stack_sizes, ref stack_size, ref max_stack);
 			}
 
 			body.code_size = offset;
-			body.max_stack_size = max_stack;
+			if (update_max_stack)
+				body.max_stack_size = max_stack;
 		}
 
 		void ComputeExceptionHandlerStackSize (ref Dictionary<Instruction, int> stack_sizes)

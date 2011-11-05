@@ -105,7 +105,7 @@ namespace Mono.Cecil {
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 
 			var metadata = new MetadataBuilder (module, fq_name,
-				symbol_writer_provider, symbol_writer);
+				symbol_writer_provider, symbol_writer, parameters.UpdateMaxStack);
 
 			BuildMetadata (module, metadata);
 
@@ -739,7 +739,7 @@ namespace Mono.Cecil {
 
 		readonly internal bool write_symbols;
 
-		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
+		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer, bool update_max_stack)
 		{
 			this.module = module;
 			this.text_map = CreateTextMap ();
@@ -747,7 +747,7 @@ namespace Mono.Cecil {
 			this.symbol_writer_provider = symbol_writer_provider;
 			this.symbol_writer = symbol_writer;
 			this.write_symbols = symbol_writer != null;
-			this.code = new CodeWriter (this);
+			this.code = new CodeWriter (this, update_max_stack);
 			this.data = new DataBuffer ();
 			this.resources = new ResourceBuffer ();
 			this.string_heap = new StringHeapBuffer ();

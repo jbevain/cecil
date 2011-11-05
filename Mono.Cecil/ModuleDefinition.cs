@@ -163,6 +163,7 @@ namespace Mono.Cecil {
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
+		bool update_max_stack = true;
 #if !SILVERLIGHT && !CF
 		SR.StrongNameKeyPair key_pair;
 #endif
@@ -179,6 +180,11 @@ namespace Mono.Cecil {
 		public bool WriteSymbols {
 			get { return write_symbols; }
 			set { write_symbols = value; }
+		}
+
+		public bool UpdateMaxStack {
+			get { return update_max_stack; }
+			set { update_max_stack = value; }
 		}
 #if !SILVERLIGHT && !CF
 		public SR.StrongNameKeyPair StrongNameKeyPair {
