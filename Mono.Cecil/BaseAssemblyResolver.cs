@@ -188,8 +188,11 @@ namespace Mono.Cecil {
 			foreach (var directory in directories) {
 				foreach (var extension in extensions) {
 					string file = Path.Combine (directory, name.Name + extension);
-					if (File.Exists (file))
-						return GetAssembly (file, parameters);
+					if (File.Exists (file)) {
+						var assembly = GetAssembly (file, parameters);
+						if (assembly.Name.FullName == name.FullName)
+							return assembly;
+					}
 				}
 			}
 
