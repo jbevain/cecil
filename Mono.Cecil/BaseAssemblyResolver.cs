@@ -145,15 +145,40 @@ namespace Mono.Cecil {
 			if (parameters == null)
 				parameters = new ReaderParameters ();
 
-			var assembly = SearchDirectory (name, directories, parameters);
+			AssemblyDefinition assembly;
+
+			assembly = SearchDirectory (name, directories, parameters, false);
 			if (assembly != null)
 				return assembly;
+			assembly = Resolve (name, parameters, false);
+			if (assembly != null)
+				return assembly;
+
+			assembly = Resolve (name, parameters, true);
+			if (assembly != null)
+				return assembly;
+			assembly = SearchDirectory (name, directories, parameters, true);
+			if (assembly != null)
+				return assembly;
+
+			if (ResolveFailure != null) {
+				assembly = ResolveFailure (this, name);
+				if (assembly != null)
+					return assembly;
+			}
+
+			throw new AssemblyResolutionException (name);
+		}
+
+		AssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters, bool atleast_version)
+		{
+			AssemblyDefinition assembly;
 
 #if !SILVERLIGHT && !CF
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
 
 			if (IsZero (name.Version)) {
-				assembly = SearchDirectory (name, new [] { framework_dir }, parameters);
+				assembly = SearchDirectory (name, new [] { framework_dir }, parameters, atleast_version);
 				if (assembly != null)
 					return assembly;
 			}
@@ -168,21 +193,15 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 
-			assembly = SearchDirectory (name, new [] { framework_dir }, parameters);
+			assembly = SearchDirectory (name, new [] { framework_dir }, parameters, atleast_version);
 			if (assembly != null)
 				return assembly;
 #endif
 
-			if (ResolveFailure != null) {
-				assembly = ResolveFailure (this, name);
-				if (assembly != null)
-					return assembly;
-			}
-
-			throw new AssemblyResolutionException (name);
+			return null;
 		}
 
-		AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
+		AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters, bool atleast_version)
 		{
 			var extensions = new [] { ".exe", ".dll" };
 			foreach (var directory in directories) {
@@ -191,6 +210,8 @@ namespace Mono.Cecil {
 					if (File.Exists (file)) {
 						var assembly = GetAssembly (file, parameters);
 						if (assembly.Name.FullName == name.FullName)
+							return assembly;
+						if (atleast_version && assembly.Name.Version >= name.Version)
 							return assembly;
 					}
 				}
