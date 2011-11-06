@@ -209,7 +209,7 @@ namespace Mono.Cecil {
 		internal TypeSystem type_system;
 
 		readonly MetadataReader reader;
-		readonly string fq_name;
+		string fq_name;
 
 		internal ModuleKind kind;
 		TargetRuntime runtime;
@@ -256,6 +256,7 @@ namespace Mono.Cecil {
 
 		public string FullyQualifiedName {
 			get { return fq_name; }
+			set { fq_name = value; }
 		}
 
 		public Guid Mvid {
