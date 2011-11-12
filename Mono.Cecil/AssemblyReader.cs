@@ -3190,7 +3190,7 @@ namespace Mono.Cecil {
 			case ElementType.String:
 				return TypeSystem.String;
 			default:
-				throw new NotImplementedException (etype.ToString ());
+				throw new NotImplementedException ("Invalid primitive type: " + etype.ToString ());
 			}
 		}
 
