@@ -12,7 +12,7 @@
     <AssemblyName>Mono.Cecil</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>mono.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\de4dot.snk</AssemblyOriginatorKeyFile>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
@@ -252,9 +252,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NOTES.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="mono.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
