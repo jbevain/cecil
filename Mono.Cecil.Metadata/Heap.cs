@@ -30,7 +30,7 @@ using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
 
-	abstract class Heap {
+	public abstract class Heap {
 
 		public int IndexSize;
 

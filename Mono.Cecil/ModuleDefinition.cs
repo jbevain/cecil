@@ -432,6 +432,10 @@ namespace Mono.Cecil {
 			set { entry_point = value; }
 		}
 
+		public MetadataStream[] MetadataStreams {
+			get { return Image.MetadataStreams; }
+		}
+
 		internal ModuleDefinition ()
 		{
 			this.MetadataSystem = new MetadataSystem ();

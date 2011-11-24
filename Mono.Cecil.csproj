@@ -140,6 +140,7 @@
     <Compile Include="Mono.Cecil.Metadata\ElementType.cs" />
     <Compile Include="Mono.Cecil.Metadata\GuidHeap.cs" />
     <Compile Include="Mono.Cecil.Metadata\Heap.cs" />
+    <Compile Include="Mono.Cecil.Metadata\MetadataStream.cs" />
     <Compile Include="Mono.Cecil.Metadata\MetadataToken.cs" />
     <Compile Include="Mono.Cecil.Metadata\Row.cs" />
     <Compile Include="Mono.Cecil.Metadata\StringHeap.cs" />

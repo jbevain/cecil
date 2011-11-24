@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Mono.Cecil.Metadata;
@@ -41,6 +42,7 @@ namespace Mono.Cecil.PE {
 
 		DataDirectory cli;
 		DataDirectory metadata;
+		List<MetadataStream> streams = new List<MetadataStream>();
 
 		public ImageReader (Stream stream)
 			: base (stream)
@@ -106,6 +108,7 @@ namespace Mono.Cecil.PE {
 			ReadMetadata ();
 
 			image.Kind = GetModuleKind (characteristics, subsystem);
+			image.MetadataStreams = streams.ToArray ();
 		}
 
 		TargetArchitecture ReadArchitecture ()
@@ -370,6 +373,9 @@ namespace Mono.Cecil.PE {
 			uint size = ReadUInt32 ();
 
 			var name = ReadAlignedString (16);
+
+			streams.Add (new MetadataStream (section, start, size, name));
+
 			switch (name) {
 			case "#~":
 			case "#-":
