@@ -105,7 +105,8 @@ namespace Mono.Cecil {
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 
 			var metadata = new MetadataBuilder (module, fq_name,
-				symbol_writer_provider, symbol_writer, parameters.UpdateMaxStack);
+				symbol_writer_provider, symbol_writer, parameters.UpdateMaxStack,
+				parameters.WriterListener);
 
 			BuildMetadata (module, metadata);
 
@@ -687,9 +688,10 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataBuilder {
+	public sealed class MetadataBuilder {
 
 		readonly internal ModuleDefinition module;
+		readonly internal IWriterListener writer_listener;
 		readonly internal ISymbolWriterProvider symbol_writer_provider;
 		readonly internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
@@ -739,11 +741,21 @@ namespace Mono.Cecil {
 
 		readonly internal bool write_symbols;
 
-		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer, bool update_max_stack)
+		public CodeWriter CodeWriter {
+			get { return code; }
+		}
+
+		public RVA GetMethodBodyRva (int index)
+		{
+			return method_table.rows[index].Col1;
+		}
+
+		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer, bool update_max_stack, IWriterListener writer_listener)
 		{
 			this.module = module;
 			this.text_map = CreateTextMap ();
 			this.fq_name = fq_name;
+			this.writer_listener = writer_listener;
 			this.symbol_writer_provider = symbol_writer_provider;
 			this.symbol_writer = symbol_writer;
 			this.write_symbols = symbol_writer != null;
@@ -843,13 +855,16 @@ namespace Mono.Cecil {
 			if (module.HasModuleReferences)
 				AddModuleReferences ();
 
-			if (module.HasResources)
-				AddResources ();
-
 			if (module.HasExportedTypes)
 				AddExportedTypes ();
 
 			BuildTypes ();
+
+			if (writer_listener != null)
+				writer_listener.OnBeforeAddingResources (this);
+
+			if (module.HasResources)
+				AddResources ();
 
 			if (assembly != null) {
 				if (assembly.HasCustomAttributes)

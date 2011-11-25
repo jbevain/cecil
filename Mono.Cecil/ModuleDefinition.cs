@@ -158,9 +158,16 @@ namespace Mono.Cecil {
 		}
 	}
 
+	public interface IWriterListener {
+
+		// Called before adding resources, and after adding types, methods, etc.
+		void OnBeforeAddingResources (MetadataBuilder builder);
+	}
+
 	public sealed class WriterParameters {
 
 		Stream symbol_stream;
+		IWriterListener writer_listener;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
 		bool update_max_stack = true;
@@ -170,6 +177,11 @@ namespace Mono.Cecil {
 		public Stream SymbolStream {
 			get { return symbol_stream; }
 			set { symbol_stream = value; }
+		}
+
+		public IWriterListener WriterListener {
+			get { return writer_listener; }
+			set { writer_listener = value; }
 		}
 
 		public ISymbolWriterProvider SymbolWriterProvider {

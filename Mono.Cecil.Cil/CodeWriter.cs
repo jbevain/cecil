@@ -40,7 +40,7 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil.Cil {
 
-	sealed class CodeWriter : ByteBuffer {
+	public sealed class CodeWriter : ByteBuffer {
 
 		readonly RVA code_base;
 		internal readonly MetadataBuilder metadata;
@@ -58,6 +58,11 @@ namespace Mono.Cecil.Cil {
 			this.metadata = metadata;
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
 			this.update_max_stack = update_max_stack;
+		}
+
+		public byte ReadByteAtRva (RVA rva) {
+			uint offset = rva - code_base;
+			return buffer [offset];
 		}
 
 		public RVA WriteMethodBody (MethodDefinition method)
