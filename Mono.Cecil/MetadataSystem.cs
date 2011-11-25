@@ -42,6 +42,11 @@ namespace Mono.Cecil {
 			this.Start = index;
 			this.Length = length;
 		}
+
+		public override string ToString()
+		{
+			return string.Format("S:{0:X8} L:{1:X8}", Start, Length);
+		}
 	}
 
 	sealed class MetadataSystem {
