@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 using Mono.Collections.Generic;
 
@@ -453,6 +454,21 @@ namespace Mono.Cecil {
 			this (@namespace, name, attributes)
 		{
 			this.BaseType = baseType;
+		}
+
+		public static IEnumerable<TypeDefinition> GetTypes (IList<TypeDefinition> types)
+		{
+			for (int i = 0; i < types.Count; i++) {
+				var type = types [i];
+
+				yield return type;
+
+				if (!type.HasNestedTypes)
+					continue;
+
+				foreach (var nested in GetTypes (type.NestedTypes))
+					yield return nested;
+			}
 		}
 
 		public override TypeDefinition Resolve ()
