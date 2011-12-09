@@ -130,7 +130,12 @@ namespace Mono.Cecil {
 			if (parameters.AssemblyResolver == null)
 				parameters.AssemblyResolver = this;
 
-			return ModuleDefinition.ReadModule (file, parameters).Assembly;
+			try {
+				return ModuleDefinition.ReadModule(file, parameters).Assembly;
+			}
+			catch (BadImageFormatException) {
+				return null;
+			}
 		}
 
 		public virtual AssemblyDefinition Resolve (AssemblyNameReference name)
@@ -209,6 +214,8 @@ namespace Mono.Cecil {
 					string file = Path.Combine (directory, name.Name + extension);
 					if (File.Exists (file)) {
 						var assembly = GetAssembly (file, parameters);
+						if (assembly == null)
+							continue;
 						if (assembly.Name.FullName == name.FullName)
 							return assembly;
 						if (atleast_version && assembly.Name.Version >= name.Version)
@@ -343,8 +350,11 @@ namespace Mono.Cecil {
 			for (int i = 0; i < gac_paths.Count; i++) {
 				var gac_path = gac_paths [i];
 				var file = GetAssemblyFile (reference, string.Empty, gac_path);
-				if (File.Exists (file))
-					return GetAssembly (file, parameters);
+				if (File.Exists (file)) {
+					var assembly = GetAssembly (file, parameters);
+					if (assembly != null)
+						return assembly;
+				}
 			}
 
 			return null;
@@ -363,8 +373,11 @@ namespace Mono.Cecil {
 				for (int j = 0; j < gacs.Length; j++) {
 					var gac = Path.Combine (gac_paths [i], gacs [j]);
 					var file = GetAssemblyFile (reference, prefixes [i], gac);
-					if (Directory.Exists (gac) && File.Exists (file))
-						return GetAssembly (file, parameters);
+					if (Directory.Exists (gac) && File.Exists (file)) {
+						var assembly = GetAssembly (file, parameters);
+						if (assembly != null)
+							return assembly;
+					}
 				}
 			}
 
