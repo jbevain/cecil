@@ -910,7 +910,7 @@ namespace Mono.Cecil.Cil {
 
 		public static readonly OpCode No = new OpCode (
 			0xfe << 0 | 0x19 << 8 | (byte) Code.No << 16 | (byte) FlowControl.Next << 24,
-			(byte) OpCodeType.Prefix << 0 | (byte) OperandType.ShortInlineI << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Push0 << 24);
+			(byte) OpCodeType.Prefix << 0 | (byte) OperandType.InlineNone << 8 | (byte) StackBehaviour.Pop0 << 16 | (byte) StackBehaviour.Push0 << 24);
 
 		public static readonly OpCode Rethrow = new OpCode (
 			0xfe << 0 | 0x1a << 8 | (byte) Code.Rethrow << 16 | (byte) FlowControl.Throw << 24,
