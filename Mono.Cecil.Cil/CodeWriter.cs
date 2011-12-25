@@ -200,7 +200,9 @@ namespace Mono.Cecil.Cil {
 				operand_type != OperandType.InlineType &&
 				operand_type != OperandType.InlineField &&
 				operand_type != OperandType.InlineMethod &&
-				operand_type != OperandType.InlineTok)
+				operand_type != OperandType.InlineTok &&
+				operand_type != OperandType.ShortInlineBrTarget &&
+				operand_type != OperandType.InlineBrTarget)
 				throw new ArgumentException ();
 
 			switch (operand_type) {
@@ -209,17 +211,23 @@ namespace Mono.Cecil.Cil {
 				WriteInt32 (targets.Length);
 				var diff = instruction.Offset + opcode.Size + (4 * (targets.Length + 1));
 				for (int i = 0; i < targets.Length; i++)
-					WriteInt32 (GetTargetOffset (targets [i]) - diff);
+					WriteInt32 (targets [i] == null ? Int32.MaxValue : GetTargetOffset (targets [i]) - diff);
 				break;
 			}
 			case OperandType.ShortInlineBrTarget: {
 				var target = (Instruction) operand;
-				WriteSByte ((sbyte) (GetTargetOffset (target) - (instruction.Offset + opcode.Size + 1)));
+				if (target != null)
+					WriteSByte ((sbyte) (GetTargetOffset (target) - (instruction.Offset + opcode.Size + 1)));
+				else
+					WriteSByte (sbyte.MaxValue);
 				break;
 			}
 			case OperandType.InlineBrTarget: {
 				var target = (Instruction) operand;
-				WriteInt32 (GetTargetOffset (target) - (instruction.Offset + opcode.Size + 4));
+				if (target != null)
+					WriteInt32 (GetTargetOffset (target) - (instruction.Offset + opcode.Size + 4));
+				else
+					WriteInt32 (int.MaxValue);
 				break;
 			}
 			case OperandType.ShortInlineVar:
