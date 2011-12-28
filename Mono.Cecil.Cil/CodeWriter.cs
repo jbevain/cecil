@@ -434,6 +434,8 @@ namespace Mono.Cecil.Cil {
 
 		static void CopyBranchStackSize (ref Dictionary<Instruction, int> stack_sizes, Instruction target, int stack_size)
 		{
+			if (target == null)
+				return;
 			if (stack_sizes == null)
 				stack_sizes = new Dictionary<Instruction, int> ();
 
