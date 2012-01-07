@@ -311,6 +311,11 @@ namespace Mono.Cecil {
 
 			return module.Resolve (this);
 		}
+
+		public void UpdateElementType ()
+		{
+			MetadataSystem.TryProcessPrimitiveType (this);
+		}
 	}
 
 	static partial class Mixin {
