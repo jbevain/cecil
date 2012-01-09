@@ -696,6 +696,7 @@ namespace Mono.Cecil {
 		readonly internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
 		readonly internal string fq_name;
+		List<TypeDefinition> all_types;
 
 		readonly Dictionary<TypeRefRow, MetadataToken> type_ref_map;
 		readonly Dictionary<uint, MetadataToken> type_spec_map;
@@ -1086,12 +1087,35 @@ namespace Mono.Cecil {
 			AddGenericParameters ();
 		}
 
+		void SortByRID<T> (IList<T> coll) where T : MemberReference
+		{
+			var list = new List<T> (coll);
+			list.Sort ((a, b) => {
+				uint rida = a.MetadataToken.RID - 1;
+				uint ridb = b.MetadataToken.RID - 1;
+				if (rida < ridb) return -1;
+				if (rida > ridb) return 1;
+				return 0;
+			});
+			coll.Clear ();
+			foreach (var elem in list)
+				coll.Add (elem);
+		}
+
 		void AttachTokens ()
 		{
-			var types = module.Types;
+			all_types = new List<TypeDefinition> (module.GetTypes ());
+			SortByRID (all_types);
 
-			for (int i = 0; i < types.Count; i++)
-				AttachTypeDefToken (types [i]);
+			// Make sure <Module> is the first type
+			if (all_types [0] != module.Types [0]) {
+				var module_type = module.Types [0];
+				all_types.Remove (module_type);
+				all_types.Insert (0, module_type);
+			}
+
+			foreach (var type in all_types)
+				AttachTypeDefToken (type);
 		}
 
 		void AttachTypeDefToken (TypeDefinition type)
@@ -1105,21 +1129,13 @@ namespace Mono.Cecil {
 
 			if (type.HasMethods)
 				AttachMethodsDefToken (type);
-
-			if (type.HasNestedTypes)
-				AttachNestedTypesDefToken (type);
-		}
-
-		void AttachNestedTypesDefToken (TypeDefinition type)
-		{
-			var nested_types = type.NestedTypes;
-			for (int i = 0; i < nested_types.Count; i++)
-				AttachTypeDefToken (nested_types [i]);
 		}
 
 		void AttachFieldsDefToken (TypeDefinition type)
 		{
 			var fields = type.Fields;
+			SortByRID (fields);
+
 			type.fields_range.Length = (uint) fields.Count;
 			for (int i = 0; i < fields.Count; i++)
 				fields [i].token = new MetadataToken (TokenType.Field, field_rid++);
@@ -1128,6 +1144,8 @@ namespace Mono.Cecil {
 		void AttachMethodsDefToken (TypeDefinition type)
 		{
 			var methods = type.Methods;
+			SortByRID (methods);
+
 			type.methods_range.Length = (uint) methods.Count;
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
@@ -1223,10 +1241,12 @@ namespace Mono.Cecil {
 
 		void AddTypeDefs ()
 		{
-			var types = module.Types;
+			foreach (var type in all_types)
+				AddType (type);
 
-			for (int i = 0; i < types.Count; i++)
-				AddType (types [i]);
+			foreach (var type in all_types)
+				if (type.HasNestedTypes)
+					AddNestedTypes (type);
 		}
 
 		void AddType (TypeDefinition type)
@@ -1265,9 +1285,6 @@ namespace Mono.Cecil {
 
 			if (type.HasSecurityDeclarations)
 				AddSecurityDeclarations (type);
-
-			if (type.HasNestedTypes)
-				AddNestedTypes (type);
 		}
 
 		void AddGenericParameters (IGenericParameterProvider owner)
@@ -1362,7 +1379,6 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < nested_types.Count; i++) {
 				var nested = nested_types [i];
-				AddType (nested);
 				nested_table.AddRow (new NestedClassRow (nested.token.RID, type.token.RID));
 			}
 		}
