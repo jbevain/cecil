@@ -1552,6 +1552,7 @@ namespace Mono.Cecil {
 		void AddProperties (TypeDefinition type)
 		{
 			var properties = type.Properties;
+			SortByRID (properties);
 
 			property_map_table.AddRow (new PropertyMapRow (type.token.RID, property_rid));
 
@@ -1594,6 +1595,7 @@ namespace Mono.Cecil {
 		void AddEvents (TypeDefinition type)
 		{
 			var events = type.Events;
+			SortByRID (events);
 
 			event_map_table.AddRow (new EventMapRow (type.token.RID, event_rid));
 
