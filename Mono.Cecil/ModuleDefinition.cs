@@ -448,6 +448,9 @@ namespace Mono.Cecil {
 		{
 			if (Image != null)
 				Image.Dispose ();
+
+			if (SymbolReader != null)
+				SymbolReader.Dispose ();
 		}
 
 		public bool HasTypeReference (string fullName)
