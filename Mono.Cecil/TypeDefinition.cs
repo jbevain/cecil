@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 
+using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -431,6 +432,23 @@ namespace Mono.Cecil {
 					return false;
 
 				return base_type.IsTypeOf ("System", "Enum") || (base_type.IsTypeOf ("System", "ValueType") && !this.IsTypeOf ("System", "Enum"));
+			}
+		}
+
+		public override bool IsPrimitive {
+			get {
+				ElementType primitive_etype;
+				return MetadataSystem.TryGetPrimitiveElementType (this, out primitive_etype);
+			}
+		}
+
+		public override MetadataType MetadataType {
+			get {
+				ElementType primitive_etype;
+				if (MetadataSystem.TryGetPrimitiveElementType (this, out primitive_etype))
+					return (MetadataType) primitive_etype;
+
+				return base.MetadataType;
 			}
 		}
 

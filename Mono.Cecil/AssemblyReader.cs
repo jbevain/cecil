@@ -1120,7 +1120,7 @@ namespace Mono.Cecil {
 			type.scope = scope;
 			type.DeclaringType = declaring_type;
 
-			MetadataSystem.TryProcessPrimitiveType (type);
+			MetadataSystem.TryProcessPrimitiveTypeReference (type);
 
 			return type;
 		}
