@@ -294,7 +294,7 @@ namespace Mono.Cecil {
 
 		public void UpdateElementType ()
 		{
-			MetadataSystem.TryProcessPrimitiveType (this);
+			MetadataSystem.TryProcessPrimitiveTypeReference (this);
 		}
 	}
 
