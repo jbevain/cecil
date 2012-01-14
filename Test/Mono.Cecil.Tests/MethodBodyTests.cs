@@ -250,6 +250,7 @@ namespace Mono.Cecil.Tests {
 			var type = method.Body.ThisParameter.ParameterType;
 			Assert.IsFalse (type.IsValueType);
 			Assert.IsFalse (type.IsPrimitive);
+			Assert.IsFalse (type.IsPointer);
 		}
 
 		[TestIL ("hello.il")]
