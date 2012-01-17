@@ -28,7 +28,7 @@
 
 namespace Mono.Cecil.Metadata {
 
-	enum ElementType : byte {
+	public enum ElementType : byte {
 		None = 0x00,
 		Void = 0x01,
 		Boolean = 0x02,
@@ -68,6 +68,8 @@ namespace Mono.Cecil.Metadata {
 		// special undocumented constants
 		Type = 0x50,
 		Boxed = 0x51,
-		Enum = 0x55
+		Enum = 0x55,
+
+		NotInitialized = 0xff	// Need special value for IConstantProvider
 	}
 }

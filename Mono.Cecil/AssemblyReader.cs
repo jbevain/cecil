@@ -2442,13 +2442,16 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public object ReadConstant (IConstantProvider owner)
+		public object ReadConstant (IConstantProvider owner, out ElementType element_type)
 		{
 			InitializeConstants ();
 
 			Row<ElementType, uint> row;
-			if (!metadata.Constants.TryGetValue (owner.MetadataToken, out row))
+			if (!metadata.Constants.TryGetValue (owner.MetadataToken, out row)) {
+				element_type = ElementType.NotInitialized;
 				return Mixin.NoValue;
+			}
+			element_type = row.Col1;
 
 			metadata.Constants.Remove (owner.MetadataToken);
 

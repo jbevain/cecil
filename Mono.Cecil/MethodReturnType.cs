@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -88,6 +89,10 @@ namespace Mono.Cecil {
 		public object Constant {
 			get { return Parameter.Constant; }
 			set { Parameter.Constant = value; }
+		}
+
+		public ElementType ElementType {
+			get { return Parameter.ElementType; }
 		}
 
 		public bool HasFieldMarshal {

@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -41,6 +42,7 @@ namespace Mono.Cecil {
 		byte [] initial_value;
 
 		object constant = Mixin.NotResolved;
+		ElementType element_type;
 
 		MarshalInfo marshal_info;
 
@@ -133,7 +135,18 @@ namespace Mono.Cecil {
 
 		public object Constant {
 			get { return HasConstant ? constant : null;	}
-			set { constant = value; }
+			set {
+				constant = value;
+				element_type = ElementType.NotInitialized;
+			}
+		}
+
+		public ElementType ElementType {
+			get {
+				ResolveConstant ();
+
+				return element_type;
+			}
 		}
 
 		void ResolveConstant ()
@@ -141,7 +154,7 @@ namespace Mono.Cecil {
 			if (constant != Mixin.NotResolved)
 				return;
 
-			this.ResolveConstant (ref constant, Module);
+			this.ResolveConstant (out constant, out element_type, Module);
 		}
 
 		public bool HasCustomAttributes {

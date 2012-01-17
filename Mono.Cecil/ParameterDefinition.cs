@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -37,6 +38,7 @@ namespace Mono.Cecil {
 		internal IMethodSignature method;
 
 		object constant = Mixin.NotResolved;
+		ElementType element_type;
 		Collection<CustomAttribute> custom_attributes;
 		MarshalInfo marshal_info;
 
@@ -69,7 +71,18 @@ namespace Mono.Cecil {
 
 		public object Constant {
 			get { return HasConstant ? constant : null;	}
-			set { constant = value; }
+			set {
+				constant = value;
+				element_type = ElementType.NotInitialized;
+			}
+		}
+
+		public ElementType ElementType {
+			get {
+				ResolveConstant ();
+
+				return element_type;
+			}
 		}
 
 		void ResolveConstant ()
@@ -77,7 +90,7 @@ namespace Mono.Cecil {
 			if (constant != Mixin.NotResolved)
 				return;
 
-			this.ResolveConstant (ref constant, parameter_type.Module);
+			this.ResolveConstant (out constant, out element_type, parameter_type.Module);
 		}
 
 		public bool HasCustomAttributes {

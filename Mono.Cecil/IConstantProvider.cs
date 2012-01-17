@@ -26,12 +26,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Mono.Cecil.Metadata;
+
 namespace Mono.Cecil {
 
 	public interface IConstantProvider : IMetadataTokenProvider {
 
 		bool HasConstant { get; set; }
 		object Constant { get; set; }
+		ElementType ElementType { get; }
 	}
 
 	static partial class Mixin {
@@ -41,12 +44,19 @@ namespace Mono.Cecil {
 
 		public static void ResolveConstant (
 			this IConstantProvider self,
-			ref object constant,
+			out object constant,
+			out ElementType element_type,
 			ModuleDefinition module)
 		{
-			constant = module.HasImage ()
-				? module.Read (self, (provider, reader) => reader.ReadConstant (provider))
-				: Mixin.NoValue;
+			if (module.HasImage ()) {
+				ElementType etype = 0;
+				constant = module.Read (self, (provider, reader) => reader.ReadConstant (provider, out etype));
+				element_type = etype;
+			}
+			else {
+				constant = Mixin.NoValue;
+				element_type = ElementType.NotInitialized;
+			}
 		}
 	}
 }

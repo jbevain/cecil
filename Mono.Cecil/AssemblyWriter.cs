@@ -1646,7 +1646,10 @@ namespace Mono.Cecil {
 			var constant = owner.Constant;
 			ElementType etype;
 			try {
-				etype = GetConstantType (type, constant);
+				if (owner.ElementType != ElementType.NotInitialized)
+					etype = owner.ElementType;
+				else
+					etype = GetConstantType (type, constant);
 			} catch (ResolutionException) {
 				//TODO: Should log this, not write to console
 				Console.WriteLine ("Could not resolve typeref {0:X8} ({1}). Output assembly might be corrupted.", type.MetadataToken.ToInt32 (), type.Scope);
