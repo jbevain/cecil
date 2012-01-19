@@ -76,7 +76,10 @@ namespace Mono.Cecil.Cil {
 		public void MoveTo (int rva)
 		{
 			if (!IsInSection (rva)) {
-				code_section = reader.image.GetSectionAtVirtualAddress ((uint) rva);
+				var new_section = reader.image.GetSectionAtVirtualAddress ((uint) rva);
+				if (new_section == null)
+					throw new ArgumentException ();
+				code_section = new_section;
 				Reset (code_section.Data);
 			}
 
