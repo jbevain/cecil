@@ -53,6 +53,10 @@ namespace Mono.Cecil {
 			set { explicit_this = value; }
 		}
 
+		public bool HasImplicitThis {
+			get { return this.MethodSignatureHasImplicitThis (); }
+		}
+
 		public virtual MethodCallingConvention CallingConvention {
 			get { return calling_convention; }
 			set { calling_convention = value; }

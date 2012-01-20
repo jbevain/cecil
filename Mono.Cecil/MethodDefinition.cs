@@ -446,7 +446,7 @@ namespace Mono.Cecil {
 		{
 			var method = self.method;
 
-			if (method.HasThis) {
+			if (method.HasImplicitThis) {
 				if (index == 0)
 					return self.ThisParameter;
 

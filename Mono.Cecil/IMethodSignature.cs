@@ -66,5 +66,10 @@ namespace Mono.Cecil {
 
 			builder.Append (")");
 		}
+
+		public static bool MethodSignatureHasImplicitThis (this IMethodSignature self)
+		{
+			return self.HasThis && !self.ExplicitThis;
+		}
 	}
 }

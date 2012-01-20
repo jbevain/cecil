@@ -100,7 +100,7 @@ namespace Mono.Cecil.Cil {
 				if (method == null || method.DeclaringType == null)
 					throw new NotSupportedException ();
 
-				if (!method.HasThis)
+				if (!method.HasImplicitThis)
 					return null;
 
 				if (this_parameter != null)
