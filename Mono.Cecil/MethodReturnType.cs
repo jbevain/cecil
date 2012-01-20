@@ -46,13 +46,17 @@ namespace Mono.Cecil {
 		}
 
 		internal ParameterDefinition Parameter {
-			get { return parameter ?? (parameter = new ParameterDefinition (return_type)); }
-			set { parameter = value; }
+			get { return parameter ?? (parameter = new ParameterDefinition (return_type, method)); }
 		}
 
 		public MetadataToken MetadataToken {
 			get { return Parameter.MetadataToken; }
 			set { Parameter.MetadataToken = value; }
+		}
+
+		public ParameterAttributes Attributes {
+			get { return Parameter.Attributes; }
+			set { Parameter.Attributes = value; }
 		}
 
 		public bool HasCustomAttributes {
