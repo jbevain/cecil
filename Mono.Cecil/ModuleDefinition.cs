@@ -276,7 +276,7 @@ namespace Mono.Cecil {
 		internal MetadataImporter MetadataImporter {
 			get {
 				if (importer == null)
-					Interlocked.CompareExchange(ref importer, new MetadataImporter(this), null);
+					Interlocked.CompareExchange (ref importer, new MetadataImporter (this), null);
 				return importer;
 			}
 		}
@@ -287,13 +287,16 @@ namespace Mono.Cecil {
 		}
 
 		public IMetadataResolver MetadataResolver {
-			get { return metadata_resolver ?? (metadata_resolver = new MetadataResolver (assembly_resolver)); }
+			get {
+				if (metadata_resolver == null)
+					Interlocked.CompareExchange (ref metadata_resolver, new MetadataResolver (assembly_resolver), null);
+			}
 		}
 
 		public TypeSystem TypeSystem {
 			get {
 				if (type_system == null)
-					Interlocked.CompareExchange(ref type_system, TypeSystem.CreateTypeSystem (this), null);
+					Interlocked.CompareExchange (ref type_system, TypeSystem.CreateTypeSystem (this), null);
 				return type_system;
 			}
 		}
