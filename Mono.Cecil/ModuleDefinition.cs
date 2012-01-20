@@ -290,6 +290,8 @@ namespace Mono.Cecil {
 			get {
 				if (metadata_resolver == null)
 					Interlocked.CompareExchange (ref metadata_resolver, new MetadataResolver (assembly_resolver), null);
+
+				return metadata_resolver;
 			}
 		}
 
@@ -817,7 +819,7 @@ namespace Mono.Cecil {
 		{
 			return Read (token, (t, reader) => reader.LookupToken (t));
 		}
-		
+
 		readonly object module_lock = new object();
 
 		internal object SyncRoot {
@@ -838,13 +840,13 @@ namespace Mono.Cecil {
 				return ret;
 			}
 		}
-		
+
 		internal TRet Read<TItem, TRet> (ref TRet variable, TItem item, Func<TItem, MetadataReader, TRet> read) where TRet : class
 		{
 			lock (module_lock) {
 				if (variable != null)
 					return variable;
-				
+
 				var position = reader.position;
 				var context = reader.context;
 
