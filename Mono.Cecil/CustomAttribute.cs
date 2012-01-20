@@ -210,7 +210,7 @@ namespace Mono.Cecil {
 						fields.Clear ();
 					if (properties != null)
 						properties.Clear ();
-					
+
 					resolved = false;
 				}
 				return this;
