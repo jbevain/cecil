@@ -748,7 +748,7 @@ namespace Mono.Cecil {
 
 		public RVA GetMethodBodyRva (int index)
 		{
-			return method_table.rows[index].Col1;
+			return method_table.rows [index].Col1;
 		}
 
 		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer, bool update_max_stack, IWriterListener writer_listener)

@@ -131,7 +131,7 @@ namespace Mono.Cecil {
 				parameters.AssemblyResolver = this;
 
 			try {
-				return ModuleDefinition.ReadModule(file, parameters).Assembly;
+				return ModuleDefinition.ReadModule (file, parameters).Assembly;
 			}
 			catch (BadImageFormatException) {
 				return null;
@@ -362,7 +362,7 @@ namespace Mono.Cecil {
 
 		AssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference, ReaderParameters parameters)
 		{
-			string[] gacs;
+			string [] gacs;
 			if (IntPtr.Size == 4)
 				gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
 			else

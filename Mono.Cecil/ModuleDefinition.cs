@@ -444,7 +444,7 @@ namespace Mono.Cecil {
 			set { entry_point = value; }
 		}
 
-		public MetadataStream[] MetadataStreams {
+		public MetadataStream [] MetadataStreams {
 			get { return Image.MetadataStreams; }
 		}
 

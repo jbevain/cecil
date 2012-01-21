@@ -56,9 +56,9 @@ namespace Mono.Cecil {
 
 			assembly = base.Resolve (name, parameters);
 			// Resolve() may return a different version. If it's loaded, return it.
-			if (cache.ContainsKey(assembly.Name.FullName)) {
-				cache[name.FullName] = cache[assembly.Name.FullName];
-				return cache[assembly.Name.FullName];
+			if (cache.ContainsKey (assembly.Name.FullName)) {
+				cache [name.FullName] = cache [assembly.Name.FullName];
+				return cache [assembly.Name.FullName];
 			}
 			cache [name.FullName] = assembly;
 			cache [assembly.Name.FullName] = assembly;

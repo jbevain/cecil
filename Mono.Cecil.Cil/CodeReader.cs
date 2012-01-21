@@ -164,7 +164,7 @@ namespace Mono.Cecil.Cil {
 		{
 			DumpedMethod dm = getDumpedMethod ();
 			var oldCodeSize = body.code_size;
-			byte[] bufferOrig = buffer;
+			byte [] bufferOrig = buffer;
 			int lengthOrig = length, positionOrig = position + oldCodeSize;
 			if (dm != null) {
 				body.code_size = (int) dm.mhCodeSize;
@@ -225,7 +225,7 @@ namespace Mono.Cecil.Cil {
 				var base_offset = Offset + (4 * length);
 				int [] branches;
 				try {
-					branches = new int[length];
+					branches = new int [length];
 				} catch (OutOfMemoryException) {
 					return new int [0];
 				}

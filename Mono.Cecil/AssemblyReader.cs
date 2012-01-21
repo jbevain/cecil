@@ -467,7 +467,7 @@ namespace Mono.Cecil {
 			return row != 0 && row <= image.TableHeap [table].Length;
 		}
 
-		bool IsValidMetadataToken(MetadataToken token) {
+		bool IsValidMetadataToken (MetadataToken token) {
 			switch (token.TokenType) {
 			case TokenType.Module:
 				return IsValidTableIndex (Table.Module, token.RID);
@@ -510,7 +510,7 @@ namespace Mono.Cecil {
 			case TokenType.MethodSpec:
 				return IsValidTableIndex (Table.MethodSpec, token.RID);
 			default:
-				throw new NotImplementedException();
+				throw new NotImplementedException ();
 			}
 		}
 
@@ -1767,7 +1767,7 @@ namespace Mono.Cecil {
 				return null;
 
 			DumpedMethod dumpedMethod;
-			dumpedMethods.TryGetValue(0x06000000 + method_rid, out dumpedMethod);
+			dumpedMethods.TryGetValue (0x06000000 + method_rid, out dumpedMethod);
 			return dumpedMethod;
 		}
 
@@ -1777,7 +1777,7 @@ namespace Mono.Cecil {
 			method.rva = ReadUInt32 ();
 
 			var dm = getDumpedMethod (method_rid);
-			byte[] bufferOrig = this.buffer;
+			byte [] bufferOrig = this.buffer;
 			int lengthOrig = this.length, positionOrig = this.position;
 			if (dm != null) {
 				var memStream = new MemoryStream (2 + 2 + 4 + 4 + 4);	// Everything except RVA
@@ -3333,7 +3333,7 @@ namespace Mono.Cecil {
 
 		public bool CanReadMore (int size = 1)
 		{
-			return size <= SizeLeft();
+			return size <= SizeLeft ();
 		}
 	}
 }
