@@ -159,7 +159,7 @@ namespace Mono.Cecil {
 
 		#endregion
 
-		internal ParameterDefinition (TypeReference parameterType, IMethodSignature method)
+		public ParameterDefinition (TypeReference parameterType, IMethodSignature method)
 			: this (string.Empty, ParameterAttributes.None, parameterType)
 		{
 			this.method = method;
