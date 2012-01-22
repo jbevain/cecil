@@ -240,6 +240,19 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (token, element_type);
 		}
 
+		[Test]
+		public void ThisParameterObject ()
+		{
+			var module = typeof (MethodBodyTests).ToDefinition ().Module;
+			var @object = module.TypeSystem.Object.Resolve ();
+			var method = @object.Methods.Where (m => m.HasBody).First ();
+
+			var type = method.Body.ThisParameter.ParameterType;
+			Assert.IsFalse (type.IsValueType);
+			Assert.IsFalse (type.IsPrimitive);
+			Assert.IsFalse (type.IsPointer);
+		}
+
 		[TestIL ("hello.il")]
 		public void FilterMaxStack (ModuleDefinition module)
 		{
