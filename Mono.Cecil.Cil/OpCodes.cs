@@ -41,9 +41,8 @@ namespace Mono.Cecil.Cil {
 
 		static void InitializeOpCodes (OpCode[] opcodes, OpCode nop)
 		{
-			var defaultOpCode = new OpCode ();
 			for (int i = 0; i < opcodes.Length; i++) {
-				if (opcodes [i] == defaultOpCode)
+				if (opcodes [i] == null)
 					opcodes [i] = nop;
 			}
 		}

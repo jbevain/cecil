@@ -104,7 +104,7 @@ namespace Mono.Cecil.Cil {
 		Varpush,
 	}
 
-	public struct OpCode {
+	public class OpCode {
 
 		readonly byte op1;
 		readonly byte op2;
@@ -184,26 +184,7 @@ namespace Mono.Cecil.Cil {
 
 		public override bool Equals (object obj)
 		{
-			if (!(obj is OpCode))
-				return false;
-
-			var opcode = (OpCode) obj;
-			return op1 == opcode.op1 && op2 == opcode.op2;
-		}
-
-		public bool Equals (OpCode opcode)
-		{
-			return op1 == opcode.op1 && op2 == opcode.op2;
-		}
-
-		public static bool operator == (OpCode one, OpCode other)
-		{
-			return one.op1 == other.op1 && one.op2 == other.op2;
-		}
-
-		public static bool operator != (OpCode one, OpCode other)
-		{
-			return one.op1 != other.op1 || one.op2 != other.op2;
+			return this == obj;
 		}
 
 		public override string ToString ()
