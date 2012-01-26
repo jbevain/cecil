@@ -220,6 +220,10 @@ namespace Mono.Cecil {
 			get { return etype.IsPrimitive (); }
 		}
 
+		public ElementType EType {
+			get { return etype; }
+		}
+
 		public int PrimitiveSize {
 			get {
 				switch (etype) {
