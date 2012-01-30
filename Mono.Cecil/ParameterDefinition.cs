@@ -56,7 +56,7 @@ namespace Mono.Cecil {
 				if (method == null)
 					return -1;
 
-				return method.MethodSignatureHasImplicitThis () ? index + 1 : index;
+				return method.HasImplicitThis () ? index + 1 : index;
 			}
 		}
 

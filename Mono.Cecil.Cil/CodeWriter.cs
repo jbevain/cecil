@@ -468,7 +468,7 @@ namespace Mono.Cecil.Cil {
 				if (method == null)
 					break;
 				stack_size -= (method.HasParameters ? method.Parameters.Count : 0)
-					+ (method.MethodSignatureHasImplicitThis () && instruction.opcode.Code != Code.Newobj ? 1 : 0);
+					+ (method.HasImplicitThis () && instruction.opcode.Code != Code.Newobj ? 1 : 0);
 				stack_size += (method.ReturnType.etype == ElementType.Void ? 0 : 1)
 					+ (method.HasThis && instruction.opcode.Code == Code.Newobj ? 1 : 0);
 				break;

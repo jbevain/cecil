@@ -54,7 +54,7 @@ namespace Mono.Cecil {
 		}
 
 		public bool HasImplicitThis {
-			get { return this.MethodSignatureHasImplicitThis (); }
+			get { return this.HasImplicitThis(); }
 		}
 
 		public virtual MethodCallingConvention CallingConvention {
