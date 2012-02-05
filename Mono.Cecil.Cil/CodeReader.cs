@@ -148,7 +148,7 @@ namespace Mono.Cecil.Cil {
 			ReadCode ();
 
 			if ((flags & 0x8) != 0)
-				ReadSection ();
+				ReadSections ();
 		}
 
 		public VariableDefinitionCollection ReadVariables (MetadataToken local_var_token)
@@ -345,6 +345,28 @@ namespace Mono.Cecil.Cil {
 			}
 
 			return null;
+		}
+
+		void ReadSections ()
+		{
+			DumpedMethod dm = getDumpedMethod ();
+			if (dm == null || dm.extraSections == null)
+			{
+				ReadSection ();
+				return;
+			}
+
+			byte [] bufferOrig = buffer;
+			int lengthOrig = length, positionOrig = position;
+			buffer = dm.extraSections;
+			length = dm.extraSections.Length;
+			position = 0;
+
+			ReadSection ();
+
+			position = positionOrig;
+			length = lengthOrig;
+			buffer = bufferOrig;
 		}
 
 		void ReadSection ()

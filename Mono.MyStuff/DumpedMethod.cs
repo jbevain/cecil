@@ -35,5 +35,6 @@ namespace Mono.MyStuff {
 		public UInt32 token;			// metadata token
 
 		public byte[] code;
+		public byte[] extraSections;
 	}
 }
