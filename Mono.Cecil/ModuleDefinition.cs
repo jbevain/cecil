@@ -428,7 +428,7 @@ namespace Mono.Cecil {
 		{
 			this.MetadataSystem = new MetadataSystem ();
 			this.token = new MetadataToken (TokenType.Module, 1);
-			this.assembly_resolver = GlobalAssemblyResolver.Instance;
+			this.assembly_resolver = new DefaultAssemblyResolver();
 		}
 
 		internal ModuleDefinition (Image image)
