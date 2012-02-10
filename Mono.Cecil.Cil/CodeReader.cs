@@ -194,7 +194,7 @@ namespace Mono.Cecil.Cil {
 				var current = new Instruction (offset, opcode);
 
 				if (opcode.OperandType != OperandType.InlineNone)
-					current.operand = ReadOperand (current);
+					current.operand = ReadOperand (current, end);
 
 				instructions.Add (current);
 			}
@@ -215,21 +215,20 @@ namespace Mono.Cecil.Cil {
 				: OpCodes.TwoBytesOpCode [ReadByte ()];
 		}
 
-		object ReadOperand (Instruction instruction)
+		object ReadOperand (Instruction instruction, int code_end)
 		{
 			switch (instruction.opcode.OperandType) {
 			case OperandType.InlineSwitch:
 				var length = ReadInt32 ();
-				if (length < 0)
-					return new int [0];
-				var base_offset = Offset + (4 * length);
-				int [] branches;
-				try {
-					branches = new int [length];
-				} catch (OutOfMemoryException) {
-					return new int [0];
-				}
 
+				if ((uint)length >= 0x40000000)
+					return new int [0];
+				var operand_length = 4 * length;
+				if (position + operand_length < position || position + operand_length > code_end)
+					return new int [0];
+
+				var base_offset = Offset + operand_length;
+				int[] branches = new int[length];
 				for (int i = 0; i < length; i++)
 					branches [i] = base_offset + ReadInt32 ();
 				return branches;
