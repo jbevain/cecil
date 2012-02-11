@@ -218,7 +218,7 @@ namespace Mono.Cecil {
 							continue;
 						if (assembly.Name.FullName == name.FullName)
 							return assembly;
-						if (atleast_version && assembly.Name.Version >= name.Version)
+						if (atleast_version && (name.Version == null || assembly.Name.Version >= name.Version))
 							return assembly;
 					}
 				}
