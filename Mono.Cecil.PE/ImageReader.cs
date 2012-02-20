@@ -115,6 +115,7 @@ namespace Mono.Cecil.PE {
 		{
 			var machine = ReadUInt16 ();
 			switch (machine) {
+			default:
 			case 0x014c:
 				return TargetArchitecture.I386;
 			case 0x8664:
