@@ -47,13 +47,13 @@ namespace Mono.Cecil.Cil {
 		MethodDefinition method;
 		MethodBody body;
 
-		Dictionary<uint, DumpedMethod> dumpedMethods;
+		DumpedMethods dumpedMethods;
 
 		int Offset {
 			get { return base.position - start; }
 		}
 
-		public CodeReader (Section section, MetadataReader reader, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public CodeReader (Section section, MetadataReader reader, DumpedMethods dumpedMethods = null)
 			: base (section.Data)
 		{
 			this.code_section = section;
@@ -96,9 +96,7 @@ namespace Mono.Cecil.Cil {
 			if (dumpedMethods == null)
 				return null;
 
-			DumpedMethod dumpedMethod;
-			dumpedMethods.TryGetValue (this.method.MetadataToken.ToUInt32 (), out dumpedMethod);
-			return dumpedMethod;
+			return dumpedMethods.get (this.method);
 		}
 
 		void ReadMethodBody ()

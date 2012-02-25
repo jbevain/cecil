@@ -455,7 +455,7 @@ namespace Mono.Cecil {
 			this.assembly_resolver = GlobalAssemblyResolver.Instance;
 		}
 
-		internal ModuleDefinition (Image image, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		internal ModuleDefinition (Image image, DumpedMethods dumpedMethods = null)
 			: this ()
 		{
 			this.Image = image;
@@ -922,7 +922,7 @@ namespace Mono.Cecil {
 			return ReadModule (stream, new ReaderParameters (ReadingMode.Deferred));
 		}
 
-		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters, DumpedMethods dumpedMethods = null)
 		{
 			using (var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
 				return ReadModule (stream, parameters, dumpedMethods);
@@ -935,7 +935,7 @@ namespace Mono.Cecil {
 				throw new ArgumentNullException ("stream");
 		}
 
-		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters, DumpedMethods dumpedMethods = null)
 		{
 			CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)

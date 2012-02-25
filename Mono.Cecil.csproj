@@ -243,7 +243,7 @@
     <Compile Include="Mono.Cecil\VariantType.cs" />
     <Compile Include="Mono.Collections.Generic\ReadOnlyCollection.cs" />
     <Compile Include="Mono.MyStuff\DumpedMethod.cs" />
-    <Compile Include="Mono.MyStuff\DumpedMethodsReader.cs" />
+    <Compile Include="Mono.MyStuff\DumpedMethods.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoConvert.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoService.cs" />
     <Compile Include="System.Runtime.CompilerServices\ExtensionAttribute.cs" />

@@ -46,7 +46,7 @@ namespace Mono.Cecil {
 		readonly protected Image image;
 		readonly protected ModuleDefinition module;
 
-		protected ModuleReader (Image image, ReadingMode mode, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		protected ModuleReader (Image image, ReadingMode mode, DumpedMethods dumpedMethods = null)
 		{
 			this.image = image;
 			this.module = new ModuleDefinition (image, dumpedMethods);
@@ -77,7 +77,7 @@ namespace Mono.Cecil {
 			assembly.main_module = module;
 		}
 
-		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters, DumpedMethods dumpedMethods = null)
 		{
 			var module = ReadModule (image, parameters, dumpedMethods);
 
@@ -110,14 +110,14 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static ModuleDefinition ReadModule (Image image, ReaderParameters parameters, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		static ModuleDefinition ReadModule (Image image, ReaderParameters parameters, DumpedMethods dumpedMethods = null)
 		{
 			var reader = CreateModuleReader (image, parameters.ReadingMode, dumpedMethods);
 			reader.ReadModule ();
 			return reader.module;
 		}
 
-		static ModuleReader CreateModuleReader (Image image, ReadingMode mode, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		static ModuleReader CreateModuleReader (Image image, ReadingMode mode, DumpedMethods dumpedMethods = null)
 		{
 			switch (mode) {
 			case ReadingMode.Immediate:
@@ -132,7 +132,7 @@ namespace Mono.Cecil {
 
 	sealed class ImmediateModuleReader : ModuleReader {
 
-		public ImmediateModuleReader (Image image, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public ImmediateModuleReader (Image image, DumpedMethods dumpedMethods = null)
 			: base (image, ReadingMode.Immediate, dumpedMethods)
 		{
 		}
@@ -344,7 +344,7 @@ namespace Mono.Cecil {
 
 	sealed class DeferredModuleReader : ModuleReader {
 
-		public DeferredModuleReader (Image image, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public DeferredModuleReader (Image image, DumpedMethods dumpedMethods = null)
 			: base (image, ReadingMode.Deferred, dumpedMethods)
 		{
 		}
@@ -367,14 +367,14 @@ namespace Mono.Cecil {
 		internal IGenericContext context;
 		internal CodeReader code;
 
-		Dictionary<uint, DumpedMethod> dumpedMethods;
+		DumpedMethods dumpedMethods;
 
 		uint Position {
 			get { return (uint) base.position; }
 			set { base.position = (int) value; }
 		}
 
-		public MetadataReader (ModuleDefinition module, Dictionary<uint, DumpedMethod> dumpedMethods = null)
+		public MetadataReader (ModuleDefinition module, DumpedMethods dumpedMethods = null)
 			: base (module.Image.MetadataSection.Data)
 		{
 			this.image = module.Image;
@@ -1766,9 +1766,7 @@ namespace Mono.Cecil {
 			if (dumpedMethods == null)
 				return null;
 
-			DumpedMethod dumpedMethod;
-			dumpedMethods.TryGetValue (0x06000000 + method_rid, out dumpedMethod);
-			return dumpedMethod;
+			return dumpedMethods.get (0x06000000 + method_rid);
 		}
 
 		void ReadMethod (uint method_rid, Collection<MethodDefinition> methods)
