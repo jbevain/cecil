@@ -40,7 +40,7 @@ namespace Mono.MyStuff {
 		}
 
 		public void add(DumpedMethod dm) {
-			if ((dm.token & 0xFF000000) != 0x06 || dm.token == 0x06000000)
+			if ((dm.token >> 24) != 0x06 || dm.token == 0x06000000)
 				throw new ArgumentException("Invalid token");
 			methods[dm.token] = dm;
 		}
