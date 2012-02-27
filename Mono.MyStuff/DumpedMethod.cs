@@ -21,18 +21,18 @@ using System;
 
 namespace Mono.MyStuff {
 	public class DumpedMethod {
-		public UInt16 mhFlags;			// method header Flags
-		public UInt16 mhMaxStack;		// method header MaxStack
-		public UInt32 mhCodeSize;		// method header CodeSize
-		public UInt32 mhLocalVarSigTok; // method header LocalVarSigTok
+		public ushort mhFlags;			// method header Flags
+		public ushort mhMaxStack;		// method header MaxStack
+		public uint mhCodeSize;			// method header CodeSize
+		public uint mhLocalVarSigTok;	// method header LocalVarSigTok
 
-		public UInt16 mdImplFlags;		// methodDef ImplFlags
-		public UInt16 mdFlags;			// methodDef Flags
-		public UInt32 mdName;			// methodDef Name (index into #String)
-		public UInt32 mdSignature;		// methodDef Signature (index into #Blob)
-		public UInt32 mdParamList;		// methodDef ParamList (index into Param table)
+		public ushort mdImplFlags;		// methodDef ImplFlags
+		public ushort mdFlags;			// methodDef Flags
+		public uint mdName;				// methodDef Name (index into #String)
+		public uint mdSignature;		// methodDef Signature (index into #Blob)
+		public uint mdParamList;		// methodDef ParamList (index into Param table)
 
-		public UInt32 token;			// metadata token
+		public uint token;				// metadata token
 
 		public byte[] code;
 		public byte[] extraSections;
