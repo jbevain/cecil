@@ -471,6 +471,13 @@ namespace Mono.Cecil {
 			this.reader = new MetadataReader (this, dumpedMethods);
 		}
 
+		public string GetUserString (uint offset)
+		{
+			if (Image.UserStringHeap == null)
+				return string.Empty;
+			return Image.UserStringHeap.Read (offset);
+		}
+
 		public bool HasTypeReference (string fullName)
 		{
 			return HasTypeReference (string.Empty, fullName);
