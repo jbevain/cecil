@@ -353,15 +353,14 @@ namespace Mono.Cecil.Metadata {
 				if (special == 1)
 					continue;
 
-				if (@char < 0x20 || @char > 0x7e) {
-					if (@char > 0x7e
-						|| (@char >= 0x01 && @char <= 0x08)
-						|| (@char >= 0x0e && @char <= 0x1f)
-						|| @char == 0x27
-						|| @char == 0x2d) {
+				if (@char > 0xff
+					|| (@char >= 0x01 && @char <= 0x08)
+					|| (@char >= 0x0e && @char <= 0x1f)
+					|| @char == 0x27
+					|| @char == 0x2d
+					|| @char == 0x7f) {
 
-						special = 1;
-					}
+					special = 1;
 				}
 			}
 
