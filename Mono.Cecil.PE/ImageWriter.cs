@@ -235,7 +235,7 @@ namespace Mono.Cecil.PE {
 			WriteByte (8);	// LMajor
 			WriteByte (0);	// LMinor
 			WriteUInt32 (text.SizeOfRawData);	// CodeSize
-			WriteUInt32 (reloc != null ? reloc.SizeOfRawData : 0
+			WriteUInt32 ((reloc != null ? reloc.SizeOfRawData : 0)
 				+ (rsrc != null ? rsrc.SizeOfRawData : 0));	// InitializedDataSize
 			WriteUInt32 (0);	// UninitializedDataSize
 
