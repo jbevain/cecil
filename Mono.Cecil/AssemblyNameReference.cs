@@ -176,7 +176,7 @@ namespace Mono.Cecil {
 				builder.Append ("PublicKeyToken=");
 
 				var pk_token = PublicKeyToken;
-				if (!pk_token.IsNullOrEmpty() && pk_token.Length > 0) {
+				if (!pk_token.IsNullOrEmpty () && pk_token.Length > 0) {
 					for (int i = 0 ; i < pk_token.Length ; i++) {
 						builder.Append (pk_token [i].ToString ("x2"));
 					}
