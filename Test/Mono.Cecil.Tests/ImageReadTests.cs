@@ -136,9 +136,9 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[TestModule ("metro.exe", Verify = false)]
-		public void MetroAssembly(ModuleDefinition module)
+		public void MetroAssembly (ModuleDefinition module)
 		{
-			Assert.AreEqual(ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
+			Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
 		}
 	}
 }
