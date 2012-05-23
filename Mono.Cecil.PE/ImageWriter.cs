@@ -267,7 +267,7 @@ namespace Mono.Cecil.PE {
 
 			WriteUInt32 (0);	// Checksum
 			WriteUInt16 (GetSubSystem ());	// SubSystem
-			WriteUInt16 (0x8540);	// DLLFlags
+			WriteUInt16 ((ushort) module.Characteristics);	// DLLFlags
 
 			const ulong stack_reserve = 0x100000;
 			const ulong stack_commit = 0x1000;

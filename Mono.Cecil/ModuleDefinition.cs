@@ -208,6 +208,7 @@ namespace Mono.Cecil {
 		TargetRuntime runtime;
 		TargetArchitecture architecture;
 		ModuleAttributes attributes;
+		ModuleCharacteristics characteristics;
 		Guid mvid;
 
 		internal AssemblyDefinition assembly;
@@ -245,6 +246,11 @@ namespace Mono.Cecil {
 		public ModuleAttributes Attributes {
 			get { return attributes; }
 			set { attributes = value; }
+		}
+
+		public ModuleCharacteristics Characteristics {
+			get { return characteristics; }
+			set { characteristics = value; }
 		}
 
 		public string FullyQualifiedName {
@@ -442,6 +448,7 @@ namespace Mono.Cecil {
 			this.runtime = image.Runtime;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
+			this.characteristics = image.Characteristics;
 			this.fq_name = image.FileName;
 
 			this.reader = new MetadataReader (this);
@@ -866,6 +873,7 @@ namespace Mono.Cecil {
 				architecture = parameters.Architecture,
 				mvid = Guid.NewGuid (),
 				Attributes = ModuleAttributes.ILOnly,
+				Characteristics = (ModuleCharacteristics) 0x8540,
 			};
 
 			if (parameters.AssemblyResolver != null)

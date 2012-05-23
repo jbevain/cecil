@@ -134,5 +134,11 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (0, module.Image.StrongName.VirtualAddress);
 			Assert.AreEqual (0, module.Image.StrongName.Size);
 		}
+
+		[TestModule ("metro.exe", Verify = false)]
+		public void MetroAssembly(ModuleDefinition module)
+		{
+			Assert.AreEqual(ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
+		}
 	}
 }
