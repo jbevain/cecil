@@ -754,17 +754,18 @@ namespace Mono.Cecil.PE {
 				return 0;
 
 			var public_key = module.Assembly.Name.PublicKey;
+			if (public_key.IsNullOrEmpty ())
+				return 0;
 
-			if (public_key != null) {
-				// in fx 2.0 the key may be from 384 to 16384 bits
-				// so we must calculate the signature size based on
-				// the size of the public key (minus the 32 byte header)
-				int size = public_key.Length;
-				if (size > 32)
-					return size - 32;
-				// note: size == 16 for the ECMA "key" which is replaced
-				// by the runtime with a 1024 bits key (128 bytes)
-			}
+			// in fx 2.0 the key may be from 384 to 16384 bits
+			// so we must calculate the signature size based on
+			// the size of the public key (minus the 32 byte header)
+			int size = public_key.Length;
+			if (size > 32)
+				return size - 32;
+
+			// note: size == 16 for the ECMA "key" which is replaced
+			// by the runtime with a 1024 bits key (128 bytes)
 
 			return 128; // default strongname signature size
 		}
