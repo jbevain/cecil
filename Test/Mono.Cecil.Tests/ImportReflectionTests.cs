@@ -195,7 +195,7 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
 				il.Emit (OpCodes.Callvirt, module.Import (typeof (Generic<string>).GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
-				il.Emit (OpCodes.Ldfld, module.Import (typeof (Generic<string>).GetField ("Field")));
+				il.Emit (OpCodes.Ldfld, module.Import (typeof (Generic<int>).GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 
