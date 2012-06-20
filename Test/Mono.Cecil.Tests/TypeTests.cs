@@ -195,5 +195,34 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (MethodCallingConvention.Default, get.CallingConvention);
 			Assert.AreEqual (method.GenericParameters [0], get.ReturnType);
 		}
+
+		[Test]
+		public void CorlibPrimitive ()
+		{
+			var module = typeof (TypeTests).ToDefinition ().Module;
+
+			var int32 = module.TypeSystem.Int32;
+			Assert.IsTrue (int32.IsPrimitive);
+			Assert.AreEqual (MetadataType.Int32, int32.MetadataType);
+
+			var int32_def = int32.Resolve ();
+			Assert.IsTrue (int32_def.IsPrimitive);
+			Assert.AreEqual (MetadataType.Int32, int32_def.MetadataType);
+		}
+
+		[TestIL ("explicitthis.il", Verify = false)]
+		public void ExplicitThis (ModuleDefinition module)
+		{
+			var type = module.GetType ("MakeDecision");
+			var method = type.GetMethod ("Decide");
+			var fptr = method.ReturnType as FunctionPointerType;
+
+			Assert.IsNotNull (fptr);
+			Assert.IsTrue (fptr.HasThis);
+			Assert.IsTrue (fptr.ExplicitThis);
+
+			Assert.AreEqual (0, fptr.Parameters [0].Sequence);
+			Assert.AreEqual (1, fptr.Parameters [1].Sequence);
+		}
 	}
 }
