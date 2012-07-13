@@ -172,7 +172,7 @@ namespace Mono.Cecil {
 				if (string.IsNullOrEmpty (@namespace))
 					return fullname = Name;
 
-				return fullname = @namespace + "." + Name;
+				return fullname = String.Intern(@namespace + "." + Name);
 			}
 		}
 

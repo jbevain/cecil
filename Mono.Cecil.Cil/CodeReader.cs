@@ -65,7 +65,9 @@ namespace Mono.Cecil.Cil {
 
 			ReadMethodBody ();
 
-			return this.body;
+			var ret = this.body;
+			this.body = null;
+			return ret;
 		}
 
 		public void MoveTo (int rva)

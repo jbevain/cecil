@@ -134,6 +134,14 @@ namespace Mono.Collections.Generic {
 			version++;
 		}
 
+		public void SetCapacity(int capacity)
+		{
+			if (size < capacity)
+			{
+				Grow(capacity-size);
+			}
+		}
+
 		public bool Contains (T item)
 		{
 			return IndexOf (item) != -1;
