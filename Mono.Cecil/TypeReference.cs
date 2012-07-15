@@ -176,6 +176,17 @@ namespace Mono.Cecil {
 			}
 		}
 
+		// C# reflection API has a different standard for full names ...
+		internal string FullNameStd
+		{
+			get
+			{
+				if (IsNested)
+					return DeclaringType.FullNameStd + "+" + Name;
+				return FullName;
+			}
+		}
+
 		public virtual bool IsByReference {
 			get { return false; }
 		}
