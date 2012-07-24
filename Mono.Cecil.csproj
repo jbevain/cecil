@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">net_4_0_Debug</Configuration>
@@ -154,6 +154,9 @@
     <Compile Include="Mono.Cecil.PE\Image.cs" />
     <Compile Include="Mono.Cecil.PE\ImageReader.cs" />
     <Compile Include="Mono.Cecil.PE\ImageWriter.cs" />
+    <Compile Include="Mono.Cecil.PE\ResourceDirectory.cs" />
+    <Compile Include="Mono.Cecil.PE\ResourceEntry.cs" />
+    <Compile Include="Mono.Cecil.PE\RsrcReader.cs" />
     <Compile Include="Mono.Cecil.PE\Section.cs" />
     <Compile Include="Mono.Cecil.PE\TextMap.cs" />
     <Compile Include="Mono.Cecil\ArrayType.cs" />

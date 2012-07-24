@@ -337,6 +337,11 @@ namespace Mono.Collections.Generic {
 			RemoveAt (index);
 		}
 
+		public void Sort(IComparer<T> cmp)
+		{
+			Array.Sort(items, 0, size, cmp);
+		}
+
 		void ICollection.CopyTo (Array array, int index)
 		{
 			Array.Copy (items, 0, array, index, size);
