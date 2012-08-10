@@ -85,7 +85,7 @@ namespace Mono.Cecil {
 
 		public override IMetadataScope Scope {
 			get { return function.ReturnType.Scope; }
-			set { function.ReturnType.Scope = value; }
+			set { throw new InvalidOperationException (); }
 		}
 
 		public override bool IsFunctionPointer {
