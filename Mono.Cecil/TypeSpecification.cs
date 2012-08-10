@@ -52,6 +52,7 @@ namespace Mono.Cecil {
 
 		public override IMetadataScope Scope {
 			get { return element_type.Scope; }
+			set { element_type.Scope = value; }
 		}
 
 		public override ModuleDefinition Module {

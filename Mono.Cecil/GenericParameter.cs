@@ -107,6 +107,16 @@ namespace Mono.Cecil {
 					? ((MethodReference) owner).DeclaringType.Scope
 					: ((TypeReference) owner).Scope;
 			}
+			set {
+				if (owner == null)
+					return;
+
+				var owner_type = owner.GenericParameterType == GenericParameterType.Method
+					? ((MethodReference) owner).DeclaringType
+					: ((TypeReference) owner);
+
+				owner_type.Scope = value;
+			}
 		}
 
 		public override ModuleDefinition Module {
