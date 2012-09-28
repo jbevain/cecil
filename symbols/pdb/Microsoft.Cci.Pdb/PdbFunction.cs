@@ -22,6 +22,7 @@ namespace Microsoft.Cci.Pdb {
 
     internal uint token;
     internal uint slotToken;
+    internal uint tokenOfMethodWhoseUsingInfoAppliesToThisMethod;
     //internal string name;
     //internal string module;
     //internal ushort flags;
@@ -294,8 +295,7 @@ namespace Microsoft.Cci.Pdb {
             }
 
           case SYM.S_MANSLOT:
-            uint typind;
-            slots[slot++] = new PdbSlot(bits, out typind);
+            slots[slot++] = new PdbSlot(bits);
             bits.Position = stop;
             break;
 
@@ -349,7 +349,7 @@ namespace Microsoft.Cci.Pdb {
       bits.ReadUInt32(out numberOfBytesInItem);
       switch (kind) {
         case 0: this.ReadUsingInfo(bits); break;
-        case 1: break; // this.ReadForwardInfo(bits); break;
+        case 1: this.ReadForwardInfo(bits); break;
         case 2: break; // this.ReadForwardedToModuleInfo(bits); break;
         case 3: this.ReadIteratorLocals(bits); break;
         case 4: this.ReadForwardIterator(bits); break;
@@ -378,8 +378,9 @@ namespace Microsoft.Cci.Pdb {
     //private void ReadForwardedToModuleInfo(BitAccess bits) {
     //}
 
-    //private void ReadForwardInfo(BitAccess bits) {
-    //}
+    private void ReadForwardInfo(BitAccess bits) {
+      bits.ReadUInt32(out this.tokenOfMethodWhoseUsingInfoAppliesToThisMethod);
+    }
 
     private void ReadUsingInfo(BitAccess bits) {
       ushort numberOfNamespaces;
@@ -449,4 +450,5 @@ namespace Microsoft.Cci.Pdb {
 
     //}
   }
+
 }
