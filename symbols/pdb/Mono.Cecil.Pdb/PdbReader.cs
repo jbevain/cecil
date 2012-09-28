@@ -86,12 +86,9 @@ namespace Mono.Cecil.Pdb {
 		bool PopulateFunctions ()
 		{
 			using (pdb_file) {
-				int age;
-				Guid guid;
-				var funcs = PdbFile.LoadFunctions (pdb_file, true, out age, out guid);
-
-				if (this.age != 0 && this.guid != guid)
-					return false;
+				Dictionary<uint, PdbTokenLine> tokenToSourceMapping;
+				string sourceServerData;
+				var funcs = PdbFile.LoadFunctions (pdb_file, out tokenToSourceMapping,  out sourceServerData);
 
 				foreach (PdbFunction function in funcs)
 					functions.Add (function.token, function);
