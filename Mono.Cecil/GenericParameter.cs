@@ -110,6 +110,15 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
+		public override TypeReference DeclaringType {
+			get { return owner as TypeReference; }
+			set { throw new InvalidOperationException (); }
+		}
+
+		public MethodReference DeclaringMethod {
+			get { return owner as MethodReference; }
+		}
+
 		public override ModuleDefinition Module {
 			get { return module ?? owner.Module; }
 		}
