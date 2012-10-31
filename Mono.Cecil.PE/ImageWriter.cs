@@ -213,6 +213,8 @@ namespace Mono.Cecil.PE {
 				return 0x8664;
 			case TargetArchitecture.IA64:
 				return 0x0200;
+			case TargetArchitecture.ARMv7:
+				return 0x01c4;
 			}
 
 			throw new NotSupportedException ();
