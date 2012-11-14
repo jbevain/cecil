@@ -287,13 +287,19 @@ namespace Mono.Cecil {
 			get {
 				if (importer == null)
 					Interlocked.CompareExchange (ref importer, new MetadataImporter (this), null);
+
 				return importer;
 			}
 		}
 #endif
 
 		public IAssemblyResolver AssemblyResolver {
-			get { return assembly_resolver ?? (assembly_resolver = new DefaultAssemblyResolver ()); }
+			get {
+				if (assembly_resolver == null)
+					Interlocked.CompareExchange (ref assembly_resolver, new DefaultAssemblyResolver (), null);
+
+				return assembly_resolver;
+			}
 		}
 
 		public IMetadataResolver MetadataResolver {
@@ -309,6 +315,7 @@ namespace Mono.Cecil {
 			get {
 				if (type_system == null)
 					Interlocked.CompareExchange (ref type_system, TypeSystem.CreateTypeSystem (this), null);
+
 				return type_system;
 			}
 		}
