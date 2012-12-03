@@ -58,7 +58,7 @@ namespace Mono.Cecil {
 #else
 			var copy = new T [length];
 			Array.Copy (self, copy, self.Length);
-			array = copy;
+			self = copy;
 #endif
 
 			return self;
