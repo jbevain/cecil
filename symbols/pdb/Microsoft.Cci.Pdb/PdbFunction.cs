@@ -41,6 +41,7 @@ namespace Microsoft.Cci.Pdb {
     internal IEnumerable<INamespaceScope>/*?*/ namespaceScopes;
     internal string/*?*/ iteratorClass;
     internal List<ILocalScope>/*?*/ iteratorScopes;
+    internal PdbSynchronizationInformation/*?*/ synchronizationInformation;
 
     private static string StripNamespace(string module) {
       int li = module.LastIndexOf('.');
@@ -268,6 +269,8 @@ namespace Microsoft.Cci.Pdb {
                     while (count-- > 0)
                       this.ReadCustomMetadata(bits);
                   }
+                } else if (name == "asyncMethodInfo") {
+                  this.synchronizationInformation = new PdbSynchronizationInformation(bits);
                 }
                 bits.Position = stop;
                 break;
@@ -449,6 +452,47 @@ namespace Microsoft.Cci.Pdb {
     //  }
 
     //}
+  }
+
+  internal class PdbSynchronizationInformation {
+    internal uint kickoffMethodToken;
+    internal uint generatedCatchHandlerIlOffset;
+    internal PdbSynchronizationPoint[] synchronizationPoints;
+
+    internal PdbSynchronizationInformation(BitAccess bits) {
+      uint asyncStepInfoCount;
+      bits.ReadUInt32(out this.kickoffMethodToken);
+      bits.ReadUInt32(out this.generatedCatchHandlerIlOffset);
+      bits.ReadUInt32(out asyncStepInfoCount);
+      this.synchronizationPoints = new PdbSynchronizationPoint[asyncStepInfoCount];
+      for (uint i = 0; i < asyncStepInfoCount; i += 1) {
+        this.synchronizationPoints[i] = new PdbSynchronizationPoint(bits);
+      }
+    }
+
+    public uint GeneratedCatchHandlerOffset {
+      get { return this.generatedCatchHandlerIlOffset; }
+    }
+  }
+
+  internal class PdbSynchronizationPoint {
+    internal uint synchronizeOffset;
+    internal uint continuationMethodToken;
+    internal uint continuationOffset;
+
+    internal PdbSynchronizationPoint(BitAccess bits) {
+      bits.ReadUInt32(out this.synchronizeOffset);
+      bits.ReadUInt32(out this.continuationMethodToken);
+      bits.ReadUInt32(out this.continuationOffset);
+    }
+
+    public uint SynchronizeOffset {
+      get { return this.synchronizeOffset; }
+    }
+
+    public uint ContinuationOffset {
+      get { return this.continuationOffset; }
+    }
   }
 
 }

@@ -88,7 +88,7 @@ namespace Microsoft.Cci.Pdb {
             bits.ReadCString(out usedNamespaces[usedNs++]);
             bits.Position = stop;
             break;
-           
+
           case SYM.S_END:
             bits.Position = stop;
             break;
