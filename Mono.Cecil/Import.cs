@@ -553,6 +553,13 @@ namespace Mono.Cecil {
 				return imported_instance;
 			case ElementType.Var:
 				TypeReference tOwner = (TypeReference)((GenericParameter)type).Owner;
+				if (tOwner == null)
+				{
+					// probably hit:
+					// http://stackoverflow.com/questions/5290559/using-base-keyword-in-delegate-causes-system-badimageformatexception
+					// https://connect.microsoft.com/VisualStudio/feedback/details/626550/badimageformatexception-on-simple-program-using-generics-and-lambdas
+					throw new BadImageFormatException("Bad image format (VS bug), check for base method access from Delegate");
+				}
 				for (int i = context.Count - 1; i >= 0; i--)
 				{
 					TypeReference candidate = GetGenericProviderCandidate(context[i]);
@@ -564,7 +571,8 @@ namespace Mono.Cecil {
 				MethodReference mOwner = (MethodReference)((GenericParameter)type).Owner;
 				for (int i = context.Count - 1; i >= 0; i--)
 				{
-					if (context[i] is MethodReference)
+					MethodReference candidate = context[i] as MethodReference;
+					if (candidate != null && (i == 0 || (candidate.DeclaringType.FullName == mOwner.DeclaringType.FullName && candidate.Name == mOwner.Name)))
 						return CheckImportedGenericParameter(((MethodReference)context[i]).GenericParameters[((GenericParameter)type).Position], type.Name);
 				}
 				throw new InvalidOperationException();

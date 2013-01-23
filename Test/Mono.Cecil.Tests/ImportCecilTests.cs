@@ -338,6 +338,11 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
+		internal static T GenericMethod<T>(T[,] array)
+		{
+			return array[0,0];
+		}
+
 		[Test]
 		public void ContextGenericTest()
 		{
@@ -368,7 +373,19 @@ namespace Mono.Cecil.Tests {
 			meth = type.GetMethod("ComplexGenericMethod");
 			imported_type = module.Import(type);
 			method = module.Import(meth, imported_type);
-			Assert.AreEqual("Mono.Cecil.Tests.ImportCecilTests/Generic`1<TS> Mono.Cecil.Tests.ImportCecilTests/Generic`1<System.String>::ComplexGenericMethod<TS>(T,TS)", method.FullName); // TODO, right now we don't even get there
+			Assert.AreEqual("Mono.Cecil.Tests.ImportCecilTests/Generic`1<TS> Mono.Cecil.Tests.ImportCecilTests/Generic`1<System.String>::ComplexGenericMethod<TS>(T,TS)", method.FullName);
+		}
+
+		[Test]
+		public void MethodContextGenericTest()
+		{
+			var module = ModuleDefinition.ReadModule(typeof(ContextGeneric1Method2<>).Module.FullyQualifiedName);
+			var type_def = GetType().ToDefinition();
+			var meth_def = type_def.GetMethod("GenericMethod");
+			var meth_ref = module.Import(meth_def);
+			var instr = meth_def.Body.Instructions.First(i => i.OpCode.OperandType == OperandType.InlineMethod);
+			var method = module.Import((MethodReference)instr.Operand, meth_ref);
+			Assert.AreEqual("T T[0...,0...]::Get(System.Int32,System.Int32)", method.FullName);
 		}
 	}
 }
