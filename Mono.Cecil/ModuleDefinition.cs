@@ -788,22 +788,15 @@ namespace Mono.Cecil {
 
 		public ResourceDirectory Win32ResourceDirectory
 		{
-			get 
+			get
 			{
-				if (win32ResourceDirectory == null)
+				if (win32ResourceDirectory == null && Image != null)
 				{
-					if (Image == null)
-						win32ResourceDirectory = new ResourceDirectory();
-					else
-					{
-						var rsrc = Image.GetSection(".rsrc");
-						if (rsrc == null)
-							win32ResourceDirectory = new ResourceDirectory();
-						else
-							win32ResourceDirectory = RsrcReader.ReadResourceDirectory(rsrc.Data, rsrc.VirtualAddress);
-					}
+					var rsrc = Image.GetSection(".rsrc");
+					if (rsrc != null)
+						win32ResourceDirectory = RsrcReader.ReadResourceDirectory(rsrc.Data, rsrc.VirtualAddress);
 				}
-				return win32ResourceDirectory;
+				return win32ResourceDirectory ?? (win32ResourceDirectory = new ResourceDirectory());
 			}
 			set
 			{

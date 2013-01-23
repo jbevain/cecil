@@ -243,31 +243,37 @@ namespace Mono.Cecil {
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 
-				if (method.Name != reference.Name)
-					continue;
-
-				if (method.HasGenericParameters != reference.HasGenericParameters)
-					continue;
-
-				if (method.HasGenericParameters && method.GenericParameters.Count != reference.GenericParameters.Count)
-					continue;
-
-				if (!AreSame (method.ReturnType, reference.ReturnType))
-					continue;
-
-				if (method.HasParameters != reference.HasParameters)
-					continue;
-
-				if (!method.HasParameters && !reference.HasParameters)
+				if (AreSame(method, reference))
 					return method;
-
-				if (!AreSame (method.Parameters, reference.Parameters))
-					continue;
-
-				return method;
 			}
 
 			return null;
+		}
+
+		internal static bool AreSame (MethodReference a, MethodReference b)
+		{
+			if (a.Name != b.Name)
+				return false;
+
+			if (a.HasGenericParameters != b.HasGenericParameters)
+				return false;
+
+			if (a.HasGenericParameters && a.GenericParameters.Count != b.GenericParameters.Count)
+				return false;
+
+			if (!AreSame(a.ReturnType, b.ReturnType))
+				return false;
+
+			if (a.HasParameters != b.HasParameters)
+				return false;
+
+			if (!a.HasParameters && !b.HasParameters)
+				return true;
+
+			if (!AreSame(a.Parameters, b.Parameters))
+				return false;
+
+			return true;
 		}
 
 		static bool AreSame (Collection<ParameterDefinition> a, Collection<ParameterDefinition> b)
