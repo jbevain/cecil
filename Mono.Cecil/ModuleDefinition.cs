@@ -4,7 +4,7 @@
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2013 Jb Evain
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -215,7 +215,10 @@ namespace Mono.Cecil {
 		MethodDefinition entry_point;
 
 #if !READ_ONLY
-		MetadataImporter importer;
+#if !CF
+		IReflectionImporter reflection_importer;
+#endif
+		IMetadataImporter metadata_importer;
 #endif
 		Collection<CustomAttribute> custom_attributes;
 		Collection<AssemblyNameReference> references;
@@ -283,8 +286,14 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-		internal MetadataImporter MetadataImporter {
-			get { return importer ?? (importer = new MetadataImporter (this)); }
+#if !CF
+		internal IReflectionImporter ReflectionImporter {
+			get { return reflection_importer ?? (reflection_importer = new DefaultReflectionImporter (this)); }
+
+		}
+#endif
+		internal IMetadataImporter MetadataImporter {
+			get { return metadata_importer ?? (metadata_importer = new DefaultMetadataImporter (this)); }
 		}
 #endif
 
@@ -454,7 +463,7 @@ namespace Mono.Cecil {
 			this.reader = new MetadataReader (this);
 		}
 
-		public bool HasTypeReference (string fullName)
+			public bool HasTypeReference (string fullName)
 		{
 			return HasTypeReference (string.Empty, fullName);
 		}
@@ -596,24 +605,6 @@ namespace Mono.Cecil {
 
 #if !READ_ONLY
 
-		static void CheckType (object type)
-		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-		}
-
-		static void CheckField (object field)
-		{
-			if (field == null)
-				throw new ArgumentNullException ("field");
-		}
-
-		static void CheckMethod (object method)
-		{
-			if (method == null)
-				throw new ArgumentNullException ("method");
-		}
-
 		static void CheckContext (IGenericParameterProvider context, ModuleDefinition module)
 		{
 			if (context == null)
@@ -623,9 +614,10 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 		}
 
-		static ImportGenericContext GenericContextFor (IGenericParameterProvider context)
+		static void CheckImporter (object importer)
 		{
-			return context != null ? new ImportGenericContext (context) : default (ImportGenericContext);
+			if (importer == null)
+				throw new ArgumentNullException ("importer");
 		}
 
 #if !CF
@@ -637,13 +629,16 @@ namespace Mono.Cecil {
 
 		public TypeReference Import (Type type, IGenericParameterProvider context)
 		{
-			CheckType (type);
-			CheckContext (context, this);
+			return Import (type, context, ReflectionImporter);
+		}
 
-			return MetadataImporter.ImportType (
-				type,
-				GenericContextFor (context),
-				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
+		public TypeReference Import (Type type, IGenericParameterProvider context, IReflectionImporter importer)
+		{
+			Mixin.CheckType (type);
+			CheckContext (context, this);
+			CheckImporter (importer);
+
+			return reflection_importer.Import (type, context);
 		}
 
 		public FieldReference Import (SR.FieldInfo field)
@@ -653,72 +648,82 @@ namespace Mono.Cecil {
 
 		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
 		{
-			CheckField (field);
-			CheckContext (context, this);
+			return Import (field, context, ReflectionImporter);
+		}
 
-			return MetadataImporter.ImportField (field, GenericContextFor (context));
+		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context, IReflectionImporter importer)
+		{
+			Mixin.CheckField (field);
+			CheckContext (context, this);
+			CheckImporter (importer);
+
+			return importer.Import (field, context);
 		}
 
 		public MethodReference Import (SR.MethodBase method)
 		{
-			CheckMethod (method);
-
-			return MetadataImporter.ImportMethod (method, default (ImportGenericContext), ImportGenericKind.Definition);
+			return Import (method, null);
 		}
 
 		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
 		{
-			CheckMethod (method);
-			CheckContext (context, this);
+			return Import (method, context, ReflectionImporter);
+		}
 
-			return MetadataImporter.ImportMethod (method,
-				GenericContextFor (context),
-				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
+		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context, IReflectionImporter importer)
+		{
+			Mixin.CheckMethod (method);
+			CheckContext (context, this);
+			CheckImporter (importer);
+
+			return importer.Import (method, context);
 		}
 #endif
 
 		public TypeReference Import (TypeReference type)
 		{
-			CheckType (type);
-
-			if (type.Module == this)
-				return type;
-
-			return MetadataImporter.ImportType (type, default (ImportGenericContext));
+			return Import (type, null);
 		}
 
 		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
 		{
-			CheckType (type);
+			return Import (type, context, MetadataImporter);
+		}
+
+		public TypeReference Import (TypeReference type, IGenericParameterProvider context, IMetadataImporter importer)
+		{
+			Mixin.CheckType (type);
 
 			if (type.Module == this)
 				return type;
 
 			CheckContext (context, this);
+			CheckImporter (importer);
 
-			return MetadataImporter.ImportType (type, GenericContextFor (context));
+			return importer.Import (type, context);
 		}
 
 		public FieldReference Import (FieldReference field)
 		{
-			CheckField (field);
-
-			if (field.Module == this)
-				return field;
-
-			return MetadataImporter.ImportField (field, default (ImportGenericContext));
+			return Import (field, null);
 		}
 
 		public FieldReference Import (FieldReference field, IGenericParameterProvider context)
 		{
-			CheckField (field);
+			return Import (field, context, MetadataImporter);
+		}
+
+		public FieldReference Import (FieldReference field, IGenericParameterProvider context, IMetadataImporter importer)
+		{
+			Mixin.CheckField (field);
 
 			if (field.Module == this)
 				return field;
 
 			CheckContext (context, this);
+			CheckImporter (importer);
 
-			return MetadataImporter.ImportField (field, GenericContextFor (context));
+			return importer.Import (field, context);
 		}
 
 		public MethodReference Import (MethodReference method)
@@ -728,14 +733,20 @@ namespace Mono.Cecil {
 
 		public MethodReference Import (MethodReference method, IGenericParameterProvider context)
 		{
-			CheckMethod (method);
+			return Import (method, context, MetadataImporter);
+		}
+
+		public MethodReference Import (MethodReference method, IGenericParameterProvider context, IMetadataImporter importer)
+		{
+			Mixin.CheckMethod (method);
 
 			if (method.Module == this)
 				return method;
 
 			CheckContext (context, this);
+			CheckImporter (importer);
 
-			return MetadataImporter.ImportMethod (method, GenericContextFor (context));
+			return importer.Import (method, context);
 		}
 
 #endif
@@ -938,6 +949,28 @@ namespace Mono.Cecil {
 	}
 
 	static partial class Mixin {
+
+#if !READ_ONLY
+
+		public static void CheckType (object type)
+		{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+		}
+
+		public static void CheckField (object field)
+		{
+			if (field == null)
+				throw new ArgumentNullException ("field");
+		}
+
+		public static void CheckMethod (object method)
+		{
+			if (method == null)
+				throw new ArgumentNullException ("method");
+		}
+
+#endif
 
 		public static void CheckParameters (object parameters)
 		{
