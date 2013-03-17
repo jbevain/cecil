@@ -147,6 +147,15 @@ namespace Mono.Cecil {
 
 				return scope;
 			}
+			set {
+				var declaring_type = this.DeclaringType;
+				if (declaring_type != null) {
+					declaring_type.Scope = value;
+					return;
+				}
+
+				scope = value;
+			}
 		}
 
 		public bool IsNested {
@@ -173,17 +182,6 @@ namespace Mono.Cecil {
 					return fullname = Name;
 
 				return fullname = String.Intern(@namespace + "." + Name);
-			}
-		}
-
-		// C# reflection API has a different standard for full names ...
-		internal string FullNameStd
-		{
-			get
-			{
-				if (IsNested)
-					return DeclaringType.FullNameStd + "+" + Name;
-				return FullName;
 			}
 		}
 
