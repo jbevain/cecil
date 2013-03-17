@@ -591,6 +591,19 @@ namespace Mono.Cecil {
 			case ElementType.MVar:
 				var mvar_parameter = (GenericParameter) type;
 				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
+			case ElementType.FnPtr:
+				var funcPtr = (FunctionPointerType)type;
+				var imported = new FunctionPointerType() {
+					HasThis = funcPtr.HasThis,
+					ExplicitThis = funcPtr.ExplicitThis,
+					CallingConvention = funcPtr.CallingConvention,
+					ReturnType = ImportType (funcPtr.ReturnType, context)
+				};
+                var parameters = funcPtr.Parameters;
+				for (int i = 0; i < parameters.Count; i++)
+                    imported.Parameters.Add(
+						new ParameterDefinition (ImportType (parameters [i].ParameterType, context)));
+                return imported;
 			}
 
 			throw new NotSupportedException (type.etype.ToString ());
