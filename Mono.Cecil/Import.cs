@@ -240,6 +240,10 @@ namespace Mono.Cecil {
 			var instance_arguments = instance.GenericArguments;
 
 			context.Push (element_type);
+            foreach (var arg in arguments)
+                if (arg.DeclaringType != null && arg.DeclaringType != type.GetGenericTypeDefinition())
+                    context.Push(ImportType(arg.DeclaringType, context));
+
 			try {
 				for (int i = 0; i < arguments.Length; i++)
 					instance_arguments.Add (ImportType (arguments [i], context));
