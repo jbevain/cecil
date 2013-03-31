@@ -11,10 +11,10 @@
 using System;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbScope {
+  public class PdbScope {
     internal PdbConstant[] constants;
-    internal PdbSlot[] slots;
-    internal PdbScope[] scopes;
+    public PdbSlot[] slots;
+    public PdbScope[] scopes;
     internal string[] usedNamespaces;
 
     //internal uint segment;

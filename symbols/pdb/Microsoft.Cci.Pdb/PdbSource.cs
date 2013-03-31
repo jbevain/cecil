@@ -11,12 +11,12 @@
 using System;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbSource {
+  public class PdbSource {
     //internal uint index;
-    internal string name;
-    internal Guid doctype;
-    internal Guid language;
-    internal Guid vendor;
+    public string name;
+    public Guid doctype;
+    public Guid language;
+    public Guid vendor;
 
     internal PdbSource(/*uint index, */string name, Guid doctype, Guid language, Guid vendor) {
       //this.index = index;

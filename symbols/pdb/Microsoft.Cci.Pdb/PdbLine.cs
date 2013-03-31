@@ -11,12 +11,12 @@
 using System;
 
 namespace Microsoft.Cci.Pdb {
-  internal struct PdbLine {
-    internal uint offset;
-    internal uint lineBegin;
-    internal uint lineEnd;
-    internal ushort colBegin;
-    internal ushort colEnd;
+  public struct PdbLine {
+    public uint offset;
+    public uint lineBegin;
+    public uint lineEnd;
+    public ushort colBegin;
+    public ushort colEnd;
 
     internal PdbLine(uint offset, uint lineBegin, ushort colBegin, uint lineEnd, ushort colEnd) {
       this.offset = offset;

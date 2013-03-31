@@ -83,35 +83,12 @@
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
+    <ProjectReference Include="Mono.Cecil.Cci.Pdb.csproj">
+      <Project>{cc988fe0-c12d-4678-a02c-1fd84a8261a2}</Project>
+      <Name>Mono.Cecil.Cci.Pdb</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Microsoft.Cci.Pdb\BitAccess.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\BitSet.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\CvInfo.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DataStream.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiDbgHdr.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiHeader.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiModuleInfo.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiSecCon.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\Interfaces.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\IntHashTable.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\MsfDirectory.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbConstant.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbDebugException.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbException.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbFile.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbFileHeader.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbFunction.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbLine.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbLines.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbReader.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbScope.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbSlot.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbSource.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbTokenLine.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\SourceLocationProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Mono.Cecil.Pdb\AssemblyInfo.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedDocumentWriter.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedWriter2.cs" />

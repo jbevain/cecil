@@ -13,14 +13,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbFunction {
+  public class PdbFunction {
     static internal readonly Guid msilMetaData = new Guid(0xc6ea3fc9, 0x59b3, 0x49d6, 0xbc, 0x25,
                                                         0x09, 0x02, 0xbb, 0xab, 0xb4, 0x60);
     static internal readonly IComparer byAddress = new PdbFunctionsByAddress();
     static internal readonly IComparer byAddressAndToken = new PdbFunctionsByAddressAndToken();
     //static internal readonly IComparer byToken = new PdbFunctionsByToken();
 
-    internal uint token;
+    public uint token;
     internal uint slotToken;
     internal uint tokenOfMethodWhoseUsingInfoAppliesToThisMethod;
     //internal string name;
@@ -32,11 +32,11 @@ namespace Microsoft.Cci.Pdb {
     //internal uint length;
 
     //internal byte[] metadata;
-    internal PdbScope[] scopes;
+    public PdbScope[] scopes;
     internal PdbSlot[] slots;
     internal PdbConstant[] constants;
     internal string[] usedNamespaces;
-    internal PdbLines[] lines;
+    public PdbLines[] lines;
     internal ushort[]/*?*/ usingCounts;
     internal IEnumerable<INamespaceScope>/*?*/ namespaceScopes;
     internal string/*?*/ iteratorClass;

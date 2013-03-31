@@ -15,7 +15,7 @@ using System.IO;
 using System.Diagnostics.SymbolStore;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbFile {
+  public class PdbFile {
     private PdbFile()   // This class can't be instantiated.
     {
     }
@@ -337,7 +337,7 @@ namespace Microsoft.Cci.Pdb {
       bits.Position = end;
     }
 
-    internal static PdbFunction[] LoadFunctions(Stream read, out Dictionary<uint, PdbTokenLine> tokenToSourceMapping, out string sourceServerData, out int age, out Guid guid) {
+    public static PdbFunction[] LoadFunctions(Stream read, out Dictionary<uint, PdbTokenLine> tokenToSourceMapping, out string sourceServerData, out int age, out Guid guid) {
       tokenToSourceMapping = new Dictionary<uint, PdbTokenLine>();
       BitAccess bits = new BitAccess(512 * 1024);
       PdbFileHeader head = new PdbFileHeader(read, bits);
