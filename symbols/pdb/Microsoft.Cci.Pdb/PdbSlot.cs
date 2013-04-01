@@ -11,10 +11,10 @@
 using System;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbSlot {
-    internal uint slot;
+  public class PdbSlot {
+    public uint slot;
     internal uint typeToken;
-    internal string name;
+    public string name;
     internal ushort flags;
     //internal uint segment;
     //internal uint address;

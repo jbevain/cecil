@@ -11,7 +11,7 @@
 using System;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbTokenLine {
+  public class PdbTokenLine {
     internal uint token;
     internal uint file_id;
     internal uint line;

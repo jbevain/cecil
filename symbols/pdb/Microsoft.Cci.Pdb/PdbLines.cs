@@ -11,9 +11,9 @@
 using System;
 
 namespace Microsoft.Cci.Pdb {
-  internal class PdbLines {
-    internal PdbSource file;
-    internal PdbLine[] lines;
+  public class PdbLines {
+    public PdbSource file;
+    public PdbLine[] lines;
 
     internal PdbLines(PdbSource file, uint count) {
       this.file = file;
