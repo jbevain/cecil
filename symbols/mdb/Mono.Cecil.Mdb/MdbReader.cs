@@ -82,7 +82,11 @@ namespace Mono.Cecil.Mdb {
 		static void ReadLocalVariables (MethodEntry entry, MethodBody body, Scope [] scopes)
 		{
 			var locals = entry.GetLocals ();
+
 			foreach (var local in locals) {
+				if (local.Index < 0 || local.Index >= body.Variables.Count) // Mono 2.6 emits wrong local infos for iterators
+					continue;
+				
 				var variable = body.Variables [local.Index];
 				variable.Name = local.Name;
 
@@ -202,6 +206,9 @@ namespace Mono.Cecil.Mdb {
 		static void ReadLocalVariables (MethodEntry entry, MethodSymbols symbols)
 		{
 			foreach (var local in entry.GetLocals ()) {
+				if (local.Index < 0 || local.Index >= symbols.Variables.Count) // Mono 2.6 emits wrong local infos for iterators
+					continue;
+
 				var variable = symbols.Variables [local.Index];
 				variable.Name = local.Name;
 			}
