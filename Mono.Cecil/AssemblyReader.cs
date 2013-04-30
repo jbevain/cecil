@@ -622,10 +622,25 @@ namespace Mono.Cecil {
 				} else if (implementation.TokenType == TokenType.File) {
 					var file_record = ReadFileRecord (implementation.RID);
 
-					resource = new LinkedResource (name, flags) {
+					var hash = ReadBlob(file_record.Col3);
+					var linkedRes = new LinkedResource (name, flags) {
 						ResourceFileName = file_record.Col2,
-						Hash = ReadBlob (file_record.Col3)
 					};
+					resource = linkedRes;
+					bool explicitHash = true;
+					if (hash.Length == 20) {
+						explicitHash = false;
+						foreach (byte b in hash) {
+							if (b != 0) {
+								explicitHash = true;
+								break;
+							}
+						}
+					}
+					if (explicitHash)
+						linkedRes.Hash = hash;
+					else
+						linkedRes.HashSource = LinkedResourceHashSource.Delay;
 				} else
 					throw new NotSupportedException ();
 

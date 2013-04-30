@@ -58,6 +58,10 @@ namespace Mono.Cecil {
 				hash = new byte[20];
 		}
 
+		/// <summary>
+		/// Returns the current hash value. Modifying the returned array is undefined unless hashSource is
+		/// LinkedResourceHashSource.Explicit.
+		/// </summary>
 		public byte [] Hash {
 			get {
 				CalculateHash();
@@ -76,7 +80,10 @@ namespace Mono.Cecil {
 		public string File {
 			get { return file; }
 			set { 
+				if (value == file)
+					return;
 				file = value;
+				hash = null;
 				hashSource = LinkedResourceHashSource.File;
 			}
 		}
@@ -88,7 +95,13 @@ namespace Mono.Cecil {
 
 		public LinkedResourceHashSource HashSource {
 			get { return hashSource; }
-			set { hashSource = value; }
+			set {
+				if (value == hashSource)
+					return;
+				if (value != LinkedResourceHashSource.Explicit)
+					hash = null;
+				hashSource = value;
+			}
 		}
 
 		public override ResourceType ResourceType {
@@ -96,7 +109,8 @@ namespace Mono.Cecil {
 		}
 
 		/// <summary>
-		/// Calculate the hash of the specified file right now instead of delaying until assembly write.
+		/// Calculate the hash of the specified file right now instead of delaying until assembly write. 
+		/// The HashSource will get changed to LinkedResourceHashSource.Explicit.
 		/// </summary>
 		/// <param name="fileName">The file to calculate hash from. Uses the current File if not specified.</param>
 		public void UseCurrentFileHash(string fileName = null)
