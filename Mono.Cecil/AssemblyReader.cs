@@ -623,8 +623,8 @@ namespace Mono.Cecil {
 					var file_record = ReadFileRecord (implementation.RID);
 
 					resource = new LinkedResource (name, flags) {
-						File = file_record.Col2,
-						hash = ReadBlob (file_record.Col3)
+						ResourceFileName = file_record.Col2,
+						Hash = ReadBlob (file_record.Col3)
 					};
 				} else
 					throw new NotSupportedException ();

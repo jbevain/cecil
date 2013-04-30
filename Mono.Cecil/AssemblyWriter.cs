@@ -986,13 +986,13 @@ namespace Mono.Cecil {
 		{
 			var table = GetTable<FileTable> (Table.File);
 
-			var hash = resource.Hash.IsNullOrEmpty ()
-				? CryptoService.ComputeHash (resource.File)
-				: resource.Hash;
+			if (resource.HashSource == LinkedResourceHashSource.File)
+				resource.UseCurrentFileHash();
+			var hash = resource.Hash;
 
 			return (uint) table.AddRow (new FileRow (
 				FileAttributes.ContainsNoMetaData,
-				GetStringIndex (resource.File),
+				GetStringIndex (resource.ResourceFileName),
 				GetBlobIndex (hash)));
 		}
 
