@@ -52,15 +52,26 @@ namespace Mono.Cecil {
 	public class ResolutionException : Exception {
 
 		readonly MemberReference member;
+		readonly IMetadataScope scope;
 
 		public MemberReference Member {
 			get { return member; }
 		}
 
+		public IMetadataScope Scope {
+			get { return scope; }
+		}
+
 		public ResolutionException (MemberReference member)
-			: base ("Failed to resolve " + member.FullName)
+			: this (member, null)
+		{
+		}
+
+		public ResolutionException (MemberReference member, IMetadataScope scope)
+			: base ("Failed to resolve " + member.FullName + (scope != null ? " from " + scope.Name : string.Empty))
 		{
 			this.member = member;
+			this.scope = scope;
 		}
 
 #if !SILVERLIGHT && !CF
