@@ -331,7 +331,7 @@ namespace Mono.Cecil {
 		{
 			var type = self.Resolve ();
 			if (type == null)
-				throw new ResolutionException (self);
+				throw new ResolutionException (self, self.Scope);
 
 			return type;
 		}
