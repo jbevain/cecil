@@ -465,6 +465,14 @@ namespace Mono.Cecil {
 			set { base.DeclaringType = value; }
 		}
 
+		#if !READ_ONLY
+
+		public static TypeDefinition CreateType (string @namespace, string name, TypeAttributes attributes, TypeReference baseType, ModuleDefinition moduleDef) {
+			return new TypeDefinition (@namespace, name, attributes, baseType) { module = moduleDef };
+		}
+
+		#endif
+
 		public TypeDefinition (string @namespace, string name, TypeAttributes attributes)
 			: base (@namespace, name)
 		{
