@@ -30,13 +30,10 @@ namespace Mono.Cecil.Cil {
 		public int PointerToRawData;
 	}
 
-	public sealed class Scope : IVariableDefinitionProvider {
+	public class InstructionRange {
 
 		Instruction start;
 		Instruction end;
-
-		Collection<Scope> scopes;
-		Collection<VariableDefinition> variables;
 
 		public Instruction Start {
 			get { return start; }
@@ -47,6 +44,12 @@ namespace Mono.Cecil.Cil {
 			get { return end; }
 			set { end = value; }
 		}
+	}
+
+	public sealed class Scope : InstructionRange, IVariableDefinitionProvider {
+
+		Collection<Scope> scopes;
+		Collection<VariableDefinition> variables;
 
 		public bool HasScopes {
 			get { return !scopes.IsNullOrEmpty (); }
@@ -56,6 +59,52 @@ namespace Mono.Cecil.Cil {
 			get {
 				if (scopes == null)
 					scopes = new Collection<Scope> ();
+
+				return scopes;
+			}
+		}
+
+		public bool HasVariables {
+			get { return !variables.IsNullOrEmpty (); }
+		}
+
+		public Collection<VariableDefinition> Variables {
+			get {
+				if (variables == null)
+					variables = new Collection<VariableDefinition> ();
+
+				return variables;
+			}
+		}
+	}
+
+	public class RangeSymbol {
+
+		internal int start;
+		internal int end;
+
+		public int Start {
+			get { return start; }
+		}
+
+		public int End {
+			get { return end; }
+		}
+	}
+
+	public sealed class ScopeSymbol : RangeSymbol, IVariableDefinitionProvider {
+
+		Collection<ScopeSymbol> scopes;
+		Collection<VariableDefinition> variables;
+
+		public bool HasScopes {
+			get { return !scopes.IsNullOrEmpty (); }
+		}
+
+		public Collection<ScopeSymbol> Scopes {
+			get {
+				if (scopes == null)
+					scopes = new Collection<ScopeSymbol> ();
 
 				return scopes;
 			}
@@ -92,6 +141,7 @@ namespace Mono.Cecil.Cil {
 		internal MethodBody method_body;
 		internal int code_size;
 		internal MetadataToken original_method_token;
+		internal ScopeSymbol scope;
 		internal MetadataToken local_var_token;
 		internal Collection<VariableDefinition> variables;
 		internal Collection<InstructionSymbol> instructions;
@@ -121,6 +171,10 @@ namespace Mono.Cecil.Cil {
 
 				return instructions;
 			}
+		}
+
+		public ScopeSymbol Scope {
+			get { return scope; }
 		}
 
 		public int CodeSize {

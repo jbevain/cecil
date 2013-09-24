@@ -45,27 +45,47 @@ namespace Mono.Cecil.Pdb {
 			var sym_token = new SymbolToken(method_token.ToInt32());
 
 			var instructions = CollectInstructions(body);
-			if (instructions.Count == 0)
+			if (instructions.Count == 0 && !body.HasVariables)
 				return;
-
-			var start_offset = 0;
-			var end_offset = body.CodeSize;
 
 			var pdbSymbols = body.Symbols as PdbMethodSymbols;
 
 			writer.OpenMethod(sym_token);
-			writer.OpenScope(start_offset);
 
 			DefineSequencePoints(instructions);
-			DefineVariables(body, start_offset, end_offset);
 
-			DefineUsedNamespaces(pdbSymbols);
+            if (body.Scope != null)
+                WriteScope(body, body.Scope, true);
+            else
+            {
+                writer.OpenScope(0);
+                DefineUsedNamespaces(pdbSymbols);
+                if (body.HasVariables)
+                    DefineVariables(body, body.Variables, 0, body.CodeSize);
+                writer.CloseScope(body.CodeSize);
+            }
 
-			writer.CloseScope(end_offset);
-
-			DefineCustomMetadata(pdbSymbols);
+            DefineCustomMetadata(pdbSymbols);
 
 			writer.CloseMethod();
+		}
+
+		void WriteScope (MethodBody body, Scope scope, bool rootScope)
+		{
+			var start_offset = scope.Start.Offset;
+			var end_offset   = scope.End.Next != null ? scope.End.Next.Offset : body.CodeSize;
+			
+			writer.OpenScope  (start_offset);
+
+            // TODO: Store used namespace per scope?
+		    if (rootScope && body.Symbols is PdbMethodSymbols)
+		        DefineUsedNamespaces ((PdbMethodSymbols)body.Symbols);
+
+			foreach (var s in scope.Scopes)
+				WriteScope (body, s, false);
+
+			DefineVariables   (body, scope.Variables, start_offset, end_offset);
+			writer.CloseScope (end_offset);
 		}
 
 		Collection<Instruction> CollectInstructions (MethodBody body)
@@ -86,14 +106,10 @@ namespace Mono.Cecil.Pdb {
 			return collection;
 		}
 
-		void DefineVariables (MethodBody body, int start_offset, int end_offset)
+		void DefineVariables (MethodBody body, Collection<VariableDefinition> variables, int start_offset, int end_offset)
 		{
-			if (!body.HasVariables)
-				return;
-
 			var sym_token = new SymbolToken (body.LocalVarToken.ToInt32 ());
 
-			var variables = body.Variables;
 			for (int i = 0; i < variables.Count; i++) {
 				var variable = variables [i];
 				if (!string.IsNullOrEmpty(variable.Name))
@@ -152,28 +168,31 @@ namespace Mono.Cecil.Pdb {
 
 		public void Write (MethodSymbols symbols)
 		{
-			var sym_token = new SymbolToken (symbols.OriginalMethodToken.ToInt32 ());
+            if (symbols.instructions.IsNullOrEmpty() && !symbols.HasVariables)
+                return;
 
-			var start_offset = 0;
-			var end_offset = symbols.CodeSize;
+			var sym_token = new SymbolToken (symbols.OriginalMethodToken.ToInt32 ());
 
 			var pdbSymbols = symbols as PdbMethodSymbols;
 
 			writer.OpenMethod (sym_token);
-			if (!symbols.instructions.IsNullOrEmpty ()) {
-				writer.OpenScope (start_offset);
 
-				DefineSequencePoints (symbols);
-				DefineVariables (symbols, start_offset, end_offset);
+			DefineSequencePoints (symbols);
 
-				DefineUsedNamespaces (pdbSymbols);
-
-				writer.CloseScope (end_offset);
+			if (symbols.Scope != null)
+				WriteScope (pdbSymbols, symbols.Scope, true);
+			else
+			{
+				writer.OpenScope  (0);
+			    DefineUsedNamespaces (pdbSymbols);
+                if (symbols.HasVariables)
+			        DefineVariables(symbols, symbols.Variables, 0, symbols.CodeSize);
+                writer.CloseScope (symbols.CodeSize);
 			}
 
-			DefineCustomMetadata (pdbSymbols);
+            DefineCustomMetadata(pdbSymbols);
 
-			writer.CloseMethod ();
+            writer.CloseMethod ();
 		}
 
 		private void DefineCustomMetadata (PdbMethodSymbols pdbSymbols)
@@ -299,14 +318,25 @@ namespace Mono.Cecil.Pdb {
 			}
 		}
 
-		void DefineVariables (MethodSymbols symbols, int start_offset, int end_offset)
+		void WriteScope (PdbMethodSymbols symbols, ScopeSymbol scope, bool rootScope)
 		{
-			if (!symbols.HasVariables)
-				return;
+			writer.OpenScope  (scope.Start);
 
+            // TODO: Store used namespace per scope?
+            if (rootScope)
+                DefineUsedNamespaces(symbols);
+
+            foreach (var s in scope.Scopes)
+				WriteScope (symbols, s, false);
+
+			DefineVariables   (symbols, scope.Variables, scope.Start, scope.End);
+			writer.CloseScope (scope.End);
+		}
+
+		void DefineVariables (MethodSymbols symbols, Collection<VariableDefinition> variables, int start_offset, int end_offset)
+		{
 			var sym_token = new SymbolToken (symbols.LocalVarToken.ToInt32 ());
 
-			var variables = symbols.Variables;
 			for (int i = 0; i < variables.Count; i++) {
 				var variable = variables [i];
 				if (!string.IsNullOrEmpty(variable.Name))
