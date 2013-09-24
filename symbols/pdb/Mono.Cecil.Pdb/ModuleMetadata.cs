@@ -487,7 +487,7 @@ namespace Mono.Cecil.Pdb {
 				return 0;
 			}
 
-			WriteString (type.Name, szTypeDef, cchTypeDef, out pchTypeDef);
+			WriteString (type.IsNested ? type.Name : type.FullName, szTypeDef, cchTypeDef, out pchTypeDef);
 			WriteIntPtr (pdwTypeDefFlags, (uint) type.Attributes);
 			return type.BaseType != null ? type.BaseType.MetadataToken.ToUInt32 () : 0;
 		}
