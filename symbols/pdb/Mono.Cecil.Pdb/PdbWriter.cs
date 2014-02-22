@@ -42,11 +42,13 @@ namespace Mono.Cecil.Pdb {
 		readonly ModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
+		readonly SourcePathRewriterDelegate sourcePathRewriter;
 
-		internal PdbWriter (ModuleDefinition module, SymWriter writer)
+		internal PdbWriter (ModuleDefinition module, SymWriter writer, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			this.module = module;
 			this.writer = writer;
+			this.sourcePathRewriter = sourcePathRewriter;
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
 		}
 
@@ -149,8 +151,15 @@ namespace Mono.Cecil.Pdb {
 			if (documents.TryGetValue (document.Url, out doc_writer))
 				return doc_writer;
 
+			var url = document.Url;
+			// Apply modifier if it is defined
+			if (sourcePathRewriter != null)
+			{
+				url = sourcePathRewriter(url);
+			}
+
 			doc_writer = writer.DefineDocument (
-				document.Url,
+				url,
 				document.Language.ToGuid (),
 				document.LanguageVendor.ToGuid (),
 				document.Type.ToGuid ());

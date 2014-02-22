@@ -157,8 +157,16 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public sealed class WriterParameters {
+	/// <summary>
+	/// Delegate used to rewrite sourcepath location stored in PDB/MDB.
+	/// </summary>
+	/// <param name="sourcePath">The source path.</param>
+	/// <returns>The sourcepath rewrited.</returns>
+	public delegate string SourcePathRewriterDelegate(string sourcePath);
 
+	public sealed class WriterParameters
+	{
+		SourcePathRewriterDelegate sourcePathRewriter;
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
@@ -178,6 +186,12 @@ namespace Mono.Cecil {
 		public bool WriteSymbols {
 			get { return write_symbols; }
 			set { write_symbols = value; }
+		}
+
+		public SourcePathRewriterDelegate SourcePathRewriter
+		{
+			get { return sourcePathRewriter; }
+			set { sourcePathRewriter = value; }
 		}
 #if !SILVERLIGHT && !CF
 		public SR.StrongNameKeyPair StrongNameKeyPair {

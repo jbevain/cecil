@@ -39,14 +39,9 @@ namespace Mono.Cecil.Mdb {
 #if !READ_ONLY
 	public class MdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, SourcePathRewriterDelegate sourcePathRewriter)
 		{
-			return new MdbWriter (module.Mvid, fileName);
-		}
-
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
-		{
-			throw new NotImplementedException ();
+			return new MdbWriter (module.Mvid, fileName, sourcePathRewriter);
 		}
 	}
 
@@ -55,10 +50,12 @@ namespace Mono.Cecil.Mdb {
 		readonly Guid mvid;
 		readonly MonoSymbolWriter writer;
 		readonly Dictionary<string, SourceFile> source_files;
+		readonly SourcePathRewriterDelegate sourcePathRewriter;
 
-		public MdbWriter (Guid mvid, string assembly)
+		public MdbWriter(Guid mvid, string assembly, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			this.mvid = mvid;
+			this.sourcePathRewriter = sourcePathRewriter;
 			this.writer = new MonoSymbolWriter (assembly);
 			this.source_files = new Dictionary<string, SourceFile> ();
 		}
@@ -81,7 +78,7 @@ namespace Mono.Cecil.Mdb {
 			if (source_files.TryGetValue (url, out source_file))
 				return source_file;
 
-			var entry = writer.DefineDocument (url);
+			var entry = writer.DefineDocument(sourcePathRewriter != null ? sourcePathRewriter(url) : url);
 			var compile_unit = writer.DefineCompilationUnit (entry);
 
 			source_file = new SourceFile (compile_unit, entry);

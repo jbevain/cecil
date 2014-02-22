@@ -94,7 +94,7 @@ namespace Mono.Cecil {
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
-			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider);
+			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters.SourcePathRewriter);
 
 #if !SILVERLIGHT && !CF
 			if (parameters.StrongNameKeyPair != null && name != null) {
@@ -135,12 +135,12 @@ namespace Mono.Cecil {
 			});
 		}
 
-		static ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider)
+		static ISymbolWriter GetSymbolWriter(ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			if (symbol_writer_provider == null)
 				return null;
 
-			return symbol_writer_provider.GetSymbolWriter (module, fq_name);
+			return symbol_writer_provider.GetSymbolWriter(module, fq_name, sourcePathRewriter);
 		}
 	}
 
