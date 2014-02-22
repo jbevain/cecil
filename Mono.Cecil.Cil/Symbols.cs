@@ -261,7 +261,6 @@ namespace Mono.Cecil.Cil {
 #if !READ_ONLY
 
 	public interface ISymbolWriter : IDisposable {
-
 		bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header);
 		void Write (MethodBody body);
 		void Write (MethodSymbols symbols);
@@ -269,8 +268,7 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriterProvider {
 
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter);
 	}
 
 #endif

@@ -157,8 +157,9 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public sealed class WriterParameters {
-
+	public sealed class WriterParameters
+	{
+		Func<string, string> sourcePathRewriter;
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
@@ -178,6 +179,12 @@ namespace Mono.Cecil {
 		public bool WriteSymbols {
 			get { return write_symbols; }
 			set { write_symbols = value; }
+		}
+
+		public Func<string, string> SourcePathRewriter
+		{
+			get { return sourcePathRewriter; }
+			set { sourcePathRewriter = value; }
 		}
 #if !SILVERLIGHT && !CF
 		public SR.StrongNameKeyPair StrongNameKeyPair {
