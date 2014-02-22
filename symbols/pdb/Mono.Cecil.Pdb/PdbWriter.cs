@@ -42,9 +42,9 @@ namespace Mono.Cecil.Pdb {
 		readonly ModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
-		readonly Func<string, string> sourcePathRewriter;
+		readonly SourcePathRewriterDelegate sourcePathRewriter;
 
-		internal PdbWriter (ModuleDefinition module, SymWriter writer, Func<string, string> sourcePathRewriter)
+		internal PdbWriter (ModuleDefinition module, SymWriter writer, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			this.module = module;
 			this.writer = writer;

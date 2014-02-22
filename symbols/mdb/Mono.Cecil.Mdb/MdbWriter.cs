@@ -39,7 +39,7 @@ namespace Mono.Cecil.Mdb {
 #if !READ_ONLY
 	public class MdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			return new MdbWriter (module.Mvid, fileName, sourcePathRewriter);
 		}
@@ -50,9 +50,9 @@ namespace Mono.Cecil.Mdb {
 		readonly Guid mvid;
 		readonly MonoSymbolWriter writer;
 		readonly Dictionary<string, SourceFile> source_files;
-		readonly Func<string, string> sourcePathRewriter;
+		readonly SourcePathRewriterDelegate sourcePathRewriter;
 
-		public MdbWriter(Guid mvid, string assembly, Func<string, string> sourcePathRewriter)
+		public MdbWriter(Guid mvid, string assembly, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			this.mvid = mvid;
 			this.sourcePathRewriter = sourcePathRewriter;

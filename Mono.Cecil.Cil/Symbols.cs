@@ -268,7 +268,7 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriterProvider {
 
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter);
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, SourcePathRewriterDelegate sourcePathRewriter);
 	}
 
 #endif

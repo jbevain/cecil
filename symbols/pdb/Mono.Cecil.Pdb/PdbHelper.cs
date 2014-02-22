@@ -73,7 +73,7 @@ namespace Mono.Cecil.Pdb {
 
 	public class PdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, Func<string, string> sourcePathRewriter)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			return new PdbWriter (module, PdbHelper.CreateWriter (module, PdbHelper.GetPdbFileName (fileName)), sourcePathRewriter);
 		}

@@ -135,7 +135,7 @@ namespace Mono.Cecil {
 			});
 		}
 
-		static ISymbolWriter GetSymbolWriter(ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, Func<string, string> sourcePathRewriter)
+		static ISymbolWriter GetSymbolWriter(ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, SourcePathRewriterDelegate sourcePathRewriter)
 		{
 			if (symbol_writer_provider == null)
 				return null;

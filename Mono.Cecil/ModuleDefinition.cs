@@ -157,9 +157,16 @@ namespace Mono.Cecil {
 		}
 	}
 
+	/// <summary>
+	/// Delegate used to rewrite sourcepath location stored in PDB/MDB.
+	/// </summary>
+	/// <param name="sourcePath">The source path.</param>
+	/// <returns>The sourcepath rewrited.</returns>
+	public delegate string SourcePathRewriterDelegate(string sourcePath);
+
 	public sealed class WriterParameters
 	{
-		Func<string, string> sourcePathRewriter;
+		SourcePathRewriterDelegate sourcePathRewriter;
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
@@ -181,7 +188,7 @@ namespace Mono.Cecil {
 			set { write_symbols = value; }
 		}
 
-		public Func<string, string> SourcePathRewriter
+		public SourcePathRewriterDelegate SourcePathRewriter
 		{
 			get { return sourcePathRewriter; }
 			set { sourcePathRewriter = value; }
