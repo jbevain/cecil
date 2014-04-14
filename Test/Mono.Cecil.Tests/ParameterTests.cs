@@ -103,6 +103,21 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (0, array_info.SizeParameterMultiplier);
 		}
 
+		[TestModule ("nullable-constant.dll")]
+		public void NullableConstant (ModuleDefinition module)
+		{
+			var type = module.GetType ("Program");
+			var method = type.GetMethod ("Foo");
+
+			Assert.IsTrue (method.Parameters [0].HasConstant);
+			Assert.IsTrue (method.Parameters [1].HasConstant);
+			Assert.IsTrue (method.Parameters [2].HasConstant);
+
+			Assert.AreEqual (1234, method.Parameters [0].Constant);
+			Assert.AreEqual (null, method.Parameters [1].Constant);
+			Assert.AreEqual (12, method.Parameters [2].Constant);
+		}
+
 		[TestModule ("boxedoptarg.dll")]
 		public void BoxedDefaultArgumentValue (ModuleDefinition module)
 		{

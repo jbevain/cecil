@@ -1640,6 +1640,11 @@ namespace Mono.Cecil {
 			case ElementType.Var:
 				return ElementType.Class;
 			case ElementType.GenericInst:
+				var generic_instance = (GenericInstanceType) constant_type;
+				if (generic_instance.ElementType.IsTypeOf ("System", "Nullable`1"))
+					return GetConstantType (generic_instance.GenericArguments [0], constant);
+
+				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
 			case ElementType.CModOpt:
 			case ElementType.CModReqD:
 			case ElementType.ByRef:
