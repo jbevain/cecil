@@ -44,8 +44,10 @@ namespace Mono.Cecil.Cil {
 
 		internal Collection<Instruction> instructions;
 		internal Collection<ExceptionHandler> exceptions;
-		internal Collection<VariableDefinition> variables;
+        internal Collection<VariableDefinition> variables; 
+        internal Collection<InstructionRange> iterator_scopes;
 		Scope scope;
+        TypeDefinition iterator_type;
 
 		public MethodDefinition Method {
 			get { return method; }
@@ -95,6 +97,14 @@ namespace Mono.Cecil.Cil {
 			set { scope = value; }
 		}
 
+   		public TypeDefinition IteratorType {
+ 			get { return iterator_type; }
+ 			set { iterator_type = value; }
+ 		}
+ 
+ 		public Collection<InstructionRange> IteratorScopes {
+ 			get { return iterator_scopes ?? (iterator_scopes = new Collection<InstructionRange> ()); }
+ 		}
 		public ParameterDefinition ThisParameter {
 			get {
 				if (method == null || method.DeclaringType == null)
