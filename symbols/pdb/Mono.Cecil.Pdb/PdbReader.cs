@@ -129,6 +129,11 @@ namespace Mono.Cecil.Pdb {
 		static void SetInstructionRange (MethodBody body, InstructionMapper mapper,	InstructionRange range, uint offset, uint length)
 		{
 			range.Start = mapper ((int) offset);
+            if (length == 0)
+            {
+                range.End = range.Start;
+                return;
+            }
 			range.End   = mapper ((int)(offset + length));
 
 			if (range.End == null) range.End = body.Instructions[body.Instructions.Count - 1];
