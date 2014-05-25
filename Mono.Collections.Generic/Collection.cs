@@ -123,13 +123,11 @@ namespace Mono.Collections.Generic {
 			this.size = this.items.Length;
 		}
 
-        public void SetCapacity(int capacity)
-        {
-            if (size < capacity)
-            {
-                this.Grow(capacity - size);
-            }
-        }
+		public void SetCapacity (int capacity)
+		{
+			if (size < capacity)
+				Grow (capacity - size);
+		}
 
 		public void Add (T item)
 		{
