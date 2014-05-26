@@ -202,7 +202,7 @@ namespace Mono.Cecil {
 			this.owner = owner;
 			this.type = owner.GenericParameterType;
 			this.etype = ConvertGenericParameterType (this.type);
-			this.token = new MetadataToken(TokenType.GenericParam);
+			this.token = new MetadataToken (TokenType.GenericParam);
 		}
 
 		public GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
@@ -215,7 +215,7 @@ namespace Mono.Cecil {
 			this.type = type;
 			this.etype = ConvertGenericParameterType (type);
 			this.module = module;
-			this.token = new MetadataToken(TokenType.GenericParam);
+			this.token = new MetadataToken (TokenType.GenericParam);
 		}
 
 		static ElementType ConvertGenericParameterType (GenericParameterType type)
