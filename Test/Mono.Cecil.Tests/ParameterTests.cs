@@ -247,5 +247,28 @@ namespace Mono.Cecil.Tests {
 				Assert.IsNull (parameter.Constant);
 			});
 		}
+
+		[Test]
+		public void NullablePrimitiveParameterConstant ()
+		{
+			TestModule ("nullable-parameter.dll", module => {
+				var test = module.GetType ("Test");
+				var method = test.GetMethod ("Foo");
+
+				Assert.IsNotNull (method);
+
+				var param = method.Parameters [0];
+				Assert.IsTrue (param.HasConstant);
+				Assert.AreEqual (1234, param.Constant);
+
+				param = method.Parameters [1];
+				Assert.IsTrue (param.HasConstant);
+				Assert.AreEqual (null, param.Constant);
+
+				param = method.Parameters [2];
+				Assert.IsTrue (param.HasConstant);
+				Assert.AreEqual (12, param.Constant);
+			});
+		}
 	}
 }
