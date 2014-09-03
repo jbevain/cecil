@@ -1045,18 +1045,29 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetTypeReferenceScope (MetadataToken scope)
 		{
+			if (scope.TokenType == TokenType.Module)
+				return module;
+
+			IMetadataScope[] scopes;
+
 			switch (scope.TokenType) {
 			case TokenType.AssemblyRef:
 				InitializeAssemblyReferences ();
-				return metadata.AssemblyReferences [(int) scope.RID - 1];
+				scopes = metadata.AssemblyReferences;
+				break;
 			case TokenType.ModuleRef:
 				InitializeModuleReferences ();
-				return metadata.ModuleReferences [(int) scope.RID - 1];
-			case TokenType.Module:
-				return module;
+				scopes = metadata.ModuleReferences;
+				break;
 			default:
 				throw new NotSupportedException ();
 			}
+
+			var index = scope.RID - 1;
+			if (index < 0 || index >= scopes.Length)
+				return null;
+
+			return scopes [index];
 		}
 
 		public IEnumerable<TypeReference> GetTypeReferences ()
@@ -1263,8 +1274,8 @@ namespace Mono.Cecil {
 			case ElementType.CModReqD:
 				return GetFieldTypeSize (((IModifierType) type).ElementType);
 			default:
-				var field_type = type.CheckedResolve ();
-				if (field_type.HasLayoutInfo)
+				var field_type = type.Resolve ();
+				if (field_type != null && field_type.HasLayoutInfo)
 					size = field_type.ClassSize;
 
 				break;

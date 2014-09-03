@@ -1175,14 +1175,25 @@ namespace Mono.Cecil {
 
 		TypeRefRow CreateTypeRefRow (TypeReference type)
 		{
-			var scope_token = type.IsNested
-				? GetTypeRefToken (type.DeclaringType)
-				: type.Scope.MetadataToken;
+			var scope_token = GetScopeToken (type);
 
 			return new TypeRefRow (
 				MakeCodedRID (scope_token, CodedIndex.ResolutionScope),
 				GetStringIndex (type.Name),
 				GetStringIndex (type.Namespace));
+		}
+
+		MetadataToken GetScopeToken (TypeReference type)
+		{
+			if (type.IsNested)
+				return GetTypeRefToken (type.DeclaringType);
+
+			var scope = type.Scope;
+
+			if (scope == null)
+				return MetadataToken.Zero;
+
+			return scope.MetadataToken;
 		}
 
 		static CodedRID MakeCodedRID (IMetadataTokenProvider provider, CodedIndex index)

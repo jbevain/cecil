@@ -114,6 +114,10 @@ namespace Mono.Cecil {
 			type = type.GetElementType ();
 
 			var scope = type.Scope;
+
+			if (scope == null)
+				return null;
+
 			switch (scope.MetadataScopeType) {
 			case MetadataScopeType.AssemblyNameReference:
 				var assembly = assembly_resolver.Resolve ((AssemblyNameReference) scope);
