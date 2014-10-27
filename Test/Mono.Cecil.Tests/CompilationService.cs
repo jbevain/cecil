@@ -259,9 +259,14 @@ namespace Mono.Cecil.Tests {
 				@"Microsoft SDKs\Windows\v7.0A\Bin",
 			};
 
+            var programfilesx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+		    var programfiles = String.IsNullOrEmpty (programfilesx86)
+		        ? Environment.GetFolderPath (Environment.SpecialFolder.ProgramFiles)
+                : programfilesx86;
+
 			foreach (var sdk in sdks) {
-				var exe = Path.Combine (
-					Path.Combine (Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), sdk),
+			    var exe = Path.Combine (
+                    Path.Combine(programfiles, sdk),
 					tool + ".exe");
 
 				if (File.Exists(exe))
