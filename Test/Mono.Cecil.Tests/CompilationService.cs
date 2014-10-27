@@ -192,6 +192,9 @@ namespace Mono.Cecil.Tests {
 			var stdout = new StringWriter ();
 			var stderr = new StringWriter ();
 
+            if (!File.Exists (target))
+                throw new FileNotFoundException(String.Format ("'{0}' was not found.", target), target);
+
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = target,
