@@ -75,6 +75,11 @@ namespace Mono.Cecil.Pdb
 
 			return debug_info;
 		}
+ 
+        public void SetSymAttribute (SymbolToken method, string name, int length, byte [] data)
+ 		{
+ 			m_writer.SetSymAttribute (method, name, (uint) length, data);
+ 		}
 
 		public void DefineLocalVariable2 (
 			string name,

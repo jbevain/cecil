@@ -3131,7 +3131,7 @@ namespace Mono.Cecil {
 		public TypeReference ReadTypeReference ()
 		{
 			string s = ReadUTF8String ();
-			if (s != null && s.IndexOf ('\\') != -1)
+			if (s.IndexOf ('\\') != -1)
 				s = UnescapeTypeName (s);
 			return TypeParser.ParseType (reader.module, s);
 		}

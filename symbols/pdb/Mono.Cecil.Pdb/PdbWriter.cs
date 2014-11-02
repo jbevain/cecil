@@ -75,8 +75,15 @@ namespace Mono.Cecil.Pdb {
 			DefineVariables (body, start_offset, end_offset);
 
 			writer.CloseScope (end_offset);
+
+			if (body.IteratorType != null)
+				DefineIteratorType   (sym_token, body.IteratorType.Name);
+
+			if (body.iterator_scopes != null)
+				DefineIteratorScopes (sym_token, body.IteratorScopes, body.CodeSize);
+
 			writer.CloseMethod ();
-		}
+        }
 
 		Collection<Instruction> CollectInstructions (MethodBody body)
 		{
@@ -159,8 +166,77 @@ namespace Mono.Cecil.Pdb {
 			return doc_writer;
 		}
 
+		void DefineIteratorType (SymbolToken method_token, string name)
+		{
+			var buffer = new PE.ByteBuffer ();
+			buffer.WriteByte (4);
+			buffer.WriteByte (1);
+			buffer.Align     (4);
+			buffer.WriteByte (4);
+			buffer.WriteByte (4);
+			buffer.Align	 (4);
+		
+			var length = 10 + (uint) name.Length * 2;
+			while (length % 4 > 0)
+				length++;
+		
+			buffer.WriteUInt32 (length);
+			buffer.WriteBytes (System.Text.Encoding.Unicode.GetBytes (name));
+			buffer.WriteByte (0);
+			buffer.Align	 (4);
+		
+			writer.SetSymAttribute (method_token, "MD2", buffer.length, buffer.buffer);
+		}
+
+		void DefineIteratorScopes (SymbolToken method_token, Collection<RangeSymbol> scopes)
+		{
+			var buffer = new PE.ByteBuffer ();
+			buffer.WriteByte (4);
+			buffer.WriteByte (1);
+			buffer.Align     (4);
+			buffer.WriteByte (4);
+			buffer.WriteByte (3);
+			buffer.Align	 (4);
+		
+			buffer.WriteInt32 (scopes.Count * 8 + 12);
+			buffer.WriteInt32 (scopes.Count);
+		
+			foreach (RangeSymbol scope in scopes)
+			{
+				buffer.WriteInt32 (scope.Start);
+				buffer.WriteInt32 (scope.End);
+			}
+		
+			writer.SetSymAttribute (method_token, "MD2", buffer.length, buffer.buffer);
+		}
+
+		void DefineIteratorScopes (SymbolToken method_token, Collection<InstructionRange> scopes, int code_size)
+		{
+			var buffer = new PE.ByteBuffer ();
+			buffer.WriteByte (4);
+			buffer.WriteByte (1);
+			buffer.Align     (4);
+			buffer.WriteByte (4);
+			buffer.WriteByte (3);
+			buffer.Align	 (4);
+		
+			buffer.WriteInt32 (scopes.Count * 8 + 12);
+			buffer.WriteInt32 (scopes.Count);
+		
+			foreach (InstructionRange scope in scopes)
+			{
+                buffer.WriteInt32(scope.Start != null ? scope.Start.Offset : code_size);
+				buffer.WriteInt32 (scope.End.Next != null ? scope.End.Next.Offset : code_size);
+			}
+		
+			writer.SetSymAttribute (method_token, "MD2", buffer.length, buffer.buffer);
+		}
+
 		public void Write (MethodSymbols symbols)
 		{
+			if (symbols.instructions.IsNullOrEmpty () && !symbols.HasVariables)
+				return;
+
 			var sym_token = new SymbolToken (symbols.MethodToken.ToInt32 ());
 
 			var start_offset = 0;
@@ -173,12 +249,21 @@ namespace Mono.Cecil.Pdb {
 			DefineVariables (symbols, start_offset, end_offset);
 
 			writer.CloseScope (end_offset);
+
+			if (!string.IsNullOrEmpty (symbols.IteratorType))
+				DefineIteratorType   (sym_token, symbols.IteratorType);
+
+			if (symbols.iterator_scopes != null)
+				DefineIteratorScopes (sym_token, symbols.IteratorScopes);
+
 			writer.CloseMethod ();
 		}
 
 		void DefineSequencePoints (MethodSymbols symbols)
 		{
 			var instructions = symbols.instructions;
+			if (instructions == null)
+				return;
 
 			for (int i = 0; i < instructions.Count; i++) {
 				var instruction = instructions [i];
