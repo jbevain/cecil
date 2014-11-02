@@ -30,6 +30,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using Mono.Cecil;
+
 namespace Mono.Collections.Generic {
 
 	public class Collection<T> : IList<T>, IList {
@@ -279,13 +281,7 @@ namespace Mono.Collections.Generic {
 			if (new_size < size)
 				throw new ArgumentOutOfRangeException ();
 
-#if !CF
-			Array.Resize (ref items, new_size);
-#else
-			var array = new T [new_size];
-			Array.Copy (items, array, size);
-			items = array;
-#endif
+			items = items.Resize (new_size);
 		}
 
 		int IList.Add (object value)
