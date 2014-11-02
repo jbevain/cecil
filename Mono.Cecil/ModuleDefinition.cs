@@ -132,7 +132,7 @@ namespace Mono.Cecil {
 		public ModuleParameters ()
 		{
 			this.kind = ModuleKind.Dll;
-			this.runtime = GetCurrentRuntime ();
+			this.Runtime = GetCurrentRuntime ();
 			this.architecture = TargetArchitecture.I386;
 		}
 
@@ -205,6 +205,7 @@ namespace Mono.Cecil {
 		readonly MetadataReader reader;
 		readonly string fq_name;
 
+		internal string runtime_version;
 		internal ModuleKind kind;
 		TargetRuntime runtime;
 		TargetArchitecture architecture;
@@ -236,7 +237,18 @@ namespace Mono.Cecil {
 
 		public TargetRuntime Runtime {
 			get { return runtime; }
-			set { runtime = value; }
+			set {
+				runtime = value;
+				runtime_version = runtime.RuntimeVersionString ();
+			}
+		}
+
+		public string RuntimeVersion {
+			get { return runtime_version; }
+			set {
+				runtime_version = value;
+				runtime = runtime_version.ParseRuntime ();
+			}
 		}
 
 		public TargetArchitecture Architecture {
@@ -466,7 +478,7 @@ namespace Mono.Cecil {
 		{
 			this.Image = image;
 			this.kind = image.Kind;
-			this.runtime = image.Runtime;
+			this.RuntimeVersion = image.RuntimeVersion;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
 			this.characteristics = image.Characteristics;
@@ -849,7 +861,7 @@ namespace Mono.Cecil {
 			var module = new ModuleDefinition {
 				Name = name,
 				kind = parameters.Kind,
-				runtime = parameters.Runtime,
+				Runtime = parameters.Runtime,
 				architecture = parameters.Architecture,
 				mvid = Guid.NewGuid (),
 				Attributes = ModuleAttributes.ILOnly,
@@ -1030,6 +1042,21 @@ namespace Mono.Cecil {
 			case '4':
 			default:
 				return TargetRuntime.Net_4_0;
+			}
+		}
+
+		public static string RuntimeVersionString (this TargetRuntime runtime)
+		{
+			switch (runtime) {
+			case TargetRuntime.Net_1_0:
+				return "v1.0.3705";
+			case TargetRuntime.Net_1_1:
+				return "v1.1.4322";
+			case TargetRuntime.Net_2_0:
+				return "v2.0.50727";
+			case TargetRuntime.Net_4_0:
+			default:
+				return "v4.0.30319";
 			}
 		}
 	}

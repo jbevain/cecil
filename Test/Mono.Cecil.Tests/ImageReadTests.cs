@@ -27,10 +27,10 @@ namespace Mono.Cecil.Tests {
 		public void ImageMetadataVersion ()
 		{
 			var image = GetResourceImage ("hello.exe");
-			Assert.AreEqual (TargetRuntime.Net_2_0, image.Runtime);
+			Assert.AreEqual (TargetRuntime.Net_2_0, image.RuntimeVersion.ParseRuntime ());
 
 			image = GetResourceImage ("hello1.exe");
-			Assert.AreEqual (TargetRuntime.Net_1_1, image.Runtime);
+			Assert.AreEqual (TargetRuntime.Net_1_1, image.RuntimeVersion.ParseRuntime ());
 		}
 
 		[Test]

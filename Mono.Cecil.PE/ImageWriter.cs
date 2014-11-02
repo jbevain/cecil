@@ -481,7 +481,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (1);	// MinorVersion
 			WriteUInt32 (0);	// Reserved
 
-			var version = GetZeroTerminatedString (GetVersion ());
+			var version = GetZeroTerminatedString (module.runtime_version);
 			WriteUInt32 ((uint) version.Length);
 			WriteBytes (version);
 			WriteUInt16 (0);	// Flags
@@ -494,21 +494,6 @@ namespace Mono.Cecil.PE {
 			WriteStreamHeader (ref offset, TextSegment.UserStringHeap, "#US");
 			WriteStreamHeader (ref offset, TextSegment.GuidHeap, "#GUID");
 			WriteStreamHeader (ref offset, TextSegment.BlobHeap, "#Blob");
-		}
-
-		string GetVersion ()
-		{
-			switch (module.Runtime) {
-			case TargetRuntime.Net_1_0:
-				return "v1.0.3705";
-			case TargetRuntime.Net_1_1:
-				return "v1.1.4322";
-			case TargetRuntime.Net_2_0:
-				return "v2.0.50727";
-			case TargetRuntime.Net_4_0:
-			default:
-				return "v4.0.30319";
-			}
 		}
 
 		ushort GetStreamCount ()

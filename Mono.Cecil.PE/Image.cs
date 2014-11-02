@@ -39,7 +39,7 @@ namespace Mono.Cecil.PE {
 	sealed class Image {
 
 		public ModuleKind Kind;
-		public TargetRuntime Runtime;
+		public string RuntimeVersion;
 		public TargetArchitecture Architecture;
 		public ModuleCharacteristics Characteristics;
 		public string FileName;
