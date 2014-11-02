@@ -47,8 +47,14 @@ namespace Mono.Cecil {
 	public sealed class ReaderParameters {
 
 		ReadingMode reading_mode;
-		IAssemblyResolver assembly_resolver;
-		IMetadataResolver metadata_resolver;
+		internal IAssemblyResolver assembly_resolver;
+		internal IMetadataResolver metadata_resolver;
+#if !READ_ONLY
+		internal IMetadataImporter metadata_importer;
+#if !CF
+		internal IReflectionImporter reflection_importer;
+#endif
+#endif
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
@@ -67,6 +73,20 @@ namespace Mono.Cecil {
 			get { return metadata_resolver; }
 			set { metadata_resolver = value; }
 		}
+
+#if !READ_ONLY
+		public IMetadataImporter MetadataImporter {
+			get { return metadata_importer; }
+			set { metadata_importer = value; }
+		}
+
+#if !CF
+		public IReflectionImporter ReflectionImporter {
+			get { return reflection_importer; }
+			set { reflection_importer = value; }
+		}
+#endif
+#endif
 
 		public Stream SymbolStream {
 			get { return symbol_stream; }
@@ -103,6 +123,12 @@ namespace Mono.Cecil {
 		TargetArchitecture architecture;
 		IAssemblyResolver assembly_resolver;
 		IMetadataResolver metadata_resolver;
+#if !READ_ONLY
+		IMetadataImporter metadata_importer;
+#if !CF
+		IReflectionImporter reflection_importer;
+#endif
+#endif
 
 		public ModuleKind Kind {
 			get { return kind; }
@@ -128,6 +154,20 @@ namespace Mono.Cecil {
 			get { return metadata_resolver; }
 			set { metadata_resolver = value; }
 		}
+
+#if !READ_ONLY
+		public IMetadataImporter MetadataImporter {
+			get { return metadata_importer; }
+			set { metadata_importer = value; }
+		}
+
+#if !CF
+		public IReflectionImporter ReflectionImporter {
+			get { return reflection_importer; }
+			set { reflection_importer = value; }
+		}
+#endif
+#endif
 
 		public ModuleParameters ()
 		{
@@ -218,9 +258,9 @@ namespace Mono.Cecil {
 
 #if !READ_ONLY
 #if !CF
-		IReflectionImporter reflection_importer;
+		internal IReflectionImporter reflection_importer;
 #endif
-		IMetadataImporter metadata_importer;
+		internal IMetadataImporter metadata_importer;
 #endif
 		Collection<CustomAttribute> custom_attributes;
 		Collection<AssemblyNameReference> references;
@@ -301,7 +341,7 @@ namespace Mono.Cecil {
 		internal IReflectionImporter ReflectionImporter {
 			get {
 				if (reflection_importer == null)
-					Interlocked.CompareExchange (ref reflection_importer, new DefaultReflectionImporter (this), null);
+					Interlocked.CompareExchange (ref reflection_importer, new ReflectionImporter (this), null);
 
 				return reflection_importer;
 			}
@@ -311,7 +351,7 @@ namespace Mono.Cecil {
 		internal IMetadataImporter MetadataImporter {
 			get {
 				if (metadata_importer == null)
-					Interlocked.CompareExchange(ref metadata_importer, new DefaultMetadataImporter(this), null);
+					Interlocked.CompareExchange(ref metadata_importer, new MetadataImporter(this), null);
 
 				return metadata_importer;
 			}
@@ -673,7 +713,7 @@ namespace Mono.Cecil {
 			Mixin.CheckType (type);
 			CheckContext (context, this);
 
-			return ReflectionImporter.Import (type, context);
+			return ReflectionImporter.ImportReference (type, context);
 		}
 
 		[Obsolete]
@@ -698,7 +738,7 @@ namespace Mono.Cecil {
 			Mixin.CheckField (field);
 			CheckContext (context, this);
 
-			return ReflectionImporter.Import (field, context);
+			return ReflectionImporter.ImportReference (field, context);
 		}
 
 		[Obsolete]
@@ -723,7 +763,7 @@ namespace Mono.Cecil {
 			Mixin.CheckMethod (method);
 			CheckContext (context, this);
 
-			return ReflectionImporter.Import (method, context);
+			return ReflectionImporter.ImportReference (method, context);
 		}
 #endif
 
@@ -753,7 +793,7 @@ namespace Mono.Cecil {
 
 			CheckContext (context, this);
 
-			return MetadataImporter.Import (type, context);
+			return MetadataImporter.ImportReference (type, context);
 		}
 
 		[Obsolete]
@@ -782,7 +822,7 @@ namespace Mono.Cecil {
 
 			CheckContext (context, this);
 
-			return MetadataImporter.Import (field, context);
+			return MetadataImporter.ImportReference (field, context);
 		}
 
 		[Obsolete]
@@ -811,7 +851,7 @@ namespace Mono.Cecil {
 
 			CheckContext (context, this);
 
-			return MetadataImporter.Import (method, context);
+			return MetadataImporter.ImportReference (method, context);
 		}
 
 #endif
@@ -916,6 +956,15 @@ namespace Mono.Cecil {
 
 			if (parameters.MetadataResolver != null)
 				module.metadata_resolver = parameters.MetadataResolver;
+
+#if !READ_ONLY
+			if (parameters.MetadataImporter != null)
+				module.metadata_importer = parameters.MetadataImporter;
+#if !CF
+			if (parameters.ReflectionImporter != null)
+				module.reflection_importer = parameters.ReflectionImporter;
+#endif
+#endif
 
 			if (parameters.Kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();

@@ -38,16 +38,16 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 
 	public interface IMetadataImporter {
-		TypeReference Import (TypeReference type, IGenericParameterProvider context);
-		FieldReference Import (FieldReference field, IGenericParameterProvider context);
-		MethodReference Import (MethodReference method, IGenericParameterProvider context);
+		TypeReference ImportReference (TypeReference type, IGenericParameterProvider context);
+		FieldReference ImportReference (FieldReference field, IGenericParameterProvider context);
+		MethodReference ImportReference (MethodReference method, IGenericParameterProvider context);
 	}
 
 #if !CF
 	public interface IReflectionImporter {
-		TypeReference Import (Type type, IGenericParameterProvider context);
-		FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context);
-		MethodReference Import (SR.MethodBase method, IGenericParameterProvider context);
+		TypeReference ImportReference (Type type, IGenericParameterProvider context);
+		FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context);
+		MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context);
 	}
 #endif
 
@@ -131,11 +131,11 @@ namespace Mono.Cecil {
 
 
 #if !CF
-	class DefaultReflectionImporter : IReflectionImporter {
+	public class ReflectionImporter : IReflectionImporter {
 
 		readonly ModuleDefinition module;
 
-		public DefaultReflectionImporter (ModuleDefinition module)
+		public ReflectionImporter (ModuleDefinition module)
 		{
 			this.module = module;
 		}
@@ -461,7 +461,7 @@ namespace Mono.Cecil {
 			return (method.CallingConvention & conventions) != 0;
 		}
 
-		public TypeReference Import (Type type, IGenericParameterProvider context)
+		public TypeReference ImportReference (Type type, IGenericParameterProvider context)
 		{
 			Mixin.CheckType (type);
 			return ImportType (
@@ -470,13 +470,13 @@ namespace Mono.Cecil {
 				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
 		}
 
-		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
+		public FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context)
 		{
 			Mixin.CheckField (field);
 			return ImportField (field, ImportGenericContext.For (context));
 		}
 
-		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
+		public MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context)
 		{
 			Mixin.CheckMethod (method);
 			return ImportMethod (method,
@@ -487,11 +487,11 @@ namespace Mono.Cecil {
 
 #endif
 
-	class DefaultMetadataImporter : IMetadataImporter {
+	public class MetadataImporter : IMetadataImporter {
 
 		readonly ModuleDefinition module;
 
-		public DefaultMetadataImporter (ModuleDefinition module)
+		public MetadataImporter (ModuleDefinition module)
 		{
 			this.module = module;
 		}
@@ -727,19 +727,19 @@ namespace Mono.Cecil {
 			return imported_instance;
 		}
 
-		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
+		public TypeReference ImportReference (TypeReference type, IGenericParameterProvider context)
 		{
 			Mixin.CheckType (type);
 			return ImportType (type, ImportGenericContext.For (context));
 		}
 
-		public FieldReference Import (FieldReference field, IGenericParameterProvider context)
+		public FieldReference ImportReference (FieldReference field, IGenericParameterProvider context)
 		{
 			Mixin.CheckField (field);
 			return ImportField (field, ImportGenericContext.For (context));
 		}
 
-		public MethodReference Import (MethodReference method, IGenericParameterProvider context)
+		public MethodReference ImportReference (MethodReference method, IGenericParameterProvider context)
 		{
 			Mixin.CheckMethod (method);
 			return ImportMethod (method, ImportGenericContext.For (context));

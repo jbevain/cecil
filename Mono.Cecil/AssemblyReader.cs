@@ -82,11 +82,20 @@ namespace Mono.Cecil {
 
 			ReadSymbols (module, parameters);
 
-			if (parameters.AssemblyResolver != null)
-				module.assembly_resolver = parameters.AssemblyResolver;
+			if (parameters.assembly_resolver != null)
+				module.assembly_resolver = parameters.assembly_resolver;
 
-			if (parameters.MetadataResolver != null)
-				module.metadata_resolver = parameters.MetadataResolver;
+			if (parameters.metadata_resolver != null)
+				module.metadata_resolver = parameters.metadata_resolver;
+
+#if !READ_ONLY
+			if (parameters.metadata_importer != null)
+				module.metadata_importer = parameters.metadata_importer;
+#if !CF
+			if (parameters.reflection_importer != null)
+				module.reflection_importer = parameters.reflection_importer;
+#endif
+#endif
 
 			return module;
 		}
