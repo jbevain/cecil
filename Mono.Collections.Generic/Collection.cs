@@ -60,6 +60,16 @@ namespace Mono.Collections.Generic {
 			}
 		}
 
+		public int Capacity {
+			get { return items.Length; }
+			set {
+				if (value < 0 || value < size)
+					throw new ArgumentOutOfRangeException ();
+
+				Resize (value);
+			}
+		}
+
 		bool ICollection<T>.IsReadOnly {
 			get { return false; }
 		}
@@ -258,6 +268,16 @@ namespace Mono.Collections.Generic {
 			new_size = System.Math.Max (
 				System.Math.Max (items.Length * 2, default_capacity),
 				new_size);
+
+			Resize (new_size);
+		}
+
+		protected void Resize (int new_size)
+		{
+			if (new_size == size)
+				return;
+			if (new_size < size)
+				throw new ArgumentOutOfRangeException ();
 
 #if !CF
 			Array.Resize (ref items, new_size);
