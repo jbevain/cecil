@@ -308,15 +308,14 @@ namespace Mono.Cecil {
 
 		}
 
-		internal MetadataImporter MetadataImporter {
+		internal IMetadataImporter MetadataImporter {
 			get {
-				if (importer == null)
-					Interlocked.CompareExchange (ref importer, new MetadataImporter (this), null);
+				if (metadata_importer == null)
+					Interlocked.CompareExchange(ref metadata_importer, new DefaultMetadataImporter(this), null);
 
-				return importer;
+				return metadata_importer;
 			}
 		}
-#endif
 
 		public IAssemblyResolver AssemblyResolver {
 			get {
