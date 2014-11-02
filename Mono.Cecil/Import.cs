@@ -525,6 +525,7 @@ namespace Mono.Cecil {
 			case MetadataScopeType.AssemblyNameReference:
 				return ImportAssemblyName ((AssemblyNameReference) scope);
 			case MetadataScopeType.ModuleDefinition:
+				if (scope == module) return scope;
 				return ImportAssemblyName (((ModuleDefinition) scope).Assembly.Name);
 			case MetadataScopeType.ModuleReference:
 				throw new NotImplementedException ();
@@ -542,6 +543,7 @@ namespace Mono.Cecil {
 			reference = new AssemblyNameReference (name.Name, name.Version) {
 				Culture = name.Culture,
 				HashAlgorithm = name.HashAlgorithm,
+				IsRetargetable = name.IsRetargetable
 			};
 
 			var pk_token = !name.PublicKeyToken.IsNullOrEmpty ()

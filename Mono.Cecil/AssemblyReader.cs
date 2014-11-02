@@ -1045,18 +1045,29 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetTypeReferenceScope (MetadataToken scope)
 		{
+			if (scope.TokenType == TokenType.Module)
+				return module;
+
+			IMetadataScope[] scopes;
+
 			switch (scope.TokenType) {
 			case TokenType.AssemblyRef:
 				InitializeAssemblyReferences ();
-				return metadata.AssemblyReferences [(int) scope.RID - 1];
+				scopes = metadata.AssemblyReferences;
+				break;
 			case TokenType.ModuleRef:
 				InitializeModuleReferences ();
-				return metadata.ModuleReferences [(int) scope.RID - 1];
-			case TokenType.Module:
-				return module;
+				scopes = metadata.ModuleReferences;
+				break;
 			default:
 				throw new NotSupportedException ();
 			}
+
+			var index = scope.RID - 1;
+			if (index < 0 || index >= scopes.Length)
+				return null;
+
+			return scopes [index];
 		}
 
 		public IEnumerable<TypeReference> GetTypeReferences ()
@@ -1263,8 +1274,8 @@ namespace Mono.Cecil {
 			case ElementType.CModReqD:
 				return GetFieldTypeSize (((IModifierType) type).ElementType);
 			default:
-				var field_type = type.CheckedResolve ();
-				if (field_type.HasLayoutInfo)
+				var field_type = type.Resolve ();
+				if (field_type != null && field_type.HasLayoutInfo)
 					size = field_type.ClassSize;
 
 				break;
@@ -1611,10 +1622,11 @@ namespace Mono.Cecil {
 			var methods = type.Methods;
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
-				if (method.sem_attrs.HasValue)
+				if (method.sem_attrs_ready)
 					continue;
 
 				method.sem_attrs = ReadMethodSemantics (method);
+				method.sem_attrs_ready = true;
 			}
 		}
 
@@ -3099,9 +3111,29 @@ namespace Mono.Cecil {
 			}
 		}
 
+		string UnescapeTypeName (string name)
+		{
+			StringBuilder sb = new StringBuilder (name.Length);
+			for (int i = 0; i < name.Length; i++) {
+				char c = name [i];
+				if (name [i] == '\\') {
+					if ((i < name.Length - 1) && (name [i + 1] == '\\')) {
+						sb.Append (c);
+						i++;
+					}
+				} else {
+					sb.Append (c);
+				}
+			}
+			return sb.ToString ();
+		}
+
 		public TypeReference ReadTypeReference ()
 		{
-			return TypeParser.ParseType (reader.module, ReadUTF8String ());
+			string s = ReadUTF8String ();
+			if (s != null && s.IndexOf ('\\') != -1)
+				s = UnescapeTypeName (s);
+			return TypeParser.ParseType (reader.module, s);
 		}
 
 		object ReadCustomAttributeEnum (TypeReference enum_type)

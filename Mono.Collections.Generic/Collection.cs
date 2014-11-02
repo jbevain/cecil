@@ -30,6 +30,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using Mono.Cecil;
+
 namespace Mono.Collections.Generic {
 
 	public class Collection<T> : IList<T>, IList {
@@ -57,6 +59,16 @@ namespace Mono.Collections.Generic {
 				OnSet (value, index);
 
 				items [index] = value;
+			}
+		}
+
+		public int Capacity {
+			get { return items.Length; }
+			set {
+				if (value < 0 || value < size)
+					throw new ArgumentOutOfRangeException ();
+
+				Resize (value);
 			}
 		}
 
@@ -259,13 +271,17 @@ namespace Mono.Collections.Generic {
 				System.Math.Max (items.Length * 2, default_capacity),
 				new_size);
 
-#if !CF
-			Array.Resize (ref items, new_size);
-#else
-			var array = new T [new_size];
-			Array.Copy (items, array, size);
-			items = array;
-#endif
+			Resize (new_size);
+		}
+
+		protected void Resize (int new_size)
+		{
+			if (new_size == size)
+				return;
+			if (new_size < size)
+				throw new ArgumentOutOfRangeException ();
+
+			items = items.Resize (new_size);
 		}
 
 		int IList.Add (object value)

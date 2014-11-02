@@ -343,8 +343,7 @@ namespace Mono.Cecil.PE {
 			// Reserved				4
 			Advance (8);
 
-			var version = ReadZeroTerminatedString (ReadInt32 ());
-			image.Runtime = version.ParseRuntime ();
+			image.RuntimeVersion = ReadZeroTerminatedString (ReadInt32 ());
 
 			// Flags		2
 			Advance (2);

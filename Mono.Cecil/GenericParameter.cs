@@ -79,7 +79,7 @@ namespace Mono.Cecil {
 					return constraints;
 
 				if (HasImage)
-					return constraints = Module.Read (this, (generic_parameter, reader) => reader.ReadGenericConstraints (generic_parameter));
+					return Module.Read (ref constraints, this, (generic_parameter, reader) => reader.ReadGenericConstraints (generic_parameter));
 
 				return constraints = new Collection<TypeReference> ();
 			}
@@ -95,7 +95,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (Module)); }
+			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
 		public override IMetadataScope Scope {
@@ -145,7 +145,7 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		internal override bool ContainsGenericParameter {
+		public override bool ContainsGenericParameter {
 			get { return true; }
 		}
 
@@ -202,6 +202,8 @@ namespace Mono.Cecil {
 			this.owner = owner;
 			this.type = owner.GenericParameterType;
 			this.etype = ConvertGenericParameterType (this.type);
+			this.token = new MetadataToken (TokenType.GenericParam);
+
 		}
 
 		public GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
@@ -214,6 +216,7 @@ namespace Mono.Cecil {
 			this.type = type;
 			this.etype = ConvertGenericParameterType (type);
 			this.module = module;
+			this.token = new MetadataToken (TokenType.GenericParam);
 		}
 
 		static ElementType ConvertGenericParameterType (GenericParameterType type)

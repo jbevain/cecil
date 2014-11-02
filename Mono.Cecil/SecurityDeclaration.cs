@@ -181,11 +181,12 @@ namespace Mono.Cecil {
 
 		public static Collection<SecurityDeclaration> GetSecurityDeclarations (
 			this ISecurityDeclarationProvider self,
+			ref Collection<SecurityDeclaration> variable,
 			ModuleDefinition module)
 		{
 			return module.HasImage ()
-				? module.Read (self, (provider, reader) => reader.ReadSecurityDeclarations (provider))
-				: new Collection<SecurityDeclaration> ();
+				? module.Read (ref variable, self, (provider, reader) => reader.ReadSecurityDeclarations (provider))
+				: variable = new Collection<SecurityDeclaration>();
 		}
 	}
 }

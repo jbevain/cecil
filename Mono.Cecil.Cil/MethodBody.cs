@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Threading;
 
 using Mono.Collections.Generic;
 
@@ -103,16 +104,21 @@ namespace Mono.Cecil.Cil {
 				if (!method.HasThis)
 					return null;
 
-				if (this_parameter != null)
-					return this_parameter;
+				if (this_parameter == null)
+					Interlocked.CompareExchange (ref this_parameter, CreateThisParameter (method), null);
 
-				var declaring_type = method.DeclaringType;
-				var type = declaring_type.IsValueType || declaring_type.IsPrimitive
-					? new PointerType (declaring_type)
-					: declaring_type as TypeReference;
-
-				return this_parameter = new ParameterDefinition (type, method);
+				return this_parameter;
 			}
+		}
+
+		static ParameterDefinition CreateThisParameter (MethodDefinition method)
+		{
+			var declaring_type = method.DeclaringType;
+			var type = declaring_type.IsValueType || declaring_type.IsPrimitive
+				? new PointerType (declaring_type)
+				: declaring_type as TypeReference;
+
+			return new ParameterDefinition (type, method);
 		}
 
 		public MethodBody (MethodDefinition method)
