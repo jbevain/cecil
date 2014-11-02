@@ -92,14 +92,16 @@ namespace Mono.Cecil {
 
 		static byte [] ReadStream (Stream stream)
 		{
-			var length = (int) stream.Length;
-			var data = new byte [length];
-			int offset = 0, read;
-
-			while ((read = stream.Read (data, offset, length - offset)) > 0)
-				offset += read;
-
-			return data;
+			byte[] buffer = new byte[16*1024];
+			using (MemoryStream ms = new MemoryStream())
+			{
+				int read;
+				while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+				{
+					ms.Write(buffer, 0, read);
+				}
+				return ms.ToArray();
+			}
 		}
 	}
 }
