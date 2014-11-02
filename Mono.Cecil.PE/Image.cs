@@ -150,6 +150,11 @@ namespace Mono.Cecil.PE {
 				PointerToRawData = buffer.ReadInt32 (),
 			};
 
+			if (directory.SizeOfData == 0 || directory.PointerToRawData == 0) {
+				header = Empty<byte>.Array;
+				return directory;
+			}
+
 			buffer.position = (int) (directory.PointerToRawData - section.PointerToRawData);
 
 			header = new byte [directory.SizeOfData];
