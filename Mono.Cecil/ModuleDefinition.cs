@@ -649,83 +649,102 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 		}
 
-		static void CheckImporter (object importer)
-		{
-			if (importer == null)
-				throw new ArgumentNullException ("importer");
-		}
-
 #if !CF
 
+		[Obsolete]
 		public TypeReference Import (Type type)
 		{
-			return Import (type, null);
+			return ImportReference (type, null);
 		}
 
+		public TypeReference ImportReference (Type type)
+		{
+			return ImportReference (type, null);
+		}
+
+		[Obsolete]
 		public TypeReference Import (Type type, IGenericParameterProvider context)
 		{
-			return Import (type, context, ReflectionImporter);
+			return ImportReference (type, context);
 		}
 
-		public TypeReference Import (Type type, IGenericParameterProvider context, IReflectionImporter importer)
+		public TypeReference ImportReference (Type type, IGenericParameterProvider context)
 		{
 			Mixin.CheckType (type);
 			CheckContext (context, this);
-			CheckImporter (importer);
 
-			return reflection_importer.Import (type, context);
+			return ReflectionImporter.Import (type, context);
 		}
 
+		[Obsolete]
 		public FieldReference Import (SR.FieldInfo field)
 		{
-			return Import (field, null);
+			return ImportReference (field, null);
 		}
 
+		[Obsolete]
 		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
 		{
-			return Import (field, context, ReflectionImporter);
+			return ImportReference (field, context);
 		}
 
-		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context, IReflectionImporter importer)
+		public FieldReference ImportReference (SR.FieldInfo field)
+		{
+			return ImportReference (field, null);
+		}
+
+		public FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context)
 		{
 			Mixin.CheckField (field);
 			CheckContext (context, this);
-			CheckImporter (importer);
 
-			return importer.Import (field, context);
+			return ReflectionImporter.Import (field, context);
 		}
 
+		[Obsolete]
 		public MethodReference Import (SR.MethodBase method)
 		{
-			return Import (method, null);
+			return ImportReference (method, null);
 		}
 
+		[Obsolete]
 		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
 		{
-			return Import (method, context, ReflectionImporter);
+			return ImportReference (method, context);
 		}
 
-		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context, IReflectionImporter importer)
+		public MethodReference ImportReference (SR.MethodBase method)
+		{
+			return ImportReference (method, null);
+		}
+
+		public MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context)
 		{
 			Mixin.CheckMethod (method);
 			CheckContext (context, this);
-			CheckImporter (importer);
 
-			return importer.Import (method, context);
+			return ReflectionImporter.Import (method, context);
 		}
 #endif
 
+		[Obsolete]
 		public TypeReference Import (TypeReference type)
 		{
-			return Import (type, null);
+			return ImportReference (type, null);
 		}
 
+		[Obsolete]
 		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
 		{
-			return Import (type, context, MetadataImporter);
+			return ImportReference (type, context);
 		}
 
-		public TypeReference Import (TypeReference type, IGenericParameterProvider context, IMetadataImporter importer)
+		public TypeReference ImportReference (TypeReference type)
+		{
+			return ImportReference (type, null);
+		}
+
+		public TypeReference ImportReference (TypeReference type, IGenericParameterProvider context)
 		{
 			Mixin.CheckType (type);
 
@@ -733,22 +752,28 @@ namespace Mono.Cecil {
 				return type;
 
 			CheckContext (context, this);
-			CheckImporter (importer);
 
-			return importer.Import (type, context);
+			return MetadataImporter.Import (type, context);
 		}
 
+		[Obsolete]
 		public FieldReference Import (FieldReference field)
 		{
-			return Import (field, null);
+			return ImportReference (field, null);
 		}
 
+		[Obsolete]
 		public FieldReference Import (FieldReference field, IGenericParameterProvider context)
 		{
-			return Import (field, context, MetadataImporter);
+			return ImportReference (field, context);
 		}
 
-		public FieldReference Import (FieldReference field, IGenericParameterProvider context, IMetadataImporter importer)
+		public FieldReference ImportReference (FieldReference field)
+		{
+			return ImportReference (field, null);
+		}
+
+		public FieldReference ImportReference (FieldReference field, IGenericParameterProvider context)
 		{
 			Mixin.CheckField (field);
 
@@ -756,22 +781,28 @@ namespace Mono.Cecil {
 				return field;
 
 			CheckContext (context, this);
-			CheckImporter (importer);
 
-			return importer.Import (field, context);
+			return MetadataImporter.Import (field, context);
 		}
 
+		[Obsolete]
 		public MethodReference Import (MethodReference method)
 		{
-			return Import (method, null);
+			return ImportReference (method, null);
 		}
 
+		[Obsolete]
 		public MethodReference Import (MethodReference method, IGenericParameterProvider context)
 		{
-			return Import (method, context, MetadataImporter);
+			return ImportReference (method, context);
 		}
 
-		public MethodReference Import (MethodReference method, IGenericParameterProvider context, IMetadataImporter importer)
+		public MethodReference ImportReference (MethodReference method)
+		{
+			return ImportReference (method, null);
+		}
+
+		public MethodReference ImportReference (MethodReference method, IGenericParameterProvider context)
 		{
 			Mixin.CheckMethod (method);
 
@@ -779,9 +810,8 @@ namespace Mono.Cecil {
 				return method;
 
 			CheckContext (context, this);
-			CheckImporter (importer);
 
-			return importer.Import (method, context);
+			return MetadataImporter.Import (method, context);
 		}
 
 #endif
