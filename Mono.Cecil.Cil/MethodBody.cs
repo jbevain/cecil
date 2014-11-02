@@ -105,13 +105,13 @@ namespace Mono.Cecil.Cil {
 					return null;
 
 				if (this_parameter == null)
-					Interlocked.CompareExchange (ref this_parameter, ThisParameterFor (method), null);
+					Interlocked.CompareExchange (ref this_parameter, CreateThisParameter (method), null);
 
 				return this_parameter;
 			}
 		}
 
-		static ParameterDefinition ThisParameterFor (MethodDefinition method)
+		static ParameterDefinition CreateThisParameter (MethodDefinition method)
 		{
 			var declaring_type = method.DeclaringType;
 			var type = declaring_type.IsValueType || declaring_type.IsPrimitive

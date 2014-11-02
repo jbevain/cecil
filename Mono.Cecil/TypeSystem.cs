@@ -191,14 +191,14 @@ namespace Mono.Cecil {
 
 		internal abstract TypeReference LookupType (string @namespace, string name);
 
-		TypeReference LookupSystemType (ref TypeReference typeRef, string name, ElementType element_type)
+		TypeReference LookupSystemType (ref TypeReference reference, string name, ElementType element_type)
 		{
 			lock (module.SyncRoot) {
-				if (typeRef != null)
-					return typeRef;
+				if (reference != null)
+					return reference;
 				var type = LookupType ("System", name);
 				type.etype = element_type;
-				return typeRef = type;
+				return reference = type;
 			}
 		}
 
