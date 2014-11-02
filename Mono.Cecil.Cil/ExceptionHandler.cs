@@ -61,6 +61,17 @@ namespace Mono.Cecil.Cil {
 			set { filter_start = value; }
 		}
 
+		/// <summary>
+		/// Provided for convenience. This is the same instruction as the <see cref="HandlerStart"/>,
+		/// because the ECMA spec states that Filters must immediately preced their handler.
+		/// </summary>
+		public Instruction FilterEnd {
+			get {
+				// the ECMA spec says that filters must immediately precede their handler
+				return filter_start == null ? null : handler_start;
+			}
+		}
+
 		public Instruction HandlerStart {
 			get { return handler_start; }
 			set { handler_start = value; }
