@@ -41,6 +41,8 @@ namespace Mono.Cecil.Rocks {
 				throw new ArgumentNullException ("self");
 			if (!self.IsVirtual)
 				return self;
+			if (self.IsNewSlot)
+				return self;
 
 			var base_type = ResolveBaseType (self.DeclaringType);
 			while (base_type != null) {
