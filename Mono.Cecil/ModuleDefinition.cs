@@ -81,7 +81,7 @@ namespace Mono.Cecil {
 		}
 
 #if !CF
-		public IReflectionImporterProvider ReflectionImporter {
+		public IReflectionImporterProvider ReflectionImporterProvider {
 			get { return reflection_importer_provider; }
 			set { reflection_importer_provider = value; }
 		}
