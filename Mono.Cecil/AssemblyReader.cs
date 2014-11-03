@@ -89,11 +89,11 @@ namespace Mono.Cecil {
 				module.metadata_resolver = parameters.metadata_resolver;
 
 #if !READ_ONLY
-			if (parameters.metadata_importer != null)
-				module.metadata_importer = parameters.metadata_importer;
+			if (parameters.metadata_importer_provider != null)
+				module.metadata_importer = parameters.metadata_importer_provider.GetMetadataImporter (module);
 #if !CF
-			if (parameters.reflection_importer != null)
-				module.reflection_importer = parameters.reflection_importer;
+			if (parameters.reflection_importer_provider != null)
+				module.reflection_importer = parameters.reflection_importer_provider.GetReflectionImporter (module);
 #endif
 #endif
 

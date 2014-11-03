@@ -50,9 +50,9 @@ namespace Mono.Cecil {
 		internal IAssemblyResolver assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
 #if !READ_ONLY
-		internal IMetadataImporter metadata_importer;
+		internal IMetadataImporterProvider metadata_importer_provider;
 #if !CF
-		internal IReflectionImporter reflection_importer;
+		internal IReflectionImporterProvider reflection_importer_provider;
 #endif
 #endif
 		Stream symbol_stream;
@@ -75,15 +75,15 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-		public IMetadataImporter MetadataImporter {
-			get { return metadata_importer; }
-			set { metadata_importer = value; }
+		public IMetadataImporterProvider MetadataImporterProvider {
+			get { return metadata_importer_provider; }
+			set { metadata_importer_provider = value; }
 		}
 
 #if !CF
-		public IReflectionImporter ReflectionImporter {
-			get { return reflection_importer; }
-			set { reflection_importer = value; }
+		public IReflectionImporterProvider ReflectionImporter {
+			get { return reflection_importer_provider; }
+			set { reflection_importer_provider = value; }
 		}
 #endif
 #endif
@@ -124,9 +124,9 @@ namespace Mono.Cecil {
 		IAssemblyResolver assembly_resolver;
 		IMetadataResolver metadata_resolver;
 #if !READ_ONLY
-		IMetadataImporter metadata_importer;
+		IMetadataImporterProvider metadata_importer_provider;
 #if !CF
-		IReflectionImporter reflection_importer;
+		IReflectionImporterProvider reflection_importer_provider;
 #endif
 #endif
 
@@ -156,15 +156,15 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-		public IMetadataImporter MetadataImporter {
-			get { return metadata_importer; }
-			set { metadata_importer = value; }
+		public IMetadataImporterProvider MetadataImporterProvider {
+			get { return metadata_importer_provider; }
+			set { metadata_importer_provider = value; }
 		}
 
 #if !CF
-		public IReflectionImporter ReflectionImporter {
-			get { return reflection_importer; }
-			set { reflection_importer = value; }
+		public IReflectionImporterProvider ReflectionImporterProvider {
+			get { return reflection_importer_provider; }
+			set { reflection_importer_provider = value; }
 		}
 #endif
 #endif
@@ -958,11 +958,11 @@ namespace Mono.Cecil {
 				module.metadata_resolver = parameters.MetadataResolver;
 
 #if !READ_ONLY
-			if (parameters.MetadataImporter != null)
-				module.metadata_importer = parameters.MetadataImporter;
+			if (parameters.MetadataImporterProvider != null)
+				module.metadata_importer = parameters.MetadataImporterProvider.GetMetadataImporter (module);
 #if !CF
-			if (parameters.ReflectionImporter != null)
-				module.reflection_importer = parameters.ReflectionImporter;
+			if (parameters.ReflectionImporterProvider != null)
+				module.reflection_importer = parameters.ReflectionImporterProvider.GetReflectionImporter (module);
 #endif
 #endif
 

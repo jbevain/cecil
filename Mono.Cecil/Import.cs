@@ -37,6 +37,10 @@ namespace Mono.Cecil {
 
 #if !READ_ONLY
 
+	public interface IMetadataImporterProvider {
+		IMetadataImporter GetMetadataImporter (ModuleDefinition module);
+	}
+
 	public interface IMetadataImporter {
 		TypeReference ImportReference (TypeReference type, IGenericParameterProvider context);
 		FieldReference ImportReference (FieldReference field, IGenericParameterProvider context);
@@ -44,6 +48,11 @@ namespace Mono.Cecil {
 	}
 
 #if !CF
+
+	public interface IReflectionImporterProvider {
+		IReflectionImporter GetReflectionImporter (ModuleDefinition module);
+	}
+
 	public interface IReflectionImporter {
 		TypeReference ImportReference (Type type, IGenericParameterProvider context);
 		FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context);
@@ -461,7 +470,7 @@ namespace Mono.Cecil {
 			return (method.CallingConvention & conventions) != 0;
 		}
 
-		public TypeReference ImportReference (Type type, IGenericParameterProvider context)
+		public virtual TypeReference ImportReference (Type type, IGenericParameterProvider context)
 		{
 			Mixin.CheckType (type);
 			return ImportType (
@@ -470,13 +479,13 @@ namespace Mono.Cecil {
 				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
 		}
 
-		public FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context)
+		public virtual FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context)
 		{
 			Mixin.CheckField (field);
 			return ImportField (field, ImportGenericContext.For (context));
 		}
 
-		public MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context)
+		public virtual MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context)
 		{
 			Mixin.CheckMethod (method);
 			return ImportMethod (method,
@@ -727,19 +736,19 @@ namespace Mono.Cecil {
 			return imported_instance;
 		}
 
-		public TypeReference ImportReference (TypeReference type, IGenericParameterProvider context)
+		public virtual TypeReference ImportReference (TypeReference type, IGenericParameterProvider context)
 		{
 			Mixin.CheckType (type);
 			return ImportType (type, ImportGenericContext.For (context));
 		}
 
-		public FieldReference ImportReference (FieldReference field, IGenericParameterProvider context)
+		public virtual FieldReference ImportReference (FieldReference field, IGenericParameterProvider context)
 		{
 			Mixin.CheckField (field);
 			return ImportField (field, ImportGenericContext.For (context));
 		}
 
-		public MethodReference ImportReference (MethodReference method, IGenericParameterProvider context)
+		public virtual MethodReference ImportReference (MethodReference method, IGenericParameterProvider context)
 		{
 			Mixin.CheckMethod (method);
 			return ImportMethod (method, ImportGenericContext.For (context));
