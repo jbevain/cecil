@@ -3,14 +3,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">net_4_0_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-	<RootDirectory Condition=" '$(RootDirectory)' == '' ">$(MSBuildThisFileDirectory)</RootDirectory>
+    <BuildDirectory Condition=" '$(BuildDirectory)' == '' ">$(MSBuildThisFileDirectory)</BuildDirectory>
     <FileAlignment>512</FileAlignment>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\mono.snk</AssemblyOriginatorKeyFile>
     <OutputType>Library</OutputType>
-    <OutputPath>$(RootDirectory)\bin\$(Configuration)\</OutputPath>
+    <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
     <DebugSymbols>true</DebugSymbols>
