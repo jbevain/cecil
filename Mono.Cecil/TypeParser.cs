@@ -129,11 +129,15 @@ namespace Mono.Cecil {
 
 		string ParsePart ()
 		{
-			int start = position;
-			while (position < length && !IsDelimiter (fullname [position]))
-				position++;
+			var part = new StringBuilder ();
+			while (position < length && !IsDelimiter (fullname [position])) {
+				if (fullname [position] == '\\')
+					position++;
 
-			return fullname.Substring (start, position - start);
+				part.Append (fullname [position++]);
+			}
+
+			return part.ToString ();
 		}
 
 		static bool IsDelimiter (char chr)
@@ -441,6 +445,16 @@ namespace Mono.Cecil {
 			return name.ToString ();
 		}
 
+		static void AppendNamePart (string part, StringBuilder name)
+		{
+			foreach (var c in part) {
+				if (IsDelimiter (c))
+					name.Append ('\\');
+
+				name.Append (c);
+			}
+		}
+
 		static void AppendType (TypeReference type, StringBuilder name, bool fq_name, bool top_level)
 		{
 			var declaring_type = type.DeclaringType;
@@ -451,11 +465,11 @@ namespace Mono.Cecil {
 
 			var @namespace = type.Namespace;
 			if (!string.IsNullOrEmpty (@namespace)) {
-				name.Append (@namespace);
+				AppendNamePart (@namespace, name);
 				name.Append ('.');
 			}
 
-			name.Append (type.GetElementType ().Name);
+			AppendNamePart (type.GetElementType ().Name, name);
 
 			if (!fq_name)
 				return;

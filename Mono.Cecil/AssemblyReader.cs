@@ -3111,29 +3111,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		string UnescapeTypeName (string name)
-		{
-			StringBuilder sb = new StringBuilder (name.Length);
-			for (int i = 0; i < name.Length; i++) {
-				char c = name [i];
-				if (name [i] == '\\') {
-					if ((i < name.Length - 1) && (name [i + 1] == '\\')) {
-						sb.Append (c);
-						i++;
-					}
-				} else {
-					sb.Append (c);
-				}
-			}
-			return sb.ToString ();
-		}
-
 		public TypeReference ReadTypeReference ()
 		{
-			string s = ReadUTF8String ();
-			if (s != null && s.IndexOf ('\\') != -1)
-				s = UnescapeTypeName (s);
-			return TypeParser.ParseType (reader.module, s);
+			return TypeParser.ParseType (reader.module, ReadUTF8String ());
 		}
 
 		object ReadCustomAttributeEnum (TypeReference enum_type)
