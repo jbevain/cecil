@@ -318,6 +318,27 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void EscapedTypeName ()
+		{
+			TestModule ("bug-185.dll", module => {
+				var foo = module.GetType ("Foo");
+				var foo_do = foo.Methods.Where (m => !m.IsConstructor).First ();
+
+				var attribute = foo_do.CustomAttributes.Where (ca => ca.AttributeType.Name == "AsyncStateMachineAttribute").First ();
+
+				Assert.AreEqual (foo.NestedTypes [0], attribute.ConstructorArguments [0].Value);
+
+				var function = module.GetType ("Function`1");
+
+				var apply = function.Methods.Where(m => !m.IsConstructor).First ();
+
+				attribute = apply.CustomAttributes.Where (ca => ca.AttributeType.Name == "AsyncStateMachineAttribute").First ();
+
+				Assert.AreEqual (function.NestedTypes [0], attribute.ConstructorArguments [0].Value);
+			});
+		}
+
+		[Test]
 		public void FieldNullTypeOf ()
 		{
 			TestCSharp ("CustomAttributes.cs", module => {
