@@ -175,13 +175,14 @@ namespace Mono.Cecil {
 				if (fullname != null)
 					return fullname;
 
+				fullname = string.IsNullOrEmpty (@namespace)
+					? Name
+					: @namespace + "." + Name;
+
 				if (IsNested)
-					return fullname = DeclaringType.FullName + "/" + Name;
+					fullname = DeclaringType.FullName + "/" + fullname;
 
-				if (string.IsNullOrEmpty (@namespace))
-					return fullname = Name;
-
-				return fullname = @namespace + "." + Name;
+				return fullname;
 			}
 		}
 
