@@ -45,5 +45,19 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("Bingo/Fuel", get_fuel.ReturnType.FullName);
 			});
 		}
+
+		[Test]
+		public void NestedTypeWithOwnNamespace ()
+		{
+			TestModule ("bug-185.dll", module => {
+				var foo = module.GetType ("Foo");
+				var foo_child = foo.NestedTypes [0];
+
+				Assert.AreEqual ("<IFoo<System.Byte[]>", foo_child.Namespace);
+				Assert.AreEqual ("Do>d__0", foo_child.Name);
+
+				Assert.AreEqual ("Foo/<IFoo<System.Byte[]>.Do>d__0", foo_child.FullName);
+			});
+		}
 	}
 }
