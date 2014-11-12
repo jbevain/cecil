@@ -13,5 +13,3 @@ Cecil has been around since 2004 and is [widely used](https://github.com/jbevain
 The best way to learn how to use Cecil is to dive into the [Cecil.Samples](https://github.com/jbevain/cecil.samples) repository. It's a growing collection of samples with the goal of showing how to get things done using Cecil, as IL manipulation can sometime get tricky.
 
 To discuss Cecil, the best place is the [mono-cecil](https://groups.google.com/group/mono-cecil) google group.
-
-Cecil is a project 
