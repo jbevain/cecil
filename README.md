@@ -8,8 +8,10 @@ To put it simply, you can use Cecil to:
 * Analyze .NET binaries using a simple and powerful object model, without having to load assemblies to use Reflection.
 * Modify .NET binaries, add new metadata structures and alter the IL code.
 
-Cecil has been around since 2004 and is ![widely used](https://github.com/jbevain/cecil/wiki/Users) in the .NET community.
+Cecil has been around since 2004 and is [widely used](https://github.com/jbevain/cecil/wiki/Users) in the .NET community.
 
-The best way to learn how to use Cecil is to dive into the ![Cecil.Samples](https://github.com/jbevain/cecil.samples) repository. It's a growing collection of samples with the goal of showing how to get things done using Cecil, as IL manipulation can sometime get tricky.
+The best way to learn how to use Cecil is to dive into the [Cecil.Samples](https://github.com/jbevain/cecil.samples) repository. It's a growing collection of samples with the goal of showing how to get things done using Cecil, as IL manipulation can sometime get tricky.
 
-To discuss Cecil, the best place is the ![mono-cecil](https://groups.google.com/group/mono-cecil) google group.
+To discuss Cecil, the best place is the [mono-cecil](https://groups.google.com/group/mono-cecil) google group.
+
+Cecil is a project 
