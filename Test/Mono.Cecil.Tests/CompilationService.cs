@@ -257,8 +257,12 @@ namespace Mono.Cecil.Tests {
 			};
 
 			foreach (var sdk in sdks) {
+				var pgf = IntPtr.Size == 8
+					? Environment.GetEnvironmentVariable("ProgramFiles(x86)")
+					: Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+
 				var exe = Path.Combine (
-					Path.Combine (Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), sdk),
+					Path.Combine (pgf, sdk),
 					tool + ".exe");
 
 				if (File.Exists(exe))
