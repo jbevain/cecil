@@ -109,6 +109,7 @@ namespace Mono.Cecil {
 
 		byte [] HashPublicKey ()
 		{
+#if !PCL
 			HashAlgorithm algorithm;
 
 			switch (hash_algorithm) {
@@ -132,6 +133,9 @@ namespace Mono.Cecil {
 
 			using (algorithm)
 				return algorithm.ComputeHash (public_key);
+#else
+			return new SHA1Managed ().ComputeHash (public_key);
+#endif
 		}
 
 		public virtual MetadataScopeType MetadataScopeType {

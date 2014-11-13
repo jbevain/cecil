@@ -8,6 +8,8 @@
 // Licensed under the MIT/X11 license.
 //
 
+#if !PCL
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -350,3 +352,5 @@ namespace Mono.Cecil {
 #endif
 	}
 }
+
+#endif

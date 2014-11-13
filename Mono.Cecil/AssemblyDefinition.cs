@@ -112,6 +112,7 @@ namespace Mono.Cecil {
 		}
 #endif
 
+#if !PCL
 		public static AssemblyDefinition ReadAssembly (string fileName)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (fileName));
@@ -121,6 +122,7 @@ namespace Mono.Cecil {
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (fileName, parameters));
 		}
+#endif
 
 		public static AssemblyDefinition ReadAssembly (Stream stream)
 		{

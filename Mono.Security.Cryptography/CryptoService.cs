@@ -104,6 +104,7 @@ namespace Mono.Cecil {
 
 		public static byte [] ComputeHash (string file)
 		{
+#if !PCL
 			if (!File.Exists (file))
 				return Empty<byte>.Array;
 
@@ -120,6 +121,9 @@ namespace Mono.Cecil {
 			}
 
 			return sha1.Hash;
+#else
+			return Empty<byte>.Array;
+#endif
 		}
 	}
 
