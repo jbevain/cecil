@@ -27,10 +27,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if !(SILVERLIGHT || READ_ONLY)
+
 using System;
 using System.Security.Cryptography;
-
-#if !(SILVERLIGHT || READ_ONLY)
 
 namespace Mono.Security.Cryptography {
 

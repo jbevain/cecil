@@ -32,5 +32,5 @@
     <Content Include="Resources\assemblies\decsec-xml.dll" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.Tests.settings" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>
