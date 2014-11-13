@@ -384,9 +384,11 @@ namespace Mono.Cecil {
 				var parameters = method.GetParameters ();
 				var reference_parameters = reference.Parameters;
 
-				for (int i = 0; i < parameters.Length; i++)
-					reference_parameters.Add (
-						new ParameterDefinition (ImportType (parameters [i].ParameterType, context)));
+				for (int i = 0; i < parameters.Length; i++) {
+				    var parameter = parameters [i];
+                    reference_parameters.Add(new ParameterDefinition(parameter.Name,
+                        (ParameterAttributes) parameter.Attributes, ImportType(parameter.ParameterType, context)));
+				}
 
 				reference.DeclaringType = declaring_type;
 
@@ -640,9 +642,11 @@ namespace Mono.Cecil {
 				var reference_parameters = reference.Parameters;
 
 				var parameters = method.Parameters;
-				for (int i = 0; i < parameters.Count; i++)
-					reference_parameters.Add (
-						new ParameterDefinition (ImportType (parameters [i].ParameterType, context)));
+				for (int i = 0; i < parameters.Count; i++) {
+				    var parameter = parameters [i];
+				    reference_parameters.Add (new ParameterDefinition (parameter.Name,
+                        parameter.Attributes, ImportType (parameter.ParameterType, context)));
+				}
 
 				return reference;
 			} finally {

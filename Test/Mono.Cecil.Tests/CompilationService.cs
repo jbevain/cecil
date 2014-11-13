@@ -192,6 +192,9 @@ namespace Mono.Cecil.Tests {
 			var stdout = new StringWriter ();
 			var stderr = new StringWriter ();
 
+            if (!File.Exists (target))
+                throw new FileNotFoundException(String.Format ("'{0}' was not found.", target), target);
+
 			var process = new Process {
 				StartInfo = new ProcessStartInfo {
 					FileName = target,
@@ -256,9 +259,14 @@ namespace Mono.Cecil.Tests {
 				@"Microsoft SDKs\Windows\v7.0A\Bin",
 			};
 
+            var programfilesx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+		    var programfiles = String.IsNullOrEmpty (programfilesx86)
+		        ? Environment.GetFolderPath (Environment.SpecialFolder.ProgramFiles)
+                : programfilesx86;
+
 			foreach (var sdk in sdks) {
-				var exe = Path.Combine (
-					Path.Combine (Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), sdk),
+			    var exe = Path.Combine (
+                    Path.Combine(programfiles, sdk),
 					tool + ".exe");
 
 				if (File.Exists(exe))
