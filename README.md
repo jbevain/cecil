@@ -15,3 +15,5 @@ The best way to learn how to use Cecil is to dive into the [Cecil.Samples](https
 Cecil is a project under the benevolent umbrella of the [.NET Foundation](http://www.dotnetfoundation.org/).
 
 To discuss Cecil, the best place is the [mono-cecil](https://groups.google.com/group/mono-cecil) google group.
+
+[![Build status](https://ci.appveyor.com/api/projects/status/fmhutmhidy1fahl4?svg=true)](https://ci.appveyor.com/project/jbevain/cecil)
