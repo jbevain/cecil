@@ -509,11 +509,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < nested_types.Count; i++) {
 				var nested_type = nested_types [i];
 
-				var nested_type_name = string.IsNullOrEmpty (nested_type.Namespace)
-					? nested_type.Name
-					: nested_type.Namespace + "." + nested_type.Name;
-
-				if (nested_type_name == fullname)
+				if (nested_type.TypeFullName () == fullname)
 					return nested_type;
 			}
 
