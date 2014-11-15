@@ -57,6 +57,11 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("Do>d__0", foo_child.Name);
 
 				Assert.AreEqual ("Foo/<IFoo<System.Byte[]>.Do>d__0", foo_child.FullName);
+
+				var foo_def = foo_child.Resolve ();
+				Assert.IsNotNull (foo_def);
+
+				Assert.AreEqual (foo_child.FullName, foo_def.FullName);
 			});
 		}
 	}
