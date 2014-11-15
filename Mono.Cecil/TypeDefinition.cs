@@ -499,7 +499,7 @@ namespace Mono.Cecil {
 			throw new ArgumentException ();
 		}
 
-		public static TypeDefinition GetNestedType (this TypeDefinition self, string name)
+		public static TypeDefinition GetNestedType (this TypeDefinition self, string fullname)
 		{
 			if (!self.HasNestedTypes)
 				return null;
@@ -513,7 +513,7 @@ namespace Mono.Cecil {
 					? nested_type.Name
 					: nested_type.Namespace + "." + nested_type.Name;
 
-				if (nested_type_name == name)
+				if (nested_type_name == fullname)
 					return nested_type;
 			}
 
