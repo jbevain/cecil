@@ -175,6 +175,9 @@ namespace Mono.Cecil {
 		TypeReference type_uintptr;
 		TypeReference type_string;
 		TypeReference type_typedref;
+		TypeReference type_enum;
+		TypeReference type_valuetype;
+		TypeReference type_delegate;
 
 		TypeSystem (ModuleDefinition module)
 		{
@@ -294,6 +297,21 @@ namespace Mono.Cecil {
 
 		public TypeReference TypedReference {
 			get { return type_typedref ?? (LookupSystemValueType (ref type_typedref, "TypedReference", ElementType.TypedByRef)); }
+		}
+
+		public TypeReference Enum
+		{
+			get { return type_enum ?? (LookupSystemValueType(ref type_enum, "Enum", ElementType.None)); }
+		}
+
+		public TypeReference ValueType
+		{
+			get { return type_valuetype ?? (LookupSystemType(ref type_valuetype, "ValueType", ElementType.None)); }
+		}
+
+		public TypeReference Delegate
+		{
+			get { return type_delegate ?? (LookupSystemValueType(ref type_delegate, "Delegate", ElementType.None)); }
 		}
 	}
 }
