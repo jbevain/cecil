@@ -211,13 +211,14 @@ namespace Mono.Cecil {
 
 		public string FullName {
 			get {
+				var fullname = string.IsNullOrEmpty (@namespace)
+					? name
+					: @namespace + '.' + name;
+
 				if (declaring_type != null)
-					return declaring_type.FullName + "/" + name;
+					return declaring_type.FullName + "/" + fullname;
 
-				if (string.IsNullOrEmpty (@namespace))
-					return name;
-
-				return @namespace + "." + name;
+				return fullname;
 			}
 		}
 
