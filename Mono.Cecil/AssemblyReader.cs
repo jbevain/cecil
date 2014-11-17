@@ -165,7 +165,7 @@ namespace Mono.Cecil {
 				return;
 
 			if (assembly.HasCustomAttributes)
-				Read (assembly.CustomAttributes);
+				ReadCustomAttributes (assembly);
 			if (assembly.HasSecurityDeclarations)
 				Read (assembly.SecurityDeclarations);
 		}
@@ -218,8 +218,7 @@ namespace Mono.Cecil {
 				if (parameter.HasConstraints)
 					Read (parameter.Constraints);
 
-				if (parameter.HasCustomAttributes)
-					Read (parameter.CustomAttributes);
+				ReadCustomAttributes (parameter);
 			}
 		}
 
@@ -231,8 +230,16 @@ namespace Mono.Cecil {
 
 		static void ReadCustomAttributes (ICustomAttributeProvider provider)
 		{
-			if (provider.HasCustomAttributes)
-				Read (provider.CustomAttributes);
+			if (!provider.HasCustomAttributes)
+				return;
+
+			var custom_attributes = provider.CustomAttributes;
+
+			for (int i = 0; i < custom_attributes.Count; i++) {
+				var custom_attribute = custom_attributes [i];
+
+				Read (custom_attribute.ConstructorArguments);
+			}
 		}
 
 		static void ReadFields (TypeDefinition type)
