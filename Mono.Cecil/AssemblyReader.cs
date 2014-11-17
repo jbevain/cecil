@@ -224,8 +224,16 @@ namespace Mono.Cecil {
 
 		static void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
 		{
-			if (provider.HasSecurityDeclarations)
-				Read (provider.SecurityDeclarations);
+			if (!provider.HasSecurityDeclarations)
+				return;
+
+			var security_declarations = provider.SecurityDeclarations;
+
+			for (int i = 0; i < security_declarations.Count; i++) {
+				var security_declaration = security_declarations [i];
+
+				Read (security_declaration.SecurityAttributes);
+			}
 		}
 
 		static void ReadCustomAttributes (ICustomAttributeProvider provider)
