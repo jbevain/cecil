@@ -78,15 +78,18 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters)
 		{
-			var module = ReadModule (image, parameters);
-
-			ReadSymbols (module, parameters);
+			var reader = CreateModuleReader (image, parameters.ReadingMode);
+			var module = reader.module;
 
 			if (parameters.AssemblyResolver != null)
 				module.assembly_resolver = parameters.AssemblyResolver;
 
 			if (parameters.MetadataResolver != null)
 				module.metadata_resolver = parameters.MetadataResolver;
+
+			reader.ReadModule ();
+
+			ReadSymbols (module, parameters);
 
 			return module;
 		}
@@ -107,13 +110,6 @@ namespace Mono.Cecil {
 
 				module.ReadSymbols (reader);
 			}
-		}
-
-		static ModuleDefinition ReadModule (Image image, ReaderParameters parameters)
-		{
-			var reader = CreateModuleReader (image, parameters.ReadingMode);
-			reader.ReadModule ();
-			return reader.module;
 		}
 
 		static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
