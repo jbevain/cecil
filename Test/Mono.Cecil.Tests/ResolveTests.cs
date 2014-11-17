@@ -226,7 +226,7 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
-		static TRet GetReference<TDel, TRet> (TDel code)
+		TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
 			if (@delegate == null)
@@ -264,7 +264,7 @@ namespace Mono.Cecil.Tests {
 			throw new InvalidOperationException ();
 		}
 
-		static MethodDefinition GetMethodFromDelegate (Delegate @delegate)
+		MethodDefinition GetMethodFromDelegate (Delegate @delegate)
 		{
 			var method = @delegate.Method;
 			var type = (TypeDefinition) TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);
