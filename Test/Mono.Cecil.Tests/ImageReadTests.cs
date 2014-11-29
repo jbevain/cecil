@@ -98,6 +98,15 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void X64ModuleTextOnlySection ()
+		{
+			TestModule ("hello.textonly.x64.exe", module => {
+				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
+				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
+			});
+		}
+
+		[Test]
 		public void IA64Module ()
 		{
 			TestModule ("hello.ia64.exe", module => {

@@ -396,9 +396,33 @@ namespace Mono.Cecil.PE {
 				WriteUInt64 (rva);
 		}
 
+		void PrepareSection (Section section)
+		{
+			MoveTo (section.PointerToRawData);
+
+			const int buffer_size = 4096;
+
+			if (section.SizeOfRawData <= buffer_size) {
+				Write (new byte [section.SizeOfRawData]);
+				MoveTo (section.PointerToRawData);
+				return;
+			}
+
+			var written = 0;
+			var buffer = new byte [buffer_size];
+			while (written != section.SizeOfRawData) {
+				var write_size = System.Math.Min((int) section.SizeOfRawData - written, buffer_size);
+				Write (buffer, 0, write_size);
+				written += write_size;
+			}
+
+			Write (new byte [section.SizeOfRawData]);
+			MoveTo (section.PointerToRawData);
+		}
+
 		void WriteText ()
 		{
-			MoveTo (text.PointerToRawData);
+			PrepareSection (text);
 
 			// ImportAddressTable
 
@@ -618,13 +642,13 @@ namespace Mono.Cecil.PE {
 
 		void WriteRsrc ()
 		{
-			MoveTo (rsrc.PointerToRawData);
+			PrepareSection (rsrc);
 			WriteBuffer (win32_resources);
 		}
 
 		void WriteReloc ()
 		{
-			MoveTo (reloc.PointerToRawData);
+			PrepareSection (reloc);
 
 			var reloc_rva = text_map.GetRVA (TextSegment.StartupStub);
 			reloc_rva += module.Architecture == TargetArchitecture.IA64 ? 0x20u : 2;
@@ -640,8 +664,6 @@ namespace Mono.Cecil.PE {
 			default:
 				throw new NotSupportedException();
 			}
-
-			WriteBytes (new byte [file_alignment - reloc.VirtualSize]);
 		}
 
 		public void WriteImage ()
