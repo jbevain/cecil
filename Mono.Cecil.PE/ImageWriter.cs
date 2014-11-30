@@ -416,7 +416,6 @@ namespace Mono.Cecil.PE {
 				written += write_size;
 			}
 
-			Write (new byte [section.SizeOfRawData]);
 			MoveTo (section.PointerToRawData);
 		}
 
