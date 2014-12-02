@@ -343,6 +343,15 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+		[Test]
+		public void UnattachedField ()
+		{
+			var field = new FieldDefinition ("Field", FieldAttributes.Public, typeof (int).ToDefinition ());
+
+			Assert.IsFalse (field.HasConstant);
+			Assert.IsNull (field.Constant);
+		}
+
 		static TypeDefinition GetPrivateImplementationType (ModuleDefinition module)
 		{
 			foreach (var type in module.Types)

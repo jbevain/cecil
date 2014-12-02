@@ -149,6 +149,9 @@ namespace Mono.Cecil {
 		void InitializeMethods ()
 		{
 			var module = this.Module;
+			if (module == null)
+				return;
+
 			lock (module.SyncRoot) {
 				if (add_method != null
 					|| invoke_method != null

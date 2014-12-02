@@ -44,6 +44,11 @@ namespace Mono.Cecil {
 			ref object constant,
 			ModuleDefinition module)
 		{
+			if (module == null) {
+				constant = Mixin.NoValue;
+				return;
+			}
+
 			lock (module.SyncRoot) {
 				if (constant != Mixin.NotResolved)
 					return;

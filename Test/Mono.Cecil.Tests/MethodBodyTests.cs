@@ -303,6 +303,19 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+		[Test]
+		public void UnattachedMethodBody ()
+		{
+			var system_void = typeof (void).ToDefinition ();
+			var method = new MethodDefinition ("NewMethod", MethodAttributes.Assembly | MethodAttributes.Static, system_void);
+			var body = new MethodBody (method);
+			var il = body.GetILProcessor ();
+			il.Emit (OpCodes.Ret);
+			method.Body = body;
+
+			Assert.AreEqual (body, method.Body);
+		}
+
 		static void AssertCode (string expected, MethodDefinition method)
 		{
 			Assert.IsTrue (method.HasBody);
