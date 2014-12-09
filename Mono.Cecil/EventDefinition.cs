@@ -165,7 +165,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override EventDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl ()
 		{
 			return this;
 		}

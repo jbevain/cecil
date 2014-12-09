@@ -448,7 +448,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.Method);
 		}
 
-		public override MethodDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl ()
 		{
 			return this;
 		}

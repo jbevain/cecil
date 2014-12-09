@@ -71,13 +71,18 @@ namespace Mono.Cecil {
 			this.DeclaringType = declaringType;
 		}
 
-		public virtual FieldDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl()
 		{
 			var module = this.Module;
 			if (module == null)
-				throw new NotSupportedException ();
+				throw new NotSupportedException();
 
-			return module.Resolve (this);
+			return module.Resolve(this);
+		}
+
+		public new FieldDefinition Resolve()
+		{
+			return (FieldDefinition)base.Resolve();
 		}
 	}
 }

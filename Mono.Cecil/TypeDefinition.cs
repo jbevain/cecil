@@ -478,7 +478,7 @@ namespace Mono.Cecil {
 			this.BaseType = baseType;
 		}
 
-		public override TypeDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl ()
 		{
 			return this;
 		}
