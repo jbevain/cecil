@@ -33,11 +33,11 @@ using Mono.Collections.Generic;
 namespace Mono.Cecil {
 
 	public interface IAssemblyResolver {
-		AssemblyDefinition Resolve (AssemblyNameReference name);
-		AssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters);
+		IAssemblyDefinition Resolve (AssemblyNameReference name);
+		IAssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters);
 
-		AssemblyDefinition Resolve (string fullName);
-		AssemblyDefinition Resolve (string fullName, ReaderParameters parameters);
+		IAssemblyDefinition Resolve (string fullName);
+		IAssemblyDefinition Resolve (string fullName, ReaderParameters parameters);
 	}
 
 	public interface IMetadataResolver {

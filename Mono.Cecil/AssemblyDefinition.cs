@@ -32,8 +32,19 @@ using System.IO;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IAssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
+        AssemblyNameDefinition Name { get; set; }
+        string FullName { get; }
+        Collection<ModuleDefinition> Modules { get; }
+        ModuleDefinition MainModule { get; }
+        MethodDefinition EntryPoint { get; set; }
+        void Write (string fileName);
+        void Write (Stream stream);
+        void Write (string fileName, WriterParameters parameters);
+        void Write (Stream stream, WriterParameters parameters);
+    }
 
-	public sealed class AssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
+    public sealed class AssemblyDefinition : IAssemblyDefinition {
 
 		AssemblyNameDefinition name;
 
@@ -108,12 +119,12 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-		public static AssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
+		public static IAssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
 		{
 			return CreateAssembly (assemblyName, moduleName, new ModuleParameters { Kind = kind });
 		}
 
-		public static AssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
+		public static IAssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
 		{
 			if (assemblyName == null)
 				throw new ArgumentNullException ("assemblyName");
@@ -130,27 +141,27 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		public static AssemblyDefinition ReadAssembly (string fileName)
+		public static IAssemblyDefinition ReadAssembly (string fileName)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (fileName));
 		}
 
-		public static AssemblyDefinition ReadAssembly (string fileName, ReaderParameters parameters)
+		public static IAssemblyDefinition ReadAssembly (string fileName, ReaderParameters parameters)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (fileName, parameters));
 		}
 
-		public static AssemblyDefinition ReadAssembly (Stream stream)
+		public static IAssemblyDefinition ReadAssembly (Stream stream)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (stream));
 		}
 
-		public static AssemblyDefinition ReadAssembly (Stream stream, ReaderParameters parameters)
+		public static IAssemblyDefinition ReadAssembly (Stream stream, ReaderParameters parameters)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (stream, parameters));
 		}
 
-		static AssemblyDefinition ReadAssembly (ModuleDefinition module)
+		static IAssemblyDefinition ReadAssembly (ModuleDefinition module)
 		{
 			var assembly = module.Assembly;
 			if (assembly == null)

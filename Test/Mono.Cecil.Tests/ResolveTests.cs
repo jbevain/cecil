@@ -97,7 +97,7 @@ namespace Mono.Cecil.Tests {
 
 		class CustomResolver : DefaultAssemblyResolver {
 
-			public void Register (AssemblyDefinition assembly)
+			public void Register (IAssemblyDefinition assembly)
 			{
 				this.RegisterAssembly (assembly);
 				this.AddSearchDirectory (Path.GetDirectoryName (assembly.MainModule.FullyQualifiedName));

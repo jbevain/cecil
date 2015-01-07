@@ -33,19 +33,19 @@ namespace Mono.Cecil {
 
 	public class DefaultAssemblyResolver : BaseAssemblyResolver {
 
-		readonly IDictionary<string, AssemblyDefinition> cache;
+		readonly IDictionary<string, IAssemblyDefinition> cache;
 
 		public DefaultAssemblyResolver ()
 		{
-			cache = new Dictionary<string, AssemblyDefinition> (StringComparer.Ordinal);
+			cache = new Dictionary<string, IAssemblyDefinition> (StringComparer.Ordinal);
 		}
 
-		public override AssemblyDefinition Resolve (AssemblyNameReference name)
+		public override IAssemblyDefinition Resolve (AssemblyNameReference name)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
 
-			AssemblyDefinition assembly;
+			IAssemblyDefinition assembly;
 			if (cache.TryGetValue (name.FullName, out assembly))
 				return assembly;
 
@@ -55,7 +55,7 @@ namespace Mono.Cecil {
 			return assembly;
 		}
 
-		protected void RegisterAssembly (AssemblyDefinition assembly)
+		protected void RegisterAssembly (IAssemblyDefinition assembly)
 		{
 			if (assembly == null)
 				throw new ArgumentNullException ("assembly");

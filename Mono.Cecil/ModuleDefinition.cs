@@ -213,7 +213,7 @@ namespace Mono.Cecil {
 		ModuleCharacteristics characteristics;
 		Guid mvid;
 
-		internal AssemblyDefinition assembly;
+		internal IAssemblyDefinition assembly;
 		MethodDefinition entry_point;
 
 #if !READ_ONLY
@@ -291,7 +291,7 @@ namespace Mono.Cecil {
 			get { return MetadataScopeType.ModuleDefinition; }
 		}
 
-		public AssemblyDefinition Assembly {
+		public IAssemblyDefinition Assembly {
 			get { return assembly; }
 		}
 
