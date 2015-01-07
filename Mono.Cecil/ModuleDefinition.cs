@@ -532,10 +532,10 @@ namespace Mono.Cecil {
             return this.Read(this, (_, reader) => reader.GetTypeReferences());
 		}
 
-		public IEnumerable<MemberReference> GetMemberReferences ()
+		public IEnumerable<IMemberReference> GetMemberReferences ()
 		{
 			if (!HasImage)
-				return Empty<MemberReference>.Array;
+				return Empty<IMemberReference>.Array;
 
             return this.Read(this, (_, reader) => reader.GetMemberReferences());
 		}

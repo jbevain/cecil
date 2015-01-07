@@ -54,7 +54,7 @@ namespace Mono.Cecil {
 
 		internal FieldDefinition [] Fields;
 		internal MethodDefinition [] Methods;
-		internal MemberReference [] MemberReferences;
+		internal IMemberReference [] MemberReferences;
 
 		internal Dictionary<uint, uint []> NestedTypes;
 		internal Dictionary<uint, uint> ReverseNestedTypes;
@@ -214,7 +214,7 @@ namespace Mono.Cecil {
 			Methods [method.token.RID - 1] = method;
 		}
 
-		public MemberReference GetMemberReference (uint rid)
+		public IMemberReference GetMemberReference (uint rid)
 		{
 			if (rid < 1 || rid > MemberReferences.Length)
 				return null;
@@ -222,9 +222,9 @@ namespace Mono.Cecil {
 			return MemberReferences [rid - 1];
 		}
 
-		public void AddMemberReference (MemberReference member)
+		public void AddMemberReference (IMemberReference member)
 		{
-			MemberReferences [member.token.RID - 1] = member;
+			MemberReferences [member.MetadataToken.RID - 1] = member;
 		}
 
 		public bool TryGetNestedTypeMapping (TypeDefinition type, out uint [] mapping)

@@ -1743,7 +1743,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		MetadataToken GetMemberRefToken (MemberReference member)
+		MetadataToken GetMemberRefToken (IMemberReference member)
 		{
 			var row = CreateMemberRefRow (member);
 
@@ -1753,10 +1753,10 @@ namespace Mono.Cecil {
 
 			AddMemberReference (member, row);
 
-			return member.token;
+			return member.MetadataToken;
 		}
 
-		MemberRefRow CreateMemberRefRow (MemberReference member)
+		MemberRefRow CreateMemberRefRow (IMemberReference member)
 		{
 			return new MemberRefRow (
 				MakeCodedRID (GetTypeToken (member.DeclaringType), CodedIndex.MemberRefParent),
@@ -1764,10 +1764,10 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetMemberRefSignature (member)));
 		}
 
-		void AddMemberReference (MemberReference member, MemberRefRow row)
+		void AddMemberReference (IMemberReference member, MemberRefRow row)
 		{
-			member.token = new MetadataToken (TokenType.MemberRef, member_ref_table.AddRow (row));
-			member_ref_map.Add (row, member.token);
+			member.MetadataToken = new MetadataToken (TokenType.MemberRef, member_ref_table.AddRow (row));
+			member_ref_map.Add (row, member.MetadataToken);
 		}
 
 		MetadataToken GetMethodSpecToken (MethodSpecification method_spec)
@@ -1856,7 +1856,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetMemberRefSignature (MemberReference member)
+		SignatureWriter GetMemberRefSignature (IMemberReference member)
 		{
 			var field = member as FieldReference;
 			if (field != null)
@@ -1968,7 +1968,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		static Exception CreateForeignMemberException (MemberReference member)
+		static Exception CreateForeignMemberException (IMemberReference member)
 		{
 			return new ArgumentException (string.Format ("Member '{0}' is declared in another module and needs to be imported", member));
 		}

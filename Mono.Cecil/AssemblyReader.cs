@@ -2190,7 +2190,7 @@ namespace Mono.Cecil {
 			return instance;
 		}
 
-		MemberReference GetMemberReference (uint rid)
+		IMemberReference GetMemberReference (uint rid)
 		{
 			InitializeMemberReferences ();
 
@@ -2204,7 +2204,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		MemberReference ReadMemberReference (uint rid)
+		IMemberReference ReadMemberReference (uint rid)
 		{
 			if (!MoveTo (Table.MemberRef, rid))
 				return null;
@@ -2213,7 +2213,7 @@ namespace Mono.Cecil {
 			var name = ReadString ();
 			var signature = ReadBlobIndex ();
 
-			MemberReference member;
+			IMemberReference member;
 
 			switch (token.TokenType) {
 			case TokenType.TypeDef:
@@ -2228,12 +2228,12 @@ namespace Mono.Cecil {
 				throw new NotSupportedException ();
 			}
 
-			member.token = new MetadataToken (TokenType.MemberRef, rid);
+			member.MetadataToken = new MetadataToken (TokenType.MemberRef, rid);
 
 			return member;
 		}
 
-		MemberReference ReadTypeMemberReference (MetadataToken type, string name, uint signature)
+		IMemberReference ReadTypeMemberReference (MetadataToken type, string name, uint signature)
 		{
 			var declaring_type = GetTypeDefOrRef (type);
 
@@ -2246,7 +2246,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		MemberReference ReadMemberReferenceSignature (uint signature, TypeReference declaring_type)
+		IMemberReference ReadMemberReferenceSignature (uint signature, TypeReference declaring_type)
 		{
 			var reader = ReadSignature (signature);
 			const byte field_sig = 0x6;
@@ -2265,7 +2265,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		MemberReference ReadMethodMemberReference (MetadataToken token, string name, uint signature)
+		IMemberReference ReadMethodMemberReference (MetadataToken token, string name, uint signature)
 		{
 			var method = GetMethodDefinition (token.RID);
 
@@ -2285,7 +2285,7 @@ namespace Mono.Cecil {
 			metadata.MemberReferences = new MemberReference [image.GetTableLength (Table.MemberRef)];
 		}
 
-		public IEnumerable<MemberReference> GetMemberReferences ()
+		public IEnumerable<IMemberReference> GetMemberReferences ()
 		{
 			InitializeMemberReferences ();
 
@@ -2296,7 +2296,7 @@ namespace Mono.Cecil {
 			var context = new MethodReference (string.Empty, type_system.Void);
 			context.DeclaringType = new TypeReference (string.Empty, string.Empty, module, type_system.Corlib);
 
-			var member_references = new MemberReference [length];
+			IMemberReference[] member_references = new IMemberReference [length];
 
 			for (uint i = 1; i <= length; i++) {
 				this.context = context;

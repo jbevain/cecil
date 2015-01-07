@@ -27,8 +27,17 @@
 //
 
 namespace Mono.Cecil {
+    public interface IMemberReference : IMetadataTokenProvider {
+        string Name { get; set; }
+        string FullName { get; }
+        TypeReference DeclaringType { get; set; }
+        ModuleDefinition Module { get; }
+        bool IsDefinition { get; }
+        bool ContainsGenericParameter { get; }
+        string ToString ();
+    }
 
-	public abstract class MemberReference : IMetadataTokenProvider {
+    public abstract class MemberReference : IMemberReference {
 
 		string name;
 		TypeReference declaring_type;

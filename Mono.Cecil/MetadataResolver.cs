@@ -51,9 +51,9 @@ namespace Mono.Cecil {
 #endif
 	public class ResolutionException : Exception {
 
-		readonly MemberReference member;
+		readonly IMemberReference member;
 
-		public MemberReference Member {
+		public IMemberReference Member {
 			get { return member; }
 		}
 
@@ -71,7 +71,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public ResolutionException (MemberReference member)
+		public ResolutionException (IMemberReference member)
 			: base ("Failed to resolve " + member.FullName)
 		{
 			if (member == null)
