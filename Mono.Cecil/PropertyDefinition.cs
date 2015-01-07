@@ -247,7 +247,10 @@ namespace Mono.Cecil {
 				if (get_method != null || set_method != null)
 					return;
 
-			
+                if (!module.HasImage())
+                    return;
+
+                module.Read(this, (property, reader) => reader.ReadMethods(property));
 			}
 		}
 
