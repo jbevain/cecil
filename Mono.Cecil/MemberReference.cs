@@ -34,6 +34,7 @@ namespace Mono.Cecil {
         IModuleDefinition Module { get; set; }
         bool IsDefinition { get; }
         bool ContainsGenericParameter { get; }
+        bool HasImage { get; }
     }
 
     public abstract class MemberReference : IMemberReference {
@@ -62,7 +63,7 @@ namespace Mono.Cecil {
 			set { token = value; }
 		}
 
-		internal bool HasImage {
+        public bool HasImage {
 			get {
 				var module = Module;
 				if (module == null)

@@ -69,7 +69,7 @@ namespace Mono.Cecil {
 		public ITypeReference MethodParameter (string method, int position)
 		{
 			for (int i = stack.Count - 1; i >= 0; i--) {
-				var candidate = stack [i] as MethodReference;
+				var candidate = stack [i] as IMethodReference;
 				if (candidate == null)
 					continue;
 
@@ -102,7 +102,7 @@ namespace Mono.Cecil {
 			if (type != null)
 				return type.GetElementType ();
 
-			var method = context as MethodReference;
+			var method = context as IMethodReference;
 			if (method != null)
 				return method.DeclaringType.GetElementType ();
 
@@ -351,7 +351,7 @@ namespace Mono.Cecil {
 #endif
 		}
 
-		public MethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)
+		public IMethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)
 		{
 			if (IsMethodSpecification (method) || ImportOpenGenericMethod (method, import_kind))
 				return ImportMethodSpecification (method, context);
@@ -409,7 +409,7 @@ namespace Mono.Cecil {
 			return method.IsGenericMethod && !method.IsGenericMethodDefinition;
 		}
 
-		MethodReference ImportMethodSpecification (SR.MethodBase method, ImportGenericContext context)
+		IMethodReference ImportMethodSpecification (SR.MethodBase method, ImportGenericContext context)
 		{
 			var method_info = method as SR.MethodInfo;
 			if (method_info == null)
@@ -612,7 +612,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public MethodReference ImportMethod (MethodReference method, ImportGenericContext context)
+		public IMethodReference ImportMethod (IMethodReference method, ImportGenericContext context)
 		{
 			if (method.IsGenericInstance)
 				return ImportMethodSpecification (method, context);
@@ -650,7 +650,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		MethodSpecification ImportMethodSpecification (MethodReference method, ImportGenericContext context)
+		MethodSpecification ImportMethodSpecification (IMethodReference method, ImportGenericContext context)
 		{
 			if (!method.IsGenericInstance)
 				throw new NotSupportedException ();

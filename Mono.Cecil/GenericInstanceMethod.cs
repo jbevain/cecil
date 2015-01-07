@@ -77,7 +77,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public GenericInstanceMethod (MethodReference method)
+		public GenericInstanceMethod (IMethodReference method)
 			: base (method)
 		{
 		}

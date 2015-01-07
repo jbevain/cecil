@@ -1978,20 +1978,20 @@ namespace Mono.Cecil {
 			return mapping.Length > 0;
 		}
 
-		public Collection<MethodReference> ReadOverrides (MethodDefinition method)
+		public Collection<IMethodReference> ReadOverrides (MethodDefinition method)
 		{
 			InitializeOverrides ();
 
 			MetadataToken [] mapping;
 			if (!metadata.TryGetOverrideMapping (method, out mapping))
-				return new Collection<MethodReference> ();
+				return new Collection<IMethodReference> ();
 
-			var overrides = new Collection<MethodReference> (mapping.Length);
+			var overrides = new Collection<IMethodReference> (mapping.Length);
 
 			this.context = method;
 
 			for (int i = 0; i < mapping.Length; i++)
-				overrides.Add ((MethodReference) LookupToken (mapping [i]));
+				overrides.Add ((IMethodReference) LookupToken (mapping [i]));
 
 			metadata.RemoveOverrideMapping (method);
 
@@ -2163,7 +2163,7 @@ namespace Mono.Cecil {
 			if (!MoveTo (Table.MethodSpec, rid))
 				return null;
 
-			var element_method = (MethodReference) LookupToken (
+			var element_method = (IMethodReference) LookupToken (
 				ReadMetadataToken (CodedIndex.MethodDefOrRef));
 			var signature = ReadBlobIndex ();
 
@@ -2172,7 +2172,7 @@ namespace Mono.Cecil {
 			return method_spec;
 		}
 
-		MethodSpecification ReadMethodSpecSignature (uint signature, MethodReference method)
+		MethodSpecification ReadMethodSpecSignature (uint signature, IMethodReference method)
 		{
 			var reader = ReadSignature (signature);
 			const byte methodspec_sig = 0x0a;
@@ -2410,7 +2410,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < range.Length; i++) {
 				ReadMetadataToken (CodedIndex.HasCustomAttribute);
 
-				var constructor = (MethodReference) LookupToken (
+				var constructor = (IMethodReference) LookupToken (
 					ReadMetadataToken (CodedIndex.CustomAttributeType));
 
 				var signature = ReadBlobIndex ();
@@ -2898,7 +2898,7 @@ namespace Mono.Cecil {
 
 			method.CallingConvention = (MethodCallingConvention) calling_convention;
 
-			var generic_context = method as MethodReference;
+			var generic_context = method as IMethodReference;
 			if (generic_context != null && !generic_context.DeclaringType.IsArray)
 				reader.context = generic_context;
 
@@ -2918,9 +2918,9 @@ namespace Mono.Cecil {
 
             IList<ParameterDefinition> parameters;
 
-			var method_ref = method as MethodReference;
+			var method_ref = method as IMethodReference;
 			if (method_ref != null)
-				parameters = method_ref.parameters = new ParameterDefinitionCollection (method, (int) param_count);
+				parameters = method_ref.Parameters = new ParameterDefinitionCollection (method, (int) param_count);
 			else
 				parameters = method.Parameters;
 

@@ -1862,7 +1862,7 @@ namespace Mono.Cecil {
 			if (field != null)
 				return GetFieldSignature (field);
 
-			var method = member as MethodReference;
+			var method = member as IMethodReference;
 			if (method != null)
 				return GetMethodSignature (method);
 

@@ -36,7 +36,7 @@ namespace Mono.Cecil {
 
 	public sealed class FunctionPointerType : TypeSpecification, IMethodSignature {
 
-		readonly MethodReference function;
+		readonly IMethodReference function;
 
 		public bool HasThis {
 			get { return function.HasThis; }
@@ -57,11 +57,13 @@ namespace Mono.Cecil {
 			get { return function.HasParameters; }
 		}
 
-		public IList<ParameterDefinition> Parameters {
-			get { return function.Parameters; }
+		public IList<ParameterDefinition> Parameters
+		{
+		    get { return function.Parameters; }
+		    set { function.Parameters = value; }
 		}
 
-		public ITypeReference ReturnType {
+	    public ITypeReference ReturnType {
 			get { return function.MethodReturnType.ReturnType; }
 			set { function.MethodReturnType.ReturnType = value; }
 		}

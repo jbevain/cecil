@@ -232,14 +232,14 @@ namespace Mono.Cecil {
         ITypeReference Import (Type type, IGenericParameterProvider context);
         FieldReference Import (SR.FieldInfo field);
         FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context);
-        MethodReference Import (SR.MethodBase method);
-        MethodReference Import (SR.MethodBase method, IGenericParameterProvider context);
+        IMethodReference Import (SR.MethodBase method);
+        IMethodReference Import (SR.MethodBase method, IGenericParameterProvider context);
         ITypeReference Import (ITypeReference type);
         ITypeReference Import (ITypeReference type, IGenericParameterProvider context);
         FieldReference Import (FieldReference field);
         FieldReference Import (FieldReference field, IGenericParameterProvider context);
-        MethodReference Import (MethodReference method);
-        MethodReference Import (MethodReference method, IGenericParameterProvider context);
+        IMethodReference Import (IMethodReference method);
+        IMethodReference Import (IMethodReference method, IGenericParameterProvider context);
         IMetadataTokenProvider LookupToken (int token);
         IMetadataTokenProvider LookupToken (MetadataToken token);
         ImageDebugDirectory GetDebugHeader (out byte [] header);
@@ -250,7 +250,7 @@ namespace Mono.Cecil {
         void Write (string fileName, WriterParameters parameters);
         void Write (Stream stream, WriterParameters parameters);
         FieldDefinition Resolve (FieldReference field);
-        MethodDefinition Resolve (MethodReference method);
+        MethodDefinition Resolve (IMethodReference method);
         ITypeDefinition Resolve (ITypeReference type);
         bool HasImage { get; }
         object SyncRoot { get; }
@@ -696,7 +696,7 @@ namespace Mono.Cecil {
 			return MetadataResolver.Resolve (field);
 		}
 
-        public MethodDefinition Resolve (MethodReference method)
+        public MethodDefinition Resolve (IMethodReference method)
 		{
 			return MetadataResolver.Resolve (method);
 		}
@@ -771,14 +771,14 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportField (field, GenericContextFor (context));
 		}
 
-		public MethodReference Import (SR.MethodBase method)
+		public IMethodReference Import (SR.MethodBase method)
 		{
 			CheckMethod (method);
 
 			return MetadataImporter.ImportMethod (method, default (ImportGenericContext), ImportGenericKind.Definition);
 		}
 
-		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
+		public IMethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
 		{
 			CheckMethod (method);
 			CheckContext (context, this);
@@ -833,12 +833,12 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportField (field, GenericContextFor (context));
 		}
 
-		public MethodReference Import (MethodReference method)
+		public IMethodReference Import (IMethodReference method)
 		{
 			return Import (method, null);
 		}
 
-		public MethodReference Import (MethodReference method, IGenericParameterProvider context)
+		public IMethodReference Import (IMethodReference method, IGenericParameterProvider context)
 		{
 			CheckMethod (method);
 

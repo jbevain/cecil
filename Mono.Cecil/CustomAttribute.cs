@@ -88,13 +88,13 @@ namespace Mono.Cecil {
 
 		readonly internal uint signature;
 		internal bool resolved;
-		MethodReference constructor;
+		IMethodReference constructor;
 		byte [] blob;
 		internal IList<CustomAttributeArgument> arguments;
 		internal IList<CustomAttributeNamedArgument> fields;
 		internal IList<CustomAttributeNamedArgument> properties;
 
-		public MethodReference Constructor {
+		public IMethodReference Constructor {
 			get { return constructor; }
 			set { constructor = value; }
 		}
@@ -156,27 +156,27 @@ namespace Mono.Cecil {
 		}
 
 		internal bool HasImage {
-			get { return constructor != null && constructor.HasImage; }
+			get { return constructor != null && ((MethodReference)constructor).HasImage; }
 		}
 
 		internal IModuleDefinition Module {
 			get { return constructor.Module; }
 		}
 
-		internal CustomAttribute (uint signature, MethodReference constructor)
+		internal CustomAttribute (uint signature, IMethodReference constructor)
 		{
 			this.signature = signature;
 			this.constructor = constructor;
 			this.resolved = false;
 		}
 
-		public CustomAttribute (MethodReference constructor)
+		public CustomAttribute (IMethodReference constructor)
 		{
 			this.constructor = constructor;
 			this.resolved = true;
 		}
 
-		public CustomAttribute (MethodReference constructor, byte [] blob)
+		public CustomAttribute (IMethodReference constructor, byte [] blob)
 		{
 			this.constructor = constructor;
 			this.resolved = false;

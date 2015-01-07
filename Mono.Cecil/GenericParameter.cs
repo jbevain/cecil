@@ -104,7 +104,7 @@ namespace Mono.Cecil {
 					return null;
 
 				return owner.GenericParameterType == GenericParameterType.Method
-					? ((MethodReference) owner).DeclaringType.Scope
+					? ((IMethodReference) owner).DeclaringType.Scope
 					: ((ITypeReference) owner).Scope;
 			}
 			set { throw new InvalidOperationException (); }
@@ -115,8 +115,8 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public MethodReference DeclaringMethod {
-			get { return owner as MethodReference; }
+		public IMethodReference DeclaringMethod {
+			get { return owner as IMethodReference; }
 		}
 
 		public override IModuleDefinition Module {

@@ -45,7 +45,7 @@ namespace Mono.Cecil {
 
 		internal RVA rva;
 		internal PInvokeInfo pinvoke;
-        IList<MethodReference> overrides;
+        IList<IMethodReference> overrides;
 
 		internal MethodBody body;
 
@@ -197,7 +197,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<MethodReference> Overrides {
+		public IList<IMethodReference> Overrides {
 			get {
 				if (overrides != null)
 					return overrides;
@@ -205,7 +205,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref overrides, this, (method, reader) => reader.ReadOverrides (method));
 
-			    return overrides = new Collection<MethodReference> ();
+			    return overrides = new Collection<IMethodReference> ();
 			}
 		}
 

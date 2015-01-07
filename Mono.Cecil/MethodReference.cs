@@ -1,5 +1,5 @@
 //
-// MethodReference.cs
+// IMethodReference.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -33,10 +33,16 @@ using System.Text;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IMethodReference : IMemberReference, IMethodSignature, IGenericParameterProvider, IGenericContext {
+        bool IsGenericInstance { get; }
+        IMethodReference GetElementMethod ();
+        MethodDefinition Resolve ();
 
-	public class MethodReference : MemberReference, IMethodSignature, IGenericParameterProvider, IGenericContext {
+    }
 
-		internal ParameterDefinitionCollection parameters;
+    public class MethodReference : MemberReference, IMethodReference {
+
+        internal IList<ParameterDefinition> parameters;
 		MethodReturnType return_type;
 
 		bool has_this;
@@ -63,16 +69,18 @@ namespace Mono.Cecil {
 			get { return !parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual IList<ParameterDefinition> Parameters {
-			get {
+		public virtual IList<ParameterDefinition> Parameters
+		{
+		    get {
 				if (parameters == null)
 					parameters = new ParameterDefinitionCollection (this);
 
 				return parameters;
 			}
+		    set { parameters = value; }
 		}
 
-		IGenericParameterProvider IGenericContext.Type {
+        IGenericParameterProvider IGenericContext.Type {
 			get {
 				var declaring_type = this.DeclaringType;
 				var instance = declaring_type as GenericInstanceType;
@@ -177,7 +185,7 @@ namespace Mono.Cecil {
 			this.DeclaringType = declaringType;
 		}
 
-		public virtual MethodReference GetElementMethod ()
+		public virtual IMethodReference GetElementMethod ()
 		{
 			return this;
 		}
