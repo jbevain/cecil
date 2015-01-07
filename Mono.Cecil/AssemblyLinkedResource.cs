@@ -32,9 +32,9 @@ namespace Mono.Cecil {
 
 	public sealed class AssemblyLinkedResource : Resource {
 
-		AssemblyNameReference reference;
+		IAssemblyNameReference reference;
 
-		public AssemblyNameReference Assembly {
+		public IAssemblyNameReference Assembly {
 			get { return reference; }
 			set { reference = value; }
 		}
@@ -48,7 +48,7 @@ namespace Mono.Cecil {
 		{
 		}
 
-		public AssemblyLinkedResource (string name, ManifestResourceAttributes flags, AssemblyNameReference reference)
+		public AssemblyLinkedResource (string name, ManifestResourceAttributes flags, IAssemblyNameReference reference)
 			: base (name, flags)
 		{
 			this.reference = reference;

@@ -40,7 +40,7 @@ namespace Mono.Cecil {
 			cache = new Dictionary<string, IAssemblyDefinition> (StringComparer.Ordinal);
 		}
 
-		public override IAssemblyDefinition Resolve (AssemblyNameReference name)
+		public override IAssemblyDefinition Resolve (IAssemblyNameReference name)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");

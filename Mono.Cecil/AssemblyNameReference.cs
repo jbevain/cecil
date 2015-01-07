@@ -1,5 +1,5 @@
 //
-// AssemblyNameReference.cs
+// IAssemblyNameReference.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -32,8 +32,22 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace Mono.Cecil {
+    public interface IAssemblyNameReference : IMetadataScope {
+        string Culture { get; set; }
+        Version Version { get; set; }
+        AssemblyAttributes Attributes { get; set; }
+        bool HasPublicKey { get; set; }
+        bool IsSideBySideCompatible { get; set; }
+        bool IsRetargetable { get; set; }
+        bool IsWindowsRuntime { get; set; }
+        byte[] PublicKey { get; set; }
+        byte[] PublicKeyToken { get; set; }
+        string FullName { get; }
+        AssemblyHashAlgorithm HashAlgorithm { get; set; }
+        byte[] Hash { get; set; }
+    }
 
-	public class AssemblyNameReference : IMetadataScope {
+    public class AssemblyNameReference : IAssemblyNameReference {
 
 		string name;
 		string culture;
@@ -153,7 +167,7 @@ namespace Mono.Cecil {
 		}
 
 		public virtual MetadataScopeType MetadataScopeType {
-			get { return MetadataScopeType.AssemblyNameReference; }
+			get { return MetadataScopeType.IAssemblyNameReference; }
 		}
 
 		public string FullName {
@@ -188,7 +202,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public static AssemblyNameReference Parse (string fullName)
+		public static IAssemblyNameReference Parse (string fullName)
 		{
 			if (fullName == null)
 				throw new ArgumentNullException ("fullName");

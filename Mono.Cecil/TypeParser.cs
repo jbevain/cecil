@@ -391,7 +391,7 @@ namespace Mono.Cecil {
 			return MatchReference (module, AssemblyNameReference.Parse (type_info.assembly));
 		}
 
-		static AssemblyNameReference MatchReference (IModuleDefinition module, AssemblyNameReference pattern)
+		static IAssemblyNameReference MatchReference (IModuleDefinition module, IAssemblyNameReference pattern)
 		{
 			var references = module.AssemblyReferences;
 
@@ -487,8 +487,8 @@ namespace Mono.Cecil {
 		{
 			var scope = type.Scope;
 			switch (scope.MetadataScopeType) {
-			case MetadataScopeType.AssemblyNameReference:
-				return ((AssemblyNameReference) scope).FullName;
+			case MetadataScopeType.IAssemblyNameReference:
+				return ((IAssemblyNameReference) scope).FullName;
 			case MetadataScopeType.ModuleDefinition:
 				return ((IModuleDefinition) scope).Assembly.Name.FullName;
 			}

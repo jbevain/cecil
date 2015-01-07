@@ -946,7 +946,7 @@ namespace Mono.Cecil {
 					GetStringIndex (reference.Culture),
 					GetBlobIndex (reference.Hash)));
 
-				reference.token = new MetadataToken (TokenType.AssemblyRef, rid);
+				reference.MetadataToken = new MetadataToken (TokenType.AssemblyRef, rid);
 			}
 		}
 

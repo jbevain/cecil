@@ -96,7 +96,7 @@ namespace Mono.Cecil {
 
 		sealed class CommonTypeSystem : TypeSystem {
 
-			AssemblyNameReference corlib;
+			IAssemblyNameReference corlib;
 
 			public CommonTypeSystem (IModuleDefinition module)
 				: base (module)
@@ -108,7 +108,7 @@ namespace Mono.Cecil {
 				return CreateTypeReference (@namespace, name);
 			}
 
-			public AssemblyNameReference GetCorlibReference ()
+			public IAssemblyNameReference GetCorlibReference ()
 			{
 				if (corlib != null)
 					return corlib;

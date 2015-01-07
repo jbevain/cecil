@@ -207,7 +207,7 @@ namespace Mono.Cecil {
         IMetadataResolver MetadataResolver { get; set; }
         TypeSystem TypeSystem { get; }
         bool HasAssemblyReferences { get; }
-        IList<AssemblyNameReference> AssemblyReferences { get; }
+        IList<IAssemblyNameReference> AssemblyReferences { get; }
         bool HasModuleReferences { get; }
         IList<IModuleReference> ModuleReferences { get; }
         bool HasResources { get; }
@@ -288,7 +288,7 @@ namespace Mono.Cecil {
 		MetadataImporter importer;
 #endif
 		IList<CustomAttribute> custom_attributes;
-		IList<AssemblyNameReference> references;
+		IList<IAssemblyNameReference> references;
 		IList<IModuleReference> modules;
 		IList<Resource> resources;
 		IList<ExportedType> exported_types;
@@ -421,7 +421,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<AssemblyNameReference> AssemblyReferences {
+		public IList<IAssemblyNameReference> AssemblyReferences {
 			get {
 				if (references != null)
 					return references;
@@ -429,7 +429,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return this.Read (ref references, this, (_, reader) => reader.ReadAssemblyReferences ());
 
-			    return references = new Collection<AssemblyNameReference> ();
+			    return references = new Collection<IAssemblyNameReference> ();
 			}
 		}
 

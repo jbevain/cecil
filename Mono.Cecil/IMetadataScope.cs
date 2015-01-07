@@ -29,7 +29,7 @@
 namespace Mono.Cecil {
 
 	public enum MetadataScopeType {
-		AssemblyNameReference,
+		IAssemblyNameReference,
 		ModuleReference,
 		ModuleDefinition,
 	}

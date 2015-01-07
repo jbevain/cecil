@@ -33,8 +33,8 @@ using Mono.Collections.Generic;
 namespace Mono.Cecil {
 
 	public interface IAssemblyResolver {
-		IAssemblyDefinition Resolve (AssemblyNameReference name);
-		IAssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters);
+		IAssemblyDefinition Resolve (IAssemblyNameReference name);
+		IAssemblyDefinition Resolve (IAssemblyNameReference name, ReaderParameters parameters);
 
 		IAssemblyDefinition Resolve (string fullName);
 		IAssemblyDefinition Resolve (string fullName, ReaderParameters parameters);
@@ -119,8 +119,8 @@ namespace Mono.Cecil {
 				return null;
 
 			switch (scope.MetadataScopeType) {
-			case MetadataScopeType.AssemblyNameReference:
-				var assembly = assembly_resolver.Resolve ((AssemblyNameReference) scope);
+			case MetadataScopeType.IAssemblyNameReference:
+				var assembly = assembly_resolver.Resolve ((IAssemblyNameReference) scope);
 				if (assembly == null)
 					return null;
 

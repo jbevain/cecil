@@ -271,9 +271,9 @@ namespace Mono.Cecil {
 			return etype;
 		}
 
-		AssemblyNameReference ImportScope (SR.Assembly assembly)
+		IAssemblyNameReference ImportScope (SR.Assembly assembly)
 		{
-			AssemblyNameReference scope;
+			IAssemblyNameReference scope;
 #if !SILVERLIGHT
 			var name = assembly.GetName ();
 
@@ -290,7 +290,7 @@ namespace Mono.Cecil {
 
 			return scope;
 #else
-			var name = AssemblyNameReference.Parse (assembly.FullName);
+			var name = IAssemblyNameReference.Parse (assembly.FullName);
 
 			if (TryGetAssemblyNameReference (name, out scope))
 				return scope;
@@ -302,7 +302,7 @@ namespace Mono.Cecil {
 		}
 
 #if !SILVERLIGHT
-		bool TryGetAssemblyNameReference (SR.AssemblyName name, out AssemblyNameReference assembly_reference)
+		bool TryGetAssemblyNameReference (SR.AssemblyName name, out IAssemblyNameReference assembly_reference)
 		{
 			var references = module.AssemblyReferences;
 
@@ -463,8 +463,8 @@ namespace Mono.Cecil {
 		IMetadataScope ImportScope (IMetadataScope scope)
 		{
 			switch (scope.MetadataScopeType) {
-			case MetadataScopeType.AssemblyNameReference:
-				return ImportAssemblyName ((AssemblyNameReference) scope);
+			case MetadataScopeType.IAssemblyNameReference:
+				return ImportAssemblyName ((IAssemblyNameReference) scope);
 			case MetadataScopeType.ModuleDefinition:
 				if (scope == module) return scope;
 				return ImportAssemblyName (((IModuleDefinition) scope).Assembly.Name);
@@ -475,9 +475,9 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		AssemblyNameReference ImportAssemblyName (AssemblyNameReference name)
+		IAssemblyNameReference ImportAssemblyName (IAssemblyNameReference name)
 		{
-			AssemblyNameReference reference;
+			IAssemblyNameReference reference;
 			if (TryGetAssemblyNameReference (name, out reference))
 				return reference;
 
@@ -501,7 +501,7 @@ namespace Mono.Cecil {
 			return reference;
 		}
 
-		bool TryGetAssemblyNameReference (AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)
+		bool TryGetAssemblyNameReference (IAssemblyNameReference name_reference, out IAssemblyNameReference assembly_reference)
 		{
 			var references = module.AssemblyReferences;
 

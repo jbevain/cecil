@@ -45,7 +45,7 @@ namespace Mono.Cecil {
 
     public sealed class MetadataSystem {
 
-		internal AssemblyNameReference [] AssemblyReferences;
+		internal IAssemblyNameReference [] AssemblyReferences;
 		internal IModuleReference [] ModuleReferences;
 
 		internal ITypeDefinition [] Types;
@@ -105,7 +105,7 @@ namespace Mono.Cecil {
 				return;
 
 			var scope = type.Scope;
-			if (scope == null || scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
+			if (scope == null || scope.MetadataScopeType != MetadataScopeType.IAssemblyNameReference)
 				return;
 
 			Row<ElementType, bool> primitive_data;

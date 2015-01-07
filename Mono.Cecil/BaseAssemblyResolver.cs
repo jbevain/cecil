@@ -35,17 +35,17 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	public delegate IAssemblyDefinition AssemblyResolveEventHandler (object sender, AssemblyNameReference reference);
+	public delegate IAssemblyDefinition AssemblyResolveEventHandler (object sender, IAssemblyNameReference reference);
 
 	public sealed class AssemblyResolveEventArgs : EventArgs {
 
-		readonly AssemblyNameReference reference;
+		readonly IAssemblyNameReference reference;
 
-		public AssemblyNameReference AssemblyReference {
+		public IAssemblyNameReference AssemblyReference {
 			get { return reference; }
 		}
 
-		public AssemblyResolveEventArgs (AssemblyNameReference reference)
+		public AssemblyResolveEventArgs (IAssemblyNameReference reference)
 		{
 			this.reference = reference;
 		}
@@ -56,13 +56,13 @@ namespace Mono.Cecil {
 #endif
 	public class AssemblyResolutionException : FileNotFoundException {
 
-		readonly AssemblyNameReference reference;
+		readonly IAssemblyNameReference reference;
 
-		public AssemblyNameReference AssemblyReference {
+		public IAssemblyNameReference AssemblyReference {
 			get { return reference; }
 		}
 
-		public AssemblyResolutionException (AssemblyNameReference reference)
+		public AssemblyResolutionException (IAssemblyNameReference reference)
 			: base (string.Format ("Failed to resolve assembly: '{0}'", reference))
 		{
 			this.reference = reference;
@@ -133,12 +133,12 @@ namespace Mono.Cecil {
 			return ModuleDefinition.ReadModule (file, parameters).Assembly;
 		}
 
-		public virtual IAssemblyDefinition Resolve (AssemblyNameReference name)
+		public virtual IAssemblyDefinition Resolve (IAssemblyNameReference name)
 		{
 			return Resolve (name, new ReaderParameters ());
 		}
 
-		public virtual IAssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters)
+		public virtual IAssemblyDefinition Resolve (IAssemblyNameReference name, ReaderParameters parameters)
 		{
 			if (name == null)
 				throw new ArgumentNullException ("name");
@@ -189,7 +189,7 @@ namespace Mono.Cecil {
 			throw new AssemblyResolutionException (name);
 		}
 
-		IAssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
+		IAssemblyDefinition SearchDirectory (IAssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
 		{
 			var extensions = new [] { ".exe", ".dll" };
 			foreach (var directory in directories) {
@@ -209,7 +209,7 @@ namespace Mono.Cecil {
 		}
 
 #if !SILVERLIGHT && !CF
-		IAssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
+		IAssemblyDefinition GetCorlib (IAssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
 			var corlib = typeof (object).Assembly.GetName ();
@@ -307,7 +307,7 @@ namespace Mono.Cecil {
 				"gac");
 		}
 
-		IAssemblyDefinition GetAssemblyInGac (AssemblyNameReference reference, ReaderParameters parameters)
+		IAssemblyDefinition GetAssemblyInGac (IAssemblyNameReference reference, ReaderParameters parameters)
 		{
 			if (reference.PublicKeyToken == null || reference.PublicKeyToken.Length == 0)
 				return null;
@@ -321,7 +321,7 @@ namespace Mono.Cecil {
 			return GetAssemblyInNetGac (reference, parameters);
 		}
 
-		IAssemblyDefinition GetAssemblyInMonoGac (AssemblyNameReference reference, ReaderParameters parameters)
+		IAssemblyDefinition GetAssemblyInMonoGac (IAssemblyNameReference reference, ReaderParameters parameters)
 		{
 			for (int i = 0; i < gac_paths.Count; i++) {
 				var gac_path = gac_paths [i];
@@ -333,7 +333,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		IAssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference, ReaderParameters parameters)
+		IAssemblyDefinition GetAssemblyInNetGac (IAssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
 			var prefixes = new [] { string.Empty, "v4.0_" };
@@ -350,7 +350,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
+		static string GetAssemblyFile (IAssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ()
 				.Append (prefix)

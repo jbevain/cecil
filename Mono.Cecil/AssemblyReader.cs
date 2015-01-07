@@ -506,7 +506,7 @@ namespace Mono.Cecil {
 				return;
 
 			int length = MoveTo (Table.AssemblyRef);
-			var references = metadata.AssemblyReferences = new AssemblyNameReference [length];
+			var references = metadata.AssemblyReferences = new IAssemblyNameReference [length];
 
 			for (uint i = 0; i < length; i++) {
 				var reference = new AssemblyNameReference ();
@@ -529,11 +529,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<AssemblyNameReference> ReadAssemblyReferences ()
+		public Collection<IAssemblyNameReference> ReadAssemblyReferences ()
 		{
 			InitializeAssemblyReferences ();
 
-			return new Collection<AssemblyNameReference> (metadata.AssemblyReferences);
+			return new Collection<IAssemblyNameReference> (metadata.AssemblyReferences);
 		}
 
 		public MethodDefinition ReadEntryPoint ()
@@ -634,7 +634,7 @@ namespace Mono.Cecil {
 					resource = new EmbeddedResource (name, flags, offset, this);
 				} else if (implementation.TokenType == TokenType.AssemblyRef) {
 					resource = new AssemblyLinkedResource (name, flags) {
-						Assembly = (AssemblyNameReference) GetTypeReferenceScope (implementation),
+						Assembly = (IAssemblyNameReference) GetTypeReferenceScope (implementation),
 					};
 				} else if (implementation.TokenType == TokenType.File) {
 					var file_record = ReadFileRecord (implementation.RID);
@@ -684,7 +684,7 @@ namespace Mono.Cecil {
 			return new MemoryStream (buffer, (int) position + 4, length);
 		}
 
-		void PopulateVersionAndFlags (AssemblyNameReference name)
+		void PopulateVersionAndFlags (IAssemblyNameReference name)
 		{
 			name.Version = new Version (
 				ReadUInt16 (),
@@ -695,7 +695,7 @@ namespace Mono.Cecil {
 			name.Attributes = (AssemblyAttributes) ReadUInt32 ();
 		}
 
-		void PopulateNameAndCulture (AssemblyNameReference name)
+		void PopulateNameAndCulture (IAssemblyNameReference name)
 		{
 			name.Name = ReadString ();
 			name.Culture = ReadString ();
