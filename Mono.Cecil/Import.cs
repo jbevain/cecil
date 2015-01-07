@@ -112,9 +112,9 @@ namespace Mono.Cecil {
 
 	class MetadataImporter {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 
-		public MetadataImporter (ModuleDefinition module)
+		public MetadataImporter (IModuleDefinition module)
 		{
 			this.module = module;
 		}
@@ -467,7 +467,7 @@ namespace Mono.Cecil {
 				return ImportAssemblyName ((AssemblyNameReference) scope);
 			case MetadataScopeType.ModuleDefinition:
 				if (scope == module) return scope;
-				return ImportAssemblyName (((ModuleDefinition) scope).Assembly.Name);
+				return ImportAssemblyName (((IModuleDefinition) scope).Assembly.Name);
 			case MetadataScopeType.ModuleReference:
 				throw new NotImplementedException ();
 			}

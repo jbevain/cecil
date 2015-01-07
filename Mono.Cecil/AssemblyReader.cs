@@ -43,16 +43,15 @@ namespace Mono.Cecil {
 	abstract class ModuleReader {
 
 		readonly protected Image image;
-		readonly protected ModuleDefinition module;
+		readonly protected IModuleDefinition module;
 
-		protected ModuleReader (Image image, ReadingMode mode)
-		{
-			this.image = image;
-			this.module = new ModuleDefinition (image);
-			this.module.ReadingMode = mode;
-		}
+	    protected ModuleReader (Image image, ReadingMode mode)
+	    {
+	        this.image = image;
+	        this.module = new ModuleDefinition (image) { ReadingMode = mode };
+	    }
 
-		protected abstract void ReadModule ();
+	    protected abstract void ReadModule ();
 
 		protected void ReadModuleManifest (MetadataReader reader)
 		{
@@ -65,27 +64,27 @@ namespace Mono.Cecil {
 		{
 			var name = reader.ReadAssemblyNameDefinition ();
 			if (name == null) {
-				module.kind = ModuleKind.NetModule;
+				module.Kind = ModuleKind.NetModule;
 				return;
 			}
 
 			var assembly = new AssemblyDefinition ();
 			assembly.Name = name;
 
-			module.assembly = assembly;
+			module.Assembly = assembly;
 			assembly.main_module = module;
 		}
 
-		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters)
+		public static IModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters)
 		{
 			var reader = CreateModuleReader (image, parameters.ReadingMode);
 			var module = reader.module;
 
 			if (parameters.AssemblyResolver != null)
-				module.assembly_resolver = parameters.AssemblyResolver;
+				module.AssemblyResolver = parameters.AssemblyResolver;
 
 			if (parameters.MetadataResolver != null)
-				module.metadata_resolver = parameters.MetadataResolver;
+				module.MetadataResolver = parameters.MetadataResolver;
 
 			reader.ReadModule ();
 
@@ -94,7 +93,7 @@ namespace Mono.Cecil {
 			return module;
 		}
 
-		static void ReadSymbols (ModuleDefinition module, ReaderParameters parameters)
+		static void ReadSymbols (IModuleDefinition module, ReaderParameters parameters)
 		{
 			var symbol_reader_provider = parameters.SymbolReaderProvider;
 
@@ -141,7 +140,7 @@ namespace Mono.Cecil {
 			});
 		}
 
-		public static void ReadModule (ModuleDefinition module)
+		public static void ReadModule (IModuleDefinition module)
 		{
 			if (module.HasAssemblyReferences)
 				Read (module.AssemblyReferences);
@@ -368,7 +367,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataReader : ByteBuffer {
+    public sealed class MetadataReader : ByteBuffer {
 
 		readonly internal Image image;
 		readonly internal ModuleDefinition module;
@@ -488,7 +487,7 @@ namespace Mono.Cecil {
 			return name;
 		}
 
-		public ModuleDefinition Populate (ModuleDefinition module)
+		public IModuleDefinition Populate (IModuleDefinition module)
 		{
 			if (MoveTo (Table.Module) == 0)
 				return module;
@@ -546,9 +545,9 @@ namespace Mono.Cecil {
 			return GetMethodDefinition (token.RID);
 		}
 
-		public Collection<ModuleDefinition> ReadModules ()
+		public Collection<IModuleDefinition> ReadModules ()
 		{
-			var modules = new Collection<ModuleDefinition> (1);
+			var modules = new Collection<IModuleDefinition> (1);
 			modules.Add (this.module);
 
 			int length = MoveTo (Table.File);

@@ -146,7 +146,7 @@ namespace Mono.Cecil.Rocks {
 			return security_attribute;
 		}
 
-		public static SecurityDeclaration ToSecurityDeclaration (this PermissionSet self, SecurityAction action, ModuleDefinition module)
+		public static SecurityDeclaration ToSecurityDeclaration (this PermissionSet self, SecurityAction action, IModuleDefinition module)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");

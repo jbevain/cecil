@@ -268,7 +268,7 @@ namespace Mono.Cecil {
 			return fullname.Substring (start, position - start);
 		}
 
-		public static ITypeReference ParseType (ModuleDefinition module, string fullname)
+		public static ITypeReference ParseType (IModuleDefinition module, string fullname)
 		{
 			if (string.IsNullOrEmpty (fullname))
 				return null;
@@ -277,7 +277,7 @@ namespace Mono.Cecil {
 			return GetTypeReference (module, parser.ParseType (true));
 		}
 
-		static ITypeReference GetTypeReference (ModuleDefinition module, Type type_info)
+		static ITypeReference GetTypeReference (IModuleDefinition module, Type type_info)
 		{
 			ITypeReference type;
 			if (!TryGetDefinition (module, type_info, out type))
@@ -348,7 +348,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static ITypeReference CreateReference (Type type_info, ModuleDefinition module, IMetadataScope scope)
+		static ITypeReference CreateReference (Type type_info, IModuleDefinition module, IMetadataScope scope)
 		{
 			string @namespace, name;
 			SplitFullName (type_info.type_fullname, out @namespace, out name);
@@ -383,7 +383,7 @@ namespace Mono.Cecil {
 				type.GenericParameters.Add (new GenericParameter (type));
 		}
 
-		static IMetadataScope GetMetadataScope (ModuleDefinition module, Type type_info)
+		static IMetadataScope GetMetadataScope (IModuleDefinition module, Type type_info)
 		{
 			if (string.IsNullOrEmpty (type_info.assembly))
 				return module.TypeSystem.Corlib;
@@ -391,7 +391,7 @@ namespace Mono.Cecil {
 			return MatchReference (module, AssemblyNameReference.Parse (type_info.assembly));
 		}
 
-		static AssemblyNameReference MatchReference (ModuleDefinition module, AssemblyNameReference pattern)
+		static AssemblyNameReference MatchReference (IModuleDefinition module, AssemblyNameReference pattern)
 		{
 			var references = module.AssemblyReferences;
 
@@ -404,7 +404,7 @@ namespace Mono.Cecil {
 			return pattern;
 		}
 
-		static bool TryGetDefinition (ModuleDefinition module, Type type_info, out ITypeReference type)
+		static bool TryGetDefinition (IModuleDefinition module, Type type_info, out ITypeReference type)
 		{
 			type = null;
 			if (!TryCurrentModule (module, type_info))
@@ -424,12 +424,12 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		static bool TryCurrentModule (ModuleDefinition module, Type type_info)
+		static bool TryCurrentModule (IModuleDefinition module, Type type_info)
 		{
 			if (string.IsNullOrEmpty (type_info.assembly))
 				return true;
 
-			if (module.assembly != null && module.assembly.Name.FullName == type_info.assembly)
+			if (module.Assembly != null && module.Assembly.Name.FullName == type_info.assembly)
 				return true;
 
 			return false;
@@ -490,7 +490,7 @@ namespace Mono.Cecil {
 			case MetadataScopeType.AssemblyNameReference:
 				return ((AssemblyNameReference) scope).FullName;
 			case MetadataScopeType.ModuleDefinition:
-				return ((ModuleDefinition) scope).Assembly.Name.FullName;
+				return ((IModuleDefinition) scope).Assembly.Name.FullName;
 			}
 
 			throw new ArgumentException ();

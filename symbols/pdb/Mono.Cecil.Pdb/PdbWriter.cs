@@ -39,11 +39,11 @@ namespace Mono.Cecil.Pdb {
 
 	public class PdbWriter : Cil.ISymbolWriter {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
 
-		internal PdbWriter (ModuleDefinition module, SymWriter writer)
+		internal PdbWriter (IModuleDefinition module, SymWriter writer)
 		{
 			this.module = module;
 			this.writer = writer;

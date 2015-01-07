@@ -137,7 +137,7 @@ namespace Mono.Cecil.Cil {
 		Collection<VariableDefinition> Variables { get; }
 	}
 
-	class VariableDefinitionCollection : Collection<VariableDefinition> {
+    public class VariableDefinitionCollection : Collection<VariableDefinition> {
 
 		internal VariableDefinitionCollection ()
 		{

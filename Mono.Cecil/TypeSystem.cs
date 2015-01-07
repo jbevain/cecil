@@ -36,7 +36,7 @@ namespace Mono.Cecil {
 
 		sealed class CoreTypeSystem : TypeSystem {
 
-			public CoreTypeSystem (ModuleDefinition module)
+			public CoreTypeSystem (IModuleDefinition module)
 				: base (module)
 			{
 			}
@@ -98,7 +98,7 @@ namespace Mono.Cecil {
 
 			AssemblyNameReference corlib;
 
-			public CommonTypeSystem (ModuleDefinition module)
+			public CommonTypeSystem (IModuleDefinition module)
 				: base (module)
 			{
 			}
@@ -155,7 +155,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 
 		ITypeReference type_object;
 		ITypeReference type_void;
@@ -176,12 +176,12 @@ namespace Mono.Cecil {
 		ITypeReference type_string;
 		ITypeReference type_typedref;
 
-		TypeSystem (ModuleDefinition module)
+		TypeSystem (IModuleDefinition module)
 		{
 			this.module = module;
 		}
 
-		internal static TypeSystem CreateTypeSystem (ModuleDefinition module)
+		internal static TypeSystem CreateTypeSystem (IModuleDefinition module)
 		{
 			if (module.IsCorlib ())
 				return new CoreTypeSystem (module);

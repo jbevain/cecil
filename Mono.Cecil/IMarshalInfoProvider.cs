@@ -38,7 +38,7 @@ namespace Mono.Cecil {
 
 		public static bool GetHasMarshalInfo (
 			this IMarshalInfoProvider self,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasMarshalInfo (provider));
 		}
@@ -46,7 +46,7 @@ namespace Mono.Cecil {
 		public static MarshalInfo GetMarshalInfo (
 			this IMarshalInfoProvider self,
 			ref MarshalInfo variable,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage ()
 				? module.Read (ref variable, self, (provider, reader) => reader.ReadMarshalInfo (provider))

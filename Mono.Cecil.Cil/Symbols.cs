@@ -173,8 +173,8 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolReaderProvider {
 
-		ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName);
-		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
+		ISymbolReader GetSymbolReader (IModuleDefinition module, string fileName);
+		ISymbolReader GetSymbolReader (IModuleDefinition module, Stream symbolStream);
 	}
 
 	static class SymbolProvider {
@@ -269,8 +269,8 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriterProvider {
 
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
+		ISymbolWriter GetSymbolWriter (IModuleDefinition module, string fileName);
+		ISymbolWriter GetSymbolWriter (IModuleDefinition module, Stream symbolStream);
 	}
 
 #endif

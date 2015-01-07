@@ -37,18 +37,18 @@ namespace Mono.Cecil {
 
 	using Slot = Row<string, string>;
 
-	sealed class TypeDefinitionCollection : Collection<ITypeDefinition> {
+    public sealed class TypeDefinitionCollection : Collection<ITypeDefinition> {
 
-		readonly ModuleDefinition container;
+		readonly IModuleDefinition container;
 		readonly Dictionary<Slot, ITypeDefinition> name_cache;
 
-		internal TypeDefinitionCollection (ModuleDefinition container)
+		internal TypeDefinitionCollection (IModuleDefinition container)
 		{
 			this.container = container;
 			this.name_cache = new Dictionary<Slot, ITypeDefinition> (new RowEqualityComparer ());
 		}
 
-		internal TypeDefinitionCollection (ModuleDefinition container, int capacity)
+		internal TypeDefinitionCollection (IModuleDefinition container, int capacity)
 			: base (capacity)
 		{
 			this.container = container;

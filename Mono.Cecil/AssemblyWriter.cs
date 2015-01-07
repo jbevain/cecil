@@ -79,7 +79,7 @@ namespace Mono.Cecil {
 
 	static class ModuleWriter {
 
-		public static void WriteModuleTo (ModuleDefinition module, Stream stream, WriterParameters parameters)
+		public static void WriteModuleTo (IModuleDefinition module, Stream stream, WriterParameters parameters)
 		{
 			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
 				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
@@ -89,7 +89,7 @@ namespace Mono.Cecil {
 
 			module.MetadataSystem.Clear ();
 
-			var name = module.assembly != null ? module.assembly.Name : null;
+			var name = module.Assembly != null ? module.Assembly.Name : null;
 			var fq_name = stream.GetFullyQualifiedName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
@@ -107,8 +107,8 @@ namespace Mono.Cecil {
 
 			BuildMetadata (module, metadata);
 
-			if (module.symbol_reader != null)
-				module.symbol_reader.Dispose ();
+			if (module.SymbolReader != null)
+                module.SymbolReader.Dispose();
 
 			var writer = ImageWriter.CreateWriter (module, metadata, stream);
 
@@ -122,7 +122,7 @@ namespace Mono.Cecil {
 				symbol_writer.Dispose ();
 		}
 
-		static void BuildMetadata (ModuleDefinition module, MetadataBuilder metadata)
+		static void BuildMetadata (IModuleDefinition module, MetadataBuilder metadata)
 		{
 			if (!module.HasImage) {
 				metadata.BuildMetadata ();
@@ -135,7 +135,7 @@ namespace Mono.Cecil {
 			});
 		}
 
-		static ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider)
+		static ISymbolWriter GetSymbolWriter (IModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider)
 		{
 			if (symbol_writer_provider == null)
 				return null;
@@ -687,7 +687,7 @@ namespace Mono.Cecil {
 
 	sealed class MetadataBuilder {
 
-		readonly internal ModuleDefinition module;
+		readonly internal IModuleDefinition module;
 		readonly internal ISymbolWriterProvider symbol_writer_provider;
 		readonly internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
@@ -737,7 +737,7 @@ namespace Mono.Cecil {
 
 		readonly internal bool write_symbols;
 
-		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
+		public MetadataBuilder (IModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
 		{
 			this.module = module;
 			this.text_map = CreateTextMap ();

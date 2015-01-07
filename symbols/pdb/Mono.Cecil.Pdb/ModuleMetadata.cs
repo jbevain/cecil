@@ -145,12 +145,12 @@ namespace Mono.Cecil.Pdb {
 
 	class ModuleMetadata : IMetaDataEmit, IMetaDataImport {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 
 		Dictionary<uint, ITypeDefinition> types;
 		Dictionary<uint, MethodDefinition> methods;
 
-		public ModuleMetadata (ModuleDefinition module)
+		public ModuleMetadata (IModuleDefinition module)
 		{
 			this.module = module;
 		}
@@ -171,7 +171,7 @@ namespace Mono.Cecil.Pdb {
 			return methods.TryGetValue (token, out method);
 		}
 
-		void InitializeMetadata (ModuleDefinition module)
+		void InitializeMetadata (IModuleDefinition module)
 		{
 			types = new Dictionary<uint, ITypeDefinition> ();
 			methods = new Dictionary<uint, MethodDefinition> ();

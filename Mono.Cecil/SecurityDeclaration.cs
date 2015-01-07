@@ -95,7 +95,7 @@ namespace Mono.Cecil {
 
 		readonly internal uint signature;
 		byte [] blob;
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 
 		internal bool resolved;
 		SecurityAction action;
@@ -126,7 +126,7 @@ namespace Mono.Cecil {
 			get { return module != null && module.HasImage; }
 		}
 
-		internal SecurityDeclaration (SecurityAction action, uint signature, ModuleDefinition module)
+		internal SecurityDeclaration (SecurityAction action, uint signature, IModuleDefinition module)
 		{
 			this.action = action;
 			this.signature = signature;
@@ -175,7 +175,7 @@ namespace Mono.Cecil {
 
 		public static bool GetHasSecurityDeclarations (
 			this ISecurityDeclarationProvider self,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasSecurityDeclarations (provider));
 		}
@@ -183,7 +183,7 @@ namespace Mono.Cecil {
 		public static Collection<SecurityDeclaration> GetSecurityDeclarations (
 			this ISecurityDeclarationProvider self,
 			ref Collection<SecurityDeclaration> variable,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage ()
 				? module.Read (ref variable, self, (provider, reader) => reader.ReadSecurityDeclarations (provider))

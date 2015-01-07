@@ -159,7 +159,7 @@ namespace Mono.Cecil {
 			get { return constructor != null && constructor.HasImage; }
 		}
 
-		internal ModuleDefinition Module {
+		internal IModuleDefinition Module {
 			get { return constructor.Module; }
 		}
 

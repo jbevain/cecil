@@ -119,7 +119,7 @@ namespace Mono.Cecil {
 			get { return owner as MethodReference; }
 		}
 
-		public override ModuleDefinition Module {
+		public override IModuleDefinition Module {
 			get { return module ?? owner.Module; }
 		}
 
@@ -206,7 +206,7 @@ namespace Mono.Cecil {
 
 		}
 
-		public GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
+		public GenericParameter (int position, GenericParameterType type, IModuleDefinition module)
 			: base (string.Empty, string.Empty)
 		{
 			if (module == null)

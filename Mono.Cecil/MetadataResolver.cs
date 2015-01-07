@@ -126,7 +126,7 @@ namespace Mono.Cecil {
 
 				return GetType (assembly.MainModule, type);
 			case MetadataScopeType.ModuleDefinition:
-				return GetType ((ModuleDefinition) scope, type);
+				return GetType ((IModuleDefinition) scope, type);
 			case MetadataScopeType.ModuleReference:
 				var modules = type.Module.Assembly.Modules;
 				var module_ref = (ModuleReference) scope;
@@ -141,7 +141,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		static ITypeDefinition GetType (ModuleDefinition module, ITypeReference reference)
+		static ITypeDefinition GetType (IModuleDefinition module, ITypeReference reference)
 		{
 			var type = GetTypeDefinition (module, reference);
 			if (type != null)
@@ -166,7 +166,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static ITypeDefinition GetTypeDefinition (ModuleDefinition module, ITypeReference type)
+		static ITypeDefinition GetTypeDefinition (IModuleDefinition module, ITypeReference type)
 		{
 			if (!type.IsNested)
 				return module.GetType (type.Namespace, type.Name);

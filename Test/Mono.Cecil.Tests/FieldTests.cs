@@ -352,7 +352,7 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (field.Constant);
 		}
 
-		static ITypeDefinition GetPrivateImplementationType (ModuleDefinition module)
+		static ITypeDefinition GetPrivateImplementationType (IModuleDefinition module)
 		{
 			foreach (var type in module.Types)
 				if (type.FullName.Contains ("<PrivateImplementationDetails>"))

@@ -39,12 +39,12 @@ namespace Mono.Cecil.Mdb {
 #if !READ_ONLY
 	public class MdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (IModuleDefinition module, string fileName)
 		{
 			return new MdbWriter (module.Mvid, fileName);
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (IModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}

@@ -37,7 +37,7 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class ModuleDefinitionRocks {
 
-		public static IEnumerable<ITypeDefinition> GetAllTypes (this ModuleDefinition self)
+		public static IEnumerable<ITypeDefinition> GetAllTypes (this IModuleDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");

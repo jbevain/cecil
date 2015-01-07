@@ -40,7 +40,7 @@ namespace Mono.Cecil.Metadata {
 
 	sealed class TableHeapBuffer : HeapBuffer {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly MetadataBuilder metadata;
 
 		internal MetadataTable [] tables = new MetadataTable [45];
@@ -54,7 +54,7 @@ namespace Mono.Cecil.Metadata {
 			get { return false; }
 		}
 
-		public TableHeapBuffer (ModuleDefinition module, MetadataBuilder metadata)
+		public TableHeapBuffer (IModuleDefinition module, MetadataBuilder metadata)
 			: base (24)
 		{
 			this.module = module;

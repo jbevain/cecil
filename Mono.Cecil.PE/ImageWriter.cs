@@ -40,7 +40,7 @@ namespace Mono.Cecil.PE {
 
 	sealed class ImageWriter : BinaryStreamWriter {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly MetadataBuilder metadata;
 		readonly TextMap text_map;
 
@@ -67,7 +67,7 @@ namespace Mono.Cecil.PE {
 
 		ushort sections;
 
-		ImageWriter (ModuleDefinition module, MetadataBuilder metadata, Stream stream)
+		ImageWriter (IModuleDefinition module, MetadataBuilder metadata, Stream stream)
 			: base (stream)
 		{
 			this.module = module;
@@ -104,15 +104,10 @@ namespace Mono.Cecil.PE {
 
 		Section GetImageResourceSection ()
 		{
-			if (!module.HasImage)
-				return null;
-
-			const string rsrc_section = ".rsrc";
-
-			return module.Image.GetSection (rsrc_section);
+            return module.GetSection(".rsrc");
 		}
 
-		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Stream stream)
+		public static ImageWriter CreateWriter (IModuleDefinition module, MetadataBuilder metadata, Stream stream)
 		{
 			var writer = new ImageWriter (module, metadata, stream);
 			writer.BuildSections ();
@@ -504,7 +499,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (1);	// MinorVersion
 			WriteUInt32 (0);	// Reserved
 
-			var version = GetZeroTerminatedString (module.runtime_version);
+			var version = GetZeroTerminatedString (module.RuntimeVersion);
 			WriteUInt32 ((uint) version.Length);
 			WriteBytes (version);
 			WriteUInt16 (0);	// Flags

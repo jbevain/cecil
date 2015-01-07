@@ -37,7 +37,7 @@ namespace Mono.Cecil.Pdb {
 	class PdbHelper {
 
 #if !READ_ONLY
-		public static SymWriter CreateWriter (ModuleDefinition module, string pdb)
+		public static SymWriter CreateWriter (IModuleDefinition module, string pdb)
 		{
 			var writer = new SymWriter ();
 
@@ -58,12 +58,12 @@ namespace Mono.Cecil.Pdb {
 
 	public class PdbReaderProvider : ISymbolReaderProvider {
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
+		public ISymbolReader GetSymbolReader (IModuleDefinition module, string fileName)
 		{
 			return new PdbReader (File.OpenRead (PdbHelper.GetPdbFileName (fileName)));
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (IModuleDefinition module, Stream symbolStream)
 		{
 			return new PdbReader (symbolStream);
 		}
@@ -73,12 +73,12 @@ namespace Mono.Cecil.Pdb {
 
 	public class PdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (IModuleDefinition module, string fileName)
 		{
 			return new PdbWriter (module, PdbHelper.CreateWriter (module, PdbHelper.GetPdbFileName (fileName)));
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (IModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}

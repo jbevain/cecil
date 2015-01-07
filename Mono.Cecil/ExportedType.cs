@@ -36,7 +36,7 @@ namespace Mono.Cecil {
 		string name;
 		uint attributes;
 		IMetadataScope scope;
-		ModuleDefinition module;
+		IModuleDefinition module;
 		int identifier;
 		ExportedType declaring_type;
 		internal MetadataToken token;
@@ -222,7 +222,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public ExportedType (string @namespace, string name, ModuleDefinition module, IMetadataScope scope)
+		public ExportedType (string @namespace, string name, IModuleDefinition module, IMetadataScope scope)
 		{
 			this.@namespace = @namespace;
 			this.name = name;

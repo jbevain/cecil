@@ -79,7 +79,7 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public ModuleDefinition Module {
+		public IModuleDefinition Module {
 			get { return ReturnType.Module; }
 		}
 

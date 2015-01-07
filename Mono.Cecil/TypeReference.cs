@@ -95,7 +95,7 @@ namespace Mono.Cecil {
 		string @namespace;
 		bool value_type;
 		internal IMetadataScope scope;
-		internal ModuleDefinition module;
+		internal IModuleDefinition module;
 
 		internal ElementType etype = ElementType.None;
 
@@ -124,7 +124,7 @@ namespace Mono.Cecil {
 			set { value_type = value; }
 		}
 
-		public override ModuleDefinition Module {
+		public override IModuleDefinition Module {
 			get {
 				if (module != null)
 					return module;
@@ -276,14 +276,14 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.TypeRef, 0);
 		}
 
-		public TypeReference (string @namespace, string name, ModuleDefinition module, IMetadataScope scope)
+		public TypeReference (string @namespace, string name, IModuleDefinition module, IMetadataScope scope)
 			: this (@namespace, name)
 		{
 			this.module = module;
 			this.scope = scope;
 		}
 
-		public TypeReference (string @namespace, string name, ModuleDefinition module, IMetadataScope scope, bool valueType) :
+		public TypeReference (string @namespace, string name, IModuleDefinition module, IMetadataScope scope, bool valueType) :
 			this (@namespace, name, module, scope)
 		{
 			value_type = valueType;

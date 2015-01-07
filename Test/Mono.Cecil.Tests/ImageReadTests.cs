@@ -91,16 +91,23 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void X64Module ()
 		{
-			TestModule ("hello.x64.exe", module => {
-				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
-				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
+			TestModule ("hello.x64.exe", moduleDefinition => {
+                Assert.IsInstanceOf<ModuleDefinition> (moduleDefinition);
+			    var module = moduleDefinition as ModuleDefinition;
+
+                Assert.AreEqual(TargetArchitecture.AMD64, module.Image.Architecture);
+                Assert.AreEqual(ModuleAttributes.ILOnly, module.Image.Attributes);
 			});
 		}
 
 		[Test]
 		public void X64ModuleTextOnlySection ()
 		{
-			TestModule ("hello.textonly.x64.exe", module => {
+            TestModule("hello.textonly.x64.exe", moduleDefinition =>
+            {
+                Assert.IsInstanceOf<ModuleDefinition>(moduleDefinition);
+                var module = moduleDefinition as ModuleDefinition;
+
 				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			});
@@ -109,7 +116,11 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void IA64Module ()
 		{
-			TestModule ("hello.ia64.exe", module => {
+            TestModule("hello.ia64.exe", moduleDefinition =>
+            {
+                Assert.IsInstanceOf<ModuleDefinition>(moduleDefinition);
+                var module = moduleDefinition as ModuleDefinition;
+
 				Assert.AreEqual (TargetArchitecture.IA64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			});
@@ -118,7 +129,11 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void X86Module ()
 		{
-			TestModule ("hello.x86.exe", module => {
+            TestModule("hello.x86.exe", moduleDefinition =>
+            {
+                Assert.IsInstanceOf<ModuleDefinition>(moduleDefinition);
+                var module = moduleDefinition as ModuleDefinition;
+
 				Assert.AreEqual (TargetArchitecture.I386, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly | ModuleAttributes.Required32Bit, module.Image.Attributes);
 			});
@@ -127,7 +142,11 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void AnyCpuModule ()
 		{
-			TestModule ("hello.anycpu.exe", module => {
+            TestModule("hello.anycpu.exe", moduleDefinition =>
+            {
+                Assert.IsInstanceOf<ModuleDefinition>(moduleDefinition);
+                var module = moduleDefinition as ModuleDefinition;
+
 				Assert.AreEqual (TargetArchitecture.I386, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			});
@@ -136,7 +155,11 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void DelaySignedAssembly ()
 		{
-			TestModule ("delay-signed.dll", module => {
+            TestModule("delay-signed.dll", moduleDefinition =>
+            {
+                Assert.IsInstanceOf<ModuleDefinition>(moduleDefinition);
+                var module = moduleDefinition as ModuleDefinition;
+
 				Assert.IsNotNull (module.Assembly.Name.PublicKey);
 				Assert.AreNotEqual (0, module.Assembly.Name.PublicKey.Length);
 				Assert.AreNotEqual (ModuleAttributes.StrongNameSigned, module.Attributes & ModuleAttributes.StrongNameSigned);
@@ -148,7 +171,11 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void WindowsPhoneNonSignedAssembly ()
 		{
-			TestModule ("wp7.dll", module => {
+            TestModule("wp7.dll", moduleDefinition =>
+            {
+                Assert.IsInstanceOf<ModuleDefinition>(moduleDefinition);
+                var module = moduleDefinition as ModuleDefinition;
+
 				Assert.AreEqual (0, module.Assembly.Name.PublicKey.Length);
 				Assert.AreNotEqual (ModuleAttributes.StrongNameSigned, module.Attributes & ModuleAttributes.StrongNameSigned);
 				Assert.AreEqual (0, module.Image.StrongName.VirtualAddress);

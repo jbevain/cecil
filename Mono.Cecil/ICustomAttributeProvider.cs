@@ -42,7 +42,7 @@ namespace Mono.Cecil {
 
 		public static bool GetHasCustomAttributes (
 			this ICustomAttributeProvider self,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasCustomAttributes (provider));
 		}
@@ -50,7 +50,7 @@ namespace Mono.Cecil {
 		public static Collection<CustomAttribute> GetCustomAttributes (
 			this ICustomAttributeProvider self,
 			ref Collection<CustomAttribute> variable,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage ()
 				? module.Read (ref variable, self, (provider, reader) => reader.ReadCustomAttributes (provider))

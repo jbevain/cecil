@@ -38,12 +38,12 @@ namespace Mono.Cecil.Mdb {
 
 	public class MdbReaderProvider : ISymbolReaderProvider {
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
+		public ISymbolReader GetSymbolReader (IModuleDefinition module, string fileName)
 		{
 			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (module, fileName));
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (IModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}
@@ -51,11 +51,11 @@ namespace Mono.Cecil.Mdb {
 
 	public class MdbReader : ISymbolReader {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly MonoSymbolFile symbol_file;
 		readonly Dictionary<string, Document> documents;
 
-		public MdbReader (ModuleDefinition module, MonoSymbolFile symFile)
+		public MdbReader (IModuleDefinition module, MonoSymbolFile symFile)
 		{
 			this.module = module;
 			this.symbol_file = symFile;
