@@ -60,7 +60,7 @@ namespace Mono.Cecil {
 			get { return signature.Parameters; }
 		}
 
-		public TypeReference ReturnType {
+		public ITypeReference ReturnType {
 			get { return signature.MethodReturnType.ReturnType; }
 			set { signature.MethodReturnType.ReturnType = value; }
 		}
@@ -107,7 +107,7 @@ namespace Mono.Cecil {
 			this.signature.token = new MetadataToken (TokenType.Signature, 0);
 		}
 
-		public CallSite (TypeReference returnType)
+		public CallSite (ITypeReference returnType)
 			: this ()
 		{
 			if (returnType == null)

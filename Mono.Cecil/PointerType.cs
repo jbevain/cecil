@@ -51,11 +51,11 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public PointerType (TypeReference type)
+		public PointerType (ITypeReference type)
 			: base (type)
 		{
 			Mixin.CheckType (type);
-			this.etype = MD.ElementType.Ptr;
+			this.EType = MD.ElementType.Ptr;
 		}
 	}
 }

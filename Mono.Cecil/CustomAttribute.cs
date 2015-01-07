@@ -34,10 +34,10 @@ namespace Mono.Cecil {
 
 	public struct CustomAttributeArgument {
 
-		readonly TypeReference type;
+		readonly ITypeReference type;
 		readonly object value;
 
-		public TypeReference Type {
+		public ITypeReference Type {
 			get { return type; }
 		}
 
@@ -45,7 +45,7 @@ namespace Mono.Cecil {
 			get { return value; }
 		}
 
-		public CustomAttributeArgument (TypeReference type, object value)
+		public CustomAttributeArgument (ITypeReference type, object value)
 		{
 			Mixin.CheckType (type);
 			this.type = type;
@@ -76,7 +76,7 @@ namespace Mono.Cecil {
 
 	public interface ICustomAttribute {
 
-		TypeReference AttributeType { get; }
+		ITypeReference AttributeType { get; }
 
 		bool HasFields { get; }
 		bool HasProperties { get; }
@@ -99,7 +99,7 @@ namespace Mono.Cecil {
 			set { constructor = value; }
 		}
 
-		public TypeReference AttributeType {
+		public ITypeReference AttributeType {
 			get { return constructor.DeclaringType; }
 		}
 

@@ -58,12 +58,12 @@ namespace Mono.Cecil {
 
 	public sealed class SecurityAttribute : ICustomAttribute {
 
-		TypeReference attribute_type;
+		ITypeReference attribute_type;
 
 		internal Collection<CustomAttributeNamedArgument> fields;
 		internal Collection<CustomAttributeNamedArgument> properties;
 
-		public TypeReference AttributeType {
+		public ITypeReference AttributeType {
 			get { return attribute_type; }
 			set { attribute_type = value; }
 		}
@@ -84,7 +84,7 @@ namespace Mono.Cecil {
 			get { return properties ?? (properties = new Collection<CustomAttributeNamedArgument> ()); }
 		}
 
-		public SecurityAttribute (TypeReference attributeType)
+		public SecurityAttribute (ITypeReference attributeType)
 		{
 			this.attribute_type = attributeType;
 		}

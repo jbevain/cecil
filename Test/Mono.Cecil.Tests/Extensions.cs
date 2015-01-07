@@ -36,7 +36,7 @@ namespace Mono.Cecil.Tests {
 			return (FieldDefinition) declaring_type.Module.LookupToken (field.MetadataToken);
 		}
 
-		public static TypeReference MakeGenericType (this TypeReference self, params TypeReference [] arguments)
+		public static ITypeReference MakeGenericType (this ITypeReference self, params ITypeReference [] arguments)
 		{
 			if (self.GenericParameters.Count != arguments.Length)
 				throw new ArgumentException ();
@@ -48,7 +48,7 @@ namespace Mono.Cecil.Tests {
 			return instance;
 		}
 
-		public static MethodReference MakeGenericMethod (this MethodReference self, params TypeReference [] arguments)
+		public static MethodReference MakeGenericMethod (this MethodReference self, params ITypeReference [] arguments)
 		{
 			if (self.GenericParameters.Count != arguments.Length)
 				throw new ArgumentException ();
@@ -60,7 +60,7 @@ namespace Mono.Cecil.Tests {
 			return instance;
 		}
 
-		public static MethodReference MakeGeneric (this MethodReference self, params TypeReference [] arguments)
+		public static MethodReference MakeGeneric (this MethodReference self, params ITypeReference [] arguments)
 		{
 			var reference = new MethodReference {
 				Name = self.Name,
@@ -80,7 +80,7 @@ namespace Mono.Cecil.Tests {
 			return reference;
 		}
 
-		public static FieldReference MakeGeneric (this FieldReference self, params TypeReference [] arguments)
+		public static FieldReference MakeGeneric (this FieldReference self, params ITypeReference [] arguments)
 		{
 			return new FieldReference {
 				Name = self.Name,

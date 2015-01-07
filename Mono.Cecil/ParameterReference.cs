@@ -34,7 +34,7 @@ namespace Mono.Cecil {
 
 		string name;
 		internal int index = -1;
-		protected TypeReference parameter_type;
+		protected ITypeReference parameter_type;
 		internal MetadataToken token;
 
 		public string Name {
@@ -46,7 +46,7 @@ namespace Mono.Cecil {
 			get { return index; }
 		}
 
-		public TypeReference ParameterType {
+		public ITypeReference ParameterType {
 			get { return parameter_type; }
 			set { parameter_type = value; }
 		}
@@ -56,7 +56,7 @@ namespace Mono.Cecil {
 			set { token = value; }
 		}
 
-		internal ParameterReference (string name, TypeReference parameterType)
+		internal ParameterReference (string name, ITypeReference parameterType)
 		{
 			if (parameterType == null)
 				throw new ArgumentNullException ("parameterType");

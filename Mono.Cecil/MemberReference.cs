@@ -30,17 +30,16 @@ namespace Mono.Cecil {
     public interface IMemberReference : IMetadataTokenProvider {
         string Name { get; set; }
         string FullName { get; }
-        TypeReference DeclaringType { get; set; }
+        ITypeReference DeclaringType { get; set; }
         ModuleDefinition Module { get; }
         bool IsDefinition { get; }
         bool ContainsGenericParameter { get; }
-        string ToString ();
     }
 
     public abstract class MemberReference : IMemberReference {
 
 		string name;
-		TypeReference declaring_type;
+		ITypeReference declaring_type;
 
 		internal MetadataToken token;
 
@@ -53,7 +52,7 @@ namespace Mono.Cecil {
 			get;
 		}
 
-		public virtual TypeReference DeclaringType {
+		public virtual ITypeReference DeclaringType {
 			get { return declaring_type; }
 			set { declaring_type = value; }
 		}

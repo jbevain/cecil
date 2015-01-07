@@ -251,7 +251,7 @@ namespace Mono.Cecil {
 			set { base.DeclaringType = value; }
 		}
 
-		public FieldDefinition (string name, FieldAttributes attributes, TypeReference fieldType)
+		public FieldDefinition (string name, FieldAttributes attributes, ITypeReference fieldType)
 			: base (name, fieldType)
 		{
 			this.attributes = (ushort) attributes;

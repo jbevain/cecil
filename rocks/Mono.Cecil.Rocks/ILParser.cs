@@ -50,7 +50,7 @@ namespace Mono.Cecil.Rocks {
 		void OnInlineVariable (OpCode opcode, VariableDefinition variable);
 		void OnInlineArgument (OpCode opcode, ParameterDefinition parameter);
 		void OnInlineSignature (OpCode opcode, CallSite callSite);
-		void OnInlineType (OpCode opcode, TypeReference type);
+		void OnInlineType (OpCode opcode, ITypeReference type);
 		void OnInlineField (OpCode opcode, FieldReference field);
 		void OnInlineMethod (OpCode opcode, MethodReference method);
 	}
@@ -199,7 +199,7 @@ namespace Mono.Cecil.Rocks {
 					case TokenType.TypeDef:
 					case TokenType.TypeRef:
 					case TokenType.TypeSpec:
-						visitor.OnInlineType (opcode, (TypeReference) member);
+						visitor.OnInlineType (opcode, (ITypeReference) member);
 						break;
 					case TokenType.Method:
 					case TokenType.MethodSpec:

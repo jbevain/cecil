@@ -34,9 +34,9 @@ namespace Mono.Cecil {
 
 	public abstract class PropertyReference : MemberReference {
 
-		TypeReference property_type;
+		ITypeReference property_type;
 
-		public TypeReference PropertyType {
+		public ITypeReference PropertyType {
 			get { return property_type; }
 			set { property_type = value; }
 		}
@@ -45,7 +45,7 @@ namespace Mono.Cecil {
 			get;
 		}
 
-		internal PropertyReference (string name, TypeReference propertyType)
+		internal PropertyReference (string name, ITypeReference propertyType)
 			: base (name)
 		{
 			if (propertyType == null)

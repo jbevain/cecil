@@ -40,7 +40,7 @@ namespace Mono.Cecil {
 
 		bool HasParameters { get; }
 		Collection<ParameterDefinition> Parameters { get; }
-		TypeReference ReturnType { get; set; }
+		ITypeReference ReturnType { get; set; }
 		MethodReturnType MethodReturnType { get; }
 	}
 

@@ -43,7 +43,7 @@ namespace Mono.Cecil.Cil {
 		Instruction handler_start;
 		Instruction handler_end;
 
-		TypeReference catch_type;
+		ITypeReference catch_type;
 		ExceptionHandlerType handler_type;
 
 		public Instruction TryStart {
@@ -71,7 +71,7 @@ namespace Mono.Cecil.Cil {
 			set { handler_end = value; }
 		}
 
-		public TypeReference CatchType {
+		public ITypeReference CatchType {
 			get { return catch_type; }
 			set { catch_type = value; }
 		}

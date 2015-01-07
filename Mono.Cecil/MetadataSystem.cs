@@ -50,7 +50,7 @@ namespace Mono.Cecil {
 		internal IModuleReference [] ModuleReferences;
 
 		internal TypeDefinition [] Types;
-		internal TypeReference [] TypeReferences;
+		internal ITypeReference [] TypeReferences;
 
 		internal FieldDefinition [] Fields;
 		internal MethodDefinition [] Methods;
@@ -100,12 +100,12 @@ namespace Mono.Cecil {
 			};
 		}
 
-		public static void TryProcessPrimitiveTypeReference (TypeReference type)
+		public static void TryProcessPrimitiveTypeReference (ITypeReference type)
 		{
 			if (type.Namespace != "System")
 				return;
 
-			var scope = type.scope;
+			var scope = type.Scope;
 			if (scope == null || scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
 				return;
 
@@ -113,7 +113,7 @@ namespace Mono.Cecil {
 			if (!TryGetPrimitiveData (type, out primitive_data))
 				return;
 
-			type.etype = primitive_data.Col1;
+			type.EType = primitive_data.Col1;
 			type.IsValueType = primitive_data.Col2;
 		}
 
@@ -133,7 +133,7 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		static bool TryGetPrimitiveData (TypeReference type, out Row<ElementType, bool> primitive_data)
+		static bool TryGetPrimitiveData (ITypeReference type, out Row<ElementType, bool> primitive_data)
 		{
 			if (primitive_value_types == null)
 				InitializePrimitives ();
@@ -175,7 +175,7 @@ namespace Mono.Cecil {
 			Types [type.token.RID - 1] = type;
 		}
 
-		public TypeReference GetTypeReference (uint rid)
+		public ITypeReference GetTypeReference (uint rid)
 		{
 			if (rid < 1 || rid > TypeReferences.Length)
 				return null;
@@ -183,9 +183,9 @@ namespace Mono.Cecil {
 			return TypeReferences [rid - 1];
 		}
 
-		public void AddTypeReference (TypeReference type)
+		public void AddTypeReference (ITypeReference type)
 		{
-			TypeReferences [type.token.RID - 1] = type;
+			TypeReferences [type.MetadataToken.RID - 1] = type;
 		}
 
 		public FieldDefinition GetFieldDefinition (uint rid)

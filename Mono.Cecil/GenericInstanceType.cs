@@ -37,17 +37,17 @@ namespace Mono.Cecil {
 
 	public sealed class GenericInstanceType : TypeSpecification, IGenericInstance, IGenericContext {
 
-		Collection<TypeReference> arguments;
+		Collection<ITypeReference> arguments;
 
 		public bool HasGenericArguments {
 			get { return !arguments.IsNullOrEmpty (); }
 		}
 
-		public Collection<TypeReference> GenericArguments {
-			get { return arguments ?? (arguments = new Collection<TypeReference> ()); }
+		public Collection<ITypeReference> GenericArguments {
+			get { return arguments ?? (arguments = new Collection<ITypeReference> ()); }
 		}
 
-		public override TypeReference DeclaringType {
+		public override ITypeReference DeclaringType {
 			get { return ElementType.DeclaringType; }
 			set { throw new NotSupportedException (); }
 		}
@@ -73,11 +73,11 @@ namespace Mono.Cecil {
 			get { return ElementType; }
 		}
 
-		public GenericInstanceType (TypeReference type)
+		public GenericInstanceType (ITypeReference type)
 			: base (type)
 		{
 			base.IsValueType = type.IsValueType;
-			this.etype = MD.ElementType.GenericInst;
+			this.EType = MD.ElementType.GenericInst;
 		}
 	}
 }

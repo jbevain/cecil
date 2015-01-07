@@ -139,7 +139,7 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public EventDefinition (string name, EventAttributes attributes, TypeReference eventType)
+		public EventDefinition (string name, EventAttributes attributes, ITypeReference eventType)
 			: base (name, eventType)
 		{
 			this.attributes = (ushort) attributes;

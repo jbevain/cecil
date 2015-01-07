@@ -70,7 +70,7 @@ namespace Mono.Cecil.Rocks {
 			return self.Methods.Where (method => !method.IsConstructor);
 		}
 
-		public static TypeReference GetEnumUnderlyingType (this TypeDefinition self)
+		public static ITypeReference GetEnumUnderlyingType (this TypeDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");

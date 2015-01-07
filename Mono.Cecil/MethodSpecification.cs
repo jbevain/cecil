@@ -65,7 +65,7 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public override TypeReference DeclaringType {
+		public override ITypeReference DeclaringType {
 			get { return method.DeclaringType; }
 			set { throw new InvalidOperationException (); }
 		}

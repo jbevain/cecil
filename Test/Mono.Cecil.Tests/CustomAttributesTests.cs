@@ -371,7 +371,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual ("System.Type", argument.Type.FullName);
 
-				var type = argument.Value as TypeReference;
+				var type = argument.Value as ITypeReference;
 				Assert.IsNotNull (type);
 
 				Assert.AreEqual ("System.Collections.Generic.Dictionary`2", type.FullName);
@@ -394,7 +394,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual ("System.Type", argument.Type.FullName);
 
-				var type = argument.Value as TypeReference;
+				var type = argument.Value as ITypeReference;
 				Assert.IsNotNull (type);
 
 				Assert.AreEqual ("System.Collections.Generic.Dictionary`2<System.String,OpenGeneric`2<Machin,System.Int32>[,]>", type.FullName);
@@ -539,15 +539,15 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
-		static void PrettyPrint (TypeReference type, StringBuilder signature)
+		static void PrettyPrint (ITypeReference type, StringBuilder signature)
 		{
 			if (type.IsArray) {
 				ArrayType array = (ArrayType) type;
-				signature.AppendFormat ("{0}[]", array.ElementType.etype.ToString ());
-			} else if (type.etype == ElementType.None) {
+				signature.AppendFormat ("{0}[]", array.ElementType.EType);
+			} else if (type.EType == ElementType.None) {
 				signature.Append (type.FullName);
 			} else
-				signature.Append (type.etype.ToString ());
+				signature.Append (type.EType);
 		}
 
 		static void AssertArgument<T> (T value, CustomAttributeNamedArgument named_argument)

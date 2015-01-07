@@ -172,7 +172,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, null);
 		}
 
-		public static Instruction Create (OpCode opcode, TypeReference type)
+		public static Instruction Create (OpCode opcode, ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ("type");

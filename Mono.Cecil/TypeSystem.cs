@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 			{
 			}
 
-			internal override TypeReference LookupType (string @namespace, string name)
+			internal override ITypeReference LookupType (string @namespace, string name)
 			{
 				var type = LookupTypeDefinition (@namespace, name) ?? LookupTypeForwarded (@namespace, name);
 				if (type != null)
@@ -73,7 +73,7 @@ namespace Mono.Cecil {
 				});
 			}
 
-			TypeReference LookupTypeForwarded (string @namespace, string name)
+			ITypeReference LookupTypeForwarded (string @namespace, string name)
 			{
 				if (!module.HasExportedTypes)
 					return null;
@@ -103,7 +103,7 @@ namespace Mono.Cecil {
 			{
 			}
 
-			internal override TypeReference LookupType (string @namespace, string name)
+			internal override ITypeReference LookupType (string @namespace, string name)
 			{
 				return CreateTypeReference (@namespace, name);
 			}
@@ -157,24 +157,24 @@ namespace Mono.Cecil {
 
 		readonly ModuleDefinition module;
 
-		TypeReference type_object;
-		TypeReference type_void;
-		TypeReference type_bool;
-		TypeReference type_char;
-		TypeReference type_sbyte;
-		TypeReference type_byte;
-		TypeReference type_int16;
-		TypeReference type_uint16;
-		TypeReference type_int32;
-		TypeReference type_uint32;
-		TypeReference type_int64;
-		TypeReference type_uint64;
-		TypeReference type_single;
-		TypeReference type_double;
-		TypeReference type_intptr;
-		TypeReference type_uintptr;
-		TypeReference type_string;
-		TypeReference type_typedref;
+		ITypeReference type_object;
+		ITypeReference type_void;
+		ITypeReference type_bool;
+		ITypeReference type_char;
+		ITypeReference type_sbyte;
+		ITypeReference type_byte;
+		ITypeReference type_int16;
+		ITypeReference type_uint16;
+		ITypeReference type_int32;
+		ITypeReference type_uint32;
+		ITypeReference type_int64;
+		ITypeReference type_uint64;
+		ITypeReference type_single;
+		ITypeReference type_double;
+		ITypeReference type_intptr;
+		ITypeReference type_uintptr;
+		ITypeReference type_string;
+		ITypeReference type_typedref;
 
 		TypeSystem (ModuleDefinition module)
 		{
@@ -189,26 +189,26 @@ namespace Mono.Cecil {
 			return new CommonTypeSystem (module);
 		}
 
-		internal abstract TypeReference LookupType (string @namespace, string name);
+		internal abstract ITypeReference LookupType (string @namespace, string name);
 
-		TypeReference LookupSystemType (ref TypeReference reference, string name, ElementType element_type)
+		ITypeReference LookupSystemType (ref ITypeReference reference, string name, ElementType element_type)
 		{
 			lock (module.SyncRoot) {
 				if (reference != null)
 					return reference;
 				var type = LookupType ("System", name);
-				type.etype = element_type;
+				type.EType = element_type;
 				return reference = type;
 			}
 		}
 
-		TypeReference LookupSystemValueType (ref TypeReference typeRef, string name, ElementType element_type)
+		ITypeReference LookupSystemValueType (ref ITypeReference typeRef, string name, ElementType element_type)
 		{
 			lock (module.SyncRoot) {
 				if (typeRef != null)
 					return typeRef;
 				var type = LookupType ("System", name);
-				type.etype = element_type;
+				type.EType = element_type;
 				type.IsValueType = true;
 				return typeRef = type;
 			}
@@ -224,75 +224,75 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public TypeReference Object {
+		public ITypeReference Object {
 			get { return type_object ?? (LookupSystemType (ref type_object, "Object", ElementType.Object)); }
 		}
 
-		public TypeReference Void {
+		public ITypeReference Void {
 			get { return type_void ?? (LookupSystemType (ref type_void, "Void", ElementType.Void)); }
 		}
 
-		public TypeReference Boolean {
+		public ITypeReference Boolean {
 			get { return type_bool ?? (LookupSystemValueType (ref type_bool, "Boolean", ElementType.Boolean)); }
 		}
 
-		public TypeReference Char {
+		public ITypeReference Char {
 			get { return type_char ?? (LookupSystemValueType (ref type_char, "Char", ElementType.Char)); }
 		}
 
-		public TypeReference SByte {
+		public ITypeReference SByte {
 			get { return type_sbyte ?? (LookupSystemValueType (ref type_sbyte, "SByte", ElementType.I1)); }
 		}
 
-		public TypeReference Byte {
+		public ITypeReference Byte {
 			get { return type_byte ?? (LookupSystemValueType (ref type_byte, "Byte", ElementType.U1)); }
 		}
 
-		public TypeReference Int16 {
+		public ITypeReference Int16 {
 			get { return type_int16 ?? (LookupSystemValueType (ref type_int16, "Int16", ElementType.I2)); }
 		}
 
-		public TypeReference UInt16 {
+		public ITypeReference UInt16 {
 			get { return type_uint16 ?? (LookupSystemValueType (ref type_uint16, "UInt16", ElementType.U2)); }
 		}
 
-		public TypeReference Int32 {
+		public ITypeReference Int32 {
 			get { return type_int32 ?? (LookupSystemValueType (ref type_int32, "Int32", ElementType.I4)); }
 		}
 
-		public TypeReference UInt32 {
+		public ITypeReference UInt32 {
 			get { return type_uint32 ?? (LookupSystemValueType (ref type_uint32, "UInt32", ElementType.U4)); }
 		}
 
-		public TypeReference Int64 {
+		public ITypeReference Int64 {
 			get { return type_int64 ?? (LookupSystemValueType (ref type_int64, "Int64", ElementType.I8)); }
 		}
 
-		public TypeReference UInt64 {
+		public ITypeReference UInt64 {
 			get { return type_uint64 ?? (LookupSystemValueType (ref type_uint64, "UInt64", ElementType.U8)); }
 		}
 
-		public TypeReference Single {
+		public ITypeReference Single {
 			get { return type_single ?? (LookupSystemValueType (ref type_single, "Single", ElementType.R4)); }
 		}
 
-		public TypeReference Double {
+		public ITypeReference Double {
 			get { return type_double ?? (LookupSystemValueType (ref type_double, "Double", ElementType.R8)); }
 		}
 
-		public TypeReference IntPtr {
+		public ITypeReference IntPtr {
 			get { return type_intptr ?? (LookupSystemValueType (ref type_intptr, "IntPtr", ElementType.I)); }
 		}
 
-		public TypeReference UIntPtr {
+		public ITypeReference UIntPtr {
 			get { return type_uintptr ?? (LookupSystemValueType (ref type_uintptr, "UIntPtr", ElementType.U)); }
 		}
 
-		public TypeReference String {
+		public ITypeReference String {
 			get { return type_string ?? (LookupSystemType (ref type_string, "String", ElementType.String)); }
 		}
 
-		public TypeReference TypedReference {
+		public ITypeReference TypedReference {
 			get { return type_typedref ?? (LookupSystemValueType (ref type_typedref, "TypedReference", ElementType.TypedByRef)); }
 		}
 	}

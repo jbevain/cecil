@@ -138,18 +138,18 @@ namespace Mono.Cecil {
 
 		#endregion
 
-		internal ParameterDefinition (TypeReference parameterType, IMethodSignature method)
+		internal ParameterDefinition (ITypeReference parameterType, IMethodSignature method)
 			: this (string.Empty, ParameterAttributes.None, parameterType)
 		{
 			this.method = method;
 		}
 
-		public ParameterDefinition (TypeReference parameterType)
+		public ParameterDefinition (ITypeReference parameterType)
 			: this (string.Empty, ParameterAttributes.None, parameterType)
 		{
 		}
 
-		public ParameterDefinition (string name, ParameterAttributes attributes, TypeReference parameterType)
+		public ParameterDefinition (string name, ParameterAttributes attributes, ITypeReference parameterType)
 			: base (name, parameterType)
 		{
 			this.attributes = (ushort) attributes;

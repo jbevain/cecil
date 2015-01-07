@@ -60,7 +60,7 @@ namespace Mono.Cecil {
 			get { return function.Parameters; }
 		}
 
-		public TypeReference ReturnType {
+		public ITypeReference ReturnType {
 			get { return function.MethodReturnType.ReturnType; }
 			set { function.MethodReturnType.ReturnType = value; }
 		}
@@ -113,7 +113,7 @@ namespace Mono.Cecil {
 		{
 			this.function = new MethodReference ();
 			this.function.Name = "method";
-			this.etype = MD.ElementType.FnPtr;
+			this.EType = MD.ElementType.FnPtr;
 		}
 
 		public override TypeDefinition Resolve ()
@@ -121,7 +121,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		public override TypeReference GetElementType ()
+		public override ITypeReference GetElementType ()
 		{
 			return this;
 		}

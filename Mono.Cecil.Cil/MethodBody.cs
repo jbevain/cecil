@@ -116,7 +116,7 @@ namespace Mono.Cecil.Cil {
 			var declaring_type = method.DeclaringType;
 			var type = declaring_type.IsValueType || declaring_type.IsPrimitive
 				? new PointerType (declaring_type)
-				: declaring_type as TypeReference;
+				: declaring_type as ITypeReference;
 
 			return new ParameterDefinition (type, method);
 		}

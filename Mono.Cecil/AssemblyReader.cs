@@ -978,10 +978,10 @@ namespace Mono.Cecil {
 			if (metadata.TypeReferences != null)
 				return;
 
-			metadata.TypeReferences = new TypeReference [image.GetTableLength (Table.TypeRef)];
+			metadata.TypeReferences = new ITypeReference [image.GetTableLength (Table.TypeRef)];
 		}
 
-		public TypeReference GetTypeReference (string scope, string full_name)
+		public ITypeReference GetTypeReference (string scope, string full_name)
 		{
 			InitializeTypeReferences ();
 
@@ -1003,7 +1003,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		TypeReference GetTypeReference (uint rid)
+		ITypeReference GetTypeReference (uint rid)
 		{
 			InitializeTypeReferences ();
 
@@ -1014,12 +1014,12 @@ namespace Mono.Cecil {
 			return ReadTypeReference (rid);
 		}
 
-		TypeReference ReadTypeReference (uint rid)
+		ITypeReference ReadTypeReference (uint rid)
 		{
 			if (!MoveTo (Table.TypeRef, rid))
 				return null;
 
-			TypeReference declaring_type = null;
+			ITypeReference declaring_type = null;
 			IMetadataScope scope;
 
 			var scope_token = ReadMetadataToken (CodedIndex.ResolutionScope);
@@ -1081,13 +1081,13 @@ namespace Mono.Cecil {
 			return scopes [index];
 		}
 
-		public IEnumerable<TypeReference> GetTypeReferences ()
+		public IEnumerable<ITypeReference> GetTypeReferences ()
 		{
 			InitializeTypeReferences ();
 
 			var length = image.GetTableLength (Table.TypeRef);
 
-			var type_references = new TypeReference [length];
+			var type_references = new ITypeReference [length];
 
 			for (uint i = 1; i <= length; i++)
 				type_references [i - 1] = GetTypeReference (i);
@@ -1095,15 +1095,15 @@ namespace Mono.Cecil {
 			return type_references;
 		}
 
-		TypeReference GetTypeSpecification (uint rid)
+		ITypeReference GetTypeSpecification (uint rid)
 		{
 			if (!MoveTo (Table.TypeSpec, rid))
 				return null;
 
 			var reader = ReadSignature (ReadBlobIndex ());
 			var type = reader.ReadTypeSignature ();
-			if (type.token.RID == 0)
-				type.token = new MetadataToken (TokenType.TypeSpec, rid);
+			if (type.MetadataToken.RID == 0)
+                type.MetadataToken = new MetadataToken(TokenType.TypeSpec, rid);
 
 			return type;
 		}
@@ -1121,15 +1121,15 @@ namespace Mono.Cecil {
 			return metadata.TryGetInterfaceMapping (type, out mapping);
 		}
 
-		public Collection<TypeReference> ReadInterfaces (TypeDefinition type)
+		public Collection<ITypeReference> ReadInterfaces (TypeDefinition type)
 		{
 			InitializeInterfaces ();
 			MetadataToken [] mapping;
 
 			if (!metadata.TryGetInterfaceMapping (type, out mapping))
-				return new Collection<TypeReference> ();
+				return new Collection<ITypeReference> ();
 
-			var interfaces = new Collection<TypeReference> (mapping.Length);
+			var interfaces = new Collection<ITypeReference> (mapping.Length);
 
 			this.context = type;
 
@@ -1208,7 +1208,7 @@ namespace Mono.Cecil {
 			metadata.Fields = new FieldDefinition [image.GetTableLength (Table.Field)];
 		}
 
-		TypeReference ReadFieldType (uint signature)
+		ITypeReference ReadFieldType (uint signature)
 		{
 			var reader = ReadSignature (signature);
 
@@ -1252,11 +1252,11 @@ namespace Mono.Cecil {
 			return value;
 		}
 
-		static int GetFieldTypeSize (TypeReference type)
+		static int GetFieldTypeSize (ITypeReference type)
 		{
 			int size = 0;
 
-			switch (type.etype) {
+			switch (type.EType) {
 			case ElementType.Boolean:
 			case ElementType.U1:
 			case ElementType.I1:
@@ -1926,15 +1926,15 @@ namespace Mono.Cecil {
 			return mapping.Length > 0;
 		}
 
-		public Collection<TypeReference> ReadGenericConstraints (GenericParameter generic_parameter)
+		public Collection<ITypeReference> ReadGenericConstraints (GenericParameter generic_parameter)
 		{
 			InitializeGenericConstraints ();
 
 			MetadataToken [] mapping;
 			if (!metadata.TryGetGenericConstraintMapping (generic_parameter, out mapping))
-				return new Collection<TypeReference> ();
+				return new Collection<ITypeReference> ();
 
-			var constraints = new Collection<TypeReference> (mapping.Length);
+			var constraints = new Collection<ITypeReference> (mapping.Length);
 
 			this.context = (IGenericContext) generic_parameter.Owner;
 
@@ -2246,7 +2246,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		IMemberReference ReadMemberReferenceSignature (uint signature, TypeReference declaring_type)
+		IMemberReference ReadMemberReferenceSignature (uint signature, ITypeReference declaring_type)
 		{
 			var reader = ReadSignature (signature);
 			const byte field_sig = 0x6;
@@ -2810,17 +2810,17 @@ namespace Mono.Cecil {
 			return array;
 		}
 
-		TypeReference GetTypeDefOrRef (MetadataToken token)
+		ITypeReference GetTypeDefOrRef (MetadataToken token)
 		{
 			return reader.GetTypeDefOrRef (token);
 		}
 
-		public TypeReference ReadTypeSignature ()
+		public ITypeReference ReadTypeSignature ()
 		{
 			return ReadTypeSignature ((ElementType) ReadByte ());
 		}
 
-		TypeReference ReadTypeSignature (ElementType etype)
+		ITypeReference ReadTypeSignature (ElementType etype)
 		{
 			switch (etype) {
 			case ElementType.ValueType: {
@@ -2947,7 +2947,7 @@ namespace Mono.Cecil {
 					ReadCustomAttributeFixedArgument (parameters [i].ParameterType));
 		}
 
-		CustomAttributeArgument ReadCustomAttributeFixedArgument (TypeReference type)
+		CustomAttributeArgument ReadCustomAttributeFixedArgument (ITypeReference type)
 		{
 			if (type.IsArray)
 				return ReadCustomAttributeFixedArrayArgument ((ArrayType) type);
@@ -3009,21 +3009,21 @@ namespace Mono.Cecil {
 			return new CustomAttributeArgument (type, arguments);
 		}
 
-		CustomAttributeArgument ReadCustomAttributeElement (TypeReference type)
+		CustomAttributeArgument ReadCustomAttributeElement (ITypeReference type)
 		{
 			if (type.IsArray)
 				return ReadCustomAttributeFixedArrayArgument ((ArrayType) type);
 
 			return new CustomAttributeArgument (
 				type,
-				type.etype == ElementType.Object
+				type.EType == ElementType.Object
 					? ReadCustomAttributeElement (ReadCustomAttributeFieldOrPropType ())
 					: ReadCustomAttributeElementValue (type));
 		}
 
-		object ReadCustomAttributeElementValue (TypeReference type)
+		object ReadCustomAttributeElementValue (ITypeReference type)
 		{
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.String:
@@ -3070,7 +3070,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		TypeReference GetPrimitiveType (ElementType etype)
+		ITypeReference GetPrimitiveType (ElementType etype)
 		{
 			switch (etype) {
 			case ElementType.Boolean:
@@ -3104,7 +3104,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		TypeReference ReadCustomAttributeFieldOrPropType ()
+		ITypeReference ReadCustomAttributeFieldOrPropType ()
 		{
 			var etype = (ElementType) ReadByte ();
 
@@ -3122,12 +3122,12 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public TypeReference ReadTypeReference ()
+		public ITypeReference ReadTypeReference ()
 		{
 			return TypeParser.ParseType (reader.module, ReadUTF8String ());
 		}
 
-		object ReadCustomAttributeEnum (TypeReference enum_type)
+		object ReadCustomAttributeEnum (ITypeReference enum_type)
 		{
 			var type = enum_type.CheckedResolve ();
 			if (!type.IsEnum)

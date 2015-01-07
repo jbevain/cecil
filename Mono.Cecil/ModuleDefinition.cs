@@ -502,12 +502,12 @@ namespace Mono.Cecil {
 			return GetTypeReference (scope, fullName) != null;
 		}
 
-		public bool TryGetTypeReference (string fullName, out TypeReference type)
+		public bool TryGetTypeReference (string fullName, out ITypeReference type)
 		{
 			return TryGetTypeReference (string.Empty, fullName, out type);
 		}
 
-		public bool TryGetTypeReference (string scope, string fullName, out TypeReference type)
+		public bool TryGetTypeReference (string scope, string fullName, out ITypeReference type)
 		{
 			CheckFullName (fullName);
 
@@ -519,15 +519,15 @@ namespace Mono.Cecil {
 			return (type = GetTypeReference (scope, fullName)) != null;
 		}
 
-		TypeReference GetTypeReference (string scope, string fullname)
+		ITypeReference GetTypeReference (string scope, string fullname)
 		{
             return this.Read(new Row<string, string>(scope, fullname), (row, reader) => reader.GetTypeReference(row.Col1, row.Col2));
 		}
 
-		public IEnumerable<TypeReference> GetTypeReferences ()
+		public IEnumerable<ITypeReference> GetTypeReferences ()
 		{
 			if (!HasImage)
-				return Empty<TypeReference>.Array;
+				return Empty<ITypeReference>.Array;
 
             return this.Read(this, (_, reader) => reader.GetTypeReferences());
 		}
@@ -540,7 +540,7 @@ namespace Mono.Cecil {
             return this.Read(this, (_, reader) => reader.GetMemberReferences());
 		}
 
-		public TypeReference GetType (string fullName, bool runtimeName)
+		public ITypeReference GetType (string fullName, bool runtimeName)
 		{
 			return runtimeName
 				? TypeParser.ParseType (this, fullName)
@@ -622,7 +622,7 @@ namespace Mono.Cecil {
 			return MetadataResolver.Resolve (method);
 		}
 
-		internal TypeDefinition Resolve (TypeReference type)
+		internal TypeDefinition Resolve (ITypeReference type)
 		{
 			return MetadataResolver.Resolve (type);
 		}
@@ -663,12 +663,12 @@ namespace Mono.Cecil {
 
 #if !CF
 
-		public TypeReference Import (Type type)
+		public ITypeReference Import (Type type)
 		{
 			return Import (type, null);
 		}
 
-		public TypeReference Import (Type type, IGenericParameterProvider context)
+		public ITypeReference Import (Type type, IGenericParameterProvider context)
 		{
 			CheckType (type);
 			CheckContext (context, this);
@@ -710,7 +710,7 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		public TypeReference Import (TypeReference type)
+		public ITypeReference Import (ITypeReference type)
 		{
 			CheckType (type);
 
@@ -720,7 +720,7 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportType (type, default (ImportGenericContext));
 		}
 
-		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
+		public ITypeReference Import (ITypeReference type, IGenericParameterProvider context)
 		{
 			CheckType (type);
 

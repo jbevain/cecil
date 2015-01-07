@@ -355,7 +355,7 @@ namespace Mono.Cecil.Cil {
 		{
 			switch (handler.HandlerType) {
 			case ExceptionHandlerType.Catch:
-				handler.CatchType = (TypeReference) reader.LookupToken (ReadToken ());
+				handler.CatchType = (ITypeReference) reader.LookupToken (ReadToken ());
 				break;
 			case ExceptionHandlerType.Filter:
 				handler.FilterStart = GetInstruction (ReadInt32 ());

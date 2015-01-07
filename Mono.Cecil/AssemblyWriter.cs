@@ -1128,13 +1128,13 @@ namespace Mono.Cecil {
 			return method_def_map.TryGetValue (new_token, out original);
 		}
 
-		MetadataToken GetTypeToken (TypeReference type)
+		MetadataToken GetTypeToken (ITypeReference type)
 		{
 			if (type == null)
 				return MetadataToken.Zero;
 
 			if (type.IsDefinition)
-				return type.token;
+				return type.MetadataToken;
 
 			if (type.IsTypeSpecification ())
 				return GetTypeSpecToken (type);
@@ -1142,7 +1142,7 @@ namespace Mono.Cecil {
 			return GetTypeRefToken (type);
 		}
 
-		MetadataToken GetTypeSpecToken (TypeReference type)
+		MetadataToken GetTypeSpecToken (ITypeReference type)
 		{
 			var row = GetBlobIndex (GetTypeSpecSignature (type));
 
@@ -1153,16 +1153,16 @@ namespace Mono.Cecil {
 			return AddTypeSpecification (type, row);
 		}
 
-		MetadataToken AddTypeSpecification (TypeReference type, uint row)
+		MetadataToken AddTypeSpecification (ITypeReference type, uint row)
 		{
-			type.token = new MetadataToken (TokenType.TypeSpec, typespec_table.AddRow (row));
+			type.MetadataToken = new MetadataToken (TokenType.TypeSpec, typespec_table.AddRow (row));
 
-			var token = type.token;
+			var token = type.MetadataToken;
 			type_spec_map.Add (row, token);
 			return token;
 		}
 
-		MetadataToken GetTypeRefToken (TypeReference type)
+		MetadataToken GetTypeRefToken (ITypeReference type)
 		{
 			var row = CreateTypeRefRow (type);
 
@@ -1173,7 +1173,7 @@ namespace Mono.Cecil {
 			return AddTypeReference (type, row);
 		}
 
-		TypeRefRow CreateTypeRefRow (TypeReference type)
+		TypeRefRow CreateTypeRefRow (ITypeReference type)
 		{
 			var scope_token = GetScopeToken (type);
 
@@ -1183,7 +1183,7 @@ namespace Mono.Cecil {
 				GetStringIndex (type.Namespace));
 		}
 
-		MetadataToken GetScopeToken (TypeReference type)
+		MetadataToken GetScopeToken (ITypeReference type)
 		{
 			if (type.IsNested)
 				return GetTypeRefToken (type.DeclaringType);
@@ -1206,11 +1206,11 @@ namespace Mono.Cecil {
 			return index.CompressMetadataToken (token);
 		}
 
-		MetadataToken AddTypeReference (TypeReference type, TypeRefRow row)
+		MetadataToken AddTypeReference (ITypeReference type, TypeRefRow row)
 		{
-			type.token = new MetadataToken (TokenType.TypeRef, type_ref_table.AddRow (row));
+			type.MetadataToken = new MetadataToken (TokenType.TypeRef, type_ref_table.AddRow (row));
 
-			var token = type.token;
+			var token = type.MetadataToken;
 			type_ref_map.Add (row, token);
 			return token;
 		}
@@ -1617,7 +1617,7 @@ namespace Mono.Cecil {
 				MakeCodedRID (provider, CodedIndex.HasSemantics)));
 		}
 
-		void AddConstant (IConstantProvider owner, TypeReference type)
+		void AddConstant (IConstantProvider owner, ITypeReference type)
 		{
 			var constant = owner.Constant;
 			var etype = GetConstantType (type, constant);
@@ -1628,12 +1628,12 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetConstantSignature (etype, constant))));
 		}
 
-		static ElementType GetConstantType (TypeReference constant_type, object constant)
+		static ElementType GetConstantType (ITypeReference constant_type, object constant)
 		{
 			if (constant == null)
 				return ElementType.Class;
 
-			var etype = constant_type.etype;
+			var etype = constant_type.EType;
 			switch (etype) {
 			case ElementType.None:
 				var type = constant_type.CheckedResolve ();
@@ -1897,7 +1897,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetTypeSpecSignature (TypeReference type)
+		SignatureWriter GetTypeSpecSignature (ITypeReference type)
 		{
 			var signature = CreateSignatureWriter ();
 			signature.WriteTypeSignature (type);
@@ -1994,7 +1994,7 @@ namespace Mono.Cecil {
 			case TokenType.TypeRef:
 			case TokenType.TypeSpec:
 			case TokenType.GenericParam:
-				return GetTypeToken ((TypeReference) provider);
+				return GetTypeToken ((ITypeReference) provider);
 			case TokenType.MethodSpec:
 				return GetMethodSpecToken ((MethodSpecification) provider);
 			case TokenType.MemberRef:
@@ -2067,17 +2067,17 @@ namespace Mono.Cecil {
 				WriteTypeSignature (parameters [i].ParameterType);
 		}
 
-		uint MakeTypeDefOrRefCodedRID (TypeReference type)
+		uint MakeTypeDefOrRefCodedRID (ITypeReference type)
 		{
 			return CodedIndex.TypeDefOrRef.CompressMetadataToken (metadata.LookupToken (type));
 		}
 
-		public void WriteTypeSignature (TypeReference type)
+		public void WriteTypeSignature (ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ();
 
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.MVar:
@@ -2213,9 +2213,9 @@ namespace Mono.Cecil {
 			WriteTypeSignature (type.ElementType);
 		}
 
-		bool TryWriteElementType (TypeReference type)
+		bool TryWriteElementType (ITypeReference type)
 		{
-			var element = type.etype;
+			var element = type.EType;
 
 			if (element == ElementType.None)
 				return false;
@@ -2249,7 +2249,7 @@ namespace Mono.Cecil {
 				WriteCustomAttributeFixedArgument (parameters [i].ParameterType, arguments [i]);
 		}
 
-		void WriteCustomAttributeFixedArgument (TypeReference type, CustomAttributeArgument argument)
+		void WriteCustomAttributeFixedArgument (ITypeReference type, CustomAttributeArgument argument)
 		{
 			if (type.IsArray) {
 				WriteCustomAttributeFixedArrayArgument ((ArrayType) type, argument);
@@ -2279,14 +2279,14 @@ namespace Mono.Cecil {
 				WriteCustomAttributeElement (element_type, values [i]);
 		}
 
-		void WriteCustomAttributeElement (TypeReference type, CustomAttributeArgument argument)
+		void WriteCustomAttributeElement (ITypeReference type, CustomAttributeArgument argument)
 		{
 			if (type.IsArray) {
 				WriteCustomAttributeFixedArrayArgument ((ArrayType) type, argument);
 				return;
 			}
 
-			if (type.etype == ElementType.Object) {
+			if (type.EType == ElementType.Object) {
 				argument = (CustomAttributeArgument) argument.Value;
 				type = argument.Type;
 
@@ -2298,9 +2298,9 @@ namespace Mono.Cecil {
 			WriteCustomAttributeValue (type, argument.Value);
 		}
 
-		void WriteCustomAttributeValue (TypeReference type, object value)
+		void WriteCustomAttributeValue (ITypeReference type, object value)
 		{
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.String:
@@ -2312,7 +2312,7 @@ namespace Mono.Cecil {
 				break;
 			case ElementType.None:
 				if (type.IsTypeOf ("System", "Type"))
-					WriteTypeReference ((TypeReference) value);
+					WriteTypeReference ((ITypeReference) value);
 				else
 					WriteCustomAttributeEnumValue (type, value);
 				break;
@@ -2369,7 +2369,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void WriteCustomAttributeEnumValue (TypeReference enum_type, object value)
+		void WriteCustomAttributeEnumValue (ITypeReference enum_type, object value)
 		{
 			var type = enum_type.CheckedResolve ();
 			if (!type.IsEnum)
@@ -2378,7 +2378,7 @@ namespace Mono.Cecil {
 			WriteCustomAttributeValue (type.GetEnumUnderlyingType (), value);
 		}
 
-		void WriteCustomAttributeFieldOrPropType (TypeReference type)
+		void WriteCustomAttributeFieldOrPropType (ITypeReference type)
 		{
 			if (type.IsArray) {
 				var array = (ArrayType) type;
@@ -2387,7 +2387,7 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.Object:
@@ -2520,7 +2520,7 @@ namespace Mono.Cecil {
 			return (string) property.Argument.Value;
 		}
 
-		void WriteTypeReference (TypeReference type)
+		void WriteTypeReference (ITypeReference type)
 		{
 			WriteUTF8String (TypeParser.ToParseable (type));
 		}

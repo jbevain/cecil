@@ -36,13 +36,13 @@ namespace Mono.Cecil {
 
 		internal IMethodSignature method;
 		internal ParameterDefinition parameter;
-		TypeReference return_type;
+		ITypeReference return_type;
 
 		public IMethodSignature Method {
 			get { return method; }
 		}
 
-		public TypeReference ReturnType {
+		public ITypeReference ReturnType {
 			get { return return_type; }
 			set { return_type = value; }
 		}

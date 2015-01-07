@@ -230,7 +230,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public PropertyDefinition (string name, PropertyAttributes attributes, TypeReference propertyType)
+		public PropertyDefinition (string name, PropertyAttributes attributes, ITypeReference propertyType)
 			: base (name, propertyType)
 		{
 			this.attributes = (ushort) attributes;

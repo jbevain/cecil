@@ -103,7 +103,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public TypeReference ReturnType {
+		public ITypeReference ReturnType {
 			get {
 				var return_type = MethodReturnType;
 				return return_type != null ? return_type.ReturnType : null;
@@ -156,7 +156,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
-		public MethodReference (string name, TypeReference returnType)
+		public MethodReference (string name, ITypeReference returnType)
 			: base (name)
 		{
 			if (returnType == null)
@@ -167,7 +167,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
-		public MethodReference (string name, TypeReference returnType, TypeReference declaringType)
+		public MethodReference (string name, ITypeReference returnType, ITypeReference declaringType)
 			: this (name, returnType)
 		{
 			if (declaringType == null)

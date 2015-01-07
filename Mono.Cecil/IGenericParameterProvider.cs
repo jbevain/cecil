@@ -31,11 +31,9 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	public interface IGenericParameterProvider : IMetadataTokenProvider {
+	public interface IGenericParameterProvider : IMemberReference, IMetadataTokenProvider {
 
 		bool HasGenericParameters { get; }
-		bool IsDefinition { get; }
-		ModuleDefinition Module { get; }
 		Collection<GenericParameter> GenericParameters { get; }
 		GenericParameterType GenericParameterType { get; }
 	}

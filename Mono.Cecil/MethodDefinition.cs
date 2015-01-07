@@ -440,7 +440,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.Method);
 		}
 
-		public MethodDefinition (string name, MethodAttributes attributes, TypeReference returnType)
+		public MethodDefinition (string name, MethodAttributes attributes, ITypeReference returnType)
 			: base (name, returnType)
 		{
 			this.attributes = (ushort) attributes;

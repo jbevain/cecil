@@ -32,9 +32,9 @@ namespace Mono.Cecil {
 
 	public abstract class EventReference : MemberReference {
 
-		TypeReference event_type;
+		ITypeReference event_type;
 
-		public TypeReference EventType {
+		public ITypeReference EventType {
 			get { return event_type; }
 			set { event_type = value; }
 		}
@@ -43,7 +43,7 @@ namespace Mono.Cecil {
 			get { return event_type.FullName + " " + MemberFullName (); }
 		}
 
-		protected EventReference (string name, TypeReference eventType)
+		protected EventReference (string name, ITypeReference eventType)
 			: base (name)
 		{
 			if (eventType == null)

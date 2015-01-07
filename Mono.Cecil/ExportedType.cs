@@ -240,7 +240,7 @@ namespace Mono.Cecil {
 			return module.Resolve (CreateReference ());
 		}
 
-		internal TypeReference CreateReference ()
+		internal ITypeReference CreateReference ()
 		{
 			return new TypeReference (@namespace, name, module, scope) {
 				DeclaringType = declaring_type != null ? declaring_type.CreateReference () : null,

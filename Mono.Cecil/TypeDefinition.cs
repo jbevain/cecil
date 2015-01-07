@@ -36,14 +36,14 @@ namespace Mono.Cecil {
 	public sealed class TypeDefinition : TypeReference, IMemberDefinition, ISecurityDeclarationProvider {
 
 		uint attributes;
-		TypeReference base_type;
+		ITypeReference base_type;
 		internal Range fields_range;
 		internal Range methods_range;
 
 		short packing_size = Mixin.NotResolvedMarker;
 		int class_size = Mixin.NotResolvedMarker;
 
-		Collection<TypeReference> interfaces;
+		Collection<ITypeReference> interfaces;
 		Collection<TypeDefinition> nested_types;
 		Collection<MethodDefinition> methods;
 		Collection<FieldDefinition> fields;
@@ -57,7 +57,7 @@ namespace Mono.Cecil {
 			set { attributes = (uint) value; }
 		}
 
-		public TypeReference BaseType {
+		public ITypeReference BaseType {
 			get { return base_type; }
 			set { base_type = value; }
 		}
@@ -126,7 +126,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<TypeReference> Interfaces {
+		public Collection<ITypeReference> Interfaces {
 			get {
 				if (interfaces != null)
 					return interfaces;
@@ -134,7 +134,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref interfaces, this, (type, reader) => reader.ReadInterfaces (type));
 
-				return interfaces = new Collection<TypeReference> ();
+				return interfaces = new Collection<ITypeReference> ();
 			}
 		}
 
@@ -472,7 +472,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.TypeDef);
 		}
 
-		public TypeDefinition (string @namespace, string name, TypeAttributes attributes, TypeReference baseType) :
+		public TypeDefinition (string @namespace, string name, TypeAttributes attributes, ITypeReference baseType) :
 			this (@namespace, name, attributes)
 		{
 			this.BaseType = baseType;
@@ -486,7 +486,7 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static TypeReference GetEnumUnderlyingType (this TypeDefinition self)
+		public static ITypeReference GetEnumUnderlyingType (this TypeDefinition self)
 		{
 			var fields = self.Fields;
 

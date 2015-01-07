@@ -52,7 +52,7 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode);
 		}
 
-		public Instruction Create (OpCode opcode, TypeReference type)
+		public Instruction Create (OpCode opcode, ITypeReference type)
 		{
 			return Instruction.Create (opcode, type);
 		}
@@ -144,7 +144,7 @@ namespace Mono.Cecil.Cil {
 			Append (Create (opcode));
 		}
 
-		public void Emit (OpCode opcode, TypeReference type)
+		public void Emit (OpCode opcode, ITypeReference type)
 		{
 			Append (Create (opcode, type));
 		}

@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 		internal IGenericParameterProvider owner;
 
 		ushort attributes;
-		Collection<TypeReference> constraints;
+		Collection<ITypeReference> constraints;
 		Collection<CustomAttribute> custom_attributes;
 
 		public GenericParameterAttributes Attributes {
@@ -73,7 +73,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<TypeReference> Constraints {
+		public Collection<ITypeReference> Constraints {
 			get {
 				if (constraints != null)
 					return constraints;
@@ -81,7 +81,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref constraints, this, (generic_parameter, reader) => reader.ReadGenericConstraints (generic_parameter));
 
-				return constraints = new Collection<TypeReference> ();
+				return constraints = new Collection<ITypeReference> ();
 			}
 		}
 
@@ -105,13 +105,13 @@ namespace Mono.Cecil {
 
 				return owner.GenericParameterType == GenericParameterType.Method
 					? ((MethodReference) owner).DeclaringType.Scope
-					: ((TypeReference) owner).Scope;
+					: ((ITypeReference) owner).Scope;
 			}
 			set { throw new InvalidOperationException (); }
 		}
 
-		public override TypeReference DeclaringType {
-			get { return owner as TypeReference; }
+		public override ITypeReference DeclaringType {
+			get { return owner as ITypeReference; }
 			set { throw new InvalidOperationException (); }
 		}
 

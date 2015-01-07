@@ -66,7 +66,7 @@ namespace Mono.Cecil {
 			stack.RemoveAt (stack.Count - 1);
 		}
 
-		public TypeReference MethodParameter (string method, int position)
+		public ITypeReference MethodParameter (string method, int position)
 		{
 			for (int i = stack.Count - 1; i >= 0; i--) {
 				var candidate = stack [i] as MethodReference;
@@ -82,7 +82,7 @@ namespace Mono.Cecil {
 			throw new InvalidOperationException ();
 		}
 
-		public TypeReference TypeParameter (string type, int position)
+		public ITypeReference TypeParameter (string type, int position)
 		{
 			for (int i = stack.Count - 1; i >= 0; i--) {
 				var candidate = GenericTypeFor (stack [i]);
@@ -96,9 +96,9 @@ namespace Mono.Cecil {
 			throw new InvalidOperationException ();
 		}
 
-		static TypeReference GenericTypeFor (IGenericParameterProvider context)
+		static ITypeReference GenericTypeFor (IGenericParameterProvider context)
 		{
-			var type = context as TypeReference;
+			var type = context as ITypeReference;
 			if (type != null)
 				return type.GetElementType ();
 
@@ -141,12 +141,12 @@ namespace Mono.Cecil {
 			{ typeof (object), ElementType.Object },
 		};
 
-		public TypeReference ImportType (Type type, ImportGenericContext context)
+		public ITypeReference ImportType (Type type, ImportGenericContext context)
 		{
 			return ImportType (type, context, ImportGenericKind.Open);
 		}
 
-		public TypeReference ImportType (Type type, ImportGenericContext context, ImportGenericKind import_kind)
+		public ITypeReference ImportType (Type type, ImportGenericContext context, ImportGenericKind import_kind)
 		{
 			if (IsTypeSpecification (type) || ImportOpenGenericType (type, import_kind))
 				return ImportTypeSpecification (type, context);
@@ -158,7 +158,7 @@ namespace Mono.Cecil {
 				ImportScope (type.Assembly),
 				type.IsValueType);
 
-			reference.etype = ImportElementType (type);
+			reference.EType = ImportElementType (type);
 
 			if (IsNestedType (type))
 				reference.DeclaringType = ImportType (type.DeclaringType, context, import_kind);
@@ -190,7 +190,7 @@ namespace Mono.Cecil {
 #endif
 		}
 
-		TypeReference ImportTypeSpecification (Type type, ImportGenericContext context)
+		ITypeReference ImportTypeSpecification (Type type, ImportGenericContext context)
 		{
 			if (type.IsByRef)
 				return new ByReferenceType (ImportType (type.GetElementType (), context));
@@ -210,7 +210,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException (type.FullName);
 		}
 
-		static TypeReference ImportGenericParameter (Type type, ImportGenericContext context)
+		static ITypeReference ImportGenericParameter (Type type, ImportGenericContext context)
 		{
 			if (context.IsEmpty)
 				throw new InvalidOperationException ();
@@ -232,7 +232,7 @@ namespace Mono.Cecil {
 			return type.FullName;
 		}
 
-		TypeReference ImportGenericInstance (Type type, ImportGenericContext context)
+		ITypeReference ImportGenericInstance (Type type, ImportGenericContext context)
 		{
 			var element_type = ImportType (type.GetGenericTypeDefinition (), context, ImportGenericKind.Definition);
 			var instance = new GenericInstanceType (element_type);
@@ -437,7 +437,7 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		public TypeReference ImportType (TypeReference type, ImportGenericContext context)
+		public ITypeReference ImportType (ITypeReference type, ImportGenericContext context)
 		{
 			if (type.IsTypeSpecification ())
 				return ImportTypeSpecification (type, context);
@@ -527,9 +527,9 @@ namespace Mono.Cecil {
 				imported_parameters.Add (new GenericParameter (parameters [i].Name, imported));
 		}
 
-		TypeReference ImportTypeSpecification (TypeReference type, ImportGenericContext context)
+		ITypeReference ImportTypeSpecification (ITypeReference type, ImportGenericContext context)
 		{
-			switch (type.etype) {
+			switch (type.EType) {
 			case ElementType.SzArray:
 				var vector = (ArrayType) type;
 				return new ArrayType (ImportType (vector.ElementType, context));
@@ -593,7 +593,7 @@ namespace Mono.Cecil {
 				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
 			}
 
-			throw new NotSupportedException (type.etype.ToString ());
+			throw new NotSupportedException (type.EType.ToString ());
 		}
 
 		public FieldReference ImportField (FieldReference field, ImportGenericContext context)
