@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
@@ -39,12 +40,12 @@ namespace Mono.Cecil {
 		ushort impl_attributes;
 		internal volatile bool sem_attrs_ready;
 		internal MethodSemanticsAttributes sem_attrs;
-		Collection<CustomAttribute> custom_attributes;
-		Collection<SecurityDeclaration> security_declarations;
+		IList<CustomAttribute> custom_attributes;
+        IList<SecurityDeclaration> security_declarations;
 
 		internal RVA rva;
 		internal PInvokeInfo pinvoke;
-		Collection<MethodReference> overrides;
+        IList<MethodReference> overrides;
 
 		internal MethodBody body;
 
@@ -99,7 +100,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityDeclaration> SecurityDeclarations {
+		public IList<SecurityDeclaration> SecurityDeclarations {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, Module)); }
 		}
 
@@ -112,7 +113,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
@@ -196,7 +197,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<MethodReference> Overrides {
+		public IList<MethodReference> Overrides {
 			get {
 				if (overrides != null)
 					return overrides;
@@ -204,7 +205,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref overrides, this, (method, reader) => reader.ReadOverrides (method));
 
-				return overrides = new Collection<MethodReference> ();
+			    return overrides = new Collection<MethodReference> ();
 			}
 		}
 
@@ -217,7 +218,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override Collection<GenericParameter> GenericParameters {
+		public override IList<GenericParameter> GenericParameters {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
 		}
 
@@ -469,7 +470,7 @@ namespace Mono.Cecil {
 
 			var parameters = method.Parameters;
 
-			if (index < 0 || index >= parameters.size)
+			if (index < 0 || index >= parameters.Count)
 				return null;
 
 			return parameters [index];

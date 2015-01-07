@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
@@ -40,17 +40,17 @@ namespace Mono.Cecil {
         short PackingSize { get; set; }
         int ClassSize { get; set; }
         bool HasInterfaces { get; }
-        Collection<ITypeReference> Interfaces { get; }
+        IList<ITypeReference> Interfaces { get; }
         bool HasNestedTypes { get; }
-        Collection<ITypeDefinition> NestedTypes { get; }
+        IList<ITypeDefinition> NestedTypes { get; }
         bool HasMethods { get; }
-        Collection<MethodDefinition> Methods { get; }
+        IList<MethodDefinition> Methods { get; }
         bool HasFields { get; }
-        Collection<FieldDefinition> Fields { get; }
+        IList<FieldDefinition> Fields { get; }
         bool HasEvents { get; }
-        Collection<EventDefinition> Events { get; }
+        IList<EventDefinition> Events { get; }
         bool HasProperties { get; }
-        Collection<PropertyDefinition> Properties { get; }
+        IList<PropertyDefinition> Properties { get; }
         bool IsNotPublic { get; set; }
         bool IsPublic { get; set; }
         bool IsNestedPublic { get; set; }
@@ -87,14 +87,14 @@ namespace Mono.Cecil {
 		short packing_size = Mixin.NotResolvedMarker;
 		int class_size = Mixin.NotResolvedMarker;
 
-		Collection<ITypeReference> interfaces;
-		Collection<ITypeDefinition> nested_types;
-		Collection<MethodDefinition> methods;
-		Collection<FieldDefinition> fields;
-		Collection<EventDefinition> events;
-		Collection<PropertyDefinition> properties;
-		Collection<CustomAttribute> custom_attributes;
-		Collection<SecurityDeclaration> security_declarations;
+		IList<ITypeReference> interfaces;
+		IList<ITypeDefinition> nested_types;
+		IList<MethodDefinition> methods;
+		IList<FieldDefinition> fields;
+		IList<EventDefinition> events;
+		IList<PropertyDefinition> properties;
+		IList<CustomAttribute> custom_attributes;
+		IList<SecurityDeclaration> security_declarations;
 
         public Range FieldsRange { get; set; }
 		public Range MethodsRange { get; set; }
@@ -173,7 +173,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ITypeReference> Interfaces {
+		public IList<ITypeReference> Interfaces {
 			get {
 				if (interfaces != null)
 					return interfaces;
@@ -181,7 +181,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref interfaces, this, (type, reader) => reader.ReadInterfaces (type));
 
-				return interfaces = new Collection<ITypeReference> ();
+			    return interfaces = new Collection<ITypeReference> ();
 			}
 		}
 
@@ -197,7 +197,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ITypeDefinition> NestedTypes {
+		public IList<ITypeDefinition> NestedTypes {
 			get {
 				if (nested_types != null)
 					return nested_types;
@@ -221,7 +221,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<MethodDefinition> Methods {
+        public IList<MethodDefinition> Methods
+        {
 			get {
 				if (methods != null)
 					return methods;
@@ -245,7 +246,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<FieldDefinition> Fields {
+		public IList<FieldDefinition> Fields {
 			get {
 				if (fields != null)
 					return fields;
@@ -269,7 +270,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<EventDefinition> Events {
+		public IList<EventDefinition> Events {
 			get {
 				if (events != null)
 					return events;
@@ -293,7 +294,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<PropertyDefinition> Properties {
+		public IList<PropertyDefinition> Properties {
 			get {
 				if (properties != null)
 					return properties;
@@ -314,7 +315,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityDeclaration> SecurityDeclarations {
+		public IList<SecurityDeclaration> SecurityDeclarations {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, Module)); }
 		}
 
@@ -327,7 +328,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
@@ -340,7 +341,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override Collection<GenericParameter> GenericParameters {
+		public override IList<GenericParameter> GenericParameters {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
 		}
 

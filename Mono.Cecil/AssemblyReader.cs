@@ -165,7 +165,7 @@ namespace Mono.Cecil {
 				Read (assembly.SecurityDeclarations);
 		}
 
-		static void ReadTypes (Collection<ITypeDefinition> types)
+		static void ReadTypes (IList<ITypeDefinition> types)
 		{
 			for (int i = 0; i < types.Count; i++)
 				ReadType (types [i]);
@@ -1579,7 +1579,7 @@ namespace Mono.Cecil {
 			return GetMember (type.Properties, token);
 		}
 
-		static TMember GetMember<TMember> (Collection<TMember> members, MetadataToken token) where TMember : IMemberDefinition
+		static TMember GetMember<TMember> (IList<TMember> members, MetadataToken token) where TMember : IMemberDefinition
 		{
 			for (int i = 0; i < members.Count; i++) {
 				var member = members [i];
@@ -1817,7 +1817,7 @@ namespace Mono.Cecil {
 			return RangesSize (ranges) > 0;
 		}
 
-		public Collection<GenericParameter> ReadGenericParameters (IGenericParameterProvider provider)
+		public IList<GenericParameter> ReadGenericParameters (IGenericParameterProvider provider)
 		{
 			InitializeGenericParameters ();
 
@@ -2916,7 +2916,7 @@ namespace Mono.Cecil {
 			if (param_count == 0)
 				return;
 
-			Collection<ParameterDefinition> parameters;
+            IList<ParameterDefinition> parameters;
 
 			var method_ref = method as MethodReference;
 			if (method_ref != null)
@@ -2933,7 +2933,7 @@ namespace Mono.Cecil {
 			return ReadPrimitiveValue (type);
 		}
 
-		public void ReadCustomAttributeConstructorArguments (CustomAttribute attribute, Collection<ParameterDefinition> parameters)
+        public void ReadCustomAttributeConstructorArguments(CustomAttribute attribute, IList<ParameterDefinition> parameters)
 		{
 			var count = parameters.Count;
 			if (count == 0)
@@ -2954,19 +2954,19 @@ namespace Mono.Cecil {
 			return ReadCustomAttributeElement (type);
 		}
 
-		public void ReadCustomAttributeNamedArguments (ushort count, ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
+        public void ReadCustomAttributeNamedArguments(ushort count, ref IList<CustomAttributeNamedArgument> fields, ref IList<CustomAttributeNamedArgument> properties)
 		{
 			for (int i = 0; i < count; i++)
 				ReadCustomAttributeNamedArgument (ref fields, ref properties);
 		}
 
-		void ReadCustomAttributeNamedArgument (ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
+        void ReadCustomAttributeNamedArgument(ref IList<CustomAttributeNamedArgument> fields, ref IList<CustomAttributeNamedArgument> properties)
 		{
 			var kind = ReadByte ();
 			var type = ReadCustomAttributeFieldOrPropType ();
 			var name = ReadUTF8String ();
 
-			Collection<CustomAttributeNamedArgument> container;
+            IList<CustomAttributeNamedArgument> container;
 			switch (kind) {
 			case 0x53:
 				container = GetCustomAttributeNamedArgumentCollection (ref fields);
@@ -2981,7 +2981,7 @@ namespace Mono.Cecil {
 			container.Add (new CustomAttributeNamedArgument (name, ReadCustomAttributeFixedArgument (type)));
 		}
 
-		static Collection<CustomAttributeNamedArgument> GetCustomAttributeNamedArgumentCollection (ref Collection<CustomAttributeNamedArgument> collection)
+        static IList<CustomAttributeNamedArgument> GetCustomAttributeNamedArgumentCollection(ref IList<CustomAttributeNamedArgument> collection)
 		{
 			if (collection != null)
 				return collection;

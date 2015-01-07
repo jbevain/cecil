@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -37,7 +38,7 @@ namespace Mono.Cecil {
 		bool? has_this;
 		ushort attributes;
 
-		Collection<CustomAttribute> custom_attributes;
+		IList<CustomAttribute> custom_attributes;
 
 		internal MethodDefinition get_method;
 		internal MethodDefinition set_method;
@@ -75,7 +76,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

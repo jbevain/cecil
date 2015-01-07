@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -56,7 +57,7 @@ namespace Mono.Cecil {
 			get { return signature.HasParameters; }
 		}
 
-		public Collection<ParameterDefinition> Parameters {
+		public IList<ParameterDefinition> Parameters {
 			get { return signature.Parameters; }
 		}
 

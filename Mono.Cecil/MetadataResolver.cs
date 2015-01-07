@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -209,7 +209,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static FieldDefinition GetField (Collection<FieldDefinition> fields, FieldReference reference)
+		static FieldDefinition GetField (IList<FieldDefinition> fields, FieldReference reference)
 		{
 			for (int i = 0; i < fields.Count; i++) {
 				var field = fields [i];
@@ -259,7 +259,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		public static MethodDefinition GetMethod (Collection<MethodDefinition> methods, MethodReference reference)
+		public static MethodDefinition GetMethod (IList<MethodDefinition> methods, MethodReference reference)
 		{
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
@@ -291,7 +291,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static bool AreSame (Collection<ParameterDefinition> a, Collection<ParameterDefinition> b)
+		static bool AreSame (IList<ParameterDefinition> a, IList<ParameterDefinition> b)
 		{
 			var count = a.Count;
 

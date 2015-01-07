@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -54,15 +54,15 @@ namespace Mono.Cecil {
     {
 
 		bool HasSecurityDeclarations { get; }
-		Collection<SecurityDeclaration> SecurityDeclarations { get; }
+		IList<SecurityDeclaration> SecurityDeclarations { get; }
 	}
 
 	public sealed class SecurityAttribute : ICustomAttribute {
 
 		ITypeReference attribute_type;
 
-		internal Collection<CustomAttributeNamedArgument> fields;
-		internal Collection<CustomAttributeNamedArgument> properties;
+		internal IList<CustomAttributeNamedArgument> fields;
+		internal IList<CustomAttributeNamedArgument> properties;
 
 		public ITypeReference AttributeType {
 			get { return attribute_type; }
@@ -73,16 +73,16 @@ namespace Mono.Cecil {
 			get { return !fields.IsNullOrEmpty (); }
 		}
 
-		public Collection<CustomAttributeNamedArgument> Fields {
-			get { return fields ?? (fields = new Collection<CustomAttributeNamedArgument> ()); }
+		public IList<CustomAttributeNamedArgument> Fields {
+            get { return fields ?? (fields = new Collection<CustomAttributeNamedArgument>()); }
 		}
 
 		public bool HasProperties {
 			get { return !properties.IsNullOrEmpty (); }
 		}
 
-		public Collection<CustomAttributeNamedArgument> Properties {
-			get { return properties ?? (properties = new Collection<CustomAttributeNamedArgument> ()); }
+		public IList<CustomAttributeNamedArgument> Properties {
+            get { return properties ?? (properties = new Collection<CustomAttributeNamedArgument>()); }
 		}
 
 		public SecurityAttribute (ITypeReference attributeType)
@@ -99,7 +99,7 @@ namespace Mono.Cecil {
 
 		internal bool resolved;
 		SecurityAction action;
-		internal Collection<SecurityAttribute> security_attributes;
+		internal IList<SecurityAttribute> security_attributes;
 
 		public SecurityAction Action {
 			get { return action; }
@@ -114,11 +114,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityAttribute> SecurityAttributes {
+		public IList<SecurityAttribute> SecurityAttributes {
 			get {
 				Resolve ();
 
-				return security_attributes ?? (security_attributes = new Collection<SecurityAttribute> ());
+			    return security_attributes ?? (security_attributes = new Collection<SecurityAttribute> ());
 			}
 		}
 
@@ -180,14 +180,14 @@ namespace Mono.Cecil {
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasSecurityDeclarations (provider));
 		}
 
-		public static Collection<SecurityDeclaration> GetSecurityDeclarations (
+		public static IList<SecurityDeclaration> GetSecurityDeclarations (
 			this ISecurityDeclarationProvider self,
-			ref Collection<SecurityDeclaration> variable,
+			ref IList<SecurityDeclaration> variable,
 			IModuleDefinition module)
 		{
-			return module.HasImage ()
-				? module.Read (ref variable, self, (provider, reader) => reader.ReadSecurityDeclarations (provider))
-				: variable = new Collection<SecurityDeclaration>();
+		    return module.HasImage ()
+		        ? module.Read (ref variable, self, (provider, reader) => reader.ReadSecurityDeclarations (provider))
+		        : variable = new Collection<SecurityDeclaration> ();
 		}
 	}
 }

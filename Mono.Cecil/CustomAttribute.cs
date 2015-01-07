@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -80,8 +80,8 @@ namespace Mono.Cecil {
 
 		bool HasFields { get; }
 		bool HasProperties { get; }
-		Collection<CustomAttributeNamedArgument> Fields { get; }
-		Collection<CustomAttributeNamedArgument> Properties { get; }
+		IList<CustomAttributeNamedArgument> Fields { get; }
+		IList<CustomAttributeNamedArgument> Properties { get; }
 	}
 
 	public sealed class CustomAttribute : ICustomAttribute {
@@ -90,9 +90,9 @@ namespace Mono.Cecil {
 		internal bool resolved;
 		MethodReference constructor;
 		byte [] blob;
-		internal Collection<CustomAttributeArgument> arguments;
-		internal Collection<CustomAttributeNamedArgument> fields;
-		internal Collection<CustomAttributeNamedArgument> properties;
+		internal IList<CustomAttributeArgument> arguments;
+		internal IList<CustomAttributeNamedArgument> fields;
+		internal IList<CustomAttributeNamedArgument> properties;
 
 		public MethodReference Constructor {
 			get { return constructor; }
@@ -115,7 +115,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttributeArgument> ConstructorArguments {
+		public IList<CustomAttributeArgument> ConstructorArguments {
 			get {
 				Resolve ();
 
@@ -131,11 +131,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttributeNamedArgument> Fields {
+		public IList<CustomAttributeNamedArgument> Fields {
 			get {
 				Resolve ();
 
-				return fields ?? (fields = new Collection<CustomAttributeNamedArgument> ());
+                return fields ?? (fields = new Collection<CustomAttributeNamedArgument>());
 			}
 		}
 
@@ -147,11 +147,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttributeNamedArgument> Properties {
+		public IList<CustomAttributeNamedArgument> Properties {
 			get {
 				Resolve ();
 
-				return properties ?? (properties = new Collection<CustomAttributeNamedArgument> ());
+                return properties ?? (properties = new Collection<CustomAttributeNamedArgument>());
 			}
 		}
 

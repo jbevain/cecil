@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 			get { return method.HasParameters; }
 		}
 
-		public override Collection<ParameterDefinition> Parameters {
+		public override IList<ParameterDefinition> Parameters {
 			get { return method.Parameters; }
 		}
 

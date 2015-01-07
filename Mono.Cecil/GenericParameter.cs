@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 using Mono.Cecil.Metadata;
@@ -41,8 +41,8 @@ namespace Mono.Cecil {
 		internal IGenericParameterProvider owner;
 
 		ushort attributes;
-		Collection<ITypeReference> constraints;
-		Collection<CustomAttribute> custom_attributes;
+		IList<ITypeReference> constraints;
+		IList<CustomAttribute> custom_attributes;
 
 		public GenericParameterAttributes Attributes {
 			get { return (GenericParameterAttributes) attributes; }
@@ -73,7 +73,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ITypeReference> Constraints {
+		public IList<ITypeReference> Constraints {
 			get {
 				if (constraints != null)
 					return constraints;
@@ -94,7 +94,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

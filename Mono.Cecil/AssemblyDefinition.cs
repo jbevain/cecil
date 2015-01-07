@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Mono.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Mono.Cecil {
     public interface IAssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
         AssemblyNameDefinition Name { get; set; }
         string FullName { get; }
-        Collection<IModuleDefinition> Modules { get; }
+        IList<IModuleDefinition> Modules { get; }
         IModuleDefinition MainModule { get; }
         MethodDefinition EntryPoint { get; set; }
         void Write (string fileName);
@@ -49,9 +50,9 @@ namespace Mono.Cecil {
 		AssemblyNameDefinition name;
 
 		internal IModuleDefinition main_module;
-		Collection<IModuleDefinition> modules;
-		Collection<CustomAttribute> custom_attributes;
-		Collection<SecurityDeclaration> security_declarations;
+		IList<IModuleDefinition> modules;
+		IList<CustomAttribute> custom_attributes;
+		IList<SecurityDeclaration> security_declarations;
 
 		public AssemblyNameDefinition Name {
 			get { return name; }
@@ -67,7 +68,7 @@ namespace Mono.Cecil {
 			set { }
 		}
 
-		public Collection<IModuleDefinition> Modules {
+		public IList<IModuleDefinition> Modules {
 			get {
 				if (modules != null)
 					return modules;
@@ -75,7 +76,7 @@ namespace Mono.Cecil {
 				if (main_module.HasImage)
 					return main_module.Read (ref modules, this, (_, reader) => reader.ReadModules ());
 
-				return modules = new Collection<IModuleDefinition> (1) { main_module };
+				return modules = new List<IModuleDefinition> (1) { main_module };
 			}
 		}
 
@@ -97,7 +98,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, main_module)); }
 		}
 
@@ -110,7 +111,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityDeclaration> SecurityDeclarations {
+		public IList<SecurityDeclaration> SecurityDeclarations {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, main_module)); }
 		}
 

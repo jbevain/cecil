@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.Threading;
 
 using Mono.Collections.Generic;
@@ -70,7 +71,7 @@ namespace Mono.Cecil {
 			get { return parameter != null && parameter.HasCustomAttributes; }
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return Parameter.CustomAttributes; }
 		}
 

@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -41,7 +42,7 @@ namespace Mono.Cecil {
 		bool has_this;
 		bool explicit_this;
 		MethodCallingConvention calling_convention;
-		internal Collection<GenericParameter> generic_parameters;
+		internal IList<GenericParameter> generic_parameters;
 
 		public virtual bool HasThis {
 			get { return has_this; }
@@ -62,7 +63,7 @@ namespace Mono.Cecil {
 			get { return !parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual Collection<ParameterDefinition> Parameters {
+		public virtual IList<ParameterDefinition> Parameters {
 			get {
 				if (parameters == null)
 					parameters = new ParameterDefinitionCollection (this);
@@ -94,7 +95,7 @@ namespace Mono.Cecil {
 			get { return !generic_parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual Collection<GenericParameter> GenericParameters {
+		public virtual IList<GenericParameter> GenericParameters {
 			get {
 				if (generic_parameters != null)
 					return generic_parameters;

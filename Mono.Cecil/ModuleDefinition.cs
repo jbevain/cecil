@@ -207,15 +207,15 @@ namespace Mono.Cecil {
         IMetadataResolver MetadataResolver { get; set; }
         TypeSystem TypeSystem { get; }
         bool HasAssemblyReferences { get; }
-        Collection<AssemblyNameReference> AssemblyReferences { get; }
+        IList<AssemblyNameReference> AssemblyReferences { get; }
         bool HasModuleReferences { get; }
-        Collection<IModuleReference> ModuleReferences { get; }
+        IList<IModuleReference> ModuleReferences { get; }
         bool HasResources { get; }
-        Collection<Resource> Resources { get; }
+        IList<Resource> Resources { get; }
         bool HasTypes { get; }
-        Collection<ITypeDefinition> Types { get; }
+        IList<ITypeDefinition> Types { get; }
         bool HasExportedTypes { get; }
-        Collection<ExportedType> ExportedTypes { get; }
+        IList<ExportedType> ExportedTypes { get; }
         MethodDefinition EntryPoint { get; set; }
         bool HasDebugHeader { get; }
         bool HasTypeReference (string fullName);
@@ -287,11 +287,11 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 		MetadataImporter importer;
 #endif
-		Collection<CustomAttribute> custom_attributes;
-		Collection<AssemblyNameReference> references;
-		Collection<IModuleReference> modules;
-		Collection<Resource> resources;
-		Collection<ExportedType> exported_types;
+		IList<CustomAttribute> custom_attributes;
+		IList<AssemblyNameReference> references;
+		IList<IModuleReference> modules;
+		IList<Resource> resources;
+		IList<ExportedType> exported_types;
 		TypeDefinitionCollection types;
 
         public MetadataSystem MetadataSystem { get; private set; }
@@ -421,7 +421,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<AssemblyNameReference> AssemblyReferences {
+		public IList<AssemblyNameReference> AssemblyReferences {
 			get {
 				if (references != null)
 					return references;
@@ -429,7 +429,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return this.Read (ref references, this, (_, reader) => reader.ReadAssemblyReferences ());
 
-				return references = new Collection<AssemblyNameReference> ();
+			    return references = new Collection<AssemblyNameReference> ();
 			}
 		}
 
@@ -442,7 +442,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<IModuleReference> ModuleReferences {
+		public IList<IModuleReference> ModuleReferences {
 			get {
 				if (modules != null)
 					return modules;
@@ -450,7 +450,7 @@ namespace Mono.Cecil {
 				if (HasImage)
                     return this.Read(ref modules, this, (_, reader) => reader.ReadModuleReferences());
 
-				return modules = new Collection<IModuleReference> ();
+                return modules = new Collection<IModuleReference>();
 			}
 		}
 
@@ -466,7 +466,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<Resource> Resources {
+		public IList<Resource> Resources {
 			get {
 				if (resources != null)
 					return resources;
@@ -474,7 +474,7 @@ namespace Mono.Cecil {
 				if (HasImage)
                     return this.Read(ref resources, this, (_, reader) => reader.ReadResources());
 
-				return resources = new Collection<Resource> ();
+                return resources = new Collection<Resource>();
 			}
 		}
 
@@ -487,7 +487,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, this)); }
 		}
 
@@ -500,7 +500,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ITypeDefinition> Types {
+		public IList<ITypeDefinition> Types {
 			get {
 				if (types != null)
 					return types;
@@ -521,7 +521,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ExportedType> ExportedTypes {
+		public IList<ExportedType> ExportedTypes {
 			get {
 				if (exported_types != null)
 					return exported_types;
@@ -529,7 +529,7 @@ namespace Mono.Cecil {
 				if (HasImage)
                     return this.Read(ref exported_types, this, (_, reader) => reader.ReadExportedTypes());
 
-				return exported_types = new Collection<ExportedType> ();
+                return exported_types = new Collection<ExportedType>();
 			}
 		}
 
@@ -649,7 +649,7 @@ namespace Mono.Cecil {
 			return GetTypes (Types);
 		}
 
-		static IEnumerable<ITypeDefinition> GetTypes (Collection<ITypeDefinition> types)
+		static IEnumerable<ITypeDefinition> GetTypes (IList<ITypeDefinition> types)
 		{
 			for (int i = 0; i < types.Count; i++) {
 				var type = types [i];

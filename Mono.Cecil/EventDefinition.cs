@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -34,12 +35,12 @@ namespace Mono.Cecil {
 
 		ushort attributes;
 
-		Collection<CustomAttribute> custom_attributes;
+		IList<CustomAttribute> custom_attributes;
 
 		internal MethodDefinition add_method;
 		internal MethodDefinition invoke_method;
 		internal MethodDefinition remove_method;
-		internal Collection<MethodDefinition> other_methods;
+        internal IList<MethodDefinition> other_methods;
 
 		public EventAttributes Attributes {
 			get { return (EventAttributes) attributes; }
@@ -89,7 +90,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<MethodDefinition> OtherMethods {
+		public IList<MethodDefinition> OtherMethods {
 			get {
 				if (other_methods != null)
 					return other_methods;
@@ -112,7 +113,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+		public IList<CustomAttribute> CustomAttributes {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

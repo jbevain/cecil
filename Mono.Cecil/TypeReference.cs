@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
@@ -101,7 +101,7 @@ namespace Mono.Cecil {
 
 		string fullname;
 
-		protected Collection<GenericParameter> generic_parameters;
+		protected IList<GenericParameter> generic_parameters;
 
 		public override string Name {
 			get { return base.Name; }
@@ -154,7 +154,7 @@ namespace Mono.Cecil {
 			get { return !generic_parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual Collection<GenericParameter> GenericParameters {
+		public virtual IList<GenericParameter> GenericParameters {
 			get {
 				if (generic_parameters != null)
 					return generic_parameters;

@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -34,7 +34,7 @@ namespace Mono.Cecil {
 	public interface IGenericParameterProvider : IMemberReference {
 
 		bool HasGenericParameters { get; }
-		Collection<GenericParameter> GenericParameters { get; }
+		IList<GenericParameter> GenericParameters { get; }
 		GenericParameterType GenericParameterType { get; }
 	}
 
@@ -59,9 +59,9 @@ namespace Mono.Cecil {
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasGenericParameters (provider));
 		}
 
-		public static Collection<GenericParameter> GetGenericParameters (
+		public static IList<GenericParameter> GetGenericParameters (
 			this IGenericParameterProvider self,
-			ref Collection<GenericParameter> collection,
+			ref IList<GenericParameter> collection,
 			IModuleDefinition module)
 		{
 			return module.HasImage ()

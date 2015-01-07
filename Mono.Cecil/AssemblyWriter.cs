@@ -1563,7 +1563,7 @@ namespace Mono.Cecil {
 				AddConstant (property, property.PropertyType);
 		}
 
-		void AddOtherSemantic (IMetadataTokenProvider owner, Collection<MethodDefinition> others)
+        void AddOtherSemantic(IMetadataTokenProvider owner, IList<MethodDefinition> others)
 		{
 			for (int i = 0; i < others.Count; i++)
 				AddSemantic (MethodSemanticsAttributes.Other, owner, others [i]);
@@ -2441,7 +2441,7 @@ namespace Mono.Cecil {
 				WriteCustomAttributeNamedArguments (0x54, attribute.Properties);
 		}
 
-		void WriteCustomAttributeNamedArguments (byte kind, Collection<CustomAttributeNamedArgument> named_arguments)
+		void WriteCustomAttributeNamedArguments (byte kind, IList<CustomAttributeNamedArgument> named_arguments)
 		{
 			for (int i = 0; i < named_arguments.Count; i++)
 				WriteCustomAttributeNamedArgument (kind, named_arguments [i]);
