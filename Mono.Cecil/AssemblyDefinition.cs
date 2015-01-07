@@ -34,7 +34,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
     public interface IAssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
-        AssemblyNameDefinition Name { get; set; }
+        IAssemblyNameDefinition Name { get; set; }
         string FullName { get; }
         IList<IModuleDefinition> Modules { get; }
         IModuleDefinition MainModule { get; }
@@ -47,14 +47,14 @@ namespace Mono.Cecil {
 
     public sealed class AssemblyDefinition : IAssemblyDefinition {
 
-		AssemblyNameDefinition name;
+		IAssemblyNameDefinition name;
 
 		internal IModuleDefinition main_module;
 		IList<IModuleDefinition> modules;
 		IList<CustomAttribute> custom_attributes;
 		IList<SecurityDeclaration> security_declarations;
 
-		public AssemblyNameDefinition Name {
+		public IAssemblyNameDefinition Name {
 			get { return name; }
 			set { name = value; }
 		}
@@ -120,12 +120,12 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-		public static IAssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
+		public static IAssemblyDefinition CreateAssembly (IAssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
 		{
 			return CreateAssembly (assemblyName, moduleName, new ModuleParameters { Kind = kind });
 		}
 
-		public static IAssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
+		public static IAssemblyDefinition CreateAssembly (IAssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
 		{
 			if (assemblyName == null)
 				throw new ArgumentNullException ("assemblyName");

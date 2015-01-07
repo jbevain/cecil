@@ -469,7 +469,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		public AssemblyNameDefinition ReadAssemblyNameDefinition ()
+		public IAssemblyNameDefinition ReadAssemblyNameDefinition ()
 		{
 			if (MoveTo (Table.Assembly) == 0)
 				return null;

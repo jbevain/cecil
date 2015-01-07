@@ -949,7 +949,7 @@ namespace Mono.Cecil {
 			return module;
 		}
 
-		static AssemblyNameDefinition CreateAssemblyName (string name)
+		static IAssemblyNameDefinition CreateAssemblyName (string name)
 		{
 			if (name.EndsWith (".dll") || name.EndsWith (".exe"))
 				name = name.Substring (0, name.Length - 4);
