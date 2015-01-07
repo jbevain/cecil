@@ -221,7 +221,7 @@ namespace Mono.Cecil {
 #endif
 		Collection<CustomAttribute> custom_attributes;
 		Collection<AssemblyNameReference> references;
-		Collection<ModuleReference> modules;
+		Collection<IModuleReference> modules;
 		Collection<Resource> resources;
 		Collection<ExportedType> exported_types;
 		TypeDefinitionCollection types;
@@ -363,7 +363,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ModuleReference> ModuleReferences {
+		public Collection<IModuleReference> ModuleReferences {
 			get {
 				if (modules != null)
 					return modules;
@@ -371,7 +371,7 @@ namespace Mono.Cecil {
 				if (HasImage)
                     return this.Read(ref modules, this, (_, reader) => reader.ReadModuleReferences());
 
-				return modules = new Collection<ModuleReference> ();
+				return modules = new Collection<IModuleReference> ();
 			}
 		}
 

@@ -958,7 +958,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
 
-				reference.token = new MetadataToken (
+				reference.MetadataToken = new MetadataToken (
 					TokenType.ModuleRef,
 					table.AddRow (GetStringIndex (reference.Name)));
 			}

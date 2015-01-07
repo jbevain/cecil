@@ -47,7 +47,7 @@ namespace Mono.Cecil {
 	sealed class MetadataSystem {
 
 		internal AssemblyNameReference [] AssemblyReferences;
-		internal ModuleReference [] ModuleReferences;
+		internal IModuleReference [] ModuleReferences;
 
 		internal TypeDefinition [] Types;
 		internal TypeReference [] TypeReferences;

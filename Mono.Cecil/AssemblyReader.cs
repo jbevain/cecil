@@ -598,11 +598,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<ModuleReference> ReadModuleReferences ()
+		public Collection<IModuleReference> ReadModuleReferences ()
 		{
 			InitializeModuleReferences ();
 
-			return new Collection<ModuleReference> (metadata.ModuleReferences);
+			return new Collection<IModuleReference> (metadata.ModuleReferences);
 		}
 
 		public bool HasFileResource ()
@@ -2667,7 +2667,7 @@ namespace Mono.Cecil {
 			return scope;
 		}
 
-		ModuleReference GetModuleReferenceFromFile (MetadataToken token)
+		IModuleReference GetModuleReferenceFromFile (MetadataToken token)
 		{
 			if (!MoveTo (Table.File, token.RID))
 				return null;
@@ -2676,7 +2676,7 @@ namespace Mono.Cecil {
 			var file_name = ReadString ();
 			var modules = module.ModuleReferences;
 
-			ModuleReference reference;
+			IModuleReference reference;
 			for (int i = 0; i < modules.Count; i++) {
 				reference = modules [i];
 				if (reference.Name == file_name)

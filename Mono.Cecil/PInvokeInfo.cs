@@ -32,7 +32,7 @@ namespace Mono.Cecil {
 
 		ushort attributes;
 		string entry_point;
-		ModuleReference module;
+		IModuleReference module;
 
 		public PInvokeAttributes Attributes {
 			get { return (PInvokeAttributes) attributes; }
@@ -44,7 +44,7 @@ namespace Mono.Cecil {
 			set { entry_point = value; }
 		}
 
-		public ModuleReference Module {
+		public IModuleReference Module {
 			get { return module; }
 			set { module = value; }
 		}
@@ -128,7 +128,7 @@ namespace Mono.Cecil {
 
 		#endregion
 
-		public PInvokeInfo (PInvokeAttributes attributes, string entryPoint, ModuleReference module)
+		public PInvokeInfo (PInvokeAttributes attributes, string entryPoint, IModuleReference module)
 		{
 			this.attributes = (ushort) attributes;
 			this.entry_point = entryPoint;
