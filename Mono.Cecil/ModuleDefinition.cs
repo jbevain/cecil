@@ -348,7 +348,7 @@ namespace Mono.Cecil {
 					return references;
 
 				if (HasImage)
-					return Read (ref references, this, (_, reader) => reader.ReadAssemblyReferences ());
+					return this.Read (ref references, this, (_, reader) => reader.ReadAssemblyReferences ());
 
 				return references = new Collection<AssemblyNameReference> ();
 			}
@@ -369,7 +369,7 @@ namespace Mono.Cecil {
 					return modules;
 
 				if (HasImage)
-					return Read (ref modules, this, (_, reader) => reader.ReadModuleReferences ());
+                    return this.Read(ref modules, this, (_, reader) => reader.ReadModuleReferences());
 
 				return modules = new Collection<ModuleReference> ();
 			}
@@ -381,7 +381,7 @@ namespace Mono.Cecil {
 					return resources.Count > 0;
 
 				if (HasImage)
-					return Image.HasTable (Table.ManifestResource) || Read (this, (_, reader) => reader.HasFileResource ());
+                    return Image.HasTable(Table.ManifestResource) || this.Read(this, (_, reader) => reader.HasFileResource());
 
 				return false;
 			}
@@ -393,7 +393,7 @@ namespace Mono.Cecil {
 					return resources;
 
 				if (HasImage)
-					return Read (ref resources, this, (_, reader) => reader.ReadResources ());
+                    return this.Read(ref resources, this, (_, reader) => reader.ReadResources());
 
 				return resources = new Collection<Resource> ();
 			}
@@ -427,7 +427,7 @@ namespace Mono.Cecil {
 					return types;
 
 				if (HasImage)
-					return Read (ref types, this, (_, reader) => reader.ReadTypes ());
+                    return this.Read(ref types, this, (_, reader) => reader.ReadTypes());
 
 				return types = new TypeDefinitionCollection (this);
 			}
@@ -448,7 +448,7 @@ namespace Mono.Cecil {
 					return exported_types;
 
 				if (HasImage)
-					return Read (ref exported_types, this, (_, reader) => reader.ReadExportedTypes ());
+                    return this.Read(ref exported_types, this, (_, reader) => reader.ReadExportedTypes());
 
 				return exported_types = new Collection<ExportedType> ();
 			}
@@ -460,7 +460,7 @@ namespace Mono.Cecil {
 					return entry_point;
 
 				if (HasImage)
-					return Read (ref entry_point, this, (_, reader) => reader.ReadEntryPoint ());
+                    return this.Read(ref entry_point, this, (_, reader) => reader.ReadEntryPoint());
 
 				return entry_point = null;
 			}
@@ -521,7 +521,7 @@ namespace Mono.Cecil {
 
 		TypeReference GetTypeReference (string scope, string fullname)
 		{
-			return Read (new Row<string, string> (scope, fullname), (row, reader) => reader.GetTypeReference (row.Col1, row.Col2));
+            return this.Read(new Row<string, string>(scope, fullname), (row, reader) => reader.GetTypeReference(row.Col1, row.Col2));
 		}
 
 		public IEnumerable<TypeReference> GetTypeReferences ()
@@ -529,7 +529,7 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				return Empty<TypeReference>.Array;
 
-			return Read (this, (_, reader) => reader.GetTypeReferences ());
+            return this.Read(this, (_, reader) => reader.GetTypeReferences());
 		}
 
 		public IEnumerable<MemberReference> GetMemberReferences ()
@@ -537,7 +537,7 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				return Empty<MemberReference>.Array;
 
-			return Read (this, (_, reader) => reader.GetMemberReferences ());
+            return this.Read(this, (_, reader) => reader.GetMemberReferences());
 		}
 
 		public TypeReference GetType (string fullName, bool runtimeName)
@@ -773,6 +773,8 @@ namespace Mono.Cecil {
 
 #endif
 
+
+
 		public IMetadataTokenProvider LookupToken (int token)
 		{
 			return LookupToken (new MetadataToken ((uint) token));
@@ -780,7 +782,7 @@ namespace Mono.Cecil {
 
 		public IMetadataTokenProvider LookupToken (MetadataToken token)
 		{
-			return Read (token, (t, reader) => reader.LookupToken (t));
+            return this.Read(token, (t, reader) => reader.LookupToken(t));
 		}
 
 		readonly object module_lock = new object();
@@ -789,44 +791,18 @@ namespace Mono.Cecil {
 			get { return module_lock; }
 		}
 
-		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
-		{
-			lock (module_lock) {
-				var position = reader.position;
-				var context = reader.context;
-
-				var ret = read (item, reader);
-
-				reader.position = position;
-				reader.context = context;
-
-				return ret;
-			}
-		}
-
-		internal TRet Read<TItem, TRet> (ref TRet variable, TItem item, Func<TItem, MetadataReader, TRet> read) where TRet : class
-		{
-			lock (module_lock) {
-				if (variable != null)
-					return variable;
-
-				var position = reader.position;
-				var context = reader.context;
-
-				var ret = read (item, reader);
-
-				reader.position = position;
-				reader.context = context;
-
-				return variable = ret;
-			}
-		}
+        
 
 		public bool HasDebugHeader {
 			get { return Image != null && !Image.Debug.IsZero; }
 		}
 
-		public ImageDebugDirectory GetDebugHeader (out byte [] header)
+        internal MetadataReader MetadataReader
+	    {
+	        get { return reader; }
+	    }
+
+	    public ImageDebugDirectory GetDebugHeader (out byte [] header)
 		{
 			if (!HasDebugHeader)
 				throw new InvalidOperationException ();
@@ -1059,5 +1035,45 @@ namespace Mono.Cecil {
 				return "v4.0.30319";
 			}
 		}
+
+        internal static TRet Read<TItem, TRet>(this ModuleDefinition moduleDefinition, TItem item, Func<TItem, MetadataReader, TRet> read)
+        {
+            lock (moduleDefinition.SyncRoot)
+            {
+                var reader = moduleDefinition.MetadataReader;
+
+                var position = reader.position;
+                var context = reader.context;
+
+                var ret = read(item, reader);
+
+                reader.position = position;
+                reader.context = context;
+
+                return ret;
+            }
+        }
+
+        internal static TRet Read<TItem, TRet>(this ModuleDefinition moduleDefinition, ref TRet variable, TItem item, Func<TItem, MetadataReader, TRet> read) where TRet : class
+        {
+            lock (moduleDefinition.SyncRoot)
+            {
+
+                if (variable != null)
+                    return variable;
+
+                var reader = moduleDefinition.MetadataReader;
+
+                var position = reader.position;
+                var context = reader.context;
+
+                var ret = read(item, reader);
+
+                reader.position = position;
+                reader.context = context;
+
+                return variable = ret;
+            }
+        }
 	}
 }
