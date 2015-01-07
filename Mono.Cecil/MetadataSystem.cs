@@ -32,15 +32,14 @@ using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
-
-	struct Range {
-		public uint Start;
-		public uint Length;
+    public struct Range {
+        public uint Start;
+        public uint Length;
 
 		public Range (uint index, uint length)
 		{
-			this.Start = index;
-			this.Length = length;
+			Start = index;
+			Length = length;
 		}
 	}
 
@@ -49,7 +48,7 @@ namespace Mono.Cecil {
 		internal AssemblyNameReference [] AssemblyReferences;
 		internal IModuleReference [] ModuleReferences;
 
-		internal TypeDefinition [] Types;
+		internal ITypeDefinition [] Types;
 		internal ITypeReference [] TypeReferences;
 
 		internal FieldDefinition [] Fields;
@@ -117,7 +116,7 @@ namespace Mono.Cecil {
 			type.IsValueType = primitive_data.Col2;
 		}
 
-		public static bool TryGetPrimitiveElementType (TypeDefinition type, out ElementType etype)
+		public static bool TryGetPrimitiveElementType (ITypeDefinition type, out ElementType etype)
 		{
 			etype = ElementType.None;
 
@@ -162,7 +161,7 @@ namespace Mono.Cecil {
 			if (GenericConstraints != null) GenericConstraints.Clear ();
 		}
 
-		public TypeDefinition GetTypeDefinition (uint rid)
+		public ITypeDefinition GetTypeDefinition (uint rid)
 		{
 			if (rid < 1 || rid > Types.Length)
 				return null;
@@ -170,9 +169,9 @@ namespace Mono.Cecil {
 			return Types [rid - 1];
 		}
 
-		public void AddTypeDefinition (TypeDefinition type)
+		public void AddTypeDefinition (ITypeDefinition type)
 		{
-			Types [type.token.RID - 1] = type;
+			Types [type.MetadataToken.RID - 1] = type;
 		}
 
 		public ITypeReference GetTypeReference (uint rid)
@@ -227,9 +226,9 @@ namespace Mono.Cecil {
 			MemberReferences [member.MetadataToken.RID - 1] = member;
 		}
 
-		public bool TryGetNestedTypeMapping (TypeDefinition type, out uint [] mapping)
+		public bool TryGetNestedTypeMapping (ITypeDefinition type, out uint [] mapping)
 		{
-			return NestedTypes.TryGetValue (type.token.RID, out mapping);
+			return NestedTypes.TryGetValue (type.MetadataToken.RID, out mapping);
 		}
 
 		public void SetNestedTypeMapping (uint type_rid, uint [] mapping)
@@ -237,14 +236,14 @@ namespace Mono.Cecil {
 			NestedTypes [type_rid] = mapping;
 		}
 
-		public void RemoveNestedTypeMapping (TypeDefinition type)
+		public void RemoveNestedTypeMapping (ITypeDefinition type)
 		{
-			NestedTypes.Remove (type.token.RID);
+			NestedTypes.Remove (type.MetadataToken.RID);
 		}
 
-		public bool TryGetReverseNestedTypeMapping (TypeDefinition type, out uint declaring)
+		public bool TryGetReverseNestedTypeMapping (ITypeDefinition type, out uint declaring)
 		{
-			return ReverseNestedTypes.TryGetValue (type.token.RID, out declaring);
+			return ReverseNestedTypes.TryGetValue (type.MetadataToken.RID, out declaring);
 		}
 
 		public void SetReverseNestedTypeMapping (uint nested, uint declaring)
@@ -252,14 +251,14 @@ namespace Mono.Cecil {
 			ReverseNestedTypes.Add (nested, declaring);
 		}
 
-		public void RemoveReverseNestedTypeMapping (TypeDefinition type)
+		public void RemoveReverseNestedTypeMapping (ITypeDefinition type)
 		{
-			ReverseNestedTypes.Remove (type.token.RID);
+			ReverseNestedTypes.Remove (type.MetadataToken.RID);
 		}
 
-		public bool TryGetInterfaceMapping (TypeDefinition type, out MetadataToken [] mapping)
+		public bool TryGetInterfaceMapping (ITypeDefinition type, out MetadataToken [] mapping)
 		{
-			return Interfaces.TryGetValue (type.token.RID, out mapping);
+			return Interfaces.TryGetValue (type.MetadataToken.RID, out mapping);
 		}
 
 		public void SetInterfaceMapping (uint type_rid, MetadataToken [] mapping)
@@ -267,9 +266,9 @@ namespace Mono.Cecil {
 			Interfaces [type_rid] = mapping;
 		}
 
-		public void RemoveInterfaceMapping (TypeDefinition type)
+		public void RemoveInterfaceMapping (ITypeDefinition type)
 		{
-			Interfaces.Remove (type.token.RID);
+			Interfaces.Remove (type.MetadataToken.RID);
 		}
 
 		public void AddPropertiesRange (uint type_rid, Range range)
@@ -277,14 +276,14 @@ namespace Mono.Cecil {
 			Properties.Add (type_rid, range);
 		}
 
-		public bool TryGetPropertiesRange (TypeDefinition type, out Range range)
+		public bool TryGetPropertiesRange (ITypeDefinition type, out Range range)
 		{
-			return Properties.TryGetValue (type.token.RID, out range);
+			return Properties.TryGetValue (type.MetadataToken.RID, out range);
 		}
 
-		public void RemovePropertiesRange (TypeDefinition type)
+		public void RemovePropertiesRange (ITypeDefinition type)
 		{
-			Properties.Remove (type.token.RID);
+			Properties.Remove (type.MetadataToken.RID);
 		}
 
 		public void AddEventsRange (uint type_rid, Range range)
@@ -292,14 +291,14 @@ namespace Mono.Cecil {
 			Events.Add (type_rid, range);
 		}
 
-		public bool TryGetEventsRange (TypeDefinition type, out Range range)
+		public bool TryGetEventsRange (ITypeDefinition type, out Range range)
 		{
-			return Events.TryGetValue (type.token.RID, out range);
+			return Events.TryGetValue (type.MetadataToken.RID, out range);
 		}
 
-		public void RemoveEventsRange (TypeDefinition type)
+		public void RemoveEventsRange (ITypeDefinition type)
 		{
-			Events.Remove (type.token.RID);
+			Events.Remove (type.MetadataToken.RID);
 		}
 
 		public bool TryGetGenericParameterRanges (IGenericParameterProvider owner, out Range [] ranges)
@@ -362,24 +361,24 @@ namespace Mono.Cecil {
 			Overrides.Remove (method.token.RID);
 		}
 
-		public TypeDefinition GetFieldDeclaringType (uint field_rid)
+		public ITypeDefinition GetFieldDeclaringType (uint field_rid)
 		{
 			return BinaryRangeSearch (Types, field_rid, true);
 		}
 
-		public TypeDefinition GetMethodDeclaringType (uint method_rid)
+		public ITypeDefinition GetMethodDeclaringType (uint method_rid)
 		{
 			return BinaryRangeSearch (Types, method_rid, false);
 		}
 
-		static TypeDefinition BinaryRangeSearch (TypeDefinition [] types, uint rid, bool field)
+		static ITypeDefinition BinaryRangeSearch (ITypeDefinition [] types, uint rid, bool field)
 		{
 			int min = 0;
 			int max = types.Length - 1;
 			while (min <= max) {
 				int mid = min + ((max - min) / 2);
 				var type = types [mid];
-				var range = field ? type.fields_range : type.methods_range;
+				var range = field ? type.FieldsRange : type.MethodsRange;
 
 				if (rid < range.Start)
 					max = mid - 1;

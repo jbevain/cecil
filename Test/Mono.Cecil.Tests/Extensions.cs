@@ -8,12 +8,12 @@ namespace Mono.Cecil.Tests {
 
 	public static class Extensions {
 
-		public static MethodDefinition GetMethod (this TypeDefinition self, string name)
+		public static MethodDefinition GetMethod (this ITypeDefinition self, string name)
 		{
 			return self.Methods.Where (m => m.Name == name).First ();
 		}
 
-		public static FieldDefinition GetField (this TypeDefinition self, string name)
+		public static FieldDefinition GetField (this ITypeDefinition self, string name)
 		{
 			return self.Fields.Where (f => f.Name == name).First ();
 		}

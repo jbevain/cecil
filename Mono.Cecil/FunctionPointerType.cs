@@ -116,7 +116,7 @@ namespace Mono.Cecil {
 			this.EType = MD.ElementType.FnPtr;
 		}
 
-		public override TypeDefinition Resolve ()
+		public override ITypeDefinition Resolve ()
 		{
 			return null;
 		}

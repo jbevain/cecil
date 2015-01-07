@@ -37,14 +37,14 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class ModuleDefinitionRocks {
 
-		public static IEnumerable<TypeDefinition> GetAllTypes (this ModuleDefinition self)
+		public static IEnumerable<ITypeDefinition> GetAllTypes (this ModuleDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
 
 			// it was fun to write, but we need a somewhat less convoluted implementation
 			return self.Types.SelectMany (
-				Functional.Y<TypeDefinition, IEnumerable<TypeDefinition>> (f => type => type.NestedTypes.SelectMany (f).Prepend (type)));
+				Functional.Y<ITypeDefinition, IEnumerable<ITypeDefinition>> (f => type => type.NestedTypes.SelectMany (f).Prepend (type)));
 		}
 	}
 }

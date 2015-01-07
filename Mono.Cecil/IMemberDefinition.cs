@@ -28,15 +28,11 @@
 
 namespace Mono.Cecil {
 
-	public interface IMemberDefinition : ICustomAttributeProvider {
-
-		string Name { get; set; }
-		string FullName { get; }
+	public interface IMemberDefinition : IMemberReference, ICustomAttributeProvider {
 
 		bool IsSpecialName { get; set; }
 		bool IsRuntimeSpecialName { get; set; }
 
-		TypeDefinition DeclaringType { get; set; }
 	}
 
 	static partial class Mixin {

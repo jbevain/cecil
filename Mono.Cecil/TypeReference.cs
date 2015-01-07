@@ -86,7 +86,7 @@ namespace Mono.Cecil {
         bool IsPrimitive { get; }
         MetadataType MetadataType { get; }
         ITypeReference GetElementType ();
-        TypeDefinition Resolve ();
+        ITypeDefinition Resolve ();
         ElementType EType { get; set; }
     }
 
@@ -135,6 +135,7 @@ namespace Mono.Cecil {
 
 				return null;
 			}
+		    set { module = value; }
 		}
 
 		IGenericParameterProvider IGenericContext.Type {
@@ -293,7 +294,7 @@ namespace Mono.Cecil {
 			return this;
 		}
 
-		public virtual TypeDefinition Resolve ()
+		public virtual ITypeDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)
@@ -362,7 +363,7 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		public static TypeDefinition CheckedResolve (this ITypeReference self)
+		public static ITypeDefinition CheckedResolve (this ITypeReference self)
 		{
 			var type = self.Resolve ();
 			if (type == null)

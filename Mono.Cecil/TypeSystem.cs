@@ -50,7 +50,7 @@ namespace Mono.Cecil {
 				throw new NotSupportedException ();
 			}
 
-			TypeReference LookupTypeDefinition (string @namespace, string name)
+			ITypeReference LookupTypeDefinition (string @namespace, string name)
 			{
 				var metadata = module.MetadataSystem;
 				if (metadata.Types == null)

@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 	}
 
 	public interface IMetadataResolver {
-		TypeDefinition Resolve (ITypeReference type);
+		ITypeDefinition Resolve (ITypeReference type);
 		FieldDefinition Resolve (FieldReference field);
 		MethodDefinition Resolve (MethodReference method);
 	}
@@ -106,7 +106,7 @@ namespace Mono.Cecil {
 			assembly_resolver = assemblyResolver;
 		}
 
-		public virtual TypeDefinition Resolve (ITypeReference type)
+		public virtual ITypeDefinition Resolve (ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ("type");
@@ -141,7 +141,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		static TypeDefinition GetType (ModuleDefinition module, ITypeReference reference)
+		static ITypeDefinition GetType (ModuleDefinition module, ITypeReference reference)
 		{
 			var type = GetTypeDefinition (module, reference);
 			if (type != null)
@@ -166,7 +166,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static TypeDefinition GetTypeDefinition (ModuleDefinition module, ITypeReference type)
+		static ITypeDefinition GetTypeDefinition (ModuleDefinition module, ITypeReference type)
 		{
 			if (!type.IsNested)
 				return module.GetType (type.Namespace, type.Name);
@@ -193,7 +193,7 @@ namespace Mono.Cecil {
 			return GetField (type, field);
 		}
 
-		FieldDefinition GetField (TypeDefinition type, FieldReference reference)
+		FieldDefinition GetField (ITypeDefinition type, FieldReference reference)
 		{
 			while (type != null) {
 				var field = GetField (type.Fields, reference);
@@ -243,7 +243,7 @@ namespace Mono.Cecil {
 			return GetMethod (type, method);
 		}
 
-		MethodDefinition GetMethod (TypeDefinition type, MethodReference reference)
+		MethodDefinition GetMethod (ITypeDefinition type, MethodReference reference)
 		{
 			while (type != null) {
 				var method = GetMethod (type.Methods, reference);

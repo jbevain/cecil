@@ -70,7 +70,7 @@ namespace Mono.Cecil.Rocks {
 			}
 		}
 
-		static TypeDefinition ResolveBaseType (TypeDefinition type)
+		static ITypeDefinition ResolveBaseType (ITypeDefinition type)
 		{
 			if (type == null)
 				return null;
@@ -82,7 +82,7 @@ namespace Mono.Cecil.Rocks {
 			return base_type.Resolve ();
 		}
 
-		static MethodDefinition GetMatchingMethod (TypeDefinition type, MethodDefinition method)
+		static MethodDefinition GetMatchingMethod (ITypeDefinition type, MethodDefinition method)
 		{
 			return MetadataResolver.GetMethod (type.Methods, method);
 		}

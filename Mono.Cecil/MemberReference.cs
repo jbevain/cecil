@@ -31,7 +31,7 @@ namespace Mono.Cecil {
         string Name { get; set; }
         string FullName { get; }
         ITypeReference DeclaringType { get; set; }
-        ModuleDefinition Module { get; }
+        ModuleDefinition Module { get; set; }
         bool IsDefinition { get; }
         bool ContainsGenericParameter { get; }
     }
@@ -72,11 +72,13 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public virtual ModuleDefinition Module {
-			get { return declaring_type != null ? declaring_type.Module : null; }
+		public virtual ModuleDefinition Module
+		{
+		    get { return declaring_type != null ? declaring_type.Module : null; }
+            set { }
 		}
 
-		public virtual bool IsDefinition {
+        public virtual bool IsDefinition {
 			get { return false; }
 		}
 

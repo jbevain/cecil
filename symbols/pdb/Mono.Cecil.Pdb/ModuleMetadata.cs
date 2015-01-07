@@ -147,7 +147,7 @@ namespace Mono.Cecil.Pdb {
 
 		readonly ModuleDefinition module;
 
-		Dictionary<uint, TypeDefinition> types;
+		Dictionary<uint, ITypeDefinition> types;
 		Dictionary<uint, MethodDefinition> methods;
 
 		public ModuleMetadata (ModuleDefinition module)
@@ -155,7 +155,7 @@ namespace Mono.Cecil.Pdb {
 			this.module = module;
 		}
 
-		bool TryGetType (uint token, out TypeDefinition type)
+		bool TryGetType (uint token, out ITypeDefinition type)
 		{
 			if (types == null)
 				InitializeMetadata (module);
@@ -173,7 +173,7 @@ namespace Mono.Cecil.Pdb {
 
 		void InitializeMetadata (ModuleDefinition module)
 		{
-			types = new Dictionary<uint, TypeDefinition> ();
+			types = new Dictionary<uint, ITypeDefinition> ();
 			methods = new Dictionary<uint, MethodDefinition> ();
 
 			foreach (var type in module.GetTypes ()) {
@@ -182,7 +182,7 @@ namespace Mono.Cecil.Pdb {
 			}
 		}
 
-		void InitializeMethods (TypeDefinition type)
+		void InitializeMethods (ITypeDefinition type)
 		{
 			foreach (var method in type.Methods)
 				methods.Add (method.MetadataToken.ToUInt32 (), method);
@@ -480,7 +480,7 @@ namespace Mono.Cecil.Pdb {
 
 		public uint GetTypeDefProps (uint td, IntPtr szTypeDef, uint cchTypeDef, out uint pchTypeDef, IntPtr pdwTypeDefFlags)
 		{
-			TypeDefinition type;
+			ITypeDefinition type;
 			if (!TryGetType (td, out type)) {
 				Marshal.WriteInt16 (szTypeDef, 0);
 				pchTypeDef = 1;
@@ -774,7 +774,7 @@ namespace Mono.Cecil.Pdb {
 
 		public uint GetNestedClassProps (uint tdNestedClass)
 		{
-			TypeDefinition type;
+			ITypeDefinition type;
 			if (!TryGetType (tdNestedClass, out type))
 				return 0;
 

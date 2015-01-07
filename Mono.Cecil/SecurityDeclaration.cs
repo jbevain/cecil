@@ -50,7 +50,8 @@ namespace Mono.Cecil {
 		NonCasInheritance = 15
 	}
 
-	public interface ISecurityDeclarationProvider : IMetadataTokenProvider {
+    public interface ISecurityDeclarationProvider : IMetadataTokenProvider
+    {
 
 		bool HasSecurityDeclarations { get; }
 		Collection<SecurityDeclaration> SecurityDeclarations { get; }

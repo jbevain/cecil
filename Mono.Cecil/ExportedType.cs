@@ -235,7 +235,7 @@ namespace Mono.Cecil {
 			return FullName;
 		}
 
-		public TypeDefinition Resolve ()
+		public ITypeDefinition Resolve ()
 		{
 			return module.Resolve (CreateReference ());
 		}

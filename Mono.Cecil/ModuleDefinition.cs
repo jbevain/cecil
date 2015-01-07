@@ -421,7 +421,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<TypeDefinition> Types {
+		public Collection<ITypeDefinition> Types {
 			get {
 				if (types != null)
 					return types;
@@ -547,7 +547,7 @@ namespace Mono.Cecil {
 				: GetType (fullName);
 		}
 
-		public TypeDefinition GetType (string fullName)
+		public ITypeDefinition GetType (string fullName)
 		{
 			CheckFullName (fullName);
 
@@ -558,19 +558,19 @@ namespace Mono.Cecil {
 			return ((TypeDefinitionCollection) this.Types).GetType (fullName);
 		}
 
-		public TypeDefinition GetType (string @namespace, string name)
+		public ITypeDefinition GetType (string @namespace, string name)
 		{
 			Mixin.CheckName (name);
 
 			return ((TypeDefinitionCollection) this.Types).GetType (@namespace ?? string.Empty, name);
 		}
 
-		public IEnumerable<TypeDefinition> GetTypes ()
+		public IEnumerable<ITypeDefinition> GetTypes ()
 		{
 			return GetTypes (Types);
 		}
 
-		static IEnumerable<TypeDefinition> GetTypes (Collection<TypeDefinition> types)
+		static IEnumerable<ITypeDefinition> GetTypes (Collection<ITypeDefinition> types)
 		{
 			for (int i = 0; i < types.Count; i++) {
 				var type = types [i];
@@ -593,7 +593,7 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 		}
 
-		TypeDefinition GetNestedType (string fullname)
+		ITypeDefinition GetNestedType (string fullname)
 		{
 			var names = fullname.Split ('/');
 			var type = GetType (names [0]);
@@ -622,7 +622,7 @@ namespace Mono.Cecil {
 			return MetadataResolver.Resolve (method);
 		}
 
-		internal TypeDefinition Resolve (ITypeReference type)
+		internal ITypeDefinition Resolve (ITypeReference type)
 		{
 			return MetadataResolver.Resolve (type);
 		}

@@ -37,40 +37,40 @@ namespace Mono.Cecil {
 
 	using Slot = Row<string, string>;
 
-	sealed class TypeDefinitionCollection : Collection<TypeDefinition> {
+	sealed class TypeDefinitionCollection : Collection<ITypeDefinition> {
 
 		readonly ModuleDefinition container;
-		readonly Dictionary<Slot, TypeDefinition> name_cache;
+		readonly Dictionary<Slot, ITypeDefinition> name_cache;
 
 		internal TypeDefinitionCollection (ModuleDefinition container)
 		{
 			this.container = container;
-			this.name_cache = new Dictionary<Slot, TypeDefinition> (new RowEqualityComparer ());
+			this.name_cache = new Dictionary<Slot, ITypeDefinition> (new RowEqualityComparer ());
 		}
 
 		internal TypeDefinitionCollection (ModuleDefinition container, int capacity)
 			: base (capacity)
 		{
 			this.container = container;
-			this.name_cache = new Dictionary<Slot, TypeDefinition> (capacity, new RowEqualityComparer ());
+			this.name_cache = new Dictionary<Slot, ITypeDefinition> (capacity, new RowEqualityComparer ());
 		}
 
-		protected override void OnAdd (TypeDefinition item, int index)
+		protected override void OnAdd (ITypeDefinition item, int index)
 		{
 			Attach (item);
 		}
 
-		protected override void OnSet (TypeDefinition item, int index)
+		protected override void OnSet (ITypeDefinition item, int index)
 		{
 			Attach (item);
 		}
 
-		protected override void OnInsert (TypeDefinition item, int index)
+		protected override void OnInsert (ITypeDefinition item, int index)
 		{
 			Attach (item);
 		}
 
-		protected override void OnRemove (TypeDefinition item, int index)
+		protected override void OnRemove (ITypeDefinition item, int index)
 		{
 			Detach (item);
 		}
@@ -81,24 +81,24 @@ namespace Mono.Cecil {
 				Detach (type);
 		}
 
-		void Attach (TypeDefinition type)
+		void Attach (ITypeDefinition type)
 		{
 			if (type.Module != null && type.Module != container)
 				throw new ArgumentException ("Type already attached");
 
-			type.module = container;
-			type.scope = container;
+			type.Module = container;
+			type.Scope = container;
 			name_cache [new Slot (type.Namespace, type.Name)] = type;
 		}
 
-		void Detach (TypeDefinition type)
+		void Detach (ITypeDefinition type)
 		{
-			type.module = null;
-			type.scope = null;
+			type.Module = null;
+			type.Scope = null;
 			name_cache.Remove (new Slot (type.Namespace, type.Name));
 		}
 
-		public TypeDefinition GetType (string fullname)
+		public ITypeDefinition GetType (string fullname)
 		{
 			string @namespace, name;
 			TypeParser.SplitFullName (fullname, out @namespace, out name);
@@ -106,9 +106,9 @@ namespace Mono.Cecil {
 			return GetType (@namespace, name);
 		}
 
-		public TypeDefinition GetType (string @namespace, string name)
+		public ITypeDefinition GetType (string @namespace, string name)
 		{
-			TypeDefinition type;
+			ITypeDefinition type;
 			if (name_cache.TryGetValue (new Slot (@namespace, name), out type))
 				return type;
 

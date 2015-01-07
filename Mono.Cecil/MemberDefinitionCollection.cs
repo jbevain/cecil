@@ -34,14 +34,14 @@ namespace Mono.Cecil {
 
 	class MemberDefinitionCollection<T> : Collection<T> where T : IMemberDefinition {
 
-		TypeDefinition container;
+		ITypeDefinition container;
 
-		internal MemberDefinitionCollection (TypeDefinition container)
+		internal MemberDefinitionCollection (ITypeDefinition container)
 		{
 			this.container = container;
 		}
 
-		internal MemberDefinitionCollection (TypeDefinition container, int capacity)
+		internal MemberDefinitionCollection (ITypeDefinition container, int capacity)
 			: base (capacity)
 		{
 			this.container = container;

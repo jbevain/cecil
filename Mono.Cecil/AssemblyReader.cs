@@ -166,13 +166,13 @@ namespace Mono.Cecil {
 				Read (assembly.SecurityDeclarations);
 		}
 
-		static void ReadTypes (Collection<TypeDefinition> types)
+		static void ReadTypes (Collection<ITypeDefinition> types)
 		{
 			for (int i = 0; i < types.Count; i++)
 				ReadType (types [i]);
 		}
 
-		static void ReadType (TypeDefinition type)
+		static void ReadType (ITypeDefinition type)
 		{
 			ReadGenericParameters (type);
 
@@ -246,7 +246,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadFields (TypeDefinition type)
+		static void ReadFields (ITypeDefinition type)
 		{
 			var fields = type.Fields;
 
@@ -269,7 +269,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadMethods (TypeDefinition type)
+		static void ReadMethods (ITypeDefinition type)
 		{
 			var methods = type.Methods;
 
@@ -318,7 +318,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadProperties (TypeDefinition type)
+		static void ReadProperties (ITypeDefinition type)
 		{
 			var properties = type.Properties;
 
@@ -334,7 +334,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadEvents (TypeDefinition type)
+		static void ReadEvents (ITypeDefinition type)
 		{
 			var events = type.Events;
 
@@ -745,7 +745,7 @@ namespace Mono.Cecil {
 			InitializeMethods ();
 
 			int length = MoveTo (Table.TypeDef);
-			var types = metadata.Types = new TypeDefinition [length];
+			var types = metadata.Types = new ITypeDefinition [length];
 
 			for (uint i = 0; i < length; i++) {
 				if (types [i] != null)
@@ -770,7 +770,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public bool HasNestedTypes (TypeDefinition type)
+		public bool HasNestedTypes (ITypeDefinition type)
 		{
 			uint [] mapping;
 			InitializeNestedTypes ();
@@ -781,14 +781,14 @@ namespace Mono.Cecil {
 			return mapping.Length > 0;
 		}
 
-		public Collection<TypeDefinition> ReadNestedTypes (TypeDefinition type)
+		public Collection<ITypeDefinition> ReadNestedTypes (ITypeDefinition type)
 		{
 			InitializeNestedTypes ();
 			uint [] mapping;
 			if (!metadata.TryGetNestedTypeMapping (type, out mapping))
-				return new MemberDefinitionCollection<TypeDefinition> (type);
+				return new MemberDefinitionCollection<ITypeDefinition> (type);
 
-			var nested_types = new MemberDefinitionCollection<TypeDefinition> (type, mapping.Length);
+			var nested_types = new MemberDefinitionCollection<ITypeDefinition> (type, mapping.Length);
 
 			for (int i = 0; i < mapping.Length; i++) {
 				var nested_type = GetTypeDefinition (mapping [i]);
@@ -843,7 +843,7 @@ namespace Mono.Cecil {
 			return new_mapped;
 		}
 
-		TypeDefinition ReadType (uint rid)
+		ITypeDefinition ReadType (uint rid)
 		{
 			if (!MoveTo (Table.TypeDef, rid))
 				return null;
@@ -862,8 +862,8 @@ namespace Mono.Cecil {
 
 			type.BaseType = GetTypeDefOrRef (ReadMetadataToken (CodedIndex.TypeDefOrRef));
 
-			type.fields_range = ReadFieldsRange (rid);
-			type.methods_range = ReadMethodsRange (rid);
+			type.FieldsRange = ReadFieldsRange (rid);
+			type.MethodsRange = ReadMethodsRange (rid);
 
 			if (IsNested (attributes))
 				type.DeclaringType = GetNestedTypeDeclaringType (type);
@@ -871,7 +871,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		TypeDefinition GetNestedTypeDeclaringType (TypeDefinition type)
+		ITypeDefinition GetNestedTypeDeclaringType (ITypeDefinition type)
 		{
 			uint declaring_rid;
 			if (!metadata.TryGetReverseNestedTypeMapping (type, out declaring_rid))
@@ -914,11 +914,11 @@ namespace Mono.Cecil {
 			return list;
 		}
 
-		public Row<short, int> ReadTypeLayout (TypeDefinition type)
+		public Row<short, int> ReadTypeLayout (ITypeDefinition type)
 		{
 			InitializeTypeLayouts ();
 			Row<ushort, uint> class_layout;
-			var rid = type.token.RID;
+			var rid = type.MetadataToken.RID;
 			if (!metadata.ClassLayouts.TryGetValue (rid, out class_layout))
 				return new Row<short, int> (Mixin.NoDataMarker, Mixin.NoDataMarker);
 
@@ -954,7 +954,7 @@ namespace Mono.Cecil {
 			return (TypeReference) LookupToken (token);
 		}
 
-		public TypeDefinition GetTypeDefinition (uint rid)
+		public ITypeDefinition GetTypeDefinition (uint rid)
 		{
 			InitializeTypeDefinitions ();
 
@@ -965,7 +965,7 @@ namespace Mono.Cecil {
 			return ReadTypeDefinition (rid);
 		}
 
-		TypeDefinition ReadTypeDefinition (uint rid)
+		ITypeDefinition ReadTypeDefinition (uint rid)
 		{
 			if (!MoveTo (Table.TypeDef, rid))
 				return null;
@@ -1113,7 +1113,7 @@ namespace Mono.Cecil {
 			return new SignatureReader (signature, this);
 		}
 
-		public bool HasInterfaces (TypeDefinition type)
+		public bool HasInterfaces (ITypeDefinition type)
 		{
 			InitializeInterfaces ();
 			MetadataToken [] mapping;
@@ -1121,7 +1121,7 @@ namespace Mono.Cecil {
 			return metadata.TryGetInterfaceMapping (type, out mapping);
 		}
 
-		public Collection<ITypeReference> ReadInterfaces (TypeDefinition type)
+		public Collection<ITypeReference> ReadInterfaces (ITypeDefinition type)
 		{
 			InitializeInterfaces ();
 			MetadataToken [] mapping;
@@ -1163,9 +1163,9 @@ namespace Mono.Cecil {
 			metadata.SetInterfaceMapping (type, AddMapping (metadata.Interfaces, type, @interface));
 		}
 
-		public Collection<FieldDefinition> ReadFields (TypeDefinition type)
+		public Collection<FieldDefinition> ReadFields (ITypeDefinition type)
 		{
-			var fields_range = type.fields_range;
+			var fields_range = type.FieldsRange;
 			if (fields_range.Length == 0)
 				return new MemberDefinitionCollection<FieldDefinition> (type);
 
@@ -1342,7 +1342,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public bool HasEvents (TypeDefinition type)
+		public bool HasEvents (ITypeDefinition type)
 		{
 			InitializeEvents ();
 
@@ -1353,7 +1353,7 @@ namespace Mono.Cecil {
 			return range.Length > 0;
 		}
 
-		public Collection<EventDefinition> ReadEvents (TypeDefinition type)
+		public Collection<EventDefinition> ReadEvents (ITypeDefinition type)
 		{
 			InitializeEvents ();
 			Range range;
@@ -1418,7 +1418,7 @@ namespace Mono.Cecil {
 			return ReadListRange (rid, Table.EventMap, Table.Event);
 		}
 
-		public bool HasProperties (TypeDefinition type)
+		public bool HasProperties (ITypeDefinition type)
 		{
 			InitializeProperties ();
 
@@ -1429,7 +1429,7 @@ namespace Mono.Cecil {
 			return range.Length > 0;
 		}
 
-		public Collection<PropertyDefinition> ReadProperties (TypeDefinition type)
+		public Collection<PropertyDefinition> ReadProperties (ITypeDefinition type)
 		{
 			InitializeProperties ();
 
@@ -1564,7 +1564,7 @@ namespace Mono.Cecil {
 			return row.Col1;
 		}
 
-		static EventDefinition GetEvent (TypeDefinition type, MetadataToken token)
+		static EventDefinition GetEvent (ITypeDefinition type, MetadataToken token)
 		{
 			if (token.TokenType != TokenType.Event)
 				throw new ArgumentException ();
@@ -1572,7 +1572,7 @@ namespace Mono.Cecil {
 			return GetMember (type.Events, token);
 		}
 
-		static PropertyDefinition GetProperty (TypeDefinition type, MetadataToken token)
+		static PropertyDefinition GetProperty (ITypeDefinition type, MetadataToken token)
 		{
 			if (token.TokenType != TokenType.Property)
 				throw new ArgumentException ();
@@ -1628,7 +1628,7 @@ namespace Mono.Cecil {
 			return method.SemanticsAttributes;
 		}
 
-		void ReadAllSemantics (TypeDefinition type)
+		void ReadAllSemantics (ITypeDefinition type)
 		{
 			var methods = type.Methods;
 			for (int i = 0; i < methods.Count; i++) {
@@ -1646,9 +1646,9 @@ namespace Mono.Cecil {
 			return ReadListRange (method_rid, Table.Method, Table.Param);
 		}
 
-		public Collection<MethodDefinition> ReadMethods (TypeDefinition type)
+		public Collection<MethodDefinition> ReadMethods (ITypeDefinition type)
 		{
-			var methods_range = type.methods_range;
+			var methods_range = type.MethodsRange;
 			if (methods_range.Length == 0)
 				return new MemberDefinitionCollection<MethodDefinition> (type);
 

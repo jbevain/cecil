@@ -37,7 +37,7 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class TypeDefinitionRocks {
 
-		public static IEnumerable<MethodDefinition> GetConstructors (this TypeDefinition self)
+		public static IEnumerable<MethodDefinition> GetConstructors (this ITypeDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -48,7 +48,7 @@ namespace Mono.Cecil.Rocks {
 			return self.Methods.Where (method => method.IsConstructor);
 		}
 
-		public static MethodDefinition GetStaticConstructor (this TypeDefinition self)
+		public static MethodDefinition GetStaticConstructor (this ITypeDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -59,7 +59,7 @@ namespace Mono.Cecil.Rocks {
 			return self.GetConstructors ().FirstOrDefault (ctor => ctor.IsStatic);
 		}
 
-		public static IEnumerable<MethodDefinition> GetMethods (this TypeDefinition self)
+		public static IEnumerable<MethodDefinition> GetMethods (this ITypeDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -70,7 +70,7 @@ namespace Mono.Cecil.Rocks {
 			return self.Methods.Where (method => !method.IsConstructor);
 		}
 
-		public static ITypeReference GetEnumUnderlyingType (this TypeDefinition self)
+		public static ITypeReference GetEnumUnderlyingType (this ITypeDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");

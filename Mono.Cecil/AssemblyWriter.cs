@@ -1077,11 +1077,11 @@ namespace Mono.Cecil {
 				AttachTypeDefToken (types [i]);
 		}
 
-		void AttachTypeDefToken (TypeDefinition type)
+		void AttachTypeDefToken (ITypeDefinition type)
 		{
-			type.token = new MetadataToken (TokenType.TypeDef, type_rid++);
-			type.fields_range.Start = field_rid;
-			type.methods_range.Start = method_rid;
+			type.MetadataToken = new MetadataToken (TokenType.TypeDef, type_rid++);
+            type.FieldsRange = new Range(field_rid, type.FieldsRange.Length);
+            type.MethodsRange = new Range(method_rid, type.MethodsRange.Length);
 
 			if (type.HasFields)
 				AttachFieldsDefToken (type);
@@ -1093,25 +1093,25 @@ namespace Mono.Cecil {
 				AttachNestedTypesDefToken (type);
 		}
 
-		void AttachNestedTypesDefToken (TypeDefinition type)
+		void AttachNestedTypesDefToken (ITypeDefinition type)
 		{
 			var nested_types = type.NestedTypes;
 			for (int i = 0; i < nested_types.Count; i++)
 				AttachTypeDefToken (nested_types [i]);
 		}
 
-		void AttachFieldsDefToken (TypeDefinition type)
+		void AttachFieldsDefToken (ITypeDefinition type)
 		{
 			var fields = type.Fields;
-			type.fields_range.Length = (uint) fields.Count;
+            type.FieldsRange = new Range(type.FieldsRange.Start, (uint)fields.Count);
 			for (int i = 0; i < fields.Count; i++)
 				fields [i].token = new MetadataToken (TokenType.Field, field_rid++);
 		}
 
-		void AttachMethodsDefToken (TypeDefinition type)
+		void AttachMethodsDefToken (ITypeDefinition type)
 		{
 			var methods = type.Methods;
-			type.methods_range.Length = (uint) methods.Count;
+            type.MethodsRange = new Range(type.MethodsRange.Start, (uint)methods.Count);
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 				var new_token = new MetadataToken (TokenType.Method, method_rid++);
@@ -1223,15 +1223,15 @@ namespace Mono.Cecil {
 				AddType (types [i]);
 		}
 
-		void AddType (TypeDefinition type)
+		void AddType (ITypeDefinition type)
 		{
 			type_def_table.AddRow (new TypeDefRow (
 				type.Attributes,
 				GetStringIndex (type.Name),
 				GetStringIndex (type.Namespace),
 				MakeCodedRID (GetTypeToken (type.BaseType), CodedIndex.TypeDefOrRef),
-				type.fields_range.Start,
-				type.methods_range.Start));
+				type.FieldsRange.Start,
+				type.MethodsRange.Start));
 
 			if (type.HasGenericParameters)
 				AddGenericParameters (type);
@@ -1328,10 +1328,10 @@ namespace Mono.Cecil {
 					MakeCodedRID (GetTypeToken (constraints [i]), CodedIndex.TypeDefOrRef)));
 		}
 
-		void AddInterfaces (TypeDefinition type)
+		void AddInterfaces (ITypeDefinition type)
 		{
 			var interfaces = type.Interfaces;
-			var type_rid = type.token.RID;
+			var type_rid = type.MetadataToken.RID;
 
 			for (int i = 0; i < interfaces.Count; i++)
 				iface_impl_table.AddRow (new InterfaceImplRow (
@@ -1339,17 +1339,17 @@ namespace Mono.Cecil {
 					MakeCodedRID (GetTypeToken (interfaces [i]), CodedIndex.TypeDefOrRef)));
 		}
 
-		void AddLayoutInfo (TypeDefinition type)
+		void AddLayoutInfo (ITypeDefinition type)
 		{
 			var table = GetTable<ClassLayoutTable> (Table.ClassLayout);
 
 			table.AddRow (new ClassLayoutRow (
 				(ushort) type.PackingSize,
 				(uint) type.ClassSize,
-				type.token.RID));
+				type.MetadataToken.RID));
 		}
 
-		void AddNestedTypes (TypeDefinition type)
+		void AddNestedTypes (ITypeDefinition type)
 		{
 			var nested_types = type.NestedTypes;
 			var nested_table = GetTable<NestedClassTable> (Table.NestedClass);
@@ -1357,11 +1357,11 @@ namespace Mono.Cecil {
 			for (int i = 0; i < nested_types.Count; i++) {
 				var nested = nested_types [i];
 				AddType (nested);
-				nested_table.AddRow (new NestedClassRow (nested.token.RID, type.token.RID));
+                nested_table.AddRow(new NestedClassRow(nested.MetadataToken.RID, type.MetadataToken.RID));
 			}
 		}
 
-		void AddFields (TypeDefinition type)
+		void AddFields (ITypeDefinition type)
 		{
 			var fields = type.Fields;
 
@@ -1406,7 +1406,7 @@ namespace Mono.Cecil {
 			table.AddRow (new FieldLayoutRow ((uint) field.Offset, field.token.RID));
 		}
 
-		void AddMethods (TypeDefinition type)
+		void AddMethods (ITypeDefinition type)
 		{
 			var methods = type.Methods;
 
@@ -1484,7 +1484,7 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < overrides.Count; i++) {
 				table.AddRow (new MethodImplRow (
-					method.DeclaringType.token.RID,
+                    method.DeclaringType.MetadataToken.RID,
 					MakeCodedRID (method, CodedIndex.MethodDefOrRef),
 					MakeCodedRID (LookupToken (overrides [i]), CodedIndex.MethodDefOrRef)));
 			}
@@ -1527,11 +1527,11 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetMarshalInfoSignature (owner))));
 		}
 
-		void AddProperties (TypeDefinition type)
+		void AddProperties (ITypeDefinition type)
 		{
 			var properties = type.Properties;
 
-			property_map_table.AddRow (new PropertyMapRow (type.token.RID, property_rid));
+            property_map_table.AddRow(new PropertyMapRow(type.MetadataToken.RID, property_rid));
 
 			for (int i = 0; i < properties.Count; i++)
 				AddProperty (properties [i]);
@@ -1569,11 +1569,11 @@ namespace Mono.Cecil {
 				AddSemantic (MethodSemanticsAttributes.Other, owner, others [i]);
 		}
 
-		void AddEvents (TypeDefinition type)
+		void AddEvents (ITypeDefinition type)
 		{
 			var events = type.Events;
 
-			event_map_table.AddRow (new EventMapRow (type.token.RID, event_rid));
+            event_map_table.AddRow(new EventMapRow(type.MetadataToken.RID, event_rid));
 
 			for (int i = 0; i < events.Count; i++)
 				AddEvent (events [i]);
