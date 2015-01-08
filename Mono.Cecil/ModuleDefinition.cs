@@ -262,7 +262,7 @@ namespace Mono.Cecil {
         bool HasImage { get; }
         object SyncRoot { get; }
         MetadataReader MetadataReader { get; }
-        MetadataSystem MetadataSystem { get; }
+        IMetadataSystem MetadataSystem { get; }
         ReadingMode ReadingMode { get;}
         ISymbolReaderProvider SymbolReaderProvider { get; set; }
         Section GetSection (string rsrc);
@@ -301,7 +301,7 @@ namespace Mono.Cecil {
 		IList<ExportedType> exported_types;
 		TypeDefinitionCollection types;
 
-        public MetadataSystem MetadataSystem { get; private set; }
+        public IMetadataSystem MetadataSystem { get; private set; }
         public ReadingMode ReadingMode { get; internal set; }
         public ISymbolReaderProvider SymbolReaderProvider { get; set; }
 

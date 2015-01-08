@@ -40,7 +40,7 @@ namespace Mono.Cecil.Metadata {
 		}
 	}
 
-	struct Row<T1, T2, T3> {
+    public struct Row<T1, T2, T3> {
 		internal T1 Col1;
 		internal T2 Col2;
 		internal T3 Col3;

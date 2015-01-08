@@ -43,37 +43,124 @@ namespace Mono.Cecil {
 		}
 	}
 
-    public sealed class MetadataSystem {
+    public interface IMetadataSystem {
+        void Clear ();
+        ITypeDefinition GetTypeDefinition (uint rid);
+        void AddTypeDefinition (ITypeDefinition type);
+        ITypeReference GetTypeReference (uint rid);
+        void AddTypeReference (ITypeReference type);
+        IFieldDefinition GetFieldDefinition(uint rid);
+        void AddFieldDefinition(IFieldDefinition field);
+        IMethodDefinition GetMethodDefinition (uint rid);
+        void AddMethodDefinition (IMethodDefinition method);
+        IMemberReference GetMemberReference (uint rid);
+        void AddMemberReference (IMemberReference member);
+        bool TryGetNestedTypeMapping (ITypeDefinition type, out uint [] mapping);
+        void SetNestedTypeMapping (uint type_rid, uint [] mapping);
+        void RemoveNestedTypeMapping (ITypeDefinition type);
+        bool TryGetReverseNestedTypeMapping (ITypeDefinition type, out uint declaring);
+        void SetReverseNestedTypeMapping (uint nested, uint declaring);
+        void RemoveReverseNestedTypeMapping (ITypeDefinition type);
+        bool TryGetInterfaceMapping (ITypeDefinition type, out MetadataToken [] mapping);
+        void SetInterfaceMapping (uint type_rid, MetadataToken [] mapping);
+        void RemoveInterfaceMapping (ITypeDefinition type);
+        void AddPropertiesRange (uint type_rid, Range range);
+        bool TryGetPropertiesRange (ITypeDefinition type, out Range range);
+        void RemovePropertiesRange (ITypeDefinition type);
+        void AddEventsRange (uint type_rid, Range range);
+        bool TryGetEventsRange (ITypeDefinition type, out Range range);
+        void RemoveEventsRange (ITypeDefinition type);
+        bool TryGetGenericParameterRanges (IGenericParameterProvider owner, out Range [] ranges);
+        void RemoveGenericParameterRange (IGenericParameterProvider owner);
+        bool TryGetCustomAttributeRanges (ICustomAttributeProvider owner, out Range [] ranges);
+        void RemoveCustomAttributeRange (ICustomAttributeProvider owner);
+        bool TryGetSecurityDeclarationRanges (ISecurityDeclarationProvider owner, out Range [] ranges);
+        void RemoveSecurityDeclarationRange (ISecurityDeclarationProvider owner);
+        bool TryGetGenericConstraintMapping (GenericParameter generic_parameter, out MetadataToken [] mapping);
+        void SetGenericConstraintMapping (uint gp_rid, MetadataToken [] mapping);
+        void RemoveGenericConstraintMapping (GenericParameter generic_parameter);
+        bool TryGetOverrideMapping (IMethodDefinition method, out MetadataToken [] mapping);
+        void SetOverrideMapping (uint rid, MetadataToken [] mapping);
+        void RemoveOverrideMapping (IMethodDefinition method);
+        ITypeDefinition GetFieldDeclaringType (uint field_rid);
+        ITypeDefinition GetMethodDeclaringType (uint method_rid);
+        ITypeDefinition[] Types { get; set; }
+        IAssemblyNameReference[] AssemblyReferences { get; set; }
+        IModuleReference[] ModuleReferences { get; set; }
+        Dictionary<uint, uint[]> NestedTypes { get; set; }
+        Dictionary<uint, uint> ReverseNestedTypes { get; set; }
+        Dictionary<uint, Row<ushort, uint>> ClassLayouts { get; set; }
+        ITypeReference[] TypeReferences { get; set; }
+        IFieldDefinition[] Fields { get; set; }
+        IMethodDefinition[] Methods { get; set; }
+        IMemberReference[] MemberReferences { get; set; }
+        Dictionary<uint, MetadataToken[]> Interfaces { get; set; }
+        Dictionary<uint, uint> FieldLayouts { get; set; }
+        Dictionary<uint, uint> FieldRVAs { get; set; }
+        Dictionary<MetadataToken, uint> FieldMarshals { get; set; }
+        Dictionary<MetadataToken, Row<ElementType, uint>> Constants { get; set; }
+        Dictionary<uint, MetadataToken[]> Overrides { get; set; }
+        Dictionary<MetadataToken, Range[]> CustomAttributes { get; set; }
+        Dictionary<MetadataToken, Range[]> SecurityDeclarations { get; set; }
+        Dictionary<uint, Range> Events { get; set; }
+        Dictionary<uint, Range> Properties { get; set; }
+        Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics { get; set; }
+        Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes { get; set; }
+        Dictionary<MetadataToken, Range[]> GenericParameters { get; set; }
+        Dictionary<uint, MetadataToken[]> GenericConstraints { get; set; }
 
-		internal IAssemblyNameReference [] AssemblyReferences;
-		internal IModuleReference [] ModuleReferences;
+    }
 
-		internal ITypeDefinition [] Types;
-		internal ITypeReference [] TypeReferences;
+    public sealed class MetadataSystem : IMetadataSystem {
+        static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
 
-        internal IFieldDefinition[] Fields;
-		internal IMethodDefinition [] Methods;
-		internal IMemberReference [] MemberReferences;
+        public Dictionary<uint, uint> FieldRVAs { get; set; }
 
-		internal Dictionary<uint, uint []> NestedTypes;
-		internal Dictionary<uint, uint> ReverseNestedTypes;
-		internal Dictionary<uint, MetadataToken []> Interfaces;
-		internal Dictionary<uint, Row<ushort, uint>> ClassLayouts;
-		internal Dictionary<uint, uint> FieldLayouts;
-		internal Dictionary<uint, uint> FieldRVAs;
-		internal Dictionary<MetadataToken, uint> FieldMarshals;
-		internal Dictionary<MetadataToken, Row<ElementType, uint>> Constants;
-		internal Dictionary<uint, MetadataToken []> Overrides;
-		internal Dictionary<MetadataToken, Range []> CustomAttributes;
-		internal Dictionary<MetadataToken, Range []> SecurityDeclarations;
-		internal Dictionary<uint, Range> Events;
-		internal Dictionary<uint, Range> Properties;
-		internal Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics;
-		internal Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes;
-		internal Dictionary<MetadataToken, Range []> GenericParameters;
-		internal Dictionary<uint, MetadataToken []> GenericConstraints;
+        public Dictionary<MetadataToken, uint> FieldMarshals{ get; set; }
 
-		static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
+        public Dictionary<MetadataToken, Row<ElementType, uint>> Constants{ get; set; }
+
+        public Dictionary<uint, MetadataToken[]> Overrides{ get; set; }
+
+        public Dictionary<MetadataToken, Range[]> CustomAttributes{ get; set; }
+
+        public Dictionary<MetadataToken, Range[]> SecurityDeclarations{ get; set; }
+
+        public Dictionary<uint, Range> Events{ get; set; }
+
+        public Dictionary<uint, Range> Properties{ get; set; }
+
+        public Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics{ get; set; }
+
+        public Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes{ get; set; }
+
+        public Dictionary<MetadataToken, Range[]> GenericParameters{ get; set; }
+
+        public Dictionary<uint, MetadataToken[]> GenericConstraints{ get; set; }
+
+        public ITypeDefinition[] Types { get; set; }
+
+        public IAssemblyNameReference[] AssemblyReferences { get; set; }
+
+        public IModuleReference[] ModuleReferences { get; set; }
+
+        public Dictionary<uint, uint[]> NestedTypes { get; set; }
+
+        public Dictionary<uint, uint> ReverseNestedTypes { get; set; }
+
+        public Dictionary<uint, Row<ushort, uint>> ClassLayouts { get; set; }
+
+        public ITypeReference[] TypeReferences { get; set; }
+
+        public IFieldDefinition[] Fields { get; set; }
+
+        public IMethodDefinition[] Methods { get; set; }
+
+        public IMemberReference[] MemberReferences { get; set; }
+
+        public Dictionary<uint, MetadataToken[]> Interfaces { get; set; }
+
+        public Dictionary<uint, uint> FieldLayouts { get; set; }
 
 		static void InitializePrimitives ()
 		{

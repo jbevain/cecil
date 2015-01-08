@@ -371,7 +371,7 @@ namespace Mono.Cecil {
 
 		readonly internal Image image;
 		readonly internal ModuleDefinition module;
-		readonly internal MetadataSystem metadata;
+        readonly internal IMetadataSystem metadata;
 
 		internal IGenericContext context;
 		internal CodeReader code;
