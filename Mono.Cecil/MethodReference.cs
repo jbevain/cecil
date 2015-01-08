@@ -48,7 +48,7 @@ namespace Mono.Cecil {
 		bool has_this;
 		bool explicit_this;
 		MethodCallingConvention calling_convention;
-		internal IList<GenericParameter> generic_parameters;
+        internal IList<IGenericParameter> generic_parameters;
 
 		public virtual bool HasThis {
 			get { return has_this; }
@@ -103,7 +103,8 @@ namespace Mono.Cecil {
 			get { return !generic_parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual IList<GenericParameter> GenericParameters {
+        public virtual IList<IGenericParameter> GenericParameters
+        {
 			get {
 				if (generic_parameters != null)
 					return generic_parameters;

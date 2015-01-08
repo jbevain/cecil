@@ -697,7 +697,7 @@ namespace Mono.Cecil {
 		readonly Dictionary<uint, MetadataToken> type_spec_map;
 		readonly Dictionary<MemberRefRow, MetadataToken> member_ref_map;
 		readonly Dictionary<MethodSpecRow, MetadataToken> method_spec_map;
-		readonly Collection<GenericParameter> generic_parameters;
+        readonly Collection<IGenericParameter> generic_parameters;
 		readonly Dictionary<MetadataToken, MetadataToken> method_def_map;
 
 		readonly internal CodeWriter code;
@@ -776,7 +776,7 @@ namespace Mono.Cecil {
 			type_spec_map = new Dictionary<uint, MetadataToken> ();
 			member_ref_map = new Dictionary<MemberRefRow, MetadataToken> (row_equality_comparer);
 			method_spec_map = new Dictionary<MethodSpecRow, MetadataToken> (row_equality_comparer);
-			generic_parameters = new Collection<GenericParameter> ();
+            generic_parameters = new Collection<IGenericParameter>();
 			if (write_symbols)
 				method_def_map = new Dictionary<MetadataToken, MetadataToken> ();
 		}
@@ -1272,9 +1272,10 @@ namespace Mono.Cecil {
 				generic_parameters.Add (parameters [i]);
 		}
 
-		sealed class GenericParameterComparer : IComparer<GenericParameter> {
+        sealed class GenericParameterComparer : IComparer<IGenericParameter>
+        {
 
-			public int Compare (GenericParameter a, GenericParameter b)
+            public int Compare(IGenericParameter a, IGenericParameter b)
 			{
 				var a_owner = MakeCodedRID (a.Owner, CodedIndex.TypeOrMethodDef);
 				var b_owner = MakeCodedRID (b.Owner, CodedIndex.TypeOrMethodDef);
@@ -1306,7 +1307,7 @@ namespace Mono.Cecil {
 					MakeCodedRID (generic_parameter.Owner, CodedIndex.TypeOrMethodDef),
 					GetStringIndex (generic_parameter.Name)));
 
-				generic_parameter.token = new MetadataToken (TokenType.GenericParam, rid);
+				generic_parameter.MetadataToken = new MetadataToken (TokenType.GenericParam, rid);
 
 				if (generic_parameter.HasConstraints)
 					AddConstraints (generic_parameter, generic_param_constraint_table);
@@ -1316,11 +1317,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddConstraints (GenericParameter generic_parameter, GenericParamConstraintTable table)
+        void AddConstraints(IGenericParameter generic_parameter, GenericParamConstraintTable table)
 		{
 			var constraints = generic_parameter.Constraints;
 
-			var rid = generic_parameter.token.RID;
+			var rid = generic_parameter.MetadataToken.RID;
 
 			for (int i = 0; i < constraints.Count; i++)
 				table.AddRow (new GenericParamConstraintRow (
@@ -2082,7 +2083,7 @@ namespace Mono.Cecil {
 			switch (etype) {
 			case ElementType.MVar:
 			case ElementType.Var: {
-				var generic_parameter = (GenericParameter) type;
+                var generic_parameter = (IGenericParameter)type;
 
 				WriteElementType (etype);
 				var position = generic_parameter.Position;

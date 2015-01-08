@@ -33,8 +33,23 @@ using Mono.Collections.Generic;
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
+    public interface IGenericParameter : ITypeReference, ICustomAttributeProvider {
+        GenericParameterAttributes Attributes { get; set; }
+        int Position { get; set; }
+        GenericParameterType Type { get; set; }
+        IGenericParameterProvider Owner { get; set; }
+        bool HasConstraints { get; }
+        IList<ITypeReference> Constraints { get; }
+        IMethodReference DeclaringMethod { get; }
+        bool IsNonVariant { get; set; }
+        bool IsCovariant { get; set; }
+        bool IsContravariant { get; set; }
+        bool HasReferenceTypeConstraint { get; set; }
+        bool HasNotNullableValueTypeConstraint { get; set; }
+        bool HasDefaultConstructorConstraint { get; set; }
+    }
 
-	public sealed class GenericParameter : TypeReference, ICustomAttributeProvider {
+    public sealed class GenericParameter : TypeReference, IGenericParameter {
 
 		internal int position;
 		internal GenericParameterType type;
@@ -49,19 +64,25 @@ namespace Mono.Cecil {
 			set { attributes = (ushort) value; }
 		}
 
-		public int Position {
-			get { return position; }
+		public int Position
+		{
+		    get { return position; }
+		    set { position = value; }
 		}
 
-		public GenericParameterType Type {
-			get { return type; }
-		}
+        public GenericParameterType Type
+        {
+            get { return type; }
+            set { type = value; }
+        }
 
-		public IGenericParameterProvider Owner {
-			get { return owner; }
-		}
+        public IGenericParameterProvider Owner
+        {
+            get { return owner; }
+            set { owner = value; }
+        }
 
-		public bool HasConstraints {
+        public bool HasConstraints {
 			get {
 				if (constraints != null)
 					return constraints.Count > 0;
@@ -237,7 +258,8 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class GenericParameterCollection : Collection<GenericParameter> {
+    sealed class GenericParameterCollection : Collection<IGenericParameter>
+    {
 
 		readonly IGenericParameterProvider owner;
 
@@ -252,39 +274,39 @@ namespace Mono.Cecil {
 			this.owner = owner;
 		}
 
-		protected override void OnAdd (GenericParameter item, int index)
+        protected override void OnAdd(IGenericParameter item, int index)
 		{
 			UpdateGenericParameter (item, index);
 		}
 
-		protected override void OnInsert (GenericParameter item, int index)
+        protected override void OnInsert(IGenericParameter item, int index)
 		{
 			UpdateGenericParameter (item, index);
 
 			for (int i = index; i < size; i++)
-				items[i].position = i + 1;
+				items[i].Position = i + 1;
 		}
 
-		protected override void OnSet (GenericParameter item, int index)
+        protected override void OnSet(IGenericParameter item, int index)
 		{
 			UpdateGenericParameter (item, index);
 		}
 
-		void UpdateGenericParameter (GenericParameter item, int index)
+        void UpdateGenericParameter(IGenericParameter item, int index)
 		{
-			item.owner = owner;
-			item.position = index;
-			item.type = owner.GenericParameterType;
+			item.Owner = owner;
+			item.Position = index;
+			item.Type = owner.GenericParameterType;
 		}
 
-		protected override void OnRemove (GenericParameter item, int index)
+        protected override void OnRemove(IGenericParameter item, int index)
 		{
-			item.owner = null;
-			item.position = -1;
-			item.type = GenericParameterType.Type;
+			item.Owner = null;
+			item.Position = -1;
+			item.Type = GenericParameterType.Type;
 
 			for (int i = index + 1; i < size; i++)
-				items[i].position = i - 1;
+				items[i].Position = i - 1;
 		}
 	}
 }

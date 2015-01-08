@@ -101,7 +101,7 @@ namespace Mono.Cecil {
 
 		string fullname;
 
-		protected IList<GenericParameter> generic_parameters;
+        protected IList<IGenericParameter> generic_parameters;
 
 		public override string Name {
 			get { return base.Name; }
@@ -154,7 +154,8 @@ namespace Mono.Cecil {
 			get { return !generic_parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual IList<GenericParameter> GenericParameters {
+        public virtual IList<IGenericParameter> GenericParameters
+        {
 			get {
 				if (generic_parameters != null)
 					return generic_parameters;

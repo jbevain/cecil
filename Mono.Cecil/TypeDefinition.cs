@@ -345,7 +345,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override IList<GenericParameter> GenericParameters {
+        public override IList<IGenericParameter> GenericParameters
+        {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
 		}
 

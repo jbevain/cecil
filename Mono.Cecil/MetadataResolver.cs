@@ -353,7 +353,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		static bool AreSame (GenericParameter a, GenericParameter b)
+        static bool AreSame(IGenericParameter a, IGenericParameter b)
 		{
 			return a.Position == b.Position;
 		}
@@ -370,7 +370,7 @@ namespace Mono.Cecil {
 				return false;
 
 			if (a.IsGenericParameter)
-				return AreSame ((GenericParameter) a, (GenericParameter) b);
+                return AreSame((IGenericParameter)a, (IGenericParameter)b);
 
 			if (a.IsTypeSpecification ())
 				return AreSame ((TypeSpecification) a, (TypeSpecification) b);

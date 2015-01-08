@@ -34,7 +34,7 @@ namespace Mono.Cecil {
 	public interface IGenericParameterProvider : IMemberReference {
 
 		bool HasGenericParameters { get; }
-		IList<GenericParameter> GenericParameters { get; }
+        IList<IGenericParameter> GenericParameters { get; }
 		GenericParameterType GenericParameterType { get; }
 	}
 
@@ -59,9 +59,9 @@ namespace Mono.Cecil {
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasGenericParameters (provider));
 		}
 
-		public static IList<GenericParameter> GetGenericParameters (
+        public static IList<IGenericParameter> GetGenericParameters(
 			this IGenericParameterProvider self,
-			ref IList<GenericParameter> collection,
+            ref IList<IGenericParameter> collection,
 			IModuleDefinition module)
 		{
 			return module.HasImage ()

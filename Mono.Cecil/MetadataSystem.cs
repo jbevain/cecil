@@ -76,9 +76,9 @@ namespace Mono.Cecil {
         void RemoveCustomAttributeRange (ICustomAttributeProvider owner);
         bool TryGetSecurityDeclarationRanges (ISecurityDeclarationProvider owner, out Range [] ranges);
         void RemoveSecurityDeclarationRange (ISecurityDeclarationProvider owner);
-        bool TryGetGenericConstraintMapping (GenericParameter generic_parameter, out MetadataToken [] mapping);
+        bool TryGetGenericConstraintMapping(IGenericParameter generic_parameter, out MetadataToken[] mapping);
         void SetGenericConstraintMapping (uint gp_rid, MetadataToken [] mapping);
-        void RemoveGenericConstraintMapping (GenericParameter generic_parameter);
+        void RemoveGenericConstraintMapping(IGenericParameter generic_parameter);
         bool TryGetOverrideMapping (IMethodDefinition method, out MetadataToken [] mapping);
         void SetOverrideMapping (uint rid, MetadataToken [] mapping);
         void RemoveOverrideMapping (IMethodDefinition method);
@@ -418,9 +418,9 @@ namespace Mono.Cecil {
 			SecurityDeclarations.Remove (owner.MetadataToken);
 		}
 
-		public bool TryGetGenericConstraintMapping (GenericParameter generic_parameter, out MetadataToken [] mapping)
+        public bool TryGetGenericConstraintMapping(IGenericParameter generic_parameter, out MetadataToken[] mapping)
 		{
-			return GenericConstraints.TryGetValue (generic_parameter.token.RID, out mapping);
+			return GenericConstraints.TryGetValue (generic_parameter.MetadataToken.RID, out mapping);
 		}
 
 		public void SetGenericConstraintMapping (uint gp_rid, MetadataToken [] mapping)
@@ -428,9 +428,9 @@ namespace Mono.Cecil {
 			GenericConstraints [gp_rid] = mapping;
 		}
 
-		public void RemoveGenericConstraintMapping (GenericParameter generic_parameter)
+        public void RemoveGenericConstraintMapping(IGenericParameter generic_parameter)
 		{
-			GenericConstraints.Remove (generic_parameter.token.RID);
+			GenericConstraints.Remove (generic_parameter.MetadataToken.RID);
 		}
 
 		public bool TryGetOverrideMapping (IMethodDefinition method, out MetadataToken [] mapping)

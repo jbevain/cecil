@@ -400,9 +400,9 @@ namespace Mono.Cecil {
         Collection<IMethodDefinition> ReadMethods (ITypeDefinition type);
         IPInvokeInfo ReadPInvokeInfo(IMethodDefinition method);
         bool HasGenericParameters (IGenericParameterProvider provider);
-        IList<GenericParameter> ReadGenericParameters (IGenericParameterProvider provider);
-        bool HasGenericConstraints (GenericParameter generic_parameter);
-        Collection<ITypeReference> ReadGenericConstraints (GenericParameter generic_parameter);
+        IList<IGenericParameter> ReadGenericParameters(IGenericParameterProvider provider);
+        bool HasGenericConstraints(IGenericParameter generic_parameter);
+        Collection<ITypeReference> ReadGenericConstraints(IGenericParameter generic_parameter);
         bool HasOverrides (IMethodDefinition method);
         Collection<IMethodReference> ReadOverrides (IMethodDefinition method);
         IMethodBody ReadMethodBody(IMethodDefinition method);
@@ -1885,7 +1885,7 @@ namespace Mono.Cecil {
 			return RangesSize (ranges) > 0;
 		}
 
-		public IList<GenericParameter> ReadGenericParameters (IGenericParameterProvider provider)
+        public IList<IGenericParameter> ReadGenericParameters(IGenericParameterProvider provider)
 		{
 			InitializeGenericParameters ();
 
@@ -1982,7 +1982,7 @@ namespace Mono.Cecil {
 			ranges [owner] = slots;
 		}
 
-		public bool HasGenericConstraints (GenericParameter generic_parameter)
+        public bool HasGenericConstraints(IGenericParameter generic_parameter)
 		{
 			InitializeGenericConstraints ();
 
@@ -1993,7 +1993,7 @@ namespace Mono.Cecil {
 			return mapping.Length > 0;
 		}
 
-		public Collection<ITypeReference> ReadGenericConstraints (GenericParameter generic_parameter)
+        public Collection<ITypeReference> ReadGenericConstraints(IGenericParameter generic_parameter)
 		{
 			InitializeGenericConstraints ();
 
@@ -2790,7 +2790,7 @@ namespace Mono.Cecil {
 			return CodedIndex.TypeDefOrRef.GetMetadataToken (ReadCompressedUInt32 ());
 		}
 
-		GenericParameter GetGenericParameter (GenericParameterType type, uint var)
+        IGenericParameter GetGenericParameter(GenericParameterType type, uint var)
 		{
 			var context = reader.Context;
 			int index = (int) var;
@@ -2820,7 +2820,7 @@ namespace Mono.Cecil {
 			return provider.GenericParameters [index];
 		}
 
-		GenericParameter GetUnboundGenericParameter (GenericParameterType type, int index)
+        IGenericParameter GetUnboundGenericParameter(GenericParameterType type, int index)
 		{
 			return new GenericParameter (index, type, reader.Module);
 		}
@@ -2830,7 +2830,7 @@ namespace Mono.Cecil {
 			var owner_parameters = owner.GenericParameters;
 
 			for (int i = owner_parameters.Count; i <= index; i++)
-				owner_parameters.Add (new GenericParameter (owner));
+                owner_parameters.Add(new GenericParameter(owner));
 		}
 
 		public void ReadGenericInstanceSignature (IGenericParameterProvider provider, IGenericInstance instance)

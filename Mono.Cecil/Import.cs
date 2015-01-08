@@ -586,10 +586,10 @@ namespace Mono.Cecil {
 
 				return imported_instance;
 			case ElementType.Var:
-				var var_parameter = (GenericParameter) type;
+                var var_parameter = (IGenericParameter)type;
 				return context.TypeParameter (type.DeclaringType.FullName, var_parameter.Position);
 			case ElementType.MVar:
-				var mvar_parameter = (GenericParameter) type;
+                var mvar_parameter = (IGenericParameter)type;
 				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
 			}
 
