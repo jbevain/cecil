@@ -216,7 +216,7 @@ namespace Mono.Cecil {
         IList<ITypeDefinition> Types { get; }
         bool HasExportedTypes { get; }
         IList<ExportedType> ExportedTypes { get; }
-        MethodDefinition EntryPoint { get; set; }
+        IMethodDefinition EntryPoint { get; set; }
         bool HasDebugHeader { get; }
         bool HasTypeReference (string fullName);
         bool HasTypeReference (string scope, string fullName);
@@ -250,7 +250,7 @@ namespace Mono.Cecil {
         void Write (string fileName, WriterParameters parameters);
         void Write (Stream stream, WriterParameters parameters);
         FieldDefinition Resolve (FieldReference field);
-        MethodDefinition Resolve (IMethodReference method);
+        IMethodDefinition Resolve (IMethodReference method);
         ITypeDefinition Resolve (ITypeReference type);
         bool HasImage { get; }
         object SyncRoot { get; }
@@ -282,7 +282,7 @@ namespace Mono.Cecil {
 		Guid mvid;
 
 		internal IAssemblyDefinition assembly;
-		MethodDefinition entry_point;
+		IMethodDefinition entry_point;
 
 #if !READ_ONLY
 		MetadataImporter importer;
@@ -533,7 +533,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public MethodDefinition EntryPoint {
+		public IMethodDefinition EntryPoint {
 			get {
 				if (entry_point != null)
 					return entry_point;
@@ -696,7 +696,7 @@ namespace Mono.Cecil {
 			return MetadataResolver.Resolve (field);
 		}
 
-        public MethodDefinition Resolve (IMethodReference method)
+        public IMethodDefinition Resolve (IMethodReference method)
 		{
 			return MetadataResolver.Resolve (method);
 		}

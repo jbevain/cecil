@@ -52,7 +52,7 @@ namespace Mono.Cecil {
 		internal ITypeReference [] TypeReferences;
 
 		internal FieldDefinition [] Fields;
-		internal MethodDefinition [] Methods;
+		internal IMethodDefinition [] Methods;
 		internal IMemberReference [] MemberReferences;
 
 		internal Dictionary<uint, uint []> NestedTypes;
@@ -200,7 +200,7 @@ namespace Mono.Cecil {
 			Fields [field.token.RID - 1] = field;
 		}
 
-		public MethodDefinition GetMethodDefinition (uint rid)
+		public IMethodDefinition GetMethodDefinition (uint rid)
 		{
 			if (rid < 1 || rid > Methods.Length)
 				return null;
@@ -208,9 +208,9 @@ namespace Mono.Cecil {
 			return Methods [rid - 1];
 		}
 
-		public void AddMethodDefinition (MethodDefinition method)
+		public void AddMethodDefinition (IMethodDefinition method)
 		{
-			Methods [method.token.RID - 1] = method;
+			Methods [method.MetadataToken.RID - 1] = method;
 		}
 
 		public IMemberReference GetMemberReference (uint rid)
@@ -346,9 +346,9 @@ namespace Mono.Cecil {
 			GenericConstraints.Remove (generic_parameter.token.RID);
 		}
 
-		public bool TryGetOverrideMapping (MethodDefinition method, out MetadataToken [] mapping)
+		public bool TryGetOverrideMapping (IMethodDefinition method, out MetadataToken [] mapping)
 		{
-			return Overrides.TryGetValue (method.token.RID, out mapping);
+			return Overrides.TryGetValue (method.MetadataToken.RID, out mapping);
 		}
 
 		public void SetOverrideMapping (uint rid, MetadataToken [] mapping)
@@ -356,9 +356,9 @@ namespace Mono.Cecil {
 			Overrides [rid] = mapping;
 		}
 
-		public void RemoveOverrideMapping (MethodDefinition method)
+		public void RemoveOverrideMapping (IMethodDefinition method)
 		{
-			Overrides.Remove (method.token.RID);
+			Overrides.Remove (method.MetadataToken.RID);
 		}
 
 		public ITypeDefinition GetFieldDeclaringType (uint field_rid)

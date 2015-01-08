@@ -42,7 +42,7 @@ namespace Mono.Cecil.Cil {
 		int start;
 		Section code_section;
 
-		MethodDefinition method;
+		IMethodDefinition method;
 		MethodBody body;
 
 		int Offset {
@@ -56,7 +56,7 @@ namespace Mono.Cecil.Cil {
 			this.reader = reader;
 		}
 
-		public MethodBody ReadMethodBody (MethodDefinition method)
+		public MethodBody ReadMethodBody (IMethodDefinition method)
 		{
 			this.method = method;
 			this.body = new MethodBody (method);
@@ -379,7 +379,7 @@ namespace Mono.Cecil.Cil {
 
 #if !READ_ONLY
 
-		public ByteBuffer PatchRawMethodBody (MethodDefinition method, CodeWriter writer, out MethodSymbols symbols)
+		public ByteBuffer PatchRawMethodBody (IMethodDefinition method, CodeWriter writer, out MethodSymbols symbols)
 		{
 			var buffer = new ByteBuffer ();
 			symbols = new MethodSymbols (method.Name);
@@ -442,10 +442,10 @@ namespace Mono.Cecil.Cil {
 				PatchRawSection (buffer, writer.metadata);
 		}
 
-		static MetadataToken GetOriginalToken (MetadataBuilder metadata, MethodDefinition method)
+		static MetadataToken GetOriginalToken (MetadataBuilder metadata, IMethodDefinition method)
 		{
 			MetadataToken original;
-			if (metadata.TryGetOriginalMethodToken (method.token, out original))
+			if (metadata.TryGetOriginalMethodToken (method.MetadataToken, out original))
 				return original;
 
 			return MetadataToken.Zero;

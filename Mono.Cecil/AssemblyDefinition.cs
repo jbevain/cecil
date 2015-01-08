@@ -38,7 +38,7 @@ namespace Mono.Cecil {
         string FullName { get; }
         IList<IModuleDefinition> Modules { get; }
         IModuleDefinition MainModule { get; }
-        MethodDefinition EntryPoint { get; set; }
+        IMethodDefinition EntryPoint { get; set; }
         void Write (string fileName);
         void Write (Stream stream);
         void Write (string fileName, WriterParameters parameters);
@@ -84,7 +84,7 @@ namespace Mono.Cecil {
 			get { return main_module; }
 		}
 
-		public MethodDefinition EntryPoint {
+		public IMethodDefinition EntryPoint {
 			get { return main_module.EntryPoint; }
 			set { main_module.EntryPoint = value; }
 		}

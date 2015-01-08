@@ -36,7 +36,7 @@ namespace Mono.Cecil {
     public interface IMethodReference : IMemberReference, IMethodSignature, IGenericParameterProvider, IGenericContext {
         bool IsGenericInstance { get; }
         IMethodReference GetElementMethod ();
-        MethodDefinition Resolve ();
+        IMethodDefinition Resolve ();
 
     }
 
@@ -190,7 +190,7 @@ namespace Mono.Cecil {
 			return this;
 		}
 
-		public virtual MethodDefinition Resolve ()
+		public virtual IMethodDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

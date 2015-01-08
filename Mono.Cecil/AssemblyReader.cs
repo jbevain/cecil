@@ -300,7 +300,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadParameters (MethodDefinition method)
+		static void ReadParameters (IMethodDefinition method)
 		{
 			var parameters = method.Parameters;
 
@@ -536,7 +536,7 @@ namespace Mono.Cecil {
 			return new Collection<IAssemblyNameReference> (metadata.AssemblyReferences);
 		}
 
-		public MethodDefinition ReadEntryPoint ()
+		public IMethodDefinition ReadEntryPoint ()
 		{
 			if (module.Image.EntryPointToken == 0)
 				return null;
@@ -1506,11 +1506,11 @@ namespace Mono.Cecil {
 			return ReadListRange (rid, Table.PropertyMap, Table.Property);
 		}
 
-		MethodSemanticsAttributes ReadMethodSemantics (MethodDefinition method)
+		MethodSemanticsAttributes ReadMethodSemantics (IMethodDefinition method)
 		{
 			InitializeMethodSemantics ();
 			Row<MethodSemanticsAttributes, MetadataToken> row;
-			if (!metadata.Semantics.TryGetValue (method.token.RID, out row))
+			if (!metadata.Semantics.TryGetValue (method.MetadataToken.RID, out row))
 				return MethodSemanticsAttributes.None;
 
 			var type = method.DeclaringType;
@@ -1536,7 +1536,7 @@ namespace Mono.Cecil {
 				case TokenType.Event: {
 					var @event = GetEvent (type, row.Col2);
 					if (@event.other_methods == null)
-						@event.other_methods = new Collection<MethodDefinition> ();
+						@event.other_methods = new Collection<IMethodDefinition> ();
 
 					@event.other_methods.Add (method);
 					break;
@@ -1544,7 +1544,7 @@ namespace Mono.Cecil {
 				case TokenType.Property: {
 					var property = GetProperty (type, row.Col2);
 					if (property.other_methods == null)
-						property.other_methods = new Collection<MethodDefinition> ();
+						property.other_methods = new Collection<IMethodDefinition> ();
 
 					property.other_methods.Add (method);
 
@@ -1558,7 +1558,7 @@ namespace Mono.Cecil {
 				throw new NotSupportedException ();
 			}
 
-			metadata.Semantics.Remove (method.token.RID);
+            metadata.Semantics.Remove(method.MetadataToken.RID);
 
 			return row.Col1;
 		}
@@ -1620,7 +1620,7 @@ namespace Mono.Cecil {
 			return @event;
 		}
 
-		public MethodSemanticsAttributes ReadAllSemantics (MethodDefinition method)
+		public MethodSemanticsAttributes ReadAllSemantics (IMethodDefinition method)
 		{
 			ReadAllSemantics (method.DeclaringType);
 
@@ -1632,11 +1632,11 @@ namespace Mono.Cecil {
 			var methods = type.Methods;
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
-				if (method.sem_attrs_ready)
+				if (method.SemanticsAttributesIsReady)
 					continue;
 
-				method.sem_attrs = ReadMethodSemantics (method);
-				method.sem_attrs_ready = true;
+				method.SemanticsAttributes = ReadMethodSemantics (method);
+                method.SemanticsAttributesIsReady = true;
 			}
 		}
 
@@ -1645,13 +1645,13 @@ namespace Mono.Cecil {
 			return ReadListRange (method_rid, Table.Method, Table.Param);
 		}
 
-		public Collection<MethodDefinition> ReadMethods (ITypeDefinition type)
+		public Collection<IMethodDefinition> ReadMethods (ITypeDefinition type)
 		{
 			var methods_range = type.MethodsRange;
 			if (methods_range.Length == 0)
-				return new MemberDefinitionCollection<MethodDefinition> (type);
+				return new MemberDefinitionCollection<IMethodDefinition> (type);
 
-			var methods = new MemberDefinitionCollection<MethodDefinition> (type, (int) methods_range.Length);
+			var methods = new MemberDefinitionCollection<IMethodDefinition> (type, (int) methods_range.Length);
 			if (!MoveTo (Table.MethodPtr, methods_range.Start)) {
 				if (!MoveTo (Table.Method, methods_range.Start))
 					return methods;
@@ -1687,10 +1687,10 @@ namespace Mono.Cecil {
 			if (metadata.Methods != null)
 				return;
 
-			metadata.Methods = new MethodDefinition [image.GetTableLength (Table.Method)];
+			metadata.Methods = new IMethodDefinition [image.GetTableLength (Table.Method)];
 		}
 
-		void ReadMethod (uint method_rid, Collection<MethodDefinition> methods)
+		void ReadMethod (uint method_rid, Collection<IMethodDefinition> methods)
 		{
 			var method = new MethodDefinition ();
 			method.rva = ReadUInt32 ();
@@ -1720,7 +1720,7 @@ namespace Mono.Cecil {
 			base.position = position;
 		}
 
-		void ReadParameters (MethodDefinition method, Range param_range)
+		void ReadParameters (IMethodDefinition method, Range param_range)
 		{
 			if (!MoveTo (Table.ParamPtr, param_range.Start)) {
 				if (!MoveTo (Table.Param, param_range.Start))
@@ -1732,7 +1732,7 @@ namespace Mono.Cecil {
 				ReadParameterPointers (method, param_range);
 		}
 
-		void ReadParameterPointers (MethodDefinition method, Range range)
+		void ReadParameterPointers (IMethodDefinition method, Range range)
 		{
 			for (uint i = 0; i < range.Length; i++) {
 				MoveTo (Table.ParamPtr, range.Start + i);
@@ -1745,7 +1745,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadParameter (uint param_rid, MethodDefinition method)
+		void ReadParameter (uint param_rid, IMethodDefinition method)
 		{
 			var attributes = (ParameterAttributes) ReadUInt16 ();
 			var sequence = ReadUInt16 ();
@@ -1766,12 +1766,12 @@ namespace Mono.Cecil {
 			reader.ReadMethodSignature (method);
 		}
 
-		public PInvokeInfo ReadPInvokeInfo (MethodDefinition method)
+		public PInvokeInfo ReadPInvokeInfo (IMethodDefinition method)
 		{
 			InitializePInvokes ();
 			Row<PInvokeAttributes, uint, uint> row;
 
-			var rid = method.token.RID;
+			var rid = method.MetadataToken.RID;
 
 			if (!metadata.PInvokes.TryGetValue (rid, out row))
 				return null;
@@ -1967,7 +1967,7 @@ namespace Mono.Cecil {
 				AddMapping (metadata.GenericConstraints, generic_parameter, constraint));
 		}
 
-		public bool HasOverrides (MethodDefinition method)
+		public bool HasOverrides (IMethodDefinition method)
 		{
 			InitializeOverrides ();
 			MetadataToken [] mapping;
@@ -1978,7 +1978,7 @@ namespace Mono.Cecil {
 			return mapping.Length > 0;
 		}
 
-		public Collection<IMethodReference> ReadOverrides (MethodDefinition method)
+		public Collection<IMethodReference> ReadOverrides (IMethodDefinition method)
 		{
 			InitializeOverrides ();
 
@@ -2027,7 +2027,7 @@ namespace Mono.Cecil {
 				AddMapping (metadata.Overrides, method_rid, @override));
 		}
 
-		public MethodBody ReadMethodBody (MethodDefinition method)
+		public MethodBody ReadMethodBody (IMethodDefinition method)
 		{
 			return code.ReadMethodBody (method);
 		}
@@ -2136,7 +2136,7 @@ namespace Mono.Cecil {
 			return metadata.GetFieldDefinition (rid);
 		}
 
-		public MethodDefinition GetMethodDefinition (uint rid)
+		public IMethodDefinition GetMethodDefinition (uint rid)
 		{
 			InitializeTypeDefinitions ();
 
@@ -2147,7 +2147,7 @@ namespace Mono.Cecil {
 			return LookupMethod (rid);
 		}
 
-		MethodDefinition LookupMethod (uint rid)
+		IMethodDefinition LookupMethod (uint rid)
 		{
 			var type = metadata.GetMethodDeclaringType (rid);
 			if (type == null)

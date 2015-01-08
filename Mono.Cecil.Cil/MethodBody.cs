@@ -35,7 +35,7 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class MethodBody : IVariableDefinitionProvider {
 
-		readonly internal MethodDefinition method;
+		readonly internal IMethodDefinition method;
 
 		internal ParameterDefinition this_parameter;
 		internal int max_stack_size;
@@ -48,7 +48,7 @@ namespace Mono.Cecil.Cil {
 		internal Collection<VariableDefinition> variables;
 		Scope scope;
 
-		public MethodDefinition Method {
+		public IMethodDefinition Method {
 			get { return method; }
 		}
 
@@ -111,7 +111,7 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		static ParameterDefinition CreateThisParameter (MethodDefinition method)
+		static ParameterDefinition CreateThisParameter (IMethodDefinition method)
 		{
 			var declaring_type = method.DeclaringType;
 			var type = declaring_type.IsValueType || declaring_type.IsPrimitive
@@ -121,7 +121,7 @@ namespace Mono.Cecil.Cil {
 			return new ParameterDefinition (type, method);
 		}
 
-		public MethodBody (MethodDefinition method)
+		public MethodBody (IMethodDefinition method)
 		{
 			this.method = method;
 		}

@@ -35,7 +35,7 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class MethodDefinitionRocks {
 
-		public static MethodDefinition GetBaseMethod (this MethodDefinition self)
+		public static IMethodDefinition GetBaseMethod (this IMethodDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -56,7 +56,7 @@ namespace Mono.Cecil.Rocks {
 			return self;
 		}
 
-		public static MethodDefinition GetOriginalBaseMethod (this MethodDefinition self)
+		public static IMethodDefinition GetOriginalBaseMethod (this IMethodDefinition self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -82,7 +82,7 @@ namespace Mono.Cecil.Rocks {
 			return base_type.Resolve ();
 		}
 
-		static MethodDefinition GetMatchingMethod (ITypeDefinition type, MethodDefinition method)
+		static IMethodDefinition GetMatchingMethod (ITypeDefinition type, IMethodDefinition method)
 		{
 			return MetadataResolver.GetMethod (type.Methods, method);
 		}

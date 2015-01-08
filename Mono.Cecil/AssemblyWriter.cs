@@ -1116,10 +1116,10 @@ namespace Mono.Cecil {
 				var method = methods [i];
 				var new_token = new MetadataToken (TokenType.Method, method_rid++);
 
-				if (write_symbols && method.token != MetadataToken.Zero)
-					method_def_map.Add (new_token, method.token);
+				if (write_symbols && method.MetadataToken != MetadataToken.Zero)
+                    method_def_map.Add(new_token, method.MetadataToken);
 
-				method.token = new_token;
+                method.MetadataToken = new_token;
 			}
 		}
 
@@ -1414,7 +1414,7 @@ namespace Mono.Cecil {
 				AddMethod (methods [i]);
 		}
 
-		void AddMethod (MethodDefinition method)
+		void AddMethod (IMethodDefinition method)
 		{
 			method_table.AddRow (new MethodRow (
 				method.HasBody ? code.WriteMethodBody (method) : 0,
@@ -1442,7 +1442,7 @@ namespace Mono.Cecil {
 				AddOverrides (method);
 		}
 
-		void AddParameters (MethodDefinition method)
+		void AddParameters (IMethodDefinition method)
 		{
 			var return_parameter = method.MethodReturnType.parameter;
 
@@ -1463,7 +1463,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddPInvokeInfo (MethodDefinition method)
+		void AddPInvokeInfo (IMethodDefinition method)
 		{
 			var pinvoke = method.PInvokeInfo;
 			if (pinvoke == null)
@@ -1477,7 +1477,7 @@ namespace Mono.Cecil {
 				pinvoke.Module.MetadataToken.RID));
 		}
 
-		void AddOverrides (MethodDefinition method)
+		void AddOverrides (IMethodDefinition method)
 		{
 			var overrides = method.Overrides;
 			var table = GetTable<MethodImplTable> (Table.MethodImpl);
@@ -1563,7 +1563,7 @@ namespace Mono.Cecil {
 				AddConstant (property, property.PropertyType);
 		}
 
-        void AddOtherSemantic(IMetadataTokenProvider owner, IList<MethodDefinition> others)
+        void AddOtherSemantic(IMetadataTokenProvider owner, IList<IMethodDefinition> others)
 		{
 			for (int i = 0; i < others.Count; i++)
 				AddSemantic (MethodSemanticsAttributes.Other, owner, others [i]);
@@ -1606,14 +1606,14 @@ namespace Mono.Cecil {
 				AddCustomAttributes (@event);
 		}
 
-		void AddSemantic (MethodSemanticsAttributes semantics, IMetadataTokenProvider provider, MethodDefinition method)
+		void AddSemantic (MethodSemanticsAttributes semantics, IMetadataTokenProvider provider, IMethodDefinition method)
 		{
 			method.SemanticsAttributes = semantics;
 			var table = GetTable<MethodSemanticsTable> (Table.MethodSemantics);
 
 			table.AddRow (new MethodSemanticsRow (
 				semantics,
-				method.token.RID,
+                method.MetadataToken.RID,
 				MakeCodedRID (provider, CodedIndex.HasSemantics)));
 		}
 

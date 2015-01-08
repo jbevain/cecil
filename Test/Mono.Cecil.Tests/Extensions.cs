@@ -8,7 +8,7 @@ namespace Mono.Cecil.Tests {
 
 	public static class Extensions {
 
-		public static MethodDefinition GetMethod (this ITypeDefinition self, string name)
+		public static IMethodDefinition GetMethod (this ITypeDefinition self, string name)
 		{
 			return self.Methods.Where (m => m.Name == name).First ();
 		}
@@ -24,7 +24,7 @@ namespace Mono.Cecil.Tests {
 			return (TypeDefinition) module.LookupToken (self.MetadataToken);
 		}
 
-		public static MethodDefinition ToDefinition (this SR.MethodBase method)
+		public static IMethodDefinition ToDefinition (this SR.MethodBase method)
 		{
 			var declaring_type = method.DeclaringType.ToDefinition ();
 			return (MethodDefinition) declaring_type.Module.LookupToken (method.MetadataToken);
@@ -48,7 +48,7 @@ namespace Mono.Cecil.Tests {
 			return instance;
 		}
 
-		public static MethodReference MakeGenericMethod (this MethodReference self, params ITypeReference [] arguments)
+		public static MethodReference MakeGenericMethod (this IMethodReference self, params ITypeReference [] arguments)
 		{
 			if (self.GenericParameters.Count != arguments.Length)
 				throw new ArgumentException ();
@@ -60,7 +60,7 @@ namespace Mono.Cecil.Tests {
 			return instance;
 		}
 
-		public static MethodReference MakeGeneric (this MethodReference self, params ITypeReference [] arguments)
+		public static MethodReference MakeGeneric (this IMethodReference self, params ITypeReference [] arguments)
 		{
 			var reference = new MethodReference {
 				Name = self.Name,

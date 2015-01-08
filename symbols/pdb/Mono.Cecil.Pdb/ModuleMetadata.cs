@@ -148,7 +148,7 @@ namespace Mono.Cecil.Pdb {
 		readonly IModuleDefinition module;
 
 		Dictionary<uint, ITypeDefinition> types;
-		Dictionary<uint, MethodDefinition> methods;
+		Dictionary<uint, IMethodDefinition> methods;
 
 		public ModuleMetadata (IModuleDefinition module)
 		{
@@ -163,7 +163,7 @@ namespace Mono.Cecil.Pdb {
 			return types.TryGetValue (token, out type);
 		}
 
-		bool TryGetMethod (uint token, out MethodDefinition method)
+		bool TryGetMethod (uint token, out IMethodDefinition method)
 		{
 			if (methods == null)
 				InitializeMetadata (module);
@@ -174,7 +174,7 @@ namespace Mono.Cecil.Pdb {
 		void InitializeMetadata (IModuleDefinition module)
 		{
 			types = new Dictionary<uint, ITypeDefinition> ();
-			methods = new Dictionary<uint, MethodDefinition> ();
+			methods = new Dictionary<uint, IMethodDefinition> ();
 
 			foreach (var type in module.GetTypes ()) {
 				types.Add (type.MetadataToken.ToUInt32 (), type);
@@ -601,7 +601,7 @@ namespace Mono.Cecil.Pdb {
 
 		public uint GetMethodProps (uint mb, out uint pClass, IntPtr szMethod, uint cchMethod, out uint pchMethod, IntPtr pdwAttr, IntPtr ppvSigBlob, IntPtr pcbSigBlob, IntPtr pulCodeRVA)
 		{
-			MethodDefinition method;
+			IMethodDefinition method;
 			if (!TryGetMethod (mb, out method)) {
 				Marshal.WriteInt16 (szMethod, 0);
 				pchMethod = 1;

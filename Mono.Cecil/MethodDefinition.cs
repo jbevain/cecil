@@ -1,5 +1,5 @@
 //
-// MethodDefinition.cs
+// IMethodDefinition.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -33,8 +33,59 @@ using Mono.Collections.Generic;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil {
+    public interface IMethodDefinition : IMethodReference, IMemberDefinition, ISecurityDeclarationProvider {
+        MethodAttributes Attributes { get; set; }
+        MethodImplAttributes ImplAttributes { get; set; }
+        MethodSemanticsAttributes SemanticsAttributes { get; set; }
+        int RVA { get; }
+        bool HasBody { get; }
+        MethodBody Body { get; set; }
+        bool HasPInvokeInfo { get; }
+        PInvokeInfo PInvokeInfo { get; set; }
+        bool HasOverrides { get; }
+        IList<IMethodReference> Overrides { get; }
+        bool IsCompilerControlled { get; set; }
+        bool IsPrivate { get; set; }
+        bool IsFamilyAndAssembly { get; set; }
+        bool IsAssembly { get; set; }
+        bool IsFamily { get; set; }
+        bool IsFamilyOrAssembly { get; set; }
+        bool IsPublic { get; set; }
+        bool IsStatic { get; set; }
+        bool IsFinal { get; set; }
+        bool IsVirtual { get; set; }
+        bool IsHideBySig { get; set; }
+        bool IsReuseSlot { get; set; }
+        bool IsNewSlot { get; set; }
+        bool IsCheckAccessOnOverride { get; set; }
+        bool IsAbstract { get; set; }
+        bool IsPInvokeImpl { get; set; }
+        bool IsUnmanagedExport { get; set; }
+        bool HasSecurity { get; set; }
+        bool IsIL { get; set; }
+        bool IsNative { get; set; }
+        bool IsRuntime { get; set; }
+        bool IsUnmanaged { get; set; }
+        bool IsManaged { get; set; }
+        bool IsForwardRef { get; set; }
+        bool IsPreserveSig { get; set; }
+        bool IsInternalCall { get; set; }
+        bool IsSynchronized { get; set; }
+        bool NoInlining { get; set; }
+        bool NoOptimization { get; set; }
+        bool IsSetter { get; set; }
+        bool IsGetter { get; set; }
+        bool IsOther { get; set; }
+        bool IsAddOn { get; set; }
+        bool IsRemoveOn { get; set; }
+        bool IsFire { get; set; }
+        new ITypeDefinition DeclaringType { get; set; }
+        bool IsConstructor { get; }
+        bool SemanticsAttributesIsReady { get; set; }
+        string ToString ();
+    }
 
-	public sealed class MethodDefinition : MethodReference, IMemberDefinition, ISecurityDeclarationProvider {
+    public sealed class MethodDefinition : MethodReference, IMethodDefinition {
 
 		ushort attributes;
 		ushort impl_attributes;
@@ -432,7 +483,13 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override bool IsDefinition {
+        public bool SemanticsAttributesIsReady
+        {
+            get { return sem_attrs_ready; }
+            set { sem_attrs_ready = value; }
+        }
+
+        public override bool IsDefinition {
 			get { return true; }
 		}
 
@@ -449,7 +506,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.Method);
 		}
 
-		public override MethodDefinition Resolve ()
+		public override IMethodDefinition Resolve ()
 		{
 			return this;
 		}
@@ -486,12 +543,12 @@ namespace Mono.Cecil {
 			return variables [index];
 		}
 
-		public static bool GetSemantics (this MethodDefinition self, MethodSemanticsAttributes semantics)
+		public static bool GetSemantics (this IMethodDefinition self, MethodSemanticsAttributes semantics)
 		{
 			return (self.SemanticsAttributes & semantics) != 0;
 		}
 
-		public static void SetSemantics (this MethodDefinition self, MethodSemanticsAttributes semantics, bool value)
+		public static void SetSemantics (this IMethodDefinition self, MethodSemanticsAttributes semantics, bool value)
 		{
 			if (value)
 				self.SemanticsAttributes |= semantics;

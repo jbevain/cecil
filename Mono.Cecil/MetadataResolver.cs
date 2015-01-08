@@ -43,7 +43,7 @@ namespace Mono.Cecil {
 	public interface IMetadataResolver {
 		ITypeDefinition Resolve (ITypeReference type);
 		FieldDefinition Resolve (FieldReference field);
-		MethodDefinition Resolve (IMethodReference method);
+		IMethodDefinition Resolve (IMethodReference method);
 	}
 
 #if !SILVERLIGHT && !CF
@@ -226,7 +226,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		public virtual MethodDefinition Resolve (IMethodReference method)
+		public virtual IMethodDefinition Resolve (IMethodReference method)
 		{
 			if (method == null)
 				throw new ArgumentNullException ("method");
@@ -243,7 +243,7 @@ namespace Mono.Cecil {
 			return GetMethod (type, method);
 		}
 
-		MethodDefinition GetMethod (ITypeDefinition type, IMethodReference reference)
+		IMethodDefinition GetMethod (ITypeDefinition type, IMethodReference reference)
 		{
 			while (type != null) {
 				var method = GetMethod (type.Methods, reference);
@@ -259,7 +259,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		public static MethodDefinition GetMethod (IList<MethodDefinition> methods, IMethodReference reference)
+		public static IMethodDefinition GetMethod (IList<IMethodDefinition> methods, IMethodReference reference)
 		{
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];

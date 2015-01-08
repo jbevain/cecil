@@ -14,14 +14,14 @@ namespace Mono.Cecil.Tests {
 			return writer.ToString ();
 		}
 
-		public static string FormatMethodBody (MethodDefinition method)
+		public static string FormatMethodBody (IMethodDefinition method)
 		{
 			var writer = new StringWriter ();
 			WriteMethodBody (writer, method);
 			return writer.ToString ();
 		}
 
-		public static void WriteMethodBody (TextWriter writer, MethodDefinition method)
+		public static void WriteMethodBody (TextWriter writer, IMethodDefinition method)
 		{
 			var body = method.Body;
 

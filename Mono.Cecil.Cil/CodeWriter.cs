@@ -58,12 +58,12 @@ namespace Mono.Cecil.Cil {
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
 		}
 
-		public RVA WriteMethodBody (MethodDefinition method)
+		public RVA WriteMethodBody (IMethodDefinition method)
 		{
 			var rva = BeginMethod ();
 
 			if (IsUnresolved (method)) {
-				if (method.rva == 0)
+				if (method.RVA == 0)
 					return 0;
 
 				WriteUnresolvedMethodBody (method);
@@ -86,12 +86,12 @@ namespace Mono.Cecil.Cil {
 				&& body.variables.IsNullOrEmpty ();
 		}
 
-		static bool IsUnresolved (MethodDefinition method)
+		static bool IsUnresolved (IMethodDefinition method)
 		{
-			return method.HasBody && method.HasImage && method.body == null;
+			return method.HasBody && method.HasImage && method.Body == null;
 		}
 
-		void WriteUnresolvedMethodBody (MethodDefinition method)
+		void WriteUnresolvedMethodBody (IMethodDefinition method)
 		{
 			var code_reader = metadata.module.Read (method, (_, reader) => reader.code);
 
@@ -103,7 +103,7 @@ namespace Mono.Cecil.Cil {
 			if (symbols.instructions.IsNullOrEmpty ())
 				return;
 
-			symbols.method_token = method.token;
+			symbols.method_token = method.MetadataToken;
 			symbols.local_var_token = GetLocalVarToken (buffer, symbols);
 
 			var symbol_writer = metadata.symbol_writer;
@@ -120,7 +120,7 @@ namespace Mono.Cecil.Cil {
 			return new MetadataToken (buffer.ReadUInt32 ());
 		}
 
-		void WriteResolvedMethodBody (MethodDefinition method)
+		void WriteResolvedMethodBody (IMethodDefinition method)
 		{
 			body = method.Body;
 			ComputeHeader ();

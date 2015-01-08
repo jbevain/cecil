@@ -37,17 +37,17 @@ namespace Mono.Cecil {
 
 		IList<CustomAttribute> custom_attributes;
 
-		internal MethodDefinition add_method;
-		internal MethodDefinition invoke_method;
-		internal MethodDefinition remove_method;
-        internal IList<MethodDefinition> other_methods;
+		internal IMethodDefinition add_method;
+		internal IMethodDefinition invoke_method;
+		internal IMethodDefinition remove_method;
+        internal IList<IMethodDefinition> other_methods;
 
 		public EventAttributes Attributes {
 			get { return (EventAttributes) attributes; }
 			set { attributes = (ushort) value; }
 		}
 
-		public MethodDefinition AddMethod {
+		public IMethodDefinition AddMethod {
 			get {
 				if (add_method != null)
 					return add_method;
@@ -58,7 +58,7 @@ namespace Mono.Cecil {
 			set { add_method = value; }
 		}
 
-		public MethodDefinition InvokeMethod {
+		public IMethodDefinition InvokeMethod {
 			get {
 				if (invoke_method != null)
 					return invoke_method;
@@ -69,7 +69,7 @@ namespace Mono.Cecil {
 			set { invoke_method = value; }
 		}
 
-		public MethodDefinition RemoveMethod {
+		public IMethodDefinition RemoveMethod {
 			get {
 				if (remove_method != null)
 					return remove_method;
@@ -90,7 +90,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<MethodDefinition> OtherMethods {
+		public IList<IMethodDefinition> OtherMethods {
 			get {
 				if (other_methods != null)
 					return other_methods;
@@ -100,7 +100,7 @@ namespace Mono.Cecil {
 				if (other_methods != null)
 					return other_methods;
 
-				return other_methods = new Collection<MethodDefinition> ();
+				return other_methods = new Collection<IMethodDefinition> ();
 			}
 		}
 

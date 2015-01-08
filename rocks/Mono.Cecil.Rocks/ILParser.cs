@@ -67,7 +67,7 @@ namespace Mono.Cecil.Rocks {
 			public IILVisitor Visitor { get; set; }
 		}
 
-		public static void Parse (MethodDefinition method, IILVisitor visitor)
+		public static void Parse (IMethodDefinition method, IILVisitor visitor)
 		{
 			if (method == null)
 				throw new ArgumentNullException ("method");
@@ -97,7 +97,7 @@ namespace Mono.Cecil.Rocks {
 			}
 		}
 
-		static ParseContext CreateContext (MethodDefinition method, IILVisitor visitor)
+		static ParseContext CreateContext (IMethodDefinition method, IILVisitor visitor)
 		{
 			var code = method.Module.Read (method, (_, reader) => new CodeReader (reader.image.MetadataSection, reader));
 

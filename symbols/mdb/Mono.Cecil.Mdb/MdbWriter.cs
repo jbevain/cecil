@@ -231,7 +231,7 @@ namespace Mono.Cecil.Mdb {
 
 		class SourceMethod : IMethodDef {
 
-			readonly MethodDefinition method;
+			readonly IMethodDefinition method;
 
 			public string Name {
 				get { return method.Name; }
@@ -241,7 +241,7 @@ namespace Mono.Cecil.Mdb {
 				get { return method.MetadataToken.ToInt32 (); }
 			}
 
-			public SourceMethod (MethodDefinition method)
+			public SourceMethod (IMethodDefinition method)
 			{
 				this.method = method;
 			}

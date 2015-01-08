@@ -44,7 +44,7 @@ namespace Mono.Cecil.Tests {
 			}, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
 		}
 
-		static void AssertCode (string expected, MethodDefinition method)
+		static void AssertCode (string expected, IMethodDefinition method)
 		{
 			Assert.IsTrue (method.HasBody);
 			Assert.IsNotNull (method.Body);

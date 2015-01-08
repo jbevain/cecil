@@ -40,9 +40,9 @@ namespace Mono.Cecil {
 
 		IList<CustomAttribute> custom_attributes;
 
-		internal MethodDefinition get_method;
-		internal MethodDefinition set_method;
-		internal Collection<MethodDefinition> other_methods;
+		internal IMethodDefinition get_method;
+		internal IMethodDefinition set_method;
+		internal Collection<IMethodDefinition> other_methods;
 
 		object constant = Mixin.NotResolved;
 
@@ -80,7 +80,7 @@ namespace Mono.Cecil {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
-		public MethodDefinition GetMethod {
+		public IMethodDefinition GetMethod {
 			get {
 				if (get_method != null)
 					return get_method;
@@ -91,7 +91,7 @@ namespace Mono.Cecil {
 			set { get_method = value; }
 		}
 
-		public MethodDefinition SetMethod {
+		public IMethodDefinition SetMethod {
 			get {
 				if (set_method != null)
 					return set_method;
@@ -112,7 +112,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<MethodDefinition> OtherMethods {
+		public Collection<IMethodDefinition> OtherMethods {
 			get {
 				if (other_methods != null)
 					return other_methods;
@@ -122,7 +122,7 @@ namespace Mono.Cecil {
 				if (other_methods != null)
 					return other_methods;
 
-				return other_methods = new Collection<MethodDefinition> ();
+				return other_methods = new Collection<IMethodDefinition> ();
 			}
 		}
 
@@ -154,7 +154,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static Collection<ParameterDefinition> MirrorParameters (MethodDefinition method, int bound)
+		static Collection<ParameterDefinition> MirrorParameters (IMethodDefinition method, int bound)
 		{
 			var parameters = new Collection<ParameterDefinition> ();
 			if (!method.HasParameters)
