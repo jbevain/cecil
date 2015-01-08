@@ -284,7 +284,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportCecilTests/Generic`1<TS> Mono.Cecil.Tests.ImportCecilTests/Generic`1<System.String>::ComplexGenericMethod<TS>(T,TS)", method.FullName);
 		}
 
-		delegate void Emitter (IModuleDefinition module, MethodBody body);
+		delegate void Emitter (IModuleDefinition module, IMethodBody body);
 
 		[MethodImpl (MethodImplOptions.NoInlining)]
 		static TDelegate Compile<TDelegate> (Emitter emitter)

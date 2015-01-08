@@ -34,14 +34,15 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class ILProcessor {
 
-		readonly MethodBody body;
+        readonly IMethodBody body;
 		readonly Collection<Instruction> instructions;
 
-		public MethodBody Body {
+        public IMethodBody Body
+        {
 			get { return body; }
 		}
 
-		internal ILProcessor (MethodBody body)
+        internal ILProcessor(IMethodBody body)
 		{
 			this.body = body;
 			this.instructions = body.Instructions;

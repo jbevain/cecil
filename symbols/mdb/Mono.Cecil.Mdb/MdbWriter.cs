@@ -63,7 +63,7 @@ namespace Mono.Cecil.Mdb {
 			this.source_files = new Dictionary<string, SourceFile> ();
 		}
 
-		static Collection<Instruction> GetInstructions (MethodBody body)
+        static Collection<Instruction> GetInstructions(IMethodBody body)
 		{
 			var instructions = new Collection<Instruction> ();
 			foreach (var instruction in body.Instructions)
@@ -109,7 +109,7 @@ namespace Mono.Cecil.Mdb {
 			file = source_file;
 		}
 
-		public void Write (MethodBody body)
+        public void Write(IMethodBody body)
 		{
 			var method = new SourceMethod (body.Method);
 

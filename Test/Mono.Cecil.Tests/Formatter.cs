@@ -43,7 +43,7 @@ namespace Mono.Cecil.Tests {
 			WriteExceptionHandlers (writer, body);
 		}
 
-		static void WriteVariables (TextWriter writer, MethodBody body)
+		static void WriteVariables (TextWriter writer, IMethodBody body)
 		{
 			var variables = body.Variables;
 
@@ -137,7 +137,7 @@ namespace Mono.Cecil.Tests {
 			writer.Write (")");
 		}
 
-		static void WriteExceptionHandlers (TextWriter writer, MethodBody body)
+		static void WriteExceptionHandlers (TextWriter writer, IMethodBody body)
 		{
 			if (!body.HasExceptionHandlers)
 				return;

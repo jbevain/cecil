@@ -43,7 +43,7 @@ namespace Mono.Cecil.Cil {
 		Section code_section;
 
 		IMethodDefinition method;
-		MethodBody body;
+        IMethodBody body;
 
 		int Offset {
 			get { return base.position - start; }
@@ -56,7 +56,7 @@ namespace Mono.Cecil.Cil {
 			this.reader = reader;
 		}
 
-		public MethodBody ReadMethodBody (IMethodDefinition method)
+        public IMethodBody ReadMethodBody(IMethodDefinition method)
 		{
 			this.method = method;
 			this.body = new MethodBody (method);
@@ -90,7 +90,7 @@ namespace Mono.Cecil.Cil {
 			var flags = ReadByte ();
 			switch (flags & 0x3) {
 			case 0x2: // tiny
-				body.code_size = flags >> 2;
+				body.CodeSize = flags >> 2;
 				body.MaxStackSize = 8;
 				ReadCode ();
 				break;
@@ -113,13 +113,13 @@ namespace Mono.Cecil.Cil {
 		void ReadFatMethod ()
 		{
 			var flags = ReadUInt16 ();
-			body.max_stack_size = ReadUInt16 ();
-			body.code_size = (int) ReadUInt32 ();
-			body.local_var_token = new MetadataToken (ReadUInt32 ());
-			body.init_locals = (flags & 0x10) != 0;
+			body.MaxStackSize = ReadUInt16 ();
+			body.CodeSize = (int) ReadUInt32 ();
+			body.LocalVarToken = new MetadataToken (ReadUInt32 ());
+			body.InitLocals = (flags & 0x10) != 0;
 
-			if (body.local_var_token.RID != 0)
-				body.variables = ReadVariables (body.local_var_token);
+            if (body.LocalVarToken.RID != 0)
+                body.Variables = ReadVariables(body.LocalVarToken);
 
 			ReadCode ();
 
@@ -139,13 +139,13 @@ namespace Mono.Cecil.Cil {
 		void ReadCode ()
 		{
 			start = position;
-			var code_size = body.code_size;
+			var code_size = body.CodeSize;
 
 			if (code_size < 0 || buffer.Length <= (uint) (code_size + position))
 				code_size = 0;
 
 			var end = start + code_size;
-			var instructions = body.instructions = new InstructionCollection ((code_size + 1) / 2);
+			var instructions = body.Instructions = new InstructionCollection ((code_size + 1) / 2);
 
 			while (position < end) {
 				var offset = base.position - start;

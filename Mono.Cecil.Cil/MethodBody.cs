@@ -32,8 +32,21 @@ using System.Threading;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil {
+    public interface IMethodBody : IVariableDefinitionProvider {
+        IMethodDefinition Method { get; }
+        int MaxStackSize { get; set; }
+        int CodeSize { get; set; }
+        bool InitLocals { get; set; }
+        MetadataToken LocalVarToken { get; set; }
+        Collection<Instruction> Instructions { get; set; }
+        bool HasExceptionHandlers { get; }
+        Collection<ExceptionHandler> ExceptionHandlers { get; }
+        Scope Scope { get; set; }
+        ParameterDefinition ThisParameter { get; }
+        ILProcessor GetILProcessor ();
+    }
 
-	public sealed class MethodBody : IVariableDefinitionProvider {
+    public sealed class MethodBody : IMethodBody {
 
 		readonly internal IMethodDefinition method;
 
@@ -57,11 +70,13 @@ namespace Mono.Cecil.Cil {
 			set { max_stack_size = value; }
 		}
 
-		public int CodeSize {
-			get { return code_size; }
+		public int CodeSize
+		{
+		    get { return code_size; }
+		    set { code_size = value; }
 		}
 
-		public bool InitLocals {
+        public bool InitLocals {
 			get { return init_locals; }
 			set { init_locals = value; }
 		}
@@ -71,11 +86,13 @@ namespace Mono.Cecil.Cil {
 			set { local_var_token = value; }
 		}
 
-		public Collection<Instruction> Instructions {
-			get { return instructions ?? (instructions = new InstructionCollection ()); }
+		public Collection<Instruction> Instructions
+		{
+		    get { return instructions ?? (instructions = new InstructionCollection ()); }
+		    set { instructions = value; }
 		}
 
-		public bool HasExceptionHandlers {
+        public bool HasExceptionHandlers {
 			get { return !exceptions.IsNullOrEmpty (); }
 		}
 
@@ -87,11 +104,13 @@ namespace Mono.Cecil.Cil {
 			get { return !variables.IsNullOrEmpty (); }
 		}
 
-		public Collection<VariableDefinition> Variables {
-			get { return variables ?? (variables = new VariableDefinitionCollection ()); }
+		public Collection<VariableDefinition> Variables
+		{
+		    get { return variables ?? (variables = new VariableDefinitionCollection ()); }
+		    set { variables = value; }
 		}
 
-		public Scope Scope {
+        public Scope Scope {
 			get { return scope; }
 			set { scope = value; }
 		}
@@ -134,7 +153,7 @@ namespace Mono.Cecil.Cil {
 
 	public interface IVariableDefinitionProvider {
 		bool HasVariables { get; }
-		Collection<VariableDefinition> Variables { get; }
+		Collection<VariableDefinition> Variables { get; set; }
 	}
 
     public class VariableDefinitionCollection : Collection<VariableDefinition> {

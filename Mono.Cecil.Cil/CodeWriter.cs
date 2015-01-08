@@ -47,7 +47,7 @@ namespace Mono.Cecil.Cil {
 		readonly Dictionary<uint, MetadataToken> standalone_signatures;
 
 		RVA current;
-		MethodBody body;
+        IMethodBody body;
 
 		public CodeWriter (MetadataBuilder metadata)
 			: base (0)
@@ -80,10 +80,10 @@ namespace Mono.Cecil.Cil {
 			return rva;
 		}
 
-		static bool IsEmptyMethodBody (MethodBody body)
+        static bool IsEmptyMethodBody(IMethodBody body)
 		{
-			return body.instructions.IsNullOrEmpty ()
-				&& body.variables.IsNullOrEmpty ();
+			return body.Instructions.IsNullOrEmpty ()
+				&& body.Variables.IsNullOrEmpty ();
 		}
 
 		static bool IsUnresolved (IMethodDefinition method)
@@ -150,12 +150,12 @@ namespace Mono.Cecil.Cil {
 
 			WriteByte (flags);
 			WriteByte (0x30);
-			WriteInt16 ((short) body.max_stack_size);
-			WriteInt32 (body.code_size);
-			body.local_var_token = body.HasVariables
+			WriteInt16 ((short) body.MaxStackSize);
+			WriteInt32 (body.CodeSize);
+			body.LocalVarToken = body.HasVariables
 				? GetStandAloneSignature (body.Variables)
 				: MetadataToken.Zero;
-			WriteMetadataToken (body.local_var_token);
+            WriteMetadataToken(body.LocalVarToken);
 		}
 
 		void WriteInstructions ()
@@ -264,7 +264,7 @@ namespace Mono.Cecil.Cil {
 		int GetTargetOffset (Instruction instruction)
 		{
 			if (instruction == null) {
-				var last = body.instructions [body.instructions.size - 1];
+				var last = body.Instructions [body.Instructions.size - 1];
 				return last.offset + last.GetSize ();
 			}
 
@@ -286,8 +286,8 @@ namespace Mono.Cecil.Cil {
 
 		int GetParameterIndex (ParameterDefinition parameter)
 		{
-			if (body.method.HasThis) {
-				if (parameter == body.this_parameter)
+			if (body.Method.HasThis) {
+				if (parameter == body.ThisParameter)
 					return 0;
 
 				return parameter.Index + 1;
@@ -309,7 +309,7 @@ namespace Mono.Cecil.Cil {
 		void ComputeHeader ()
 		{
 			int offset = 0;
-			var instructions = body.instructions;
+			var instructions = body.Instructions;
 			var items = instructions.items;
 			var count = instructions.size;
 			var stack_size = 0;
@@ -327,8 +327,8 @@ namespace Mono.Cecil.Cil {
 				ComputeStackSize (instruction, ref stack_sizes, ref stack_size, ref max_stack);
 			}
 
-			body.code_size = offset;
-			body.max_stack_size = max_stack;
+			body.CodeSize = offset;
+			body.MaxStackSize = max_stack;
 		}
 
 		void ComputeExceptionHandlerStackSize (ref Dictionary<Instruction, int> stack_sizes)

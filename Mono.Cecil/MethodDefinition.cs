@@ -39,7 +39,7 @@ namespace Mono.Cecil {
         MethodSemanticsAttributes SemanticsAttributes { get; set; }
         int RVA { get; }
         bool HasBody { get; }
-        MethodBody Body { get; set; }
+        IMethodBody Body { get; set; }
         bool HasPInvokeInfo { get; }
         PInvokeInfo PInvokeInfo { get; set; }
         bool HasOverrides { get; }
@@ -98,7 +98,7 @@ namespace Mono.Cecil {
 		internal PInvokeInfo pinvoke;
         IList<IMethodReference> overrides;
 
-		internal MethodBody body;
+        internal IMethodBody body;
 
 		public MethodAttributes Attributes {
 			get { return (MethodAttributes) attributes; }
@@ -183,9 +183,10 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public MethodBody Body {
+        public IMethodBody Body
+        {
 			get {
-				MethodBody localBody = this.body;
+                IMethodBody localBody = this.body;
 				if (localBody != null)
 					return localBody;
 
@@ -514,9 +515,9 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static ParameterDefinition GetParameter (this MethodBody self, int index)
+        public static ParameterDefinition GetParameter(this IMethodBody self, int index)
 		{
-			var method = self.method;
+			var method = self.Method;
 
 			if (method.HasThis) {
 				if (index == 0)
@@ -533,7 +534,7 @@ namespace Mono.Cecil {
 			return parameters [index];
 		}
 
-		public static VariableDefinition GetVariable (this MethodBody self, int index)
+        public static VariableDefinition GetVariable(this IMethodBody self, int index)
 		{
 			var variables = self.Variables;
 

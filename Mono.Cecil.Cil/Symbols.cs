@@ -82,13 +82,15 @@ namespace Mono.Cecil.Cil {
 			get { return !variables.IsNullOrEmpty (); }
 		}
 
-		public Collection<VariableDefinition> Variables {
-			get {
+		public Collection<VariableDefinition> Variables
+		{
+		    get {
 				if (variables == null)
 					variables = new Collection<VariableDefinition> ();
 
 				return variables;
 			}
+		    set { variables = value; }
 		}
 	}
 
@@ -167,7 +169,7 @@ namespace Mono.Cecil.Cil {
 	public interface ISymbolReader : IDisposable {
 
 		bool ProcessDebugHeader (ImageDebugDirectory directory, byte [] header);
-		void Read (MethodBody body, InstructionMapper mapper);
+        void Read(IMethodBody body, InstructionMapper mapper);
 		void Read (MethodSymbols symbols);
 	}
 
@@ -263,7 +265,7 @@ namespace Mono.Cecil.Cil {
 	public interface ISymbolWriter : IDisposable {
 
 		bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header);
-		void Write (MethodBody body);
+        void Write(IMethodBody body);
 		void Write (MethodSymbols symbols);
 	}
 

@@ -2027,7 +2027,7 @@ namespace Mono.Cecil {
 				AddMapping (metadata.Overrides, method_rid, @override));
 		}
 
-		public MethodBody ReadMethodBody (IMethodDefinition method)
+        public IMethodBody ReadMethodBody(IMethodDefinition method)
 		{
 			return code.ReadMethodBody (method);
 		}

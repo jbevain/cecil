@@ -103,7 +103,7 @@ namespace Mono.Cecil.Pdb {
 			return true;
 		}
 
-		public void Read (MethodBody body, InstructionMapper mapper)
+        public void Read(IMethodBody body, InstructionMapper mapper)
 		{
 			var method_token = body.Method.MetadataToken;
 
@@ -115,7 +115,7 @@ namespace Mono.Cecil.Pdb {
 			ReadScopeAndLocals (function.scopes, null, body, mapper);
 		}
 
-		static void ReadScopeAndLocals (PdbScope [] scopes, Scope parent, MethodBody body, InstructionMapper mapper)
+        static void ReadScopeAndLocals(PdbScope[] scopes, Scope parent, IMethodBody body, InstructionMapper mapper)
 		{
 			foreach (PdbScope scope in scopes)
 				ReadScopeAndLocals (scope, parent, body, mapper);
@@ -123,7 +123,7 @@ namespace Mono.Cecil.Pdb {
 			CreateRootScope (body);
 		}
 
-		static void CreateRootScope (MethodBody body)
+        static void CreateRootScope(IMethodBody body)
 		{
 			if (!body.HasVariables)
 				return;
@@ -141,7 +141,7 @@ namespace Mono.Cecil.Pdb {
 			body.Scope = root;
 		}
 
-		static void ReadScopeAndLocals (PdbScope scope, Scope parent, MethodBody body, InstructionMapper mapper)
+        static void ReadScopeAndLocals(PdbScope scope, Scope parent, IMethodBody body, InstructionMapper mapper)
 		{
 			//Scope s = new Scope ();
 			//s.Start = GetInstruction (body, instructions, (int) scope.address);

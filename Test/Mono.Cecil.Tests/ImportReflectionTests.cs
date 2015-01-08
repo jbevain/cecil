@@ -319,7 +319,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
 		}
 
-		delegate void Emitter (IModuleDefinition module, MethodBody body);
+		delegate void Emitter (IModuleDefinition module, IMethodBody body);
 
 		[MethodImpl (MethodImplOptions.NoInlining)]
 		static TDelegate Compile<TDelegate> (Emitter emitter)

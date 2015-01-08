@@ -67,7 +67,7 @@ namespace Mono.Cecil.Mdb {
 			return symbol_file.Guid == module.Mvid;
 		}
 
-		public void Read (MethodBody body, InstructionMapper mapper)
+        public void Read(IMethodBody body, InstructionMapper mapper)
 		{
 			var method_token = body.Method.MetadataToken;
 			var entry = symbol_file.GetMethodByToken (method_token.ToInt32	());
@@ -79,7 +79,7 @@ namespace Mono.Cecil.Mdb {
 			ReadLocalVariables (entry, body, scopes);
 		}
 
-		static void ReadLocalVariables (MethodEntry entry, MethodBody body, Scope [] scopes)
+        static void ReadLocalVariables(MethodEntry entry, IMethodBody body, Scope[] scopes)
 		{
 			var locals = entry.GetLocals ();
 
@@ -136,7 +136,7 @@ namespace Mono.Cecil.Mdb {
 			return document;
 		}
 
-		static Scope [] ReadScopes (MethodEntry entry, MethodBody body, InstructionMapper mapper)
+        static Scope[] ReadScopes(MethodEntry entry, IMethodBody body, InstructionMapper mapper)
 		{
 			var blocks = entry.GetCodeBlocks ();
 			var scopes = new Scope [blocks.Length];
