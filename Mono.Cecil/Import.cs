@@ -320,7 +320,7 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		public FieldReference ImportField (SR.FieldInfo field, ImportGenericContext context)
+        public IFieldReference ImportField(SR.FieldInfo field, ImportGenericContext context)
 		{
 			var declaring_type = ImportType (field.DeclaringType, context);
 
@@ -596,7 +596,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException (type.EType.ToString ());
 		}
 
-		public FieldReference ImportField (FieldReference field, ImportGenericContext context)
+        public IFieldReference ImportField(IFieldReference field, ImportGenericContext context)
 		{
 			var declaring_type = ImportType (field.DeclaringType, context);
 

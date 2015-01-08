@@ -1841,7 +1841,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetFieldSignature (FieldReference field)
+        SignatureWriter GetFieldSignature(IFieldReference field)
 		{
 			var signature = CreateSignatureWriter ();
 			signature.WriteByte (0x6);
@@ -1858,7 +1858,7 @@ namespace Mono.Cecil {
 
 		SignatureWriter GetMemberRefSignature (IMemberReference member)
 		{
-			var field = member as FieldReference;
+            var field = member as IFieldReference;
 			if (field != null)
 				return GetFieldSignature (field);
 

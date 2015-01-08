@@ -29,8 +29,12 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IFieldReference: IMemberReference {
+        ITypeReference FieldType { get; set; }
+        FieldDefinition Resolve ();
+    }
 
-	public class FieldReference : MemberReference {
+    public class FieldReference : MemberReference, IFieldReference {
 
 		ITypeReference field_type;
 

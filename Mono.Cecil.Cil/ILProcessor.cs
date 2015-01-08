@@ -68,7 +68,7 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode, method);
 		}
 
-		public Instruction Create (OpCode opcode, FieldReference field)
+        public Instruction Create(OpCode opcode, IFieldReference field)
 		{
 			return Instruction.Create (opcode, field);
 		}
@@ -160,7 +160,7 @@ namespace Mono.Cecil.Cil {
 			Append (Create (opcode, site));
 		}
 
-		public void Emit (OpCode opcode, FieldReference field)
+        public void Emit(OpCode opcode, IFieldReference field)
 		{
 			Append (Create (opcode, field));
 		}

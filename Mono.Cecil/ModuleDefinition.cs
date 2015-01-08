@@ -237,14 +237,14 @@ namespace Mono.Cecil {
         IEnumerable<ITypeDefinition> GetTypes ();
         ITypeReference Import (Type type);
         ITypeReference Import (Type type, IGenericParameterProvider context);
-        FieldReference Import (SR.FieldInfo field);
-        FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context);
+        IFieldReference Import(SR.FieldInfo field);
+        IFieldReference Import(SR.FieldInfo field, IGenericParameterProvider context);
         IMethodReference Import (SR.MethodBase method);
         IMethodReference Import (SR.MethodBase method, IGenericParameterProvider context);
         ITypeReference Import (ITypeReference type);
         ITypeReference Import (ITypeReference type, IGenericParameterProvider context);
-        FieldReference Import (FieldReference field);
-        FieldReference Import (FieldReference field, IGenericParameterProvider context);
+        IFieldReference Import(IFieldReference field);
+        IFieldReference Import(IFieldReference field, IGenericParameterProvider context);
         IMethodReference Import (IMethodReference method);
         IMethodReference Import (IMethodReference method, IGenericParameterProvider context);
         IMetadataTokenProvider LookupToken (int token);
@@ -256,7 +256,7 @@ namespace Mono.Cecil {
         void Write (Stream stream);
         void Write(string fileName, IWriterParameters parameters);
         void Write(Stream stream, IWriterParameters parameters);
-        FieldDefinition Resolve (FieldReference field);
+        FieldDefinition Resolve(IFieldReference field);
         IMethodDefinition Resolve (IMethodReference method);
         ITypeDefinition Resolve (ITypeReference type);
         bool HasImage { get; }
@@ -699,7 +699,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-        public FieldDefinition Resolve (FieldReference field)
+        public FieldDefinition Resolve(IFieldReference field)
 		{
 			return MetadataResolver.Resolve (field);
 		}
@@ -766,12 +766,12 @@ namespace Mono.Cecil {
 				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
 		}
 
-		public FieldReference Import (SR.FieldInfo field)
+        public IFieldReference Import(SR.FieldInfo field)
 		{
 			return Import (field, null);
 		}
 
-		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
+        public IFieldReference Import(SR.FieldInfo field, IGenericParameterProvider context)
 		{
 			CheckField (field);
 			CheckContext (context, this);
@@ -819,7 +819,7 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportType (type, GenericContextFor (context));
 		}
 
-		public FieldReference Import (FieldReference field)
+        public IFieldReference Import(IFieldReference field)
 		{
 			CheckField (field);
 
@@ -829,7 +829,7 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportField (field, default (ImportGenericContext));
 		}
 
-		public FieldReference Import (FieldReference field, IGenericParameterProvider context)
+        public IFieldReference Import(IFieldReference field, IGenericParameterProvider context)
 		{
 			CheckField (field);
 

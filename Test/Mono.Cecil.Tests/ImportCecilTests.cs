@@ -358,7 +358,7 @@ namespace Mono.Cecil.Tests {
 		}
 
 		static IModuleDefinition CreateModule (string name)
-		{
+		{ 
 			return ModuleDefinition.CreateModule (name, ModuleKind.Dll);
 		}
 

@@ -42,7 +42,7 @@ namespace Mono.Cecil {
 
 	public interface IMetadataResolver {
 		ITypeDefinition Resolve (ITypeReference type);
-		FieldDefinition Resolve (FieldReference field);
+        FieldDefinition Resolve(IFieldReference field);
 		IMethodDefinition Resolve (IMethodReference method);
 	}
 
@@ -141,7 +141,8 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		static ITypeDefinition GetType (IModuleDefinition module, ITypeReference reference)
+	 
+	    static ITypeDefinition GetType (IModuleDefinition module, ITypeReference reference)
 		{
 			var type = GetTypeDefinition (module, reference);
 			if (type != null)
@@ -178,7 +179,7 @@ namespace Mono.Cecil {
 			return declaring_type.GetNestedType (type.TypeFullName ());
 		}
 
-		public virtual FieldDefinition Resolve (FieldReference field)
+		public virtual FieldDefinition Resolve (IFieldReference field)
 		{
 			if (field == null)
 				throw new ArgumentNullException ("field");
@@ -193,7 +194,7 @@ namespace Mono.Cecil {
 			return GetField (type, field);
 		}
 
-		FieldDefinition GetField (ITypeDefinition type, FieldReference reference)
+        FieldDefinition GetField(ITypeDefinition type, IFieldReference reference)
 		{
 			while (type != null) {
 				var field = GetField (type.Fields, reference);
@@ -209,7 +210,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static FieldDefinition GetField (IList<FieldDefinition> fields, FieldReference reference)
+        static FieldDefinition GetField(IList<FieldDefinition> fields, IFieldReference reference)
 		{
 			for (int i = 0; i < fields.Count; i++) {
 				var field = fields [i];

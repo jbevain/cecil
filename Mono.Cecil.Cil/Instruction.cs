@@ -204,7 +204,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, method);
 		}
 
-		public static Instruction Create (OpCode opcode, FieldReference field)
+        public static Instruction Create(OpCode opcode, IFieldReference field)
 		{
 			if (field == null)
 				throw new ArgumentNullException ("field");
