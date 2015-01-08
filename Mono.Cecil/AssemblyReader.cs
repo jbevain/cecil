@@ -2587,7 +2587,7 @@ namespace Mono.Cecil {
 			var attributes = new Collection<SecurityAttribute> (1);
 
 			var attribute = new SecurityAttribute (
-				module.TypeSystem.LookupType ("System.Security.Permissions", "PermissionSetAttribute"));
+                module.TypeSystem.LookupType("System.Security.Permissions", "PermissionSetAttribute"));
 
 			attribute.properties = new Collection<CustomAttributeNamedArgument> (1);
 			attribute.properties.Add (
@@ -2697,7 +2697,7 @@ namespace Mono.Cecil {
 		readonly MetadataReader reader;
 		readonly uint start, sig_length;
 
-		TypeSystem TypeSystem {
+		ITypeSystem TypeSystem {
 			get { return reader.module.TypeSystem; }
 		}
 

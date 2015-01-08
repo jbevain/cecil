@@ -31,8 +31,30 @@ using System;
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
+    public interface ITypeSystem {
+        IMetadataScope Corlib { get; }
+        ITypeReference Object { get; }
+        ITypeReference Void { get; }
+        ITypeReference Boolean { get; }
+        ITypeReference Char { get; }
+        ITypeReference SByte { get; }
+        ITypeReference Byte { get; }
+        ITypeReference Int16 { get; }
+        ITypeReference UInt16 { get; }
+        ITypeReference Int32 { get; }
+        ITypeReference UInt32 { get; }
+        ITypeReference Int64 { get; }
+        ITypeReference UInt64 { get; }
+        ITypeReference Single { get; }
+        ITypeReference Double { get; }
+        ITypeReference IntPtr { get; }
+        ITypeReference UIntPtr { get; }
+        ITypeReference String { get; }
+        ITypeReference TypedReference { get; }
+        ITypeReference LookupType (string @namespace, string name);
+    }
 
-	public abstract class TypeSystem {
+    public abstract class TypeSystem : ITypeSystem {
 
 		sealed class CoreTypeSystem : TypeSystem {
 
@@ -41,7 +63,7 @@ namespace Mono.Cecil {
 			{
 			}
 
-			internal override ITypeReference LookupType (string @namespace, string name)
+		    public override ITypeReference LookupType (string @namespace, string name)
 			{
 				var type = LookupTypeDefinition (@namespace, name) ?? LookupTypeForwarded (@namespace, name);
 				if (type != null)
@@ -103,7 +125,7 @@ namespace Mono.Cecil {
 			{
 			}
 
-			internal override ITypeReference LookupType (string @namespace, string name)
+		    public override ITypeReference LookupType (string @namespace, string name)
 			{
 				return CreateTypeReference (@namespace, name);
 			}
@@ -189,7 +211,7 @@ namespace Mono.Cecil {
 			return new CommonTypeSystem (module);
 		}
 
-		internal abstract ITypeReference LookupType (string @namespace, string name);
+		public abstract ITypeReference LookupType (string @namespace, string name);
 
 		ITypeReference LookupSystemType (ref ITypeReference reference, string name, ElementType element_type)
 		{

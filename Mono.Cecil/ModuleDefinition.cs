@@ -212,7 +212,7 @@ namespace Mono.Cecil {
         IAssemblyDefinition Assembly { get; set; }
         IAssemblyResolver AssemblyResolver { get; set; }
         IMetadataResolver MetadataResolver { get; set; }
-        TypeSystem TypeSystem { get; }
+        ITypeSystem TypeSystem { get; }
         bool HasAssemblyReferences { get; }
         IList<IAssemblyNameReference> AssemblyReferences { get; }
         bool HasModuleReferences { get; }
@@ -275,7 +275,7 @@ namespace Mono.Cecil {
 		internal ISymbolReader symbol_reader;
 		internal IAssemblyResolver assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
-		internal TypeSystem type_system;
+		internal ITypeSystem type_system;
 
 		readonly MetadataReader reader;
 		readonly string fq_name;
@@ -410,10 +410,11 @@ namespace Mono.Cecil {
             set { metadata_resolver = value; }
         }
 
-        public TypeSystem TypeSystem {
+        public ITypeSystem TypeSystem
+        {
 			get {
 				if (type_system == null)
-					Interlocked.CompareExchange (ref type_system, TypeSystem.CreateTypeSystem (this), null);
+                    Interlocked.CompareExchange(ref type_system, Cecil.TypeSystem.CreateTypeSystem(this), null);
 
 				return type_system;
 			}
