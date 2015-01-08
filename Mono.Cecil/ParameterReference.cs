@@ -19,9 +19,9 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
@@ -29,8 +29,16 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IParameterReference : IMetadataTokenProvider {
+        string Name { get; set; }
+        int Index { get; }
+        ITypeReference ParameterType { get; set; }
+        MetadataToken MetadataToken { get; set; }
+        string ToString ();
+        ParameterDefinition Resolve ();
+    }
 
-	public abstract class ParameterReference : IMetadataTokenProvider {
+    public abstract class ParameterReference : IParameterReference {
 
 		string name;
 		internal int index = -1;
