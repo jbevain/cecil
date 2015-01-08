@@ -213,17 +213,17 @@ namespace Mono.Cecil.Metadata {
 				return;
 
 			var field_idx_size = GetTable<FieldTable> (Table.Field).IsLarge ? 4 : 2;
-			var previous = this.position;
+			var previous = this.Position;
 
-			base.position = table.position;
+			base.Position = table.position;
 			for (int i = 0; i < table.length; i++) {
 				var rva = ReadUInt32 ();
-				base.position -= 4;
+				base.Position -= 4;
 				WriteUInt32 (rva + data_rva);
-				base.position += field_idx_size;
+				base.Position += field_idx_size;
 			}
 
-			base.position = previous;
+			base.Position = previous;
 		}
 	}
 
@@ -236,7 +236,7 @@ namespace Mono.Cecil.Metadata {
 
 		public uint AddResource (byte [] resource)
 		{
-			var offset = (uint) this.position;
+			var offset = (uint) this.Position;
 			WriteInt32 (resource.Length);
 			WriteBytes (resource);
 			return offset;
@@ -252,7 +252,7 @@ namespace Mono.Cecil.Metadata {
 
 		public RVA AddData (byte [] data)
 		{
-			var rva = (RVA) position;
+			var rva = (RVA) Position;
 			WriteBytes (data);
 			return rva;
 		}
@@ -261,7 +261,7 @@ namespace Mono.Cecil.Metadata {
 	abstract class HeapBuffer : ByteBuffer {
 
 		public bool IsLarge {
-			get { return base.length > 65535; }
+			get { return base.Length > 65535; }
 		}
 
 		public abstract bool IsEmpty { get; }
@@ -277,7 +277,7 @@ namespace Mono.Cecil.Metadata {
 		readonly Dictionary<string, uint> strings = new Dictionary<string, uint> (StringComparer.Ordinal);
 
 		public sealed override bool IsEmpty {
-			get { return length <= 1; }
+			get { return Length <= 1; }
 		}
 
 		public StringHeapBuffer ()
@@ -292,7 +292,7 @@ namespace Mono.Cecil.Metadata {
 			if (strings.TryGetValue (@string, out index))
 				return index;
 
-			index = (uint) base.position;
+			index = (uint) base.Position;
 			WriteString (@string);
 			strings.Add (@string, index);
 			return index;
@@ -307,10 +307,10 @@ namespace Mono.Cecil.Metadata {
 
 	sealed class BlobHeapBuffer : HeapBuffer {
 
-		readonly Dictionary<ByteBuffer, uint> blobs = new Dictionary<ByteBuffer, uint> (new ByteBufferEqualityComparer ());
+        readonly Dictionary<IByteBuffer, uint> blobs = new Dictionary<IByteBuffer, uint>(new ByteBufferEqualityComparer());
 
 		public override bool IsEmpty {
-			get { return length <= 1; }
+			get { return Length <= 1; }
 		}
 
 		public BlobHeapBuffer ()
@@ -319,21 +319,21 @@ namespace Mono.Cecil.Metadata {
 			WriteByte (0);
 		}
 
-		public uint GetBlobIndex (ByteBuffer blob)
+        public uint GetBlobIndex(IByteBuffer blob)
 		{
 			uint index;
 			if (blobs.TryGetValue (blob, out index))
 				return index;
 
-			index = (uint) base.position;
+			index = (uint) base.Position;
 			WriteBlob (blob);
 			blobs.Add (blob, index);
 			return index;
 		}
 
-		void WriteBlob (ByteBuffer blob)
+        void WriteBlob(IByteBuffer blob)
 		{
-			WriteCompressedUInt32 ((uint) blob.length);
+			WriteCompressedUInt32 ((uint) blob.Length);
 			WriteBytes (blob);
 		}
 	}

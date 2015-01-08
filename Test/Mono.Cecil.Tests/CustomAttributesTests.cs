@@ -431,8 +431,8 @@ namespace Mono.Cecil.Tests {
 
 			buffer.WriteUInt16 (0); // named arguments
 
-			var blob = new byte [buffer.length];
-			Buffer.BlockCopy (buffer.buffer, 0, blob, 0, buffer.length);
+			var blob = new byte [buffer.Length];
+			Buffer.BlockCopy (buffer.Buffer, 0, blob, 0, buffer.Length);
 
 			var attribute = new CustomAttribute (assembly_title_ctor, blob);
 			module.Assembly.CustomAttributes.Add (attribute);

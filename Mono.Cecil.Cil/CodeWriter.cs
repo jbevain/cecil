@@ -111,12 +111,12 @@ namespace Mono.Cecil.Cil {
 				symbol_writer.Write (symbols);
 		}
 
-		static MetadataToken GetLocalVarToken (ByteBuffer buffer, MethodSymbols symbols)
+        static MetadataToken GetLocalVarToken(IByteBuffer buffer, MethodSymbols symbols)
 		{
 			if (symbols.variables.IsNullOrEmpty ())
 				return MetadataToken.Zero;
 
-			buffer.position = 8;
+			buffer.Position = 8;
 			return new MetadataToken (buffer.ReadUInt32 ());
 		}
 
@@ -636,12 +636,12 @@ namespace Mono.Cecil.Cil {
 		void Align (int align)
 		{
 			align--;
-			WriteBytes (((position + align) & ~align) - position);
+			WriteBytes (((Position + align) & ~align) - Position);
 		}
 
 		void EndMethod ()
 		{
-			current = (RVA) (code_base + position);
+			current = (RVA) (code_base + Position);
 		}
 	}
 }

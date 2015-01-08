@@ -377,8 +377,8 @@ namespace Mono.Cecil {
 		internal CodeReader code;
 
 		uint Position {
-			get { return (uint) base.position; }
-			set { base.position = (int) value; }
+			get { return (uint) base.Position; }
+			set { base.Position = (int) value; }
 		}
 
 		public MetadataReader (ModuleDefinition module)
@@ -407,7 +407,7 @@ namespace Mono.Cecil {
 		{
 			var blob_heap = image.BlobHeap;
 			if (blob_heap == null) {
-				position += 2;
+				base.Position += 2;
 				return Empty<byte>.Array;
 			}
 
@@ -654,7 +654,7 @@ namespace Mono.Cecil {
 
 		Row<FileAttributes, string, uint> ReadFileRecord (uint rid)
 		{
-			var position = this.position;
+			var position = base.Position;
 
 			if (!MoveTo (Table.File, rid))
 				throw new ArgumentException ();
@@ -664,7 +664,7 @@ namespace Mono.Cecil {
 				ReadString (),
 				ReadBlobIndex ());
 
-			this.position = position;
+			base.Position = position;
 
 			return record;
 		}
@@ -1247,7 +1247,7 @@ namespace Mono.Cecil {
 				return Empty<byte>.Array;
 
 			var value = new byte [size];
-			Buffer.BlockCopy (section.Data, (int) (rva - section.VirtualAddress), value, 0, size);
+			System.Buffer.BlockCopy (section.Data, (int) (rva - section.VirtualAddress), value, 0, size);
 			return value;
 		}
 
@@ -1715,9 +1715,9 @@ namespace Mono.Cecil {
 			if (param_range.Length == 0)
 				return;
 
-			var position = base.position;
+			var position = base.Position;
 			ReadParameters (method, param_range);
-			base.position = position;
+			base.Position = position;
 		}
 
 		void ReadParameters (IMethodDefinition method, Range param_range)
@@ -2079,7 +2079,7 @@ namespace Mono.Cecil {
 				return null;
 
 			IMetadataTokenProvider element;
-			var position = this.position;
+			var position = base.Position;
 			var context = this.context;
 
 			switch (token.TokenType) {
@@ -2108,7 +2108,7 @@ namespace Mono.Cecil {
 				return null;
 			}
 
-			this.position = position;
+			base.Position = position;
 			this.context = context;
 
 			return element;
@@ -2250,8 +2250,8 @@ namespace Mono.Cecil {
 			var reader = ReadSignature (signature);
 			const byte field_sig = 0x6;
 
-			if (reader.buffer [reader.position] == field_sig) {
-				reader.position++;
+			if (reader.Buffer [reader.Position] == field_sig) {
+				reader.Position++;
 				var field = new FieldReference ();
 				field.DeclaringType = declaring_type;
 				field.FieldType = reader.ReadTypeSignature ();
@@ -2566,12 +2566,12 @@ namespace Mono.Cecil {
 			var signature = declaration.Signature;
 			var reader = ReadSignature (signature);
 
-			if (reader.buffer [reader.position] != '.') {
+			if (reader.Buffer [reader.Position] != '.') {
 				ReadXmlSecurityDeclaration (signature, declaration);
 				return;
 			}
 
-			reader.position++;
+			reader.Position++;
 			var count = reader.ReadCompressedUInt32 ();
 			var attributes = new Collection<SecurityAttribute> ((int) count);
 
@@ -2646,7 +2646,7 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetExportedTypeScope (MetadataToken token)
 		{
-			var position = this.position;
+			var position = base.Position;
 			IMetadataScope scope;
 
 			switch (token.TokenType) {
@@ -2662,7 +2662,7 @@ namespace Mono.Cecil {
 				throw new NotSupportedException ();
 			}
 
-			this.position = position;
+			base.Position = position;
 			return scope;
 		}
 
@@ -2702,19 +2702,19 @@ namespace Mono.Cecil {
 		}
 
 		public SignatureReader (uint blob, MetadataReader reader)
-			: base (reader.buffer)
+			: base (reader.Buffer)
 		{
 			this.reader = reader;
 
 			MoveToBlob (blob);
 
 			this.sig_length = ReadCompressedUInt32 ();
-			this.start = (uint) position;
+			this.start = (uint) Position;
 		}
 
 		void MoveToBlob (uint blob)
 		{
-			position = (int) (reader.image.BlobHeap.Offset + blob);
+			Position = (int) (reader.image.BlobHeap.Offset + blob);
 		}
 
 		MetadataToken ReadTypeTokenSignature ()
@@ -3211,8 +3211,8 @@ namespace Mono.Cecil {
 
 		string ReadUTF8String ()
 		{
-			if (buffer [position] == 0xff) {
-				position++;
+			if (Buffer [Position] == 0xff) {
+				Position++;
 				return null;
 			}
 
@@ -3220,16 +3220,16 @@ namespace Mono.Cecil {
 			if (length == 0)
 				return string.Empty;
 
-			var @string = Encoding.UTF8.GetString (buffer, position,
-				buffer [position + length - 1] == 0 ? length - 1 : length);
+			var @string = Encoding.UTF8.GetString (Buffer, Position,
+				Buffer [Position + length - 1] == 0 ? length - 1 : length);
 
-			position += length;
+			Position += length;
 			return @string;
 		}
 
 		public bool CanReadMore ()
 		{
-			return position - start < sig_length;
+			return Position - start < sig_length;
 		}
 	}
 }

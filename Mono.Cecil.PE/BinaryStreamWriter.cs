@@ -83,7 +83,7 @@ namespace Mono.Cecil.PE {
 
 		public void WriteBuffer (ByteBuffer buffer)
 		{
-			Write (buffer.buffer, 0, buffer.length);
+			Write (buffer.Buffer, 0, buffer.Length);
 		}
 
 		protected void Advance (int bytes)

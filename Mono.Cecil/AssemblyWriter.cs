@@ -548,7 +548,7 @@ namespace Mono.Cecil {
 
 		public override void Write (TableHeapBuffer buffer)
 		{
-			position = buffer.position;
+			position = buffer.Position;
 			for (int i = 0; i < length; i++) {
 				buffer.WriteUInt32 (rows [i].Col1);		// RVA
 				buffer.WriteRID (rows [i].Col2, Table.Field);	// Field
@@ -802,9 +802,9 @@ namespace Mono.Cecil {
 			return string_heap.GetStringIndex (@string);
 		}
 
-		uint GetBlobIndex (ByteBuffer blob)
+        uint GetBlobIndex(IByteBuffer blob)
 		{
-			if (blob.length == 0)
+			if (blob.Length  == 0)
 				return 0;
 
 			return blob_heap.GetBlobIndex (blob);
@@ -2473,7 +2473,7 @@ namespace Mono.Cecil {
 			buffer.WriteCompressedUInt32 ((uint) count);
 			buffer.WriteICustomAttributeNamedArguments (attribute);
 
-			WriteCompressedUInt32 ((uint) buffer.length);
+			WriteCompressedUInt32 ((uint) buffer.Length);
 			WriteBytes (buffer);
 		}
 

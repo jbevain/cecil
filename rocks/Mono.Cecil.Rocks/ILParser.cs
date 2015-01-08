@@ -89,7 +89,7 @@ namespace Mono.Cecil.Rocks {
 				ParseCode (code_size, context);
 				break;
 			case 0x3: // fat
-				code.position--;
+				code.Position--;
 				ParseFatMethod (context);
 				break;
 			default:
@@ -128,10 +128,10 @@ namespace Mono.Cecil.Rocks {
 			var metadata = context.Metadata;
 			var visitor = context.Visitor;
 
-			var start = code.position;
+			var start = code.Position;
 			var end = start + code_size;
 
-			while (code.position < end) {
+			while (code.Position < end) {
 				var il_opcode = code.ReadByte ();
 				var opcode = il_opcode != 0xfe
 					? OpCodes.OneByteOpCode [il_opcode]

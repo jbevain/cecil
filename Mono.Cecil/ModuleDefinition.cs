@@ -1137,12 +1137,12 @@ namespace Mono.Cecil {
             {
                 var reader = moduleDefinition.MetadataReader;
 
-                var position = reader.position;
+                var position = reader.Position;
                 var context = reader.context;
 
                 var ret = read(item, reader);
 
-                reader.position = position;
+                reader.Position = position;
                 reader.context = context;
 
                 return ret;
@@ -1159,12 +1159,12 @@ namespace Mono.Cecil {
 
                 var reader = moduleDefinition.MetadataReader;
 
-                var position = reader.position;
+                var position = reader.Position;
                 var context = reader.context;
 
                 var ret = read(item, reader);
 
-                reader.position = position;
+                reader.Position = position;
                 reader.context = context;
 
                 return variable = ret;
