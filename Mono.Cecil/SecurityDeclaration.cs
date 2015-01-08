@@ -57,12 +57,13 @@ namespace Mono.Cecil {
         IList<ISecurityDeclaration> SecurityDeclarations { get; }
 	}
 
-	public sealed class SecurityAttribute : ICustomAttribute {
+    public sealed class SecurityAttribute : IAttribute
+    {
 
 		ITypeReference attribute_type;
 
-		internal IList<CustomAttributeNamedArgument> fields;
-		internal IList<CustomAttributeNamedArgument> properties;
+		internal IList<CustomAttributeNamedArgument> fields = new Collection<CustomAttributeNamedArgument> ();
+        internal IList<CustomAttributeNamedArgument> properties = new Collection<CustomAttributeNamedArgument>();
 
 		public ITypeReference AttributeType {
 			get { return attribute_type; }
@@ -73,19 +74,33 @@ namespace Mono.Cecil {
 			get { return !fields.IsNullOrEmpty (); }
 		}
 
-		public IList<CustomAttributeNamedArgument> Fields {
-            get { return fields ?? (fields = new Collection<CustomAttributeNamedArgument>()); }
+		public IList<CustomAttributeNamedArgument> Fields
+		{
+		    get { return fields; }
+		    set { fields = value; }
 		}
 
-		public bool HasProperties {
+        public bool HasProperties {
 			get { return !properties.IsNullOrEmpty (); }
 		}
 
 		public IList<CustomAttributeNamedArgument> Properties {
-            get { return properties ?? (properties = new Collection<CustomAttributeNamedArgument>()); }
+            get { return properties; }
+            set { fields = value; }
+
 		}
 
-		public SecurityAttribute (ITypeReference attributeType)
+        public IList<CustomAttributeNamedArgument> GetFields ()
+        {
+            return fields;
+        }
+
+        public IList<CustomAttributeNamedArgument> GetProperties ()
+        {
+            return properties;
+        }
+
+        public SecurityAttribute (ITypeReference attributeType)
 		{
 			this.attribute_type = attributeType;
 		}

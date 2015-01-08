@@ -434,7 +434,7 @@ namespace Mono.Cecil.Tests {
 			var blob = new byte [buffer.Length];
 			Buffer.BlockCopy (buffer.Buffer, 0, blob, 0, buffer.Length);
 
-			var attribute = new CustomAttribute (assembly_title_ctor, blob);
+			ICustomAttribute attribute = new CustomAttribute (assembly_title_ctor, blob);
 			module.Assembly.CustomAttributes.Add (attribute);
 
 			module.Write (file);
@@ -447,7 +447,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
 		}
 
-		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
+		static void AssertCustomAttribute (string expected, ICustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));
 		}
@@ -465,7 +465,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (expected, result.ToString ());
 		}
 
-		static string PrettyPrint (CustomAttribute attribute)
+		static string PrettyPrint (ICustomAttribute attribute)
 		{
 			var signature = new StringBuilder ();
 			signature.Append (".ctor (");
@@ -566,7 +566,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (value, argument.Value);
 		}
 
-		static CustomAttribute GetAttribute (ICustomAttributeProvider owner, string type)
+		static ICustomAttribute GetAttribute (ICustomAttributeProvider owner, string type)
 		{
 			Assert.IsTrue (owner.HasCustomAttributes);
 

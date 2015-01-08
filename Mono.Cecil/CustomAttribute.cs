@@ -74,27 +74,43 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public interface ICustomAttribute {
+    public interface IAttribute {
+        ITypeReference AttributeType { get; }
+        bool HasFields { get; }
+        bool HasProperties { get; }
+        IList<CustomAttributeNamedArgument> Fields { get; set; }
+        IList<CustomAttributeNamedArgument> Properties { get; set; }
 
-		ITypeReference AttributeType { get; }
+        IList<CustomAttributeNamedArgument> GetFields ();
+        IList<CustomAttributeNamedArgument> GetProperties ();
+    }
 
-		bool HasFields { get; }
-		bool HasProperties { get; }
-		IList<CustomAttributeNamedArgument> Fields { get; }
-		IList<CustomAttributeNamedArgument> Properties { get; }
-	}
+    public interface ICustomAttribute : IAttribute {
+        uint Signature { get; }
+        IMethodReference Constructor { get; set; }
+        bool HasConstructorArguments { get; }
+        IList<CustomAttributeArgument> ConstructorArguments { get; }
+        IList<CustomAttributeArgument> Arguments { get; set; }
+        bool IsResolved { get; set; }
+        byte[] GetBlob ();
+    }
 
-	public sealed class CustomAttribute : ICustomAttribute {
+    public sealed class CustomAttribute : ICustomAttribute {
 
-		readonly internal uint signature;
-		internal bool resolved;
+        public uint Signature { get; private set; }
 		IMethodReference constructor;
 		byte [] blob;
-		internal IList<CustomAttributeArgument> arguments;
-		internal IList<CustomAttributeNamedArgument> fields;
-		internal IList<CustomAttributeNamedArgument> properties;
+        private IList<CustomAttributeNamedArgument> fields = new Collection<CustomAttributeNamedArgument> ();
+        private IList<CustomAttributeNamedArgument> properties = new Collection<CustomAttributeNamedArgument>();
+        private IList<CustomAttributeArgument> arguments = new Collection<CustomAttributeArgument> ();
 
-		public IMethodReference Constructor {
+        public IList<CustomAttributeArgument> Arguments
+        {
+            get { return arguments; }
+            set { arguments = value; }
+        }
+
+        public IMethodReference Constructor {
 			get { return constructor; }
 			set { constructor = value; }
 		}
@@ -103,15 +119,13 @@ namespace Mono.Cecil {
 			get { return constructor.DeclaringType; }
 		}
 
-		public bool IsResolved {
-			get { return resolved; }
-		}
+        public bool IsResolved { get; set; }
 
 		public bool HasConstructorArguments {
 			get {
 				Resolve ();
 
-				return !arguments.IsNullOrEmpty ();
+				return !Arguments.IsNullOrEmpty ();
 			}
 		}
 
@@ -119,7 +133,7 @@ namespace Mono.Cecil {
 			get {
 				Resolve ();
 
-				return arguments ?? (arguments = new Collection<CustomAttributeArgument> ());
+				return Arguments;
 			}
 		}
 
@@ -135,8 +149,10 @@ namespace Mono.Cecil {
 			get {
 				Resolve ();
 
-                return fields ?? (fields = new Collection<CustomAttributeNamedArgument>());
+                return fields;
 			}
+            set { fields = value; }
+
 		}
 
 		public bool HasProperties {
@@ -147,15 +163,27 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttributeNamedArgument> Properties {
-			get {
+		public IList<CustomAttributeNamedArgument> Properties
+		{
+		    get {
 				Resolve ();
 
-                return properties ?? (properties = new Collection<CustomAttributeNamedArgument>());
+                return properties;
 			}
+            set { properties = value; }
 		}
 
-		internal bool HasImage {
+        public IList<CustomAttributeNamedArgument> GetFields ()
+        {
+            return fields;
+        }
+
+        public IList<CustomAttributeNamedArgument> GetProperties ()
+        {
+            return properties;
+        }
+
+        internal bool HasImage {
 			get { return constructor != null && ((MethodReference)constructor).HasImage; }
 		}
 
@@ -165,21 +193,21 @@ namespace Mono.Cecil {
 
 		internal CustomAttribute (uint signature, IMethodReference constructor)
 		{
-			this.signature = signature;
+			this.Signature = signature;
 			this.constructor = constructor;
-			this.resolved = false;
+			this.IsResolved = false;
 		}
 
 		public CustomAttribute (IMethodReference constructor)
 		{
 			this.constructor = constructor;
-			this.resolved = true;
+            this.IsResolved = true;
 		}
 
 		public CustomAttribute (IMethodReference constructor, byte [] blob)
 		{
 			this.constructor = constructor;
-			this.resolved = false;
+            this.IsResolved = false;
 			this.blob = blob;
 		}
 
@@ -191,27 +219,27 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				throw new NotSupportedException ();
 
-			return Module.Read (ref blob, this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature));
+			return Module.Read (ref blob, this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.Signature));
 		}
 
 		void Resolve ()
 		{
-			if (resolved || !HasImage)
+            if (IsResolved || !HasImage)
 				return;
 
 			Module.Read (this, (attribute, reader) => {
 				try {
 					reader.ReadCustomAttributeSignature (attribute);
-					resolved = true;
+                    IsResolved = true;
 				} catch (ResolutionException) {
-					if (arguments != null)
-						arguments.Clear ();
+					if (Arguments != null)
+						Arguments.Clear ();
 					if (fields != null)
 						fields.Clear ();
 					if (properties != null)
 						properties.Clear ();
 
-					resolved = false;
+                    IsResolved = false;
 				}
 				return this;
 			});

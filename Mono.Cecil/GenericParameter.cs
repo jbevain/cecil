@@ -57,7 +57,7 @@ namespace Mono.Cecil {
 
 		ushort attributes;
 		IList<ITypeReference> constraints;
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 
 		public GenericParameterAttributes Attributes {
 			get { return (GenericParameterAttributes) attributes; }
@@ -115,7 +115,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

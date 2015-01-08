@@ -51,7 +51,7 @@ namespace Mono.Cecil {
 
 		internal IModuleDefinition main_module;
 		IList<IModuleDefinition> modules;
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
         IList<ISecurityDeclaration> security_declarations;
 
 		public IAssemblyNameDefinition Name {
@@ -98,7 +98,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, main_module)); }
 		}
 

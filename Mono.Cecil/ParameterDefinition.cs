@@ -50,7 +50,7 @@ namespace Mono.Cecil {
 		internal IMethodSignature method;
 
 		object constant = Mixin.NotResolved;
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 		MarshalInfo marshal_info;
 
 		public ParameterAttributes Attributes {
@@ -96,7 +96,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, parameter_type.Module)); }
 		}
 

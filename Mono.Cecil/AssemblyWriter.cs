@@ -1929,10 +1929,10 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetCustomAttributeSignature (CustomAttribute attribute)
+        SignatureWriter GetCustomAttributeSignature(ICustomAttribute attribute)
 		{
 			var signature = CreateSignatureWriter ();
-			if (!attribute.resolved) {
+			if (!attribute.IsResolved) {
 				signature.WriteBytes (attribute.GetBlob ());
 				return signature;
 			}
@@ -2235,7 +2235,7 @@ namespace Mono.Cecil {
 			WritePrimitiveValue (value);
 		}
 
-		public void WriteCustomAttributeConstructorArguments (CustomAttribute attribute)
+        public void WriteCustomAttributeConstructorArguments(ICustomAttribute attribute)
 		{
 			if (!attribute.HasConstructorArguments)
 				return;
@@ -2408,7 +2408,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public void WriteCustomAttributeNamedArguments (CustomAttribute attribute)
+        public void WriteCustomAttributeNamedArguments(ICustomAttribute attribute)
 		{
 			var count = GetNamedArgumentCount (attribute);
 
@@ -2420,7 +2420,7 @@ namespace Mono.Cecil {
 			WriteICustomAttributeNamedArguments (attribute);
 		}
 
-		static int GetNamedArgumentCount (ICustomAttribute attribute)
+		static int GetNamedArgumentCount (IAttribute attribute)
 		{
 			int count = 0;
 
@@ -2433,7 +2433,7 @@ namespace Mono.Cecil {
 			return count;
 		}
 
-		void WriteICustomAttributeNamedArguments (ICustomAttribute attribute)
+		void WriteICustomAttributeNamedArguments (IAttribute attribute)
 		{
 			if (attribute.HasFields)
 				WriteCustomAttributeNamedArguments (0x53, attribute.Fields);

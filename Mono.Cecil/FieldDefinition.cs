@@ -54,7 +54,7 @@ namespace Mono.Cecil {
     public sealed class FieldDefinition : FieldReference, IFieldDefinition {
 
 		ushort attributes;
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 
 		int offset = Mixin.NotResolvedMarker;
 
@@ -166,7 +166,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

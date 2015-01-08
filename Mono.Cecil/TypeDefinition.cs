@@ -93,7 +93,7 @@ namespace Mono.Cecil {
         IList<IFieldDefinition> fields;
         IList<IEventDefinition> events;
         IList<IPropertyDefinition> properties;
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
         IList<ISecurityDeclaration> security_declarations;
 
         public Range FieldsRange { get; set; }
@@ -332,7 +332,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

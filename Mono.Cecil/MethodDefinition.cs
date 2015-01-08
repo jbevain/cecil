@@ -91,7 +91,7 @@ namespace Mono.Cecil {
 		ushort impl_attributes;
 		internal volatile bool sem_attrs_ready;
 		internal MethodSemanticsAttributes sem_attrs;
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
         IList<ISecurityDeclaration> security_declarations;
 
 		internal RVA rva;
@@ -165,7 +165,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 

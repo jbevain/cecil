@@ -414,9 +414,9 @@ namespace Mono.Cecil {
         IEnumerable<IMemberReference> GetMemberReferences ();
         object ReadConstant (IConstantProvider owner);
         bool HasCustomAttributes (ICustomAttributeProvider owner);
-        Collection<CustomAttribute> ReadCustomAttributes (ICustomAttributeProvider owner);
+        Collection<ICustomAttribute> ReadCustomAttributes (ICustomAttributeProvider owner);
         byte [] ReadCustomAttributeBlob (uint signature);
-        void ReadCustomAttributeSignature (CustomAttribute attribute);
+        void ReadCustomAttributeSignature(ICustomAttribute attribute);
         bool HasMarshalInfo (IMarshalInfoProvider owner);
         MarshalInfo ReadMarshalInfo (IMarshalInfoProvider owner);
         bool HasSecurityDeclarations (ISecurityDeclarationProvider owner);
@@ -2452,15 +2452,15 @@ namespace Mono.Cecil {
 			return RangesSize (ranges) > 0;
 		}
 
-		public Collection<CustomAttribute> ReadCustomAttributes (ICustomAttributeProvider owner)
+        public Collection<ICustomAttribute> ReadCustomAttributes(ICustomAttributeProvider owner)
 		{
 			InitializeCustomAttributes ();
 
 			Range [] ranges;
 			if (!Metadata.TryGetCustomAttributeRanges (owner, out ranges))
-				return new Collection<CustomAttribute> ();
+                return new Collection<ICustomAttribute>();
 
-			var custom_attributes = new Collection<CustomAttribute> (RangesSize (ranges));
+            var custom_attributes = new Collection<ICustomAttribute>(RangesSize(ranges));
 
 			for (int i = 0; i < ranges.Length; i++)
 				ReadCustomAttributeRange (ranges [i], custom_attributes);
@@ -2470,7 +2470,7 @@ namespace Mono.Cecil {
 			return custom_attributes;
 		}
 
-		void ReadCustomAttributeRange (Range range, Collection<CustomAttribute> custom_attributes)
+        void ReadCustomAttributeRange(Range range, Collection<ICustomAttribute> custom_attributes)
 		{
 			if (!MoveTo (Table.CustomAttribute, range.Start))
 				return;
@@ -2501,9 +2501,9 @@ namespace Mono.Cecil {
 			return ReadBlob (signature);
 		}
 
-		public void ReadCustomAttributeSignature (CustomAttribute attribute)
+		public void ReadCustomAttributeSignature (ICustomAttribute attribute)
 		{
-			var reader = ReadSignature (attribute.signature);
+			var reader = ReadSignature (attribute.Signature);
 
 			if (!reader.CanReadMore ())
 				return;
@@ -2523,7 +2523,7 @@ namespace Mono.Cecil {
 			if (named == 0)
 				return;
 
-			reader.ReadCustomAttributeNamedArguments (named, ref attribute.fields, ref attribute.properties);
+			reader.ReadCustomAttributeNamedArguments (named, attribute);
 		}
 
 		void InitializeMarshalInfos ()
@@ -3001,16 +3001,16 @@ namespace Mono.Cecil {
 			return ReadPrimitiveValue (type);
 		}
 
-        public void ReadCustomAttributeConstructorArguments(CustomAttribute attribute, IList<IParameterDefinition> parameters)
+        public void ReadCustomAttributeConstructorArguments(ICustomAttribute attribute, IList<IParameterDefinition> parameters)
 		{
 			var count = parameters.Count;
 			if (count == 0)
 				return;
 
-			attribute.arguments = new Collection<CustomAttributeArgument> (count);
+			attribute.Arguments = new Collection<CustomAttributeArgument> (count);
 
 			for (int i = 0; i < count; i++)
-				attribute.arguments.Add (
+				attribute.Arguments.Add (
 					ReadCustomAttributeFixedArgument (parameters [i].ParameterType));
 		}
 
@@ -3022,40 +3022,33 @@ namespace Mono.Cecil {
 			return ReadCustomAttributeElement (type);
 		}
 
-        public void ReadCustomAttributeNamedArguments(ushort count, ref IList<CustomAttributeNamedArgument> fields, ref IList<CustomAttributeNamedArgument> properties)
+        public void ReadCustomAttributeNamedArguments(ushort count, IAttribute attribute)
 		{
-			for (int i = 0; i < count; i++)
-				ReadCustomAttributeNamedArgument (ref fields, ref properties);
+            for (int i = 0; i < count; i++)
+                ReadCustomAttributeNamedArgument(attribute);
 		}
 
-        void ReadCustomAttributeNamedArgument(ref IList<CustomAttributeNamedArgument> fields, ref IList<CustomAttributeNamedArgument> properties)
-		{
-			var kind = ReadByte ();
-			var type = ReadCustomAttributeFieldOrPropType ();
-			var name = ReadUTF8String ();
+        void ReadCustomAttributeNamedArgument(IAttribute attribute)
+        {
+            var kind = ReadByte();
+            var type = ReadCustomAttributeFieldOrPropType();
+            var name = ReadUTF8String();
 
             IList<CustomAttributeNamedArgument> container;
-			switch (kind) {
-			case 0x53:
-				container = GetCustomAttributeNamedArgumentCollection (ref fields);
-				break;
-			case 0x54:
-				container = GetCustomAttributeNamedArgumentCollection (ref properties);
-				break;
-			default:
-				throw new NotSupportedException ();
-			}
+            switch (kind)
+            {
+                case 0x53:
+                    container = attribute.GetFields ();
+                    break;
+                case 0x54:
+                    container = attribute.GetProperties ();
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
 
-			container.Add (new CustomAttributeNamedArgument (name, ReadCustomAttributeFixedArgument (type)));
-		}
-
-        static IList<CustomAttributeNamedArgument> GetCustomAttributeNamedArgumentCollection(ref IList<CustomAttributeNamedArgument> collection)
-		{
-			if (collection != null)
-				return collection;
-
-			return collection = new Collection<CustomAttributeNamedArgument> ();
-		}
+            container.Add(new CustomAttributeNamedArgument(name, ReadCustomAttributeFixedArgument(type)));
+        }
 
 		CustomAttributeArgument ReadCustomAttributeFixedArrayArgument (ArrayType type)
 		{
@@ -3209,10 +3202,7 @@ namespace Mono.Cecil {
 
 			ReadCompressedUInt32 ();
 
-			ReadCustomAttributeNamedArguments (
-				(ushort) ReadCompressedUInt32 (),
-				ref attribute.fields,
-				ref attribute.properties);
+			ReadCustomAttributeNamedArguments ((ushort) ReadCompressedUInt32 (), attribute);
 
 			return attribute;
 		}

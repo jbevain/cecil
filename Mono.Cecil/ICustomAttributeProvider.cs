@@ -34,7 +34,7 @@ namespace Mono.Cecil {
 
 	public interface ICustomAttributeProvider : IMetadataTokenProvider {
 
-		IList<CustomAttribute> CustomAttributes { get; }
+		IList<ICustomAttribute> CustomAttributes { get; }
 
 		bool HasCustomAttributes { get; }
 	}
@@ -48,14 +48,14 @@ namespace Mono.Cecil {
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasCustomAttributes (provider));
 		}
 
-		public static IList<CustomAttribute> GetCustomAttributes (
+        public static IList<ICustomAttribute> GetCustomAttributes(
 			this ICustomAttributeProvider self,
-			ref IList<CustomAttribute> variable,
+            ref IList<ICustomAttribute> variable,
 			IModuleDefinition module)
 		{
 			return module.HasImage ()
 				? module.Read (ref variable, self, (provider, reader) => reader.ReadCustomAttributes (provider))
-				: variable = new Collection<CustomAttribute>();
+                : variable = new Collection<ICustomAttribute>();
 		}
 	}
 }

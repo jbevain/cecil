@@ -294,7 +294,7 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 		MetadataImporter importer;
 #endif
-		IList<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 		IList<IAssemblyNameReference> references;
 		IList<IModuleReference> modules;
         IList<IResource> resources;
@@ -500,7 +500,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, this)); }
 		}
 

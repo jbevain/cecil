@@ -71,7 +71,8 @@ namespace Mono.Cecil {
 			get { return parameter != null && parameter.HasCustomAttributes; }
 		}
 
-		public IList<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return Parameter.CustomAttributes; }
 		}
 
