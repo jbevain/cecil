@@ -34,10 +34,9 @@ using Mono.Collections.Generic;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.Cil {
+    public sealed class CodeReader : ByteBuffer {
 
-	sealed class CodeReader : ByteBuffer {
-
-		readonly internal MetadataReader reader;
+        readonly internal IMetadataReader reader;
 
 		int start;
 		Section code_section;
@@ -49,7 +48,7 @@ namespace Mono.Cecil.Cil {
 			get { return base.Position - start; }
 		}
 
-		public CodeReader (Section section, MetadataReader reader)
+        public CodeReader(Section section, IMetadataReader reader)
 			: base (section.Data)
 		{
 			this.code_section = section;
@@ -61,7 +60,7 @@ namespace Mono.Cecil.Cil {
 			this.method = method;
 			this.body = new MethodBody (method);
 
-			reader.context = method;
+			reader.Context = method;
 
 			ReadMethodBody ();
 
@@ -71,7 +70,7 @@ namespace Mono.Cecil.Cil {
 		public void MoveTo (int rva)
 		{
 			if (!IsInSection (rva)) {
-				code_section = reader.image.GetSectionAtVirtualAddress ((uint) rva);
+				code_section = reader.Image.GetSectionAtVirtualAddress ((uint) rva);
 				Reset (code_section.Data);
 			}
 
@@ -102,7 +101,7 @@ namespace Mono.Cecil.Cil {
 				throw new InvalidOperationException ();
 			}
 
-			var symbol_reader = reader.module.SymbolReader;
+			var symbol_reader = reader.Module.SymbolReader;
 
 			if (symbol_reader != null) {
 				var instructions = body.Instructions;
@@ -220,7 +219,7 @@ namespace Mono.Cecil.Cil {
 
 		public string GetString (MetadataToken token)
 		{
-			return reader.image.UserStringHeap.Read (token.RID);
+			return reader.Image.UserStringHeap.Read (token.RID);
 		}
 
 		public IParameterDefinition GetParameter (int index)
@@ -385,7 +384,7 @@ namespace Mono.Cecil.Cil {
 			symbols = new MethodSymbols (method.Name);
 
 			this.method = method;
-			reader.context = method;
+			reader.Context = method;
 
 			MoveTo (method.RVA);
 
@@ -409,7 +408,7 @@ namespace Mono.Cecil.Cil {
 				throw new NotSupportedException ();
 			}
 
-			var symbol_reader = reader.module.SymbolReader;
+			var symbol_reader = reader.Module.SymbolReader;
 			if (symbol_reader != null && writer.metadata.write_symbols) {
 				symbols.method_token = GetOriginalToken (writer.metadata, method);
 				symbols.local_var_token = local_var_token;

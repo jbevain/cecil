@@ -33,8 +33,7 @@ using System.Text;
 using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
-
-	class StringHeap : Heap {
+    public class StringHeap : Heap {
 
 		readonly Dictionary<uint, string> strings = new Dictionary<uint, string> ();
 

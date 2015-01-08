@@ -79,7 +79,7 @@ namespace Mono.Cecil {
 					Initialize (module.Types);
 
 				return module.Read (new Row<string, string> (@namespace, name), (row, reader) => {
-					var types = reader.metadata.Types;
+					var types = reader.Metadata.Types;
 
 					for (int i = 0; i < types.Length; i++) {
 						if (types [i] == null)

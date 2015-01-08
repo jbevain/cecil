@@ -62,7 +62,7 @@ namespace Mono.Cecil.Rocks {
 
 		class ParseContext {
 			public CodeReader Code { get; set; }
-			public MetadataReader Metadata { get; set; }
+			public IMetadataReader Metadata { get; set; }
 			public Collection<VariableDefinition> Variables { get; set; }
 			public IILVisitor Visitor { get; set; }
 		}
@@ -99,7 +99,7 @@ namespace Mono.Cecil.Rocks {
 
 		static ParseContext CreateContext (IMethodDefinition method, IILVisitor visitor)
 		{
-			var code = method.Module.Read (method, (_, reader) => new CodeReader (reader.image.MetadataSection, reader));
+			var code = method.Module.Read (method, (_, reader) => new CodeReader (reader.Image.MetadataSection, reader));
 
 			return new ParseContext {
 				Code = code,

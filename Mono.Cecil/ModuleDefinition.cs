@@ -261,23 +261,23 @@ namespace Mono.Cecil {
         ITypeDefinition Resolve (ITypeReference type);
         bool HasImage { get; }
         object SyncRoot { get; }
-        MetadataReader MetadataReader { get; }
+        IMetadataReader MetadataReader { get; }
         IMetadataSystem MetadataSystem { get; }
         ReadingMode ReadingMode { get;}
         ISymbolReaderProvider SymbolReaderProvider { get; set; }
         Section GetSection (string rsrc);
+        Image Image { get;}
     }
 
     public sealed class ModuleDefinition : ModuleReference, IModuleDefinition {
 
-		internal Image Image;
 
 		internal ISymbolReader symbol_reader;
 		internal IAssemblyResolver assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
 		internal ITypeSystem type_system;
 
-		readonly MetadataReader reader;
+        readonly IMetadataReader reader;
 		readonly string fq_name;
 
 		internal string runtime_version;
@@ -302,8 +302,12 @@ namespace Mono.Cecil {
 		TypeDefinitionCollection types;
 
         public IMetadataSystem MetadataSystem { get; private set; }
+
         public ReadingMode ReadingMode { get; internal set; }
+
         public ISymbolReaderProvider SymbolReaderProvider { get; set; }
+
+        public Image Image { get; private set; }
 
 
 		public bool IsMain {
@@ -884,7 +888,7 @@ namespace Mono.Cecil {
 			get { return Image != null && !Image.Debug.IsZero; }
 		}
 
-        public MetadataReader MetadataReader
+        public IMetadataReader MetadataReader
 	    {
 	        get { return reader; }
 	    }
@@ -1131,25 +1135,25 @@ namespace Mono.Cecil {
 			}
 		}
 
-        internal static TRet Read<TItem, TRet>(this IModuleDefinition moduleDefinition, TItem item, Func<TItem, MetadataReader, TRet> read)
+        internal static TRet Read<TItem, TRet>(this IModuleDefinition moduleDefinition, TItem item, Func<TItem, IMetadataReader, TRet> read)
         {
             lock (moduleDefinition.SyncRoot)
             {
                 var reader = moduleDefinition.MetadataReader;
 
                 var position = reader.Position;
-                var context = reader.context;
+                var context = reader.Context;
 
                 var ret = read(item, reader);
 
                 reader.Position = position;
-                reader.context = context;
+                reader.Context = context;
 
                 return ret;
             }
         }
 
-        internal static TRet Read<TItem, TRet>(this IModuleDefinition moduleDefinition, ref TRet variable, TItem item, Func<TItem, MetadataReader, TRet> read) where TRet : class
+        internal static TRet Read<TItem, TRet>(this IModuleDefinition moduleDefinition, ref TRet variable, TItem item, Func<TItem, IMetadataReader, TRet> read) where TRet : class
         {
             lock (moduleDefinition.SyncRoot)
             {
@@ -1160,12 +1164,12 @@ namespace Mono.Cecil {
                 var reader = moduleDefinition.MetadataReader;
 
                 var position = reader.Position;
-                var context = reader.context;
+                var context = reader.Context;
 
                 var ret = read(item, reader);
 
                 reader.Position = position;
-                reader.context = context;
+                reader.Context = context;
 
                 return variable = ret;
             }

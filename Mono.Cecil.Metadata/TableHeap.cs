@@ -30,8 +30,7 @@ using System;
 using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
-
-	enum Table : byte {
+    public enum Table : byte {
 		Module = 0x00,
 		TypeRef = 0x01,
 		TypeDef = 0x02,
@@ -79,13 +78,13 @@ namespace Mono.Cecil.Metadata {
 		GenericParamConstraint = 0x2c,
 	}
 
-	struct TableInformation {
+    public struct TableInformation {
 		public uint Offset;
 		public uint Length;
 		public uint RowSize;
 	}
 
-	sealed class TableHeap : Heap {
+    public sealed class TableHeap : Heap {
 
 		public long Valid;
 		public long Sorted;

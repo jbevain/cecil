@@ -685,7 +685,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataBuilder {
+    public sealed class MetadataBuilder {
 
 		readonly internal IModuleDefinition module;
 		readonly internal ISymbolWriterProvider symbol_writer_provider;

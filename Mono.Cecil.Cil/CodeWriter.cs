@@ -39,8 +39,7 @@ using RVA = System.UInt32;
 #if !READ_ONLY
 
 namespace Mono.Cecil.Cil {
-
-	sealed class CodeWriter : ByteBuffer {
+    public sealed class CodeWriter : ByteBuffer {
 
 		readonly RVA code_base;
 		internal readonly MetadataBuilder metadata;
@@ -93,7 +92,7 @@ namespace Mono.Cecil.Cil {
 
 		void WriteUnresolvedMethodBody (IMethodDefinition method)
 		{
-			var code_reader = metadata.module.Read (method, (_, reader) => reader.code);
+			var code_reader = metadata.module.Read (method, (_, reader) => reader.Code);
 
 			MethodSymbols symbols;
 			var buffer = code_reader.PatchRawMethodBody (method, this, out symbols);

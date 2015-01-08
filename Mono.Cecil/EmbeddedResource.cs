@@ -33,7 +33,7 @@ namespace Mono.Cecil {
 
 	public sealed class EmbeddedResource : Resource {
 
-		readonly MetadataReader reader;
+		readonly IMetadataReader reader;
 
 		uint? offset;
 		byte [] data;
@@ -55,7 +55,7 @@ namespace Mono.Cecil {
 			this.stream = stream;
 		}
 
-		internal EmbeddedResource (string name, ManifestResourceAttributes attributes, uint offset, MetadataReader reader)
+        internal EmbeddedResource(string name, ManifestResourceAttributes attributes, uint offset, IMetadataReader reader)
 			: base (name, attributes)
 		{
 			this.offset = offset;
