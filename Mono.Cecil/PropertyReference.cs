@@ -31,8 +31,14 @@ using System;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IPropertyReference : IMemberReference
+    {
+        ITypeReference PropertyType { get; set; }
+        Collection<IParameterDefinition> Parameters { get; }
+        PropertyDefinition Resolve ();
+    }
 
-	public abstract class PropertyReference : MemberReference {
+    public abstract class PropertyReference : MemberReference, IPropertyReference {
 
 		ITypeReference property_type;
 
