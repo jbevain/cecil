@@ -32,8 +32,20 @@ using System.Text;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IPropertyDefinition : IPropertyReference, IMemberDefinition, IConstantProvider {
+        PropertyAttributes Attributes { get; set; }
+        bool HasThis { get; set; }
+        IMethodDefinition GetMethod { get; set; }
+        IMethodDefinition SetMethod { get; set; }
+        bool HasOtherMethods { get; }
+        Collection<IMethodDefinition> OtherMethods { get; set; }
+        bool HasParameters { get; }
+        bool HasDefault { get; set; }
+        new ITypeDefinition DeclaringType { get; set; }
+        string ToString ();
+    }
 
-	public sealed class PropertyDefinition : PropertyReference, IMemberDefinition, IConstantProvider {
+    public sealed class PropertyDefinition : PropertyReference, IPropertyDefinition {
 
 		bool? has_this;
 		ushort attributes;
@@ -112,8 +124,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<IMethodDefinition> OtherMethods {
-			get {
+		public Collection<IMethodDefinition> OtherMethods
+		{
+		    get {
 				if (other_methods != null)
 					return other_methods;
 
@@ -124,9 +137,10 @@ namespace Mono.Cecil {
 
 				return other_methods = new Collection<IMethodDefinition> ();
 			}
+		    set { other_methods = value; }
 		}
 
-		public bool HasParameters {
+        public bool HasParameters {
 			get {
 				InitializeMethods ();
 
@@ -255,7 +269,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override PropertyDefinition Resolve ()
+        public override IPropertyDefinition Resolve()
 		{
 			return this;
 		}

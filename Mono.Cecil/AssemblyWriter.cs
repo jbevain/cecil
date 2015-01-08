@@ -1537,13 +1537,13 @@ namespace Mono.Cecil {
 				AddProperty (properties [i]);
 		}
 
-		void AddProperty (PropertyDefinition property)
+        void AddProperty(IPropertyDefinition property)
 		{
 			property_table.AddRow (new PropertyRow (
 				property.Attributes,
 				GetStringIndex (property.Name),
 				GetBlobIndex (GetPropertySignature (property))));
-			property.token = new MetadataToken (TokenType.Property, property_rid++);
+			property.MetadataToken = new MetadataToken (TokenType.Property, property_rid++);
 
 			var method = property.GetMethod;
 			if (method != null)
@@ -1869,7 +1869,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		SignatureWriter GetPropertySignature (PropertyDefinition property)
+        SignatureWriter GetPropertySignature(IPropertyDefinition property)
 		{
 			var signature = CreateSignatureWriter ();
 			byte calling_convention = 0x8;

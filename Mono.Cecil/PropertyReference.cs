@@ -35,7 +35,7 @@ namespace Mono.Cecil {
     {
         ITypeReference PropertyType { get; set; }
         Collection<IParameterDefinition> Parameters { get; }
-        PropertyDefinition Resolve ();
+        IPropertyDefinition Resolve();
     }
 
     public abstract class PropertyReference : MemberReference, IPropertyReference {
@@ -60,6 +60,6 @@ namespace Mono.Cecil {
 			property_type = propertyType;
 		}
 
-		public abstract PropertyDefinition Resolve ();
+        public abstract IPropertyDefinition Resolve();
 	}
 }

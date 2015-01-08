@@ -50,7 +50,7 @@ namespace Mono.Cecil {
         bool HasEvents { get; }
         IList<IEventDefinition> Events { get; }
         bool HasProperties { get; }
-        IList<PropertyDefinition> Properties { get; }
+        IList<IPropertyDefinition> Properties { get; }
         bool IsNotPublic { get; set; }
         bool IsPublic { get; set; }
         bool IsNestedPublic { get; set; }
@@ -92,7 +92,7 @@ namespace Mono.Cecil {
 		IList<IMethodDefinition> methods;
         IList<IFieldDefinition> fields;
         IList<IEventDefinition> events;
-		IList<PropertyDefinition> properties;
+        IList<IPropertyDefinition> properties;
 		IList<CustomAttribute> custom_attributes;
         IList<ISecurityDeclaration> security_declarations;
 
@@ -296,7 +296,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<PropertyDefinition> Properties {
+        public IList<IPropertyDefinition> Properties
+        {
 			get {
 				if (properties != null)
 					return properties;
@@ -304,7 +305,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref properties, this, (type, reader) => reader.ReadProperties (type));
 
-				return properties = new MemberDefinitionCollection<PropertyDefinition> (this);
+                return properties = new MemberDefinitionCollection<IPropertyDefinition>(this);
 			}
 		}
 

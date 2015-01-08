@@ -1428,18 +1428,18 @@ namespace Mono.Cecil {
 			return range.Length > 0;
 		}
 
-		public Collection<PropertyDefinition> ReadProperties (ITypeDefinition type)
+        public Collection<IPropertyDefinition> ReadProperties(ITypeDefinition type)
 		{
 			InitializeProperties ();
 
 			Range range;
 
 			if (!metadata.TryGetPropertiesRange (type, out range))
-				return new MemberDefinitionCollection<PropertyDefinition> (type);
+                return new MemberDefinitionCollection<IPropertyDefinition>(type);
 
 			metadata.RemovePropertiesRange (type);
 
-			var properties = new MemberDefinitionCollection<PropertyDefinition> (type, (int) range.Length);
+            var properties = new MemberDefinitionCollection<IPropertyDefinition>(type, (int)range.Length);
 
 			if (range.Length == 0)
 				return properties;
@@ -1457,7 +1457,7 @@ namespace Mono.Cecil {
 			return properties;
 		}
 
-		void ReadProperty (uint property_rid, Collection<PropertyDefinition> properties)
+        void ReadProperty(uint property_rid, Collection<IPropertyDefinition> properties)
 		{
 			var attributes = (PropertyAttributes) ReadUInt16 ();
 			var name = ReadString ();
@@ -1526,10 +1526,10 @@ namespace Mono.Cecil {
 				GetEvent (type, row.Col2).RemoveMethod = method;
 				break;
 			case MethodSemanticsAttributes.Getter:
-				GetProperty (type, row.Col2).get_method = method;
+				GetProperty (type, row.Col2).GetMethod = method;
 				break;
 			case MethodSemanticsAttributes.Setter:
-				GetProperty (type, row.Col2).set_method = method;
+				GetProperty (type, row.Col2).SetMethod = method;
 				break;
 			case MethodSemanticsAttributes.Other:
 				switch (row.Col2.TokenType) {
@@ -1543,10 +1543,10 @@ namespace Mono.Cecil {
 				}
 				case TokenType.Property: {
 					var property = GetProperty (type, row.Col2);
-					if (property.other_methods == null)
-						property.other_methods = new Collection<IMethodDefinition> ();
+					if (property.OtherMethods == null)
+						property.OtherMethods = new Collection<IMethodDefinition> ();
 
-					property.other_methods.Add (method);
+					property.OtherMethods.Add (method);
 
 					break;
 				}
@@ -1571,7 +1571,7 @@ namespace Mono.Cecil {
 			return GetMember (type.Events, token);
 		}
 
-		static PropertyDefinition GetProperty (ITypeDefinition type, MetadataToken token)
+        static IPropertyDefinition GetProperty(ITypeDefinition type, MetadataToken token)
 		{
 			if (token.TokenType != TokenType.Property)
 				throw new ArgumentException ();
@@ -1608,7 +1608,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public PropertyDefinition ReadMethods (PropertyDefinition property)
+        public IPropertyDefinition ReadMethods(IPropertyDefinition property)
 		{
 			ReadAllSemantics (property.DeclaringType);
 			return property;
