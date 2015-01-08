@@ -423,7 +423,7 @@ namespace Mono.Cecil {
         Collection<ISecurityDeclaration> ReadSecurityDeclarations(ISecurityDeclarationProvider owner);
         byte [] ReadSecurityDeclarationBlob (uint signature);
         void ReadSecurityDeclarationSignature(ISecurityDeclaration declaration);
-        Collection<ExportedType> ReadExportedTypes ();
+        Collection<IExportedType> ReadExportedTypes();
         new uint Position { get; set; }
         IGenericContext Context { get; set; }
         Image Image { get; }
@@ -2670,13 +2670,13 @@ namespace Mono.Cecil {
 			declaration.SecurityAttributes = attributes;
 		}
 
-		public Collection<ExportedType> ReadExportedTypes ()
+        public Collection<IExportedType> ReadExportedTypes()
 		{
 			var length = MoveTo (Table.ExportedType);
 			if (length == 0)
-				return new Collection<ExportedType> ();
+                return new Collection<IExportedType>();
 
-			var exported_types = new Collection<ExportedType> (length);
+            var exported_types = new Collection<IExportedType>(length);
 
 			for (int i = 1; i <= length; i++) {
 				var attributes = (TypeAttributes) ReadUInt32 ();
@@ -2685,7 +2685,7 @@ namespace Mono.Cecil {
 				var @namespace = ReadString ();
 				var implementation = ReadMetadataToken (CodedIndex.Implementation);
 
-				ExportedType declaring_type = null;
+				IExportedType declaring_type = null;
 				IMetadataScope scope = null;
 
 				switch (implementation.TokenType) {

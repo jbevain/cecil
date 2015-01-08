@@ -29,8 +29,44 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IExportedType : IMetadataTokenProvider {
+        string Namespace { get; set; }
+        string Name { get; set; }
+        TypeAttributes Attributes { get; set; }
+        IMetadataScope Scope { get; }
+        IExportedType DeclaringType { get; set; }
+        int Identifier { get; set; }
+        bool IsNotPublic { get; set; }
+        bool IsPublic { get; set; }
+        bool IsNestedPublic { get; set; }
+        bool IsNestedPrivate { get; set; }
+        bool IsNestedFamily { get; set; }
+        bool IsNestedAssembly { get; set; }
+        bool IsNestedFamilyAndAssembly { get; set; }
+        bool IsNestedFamilyOrAssembly { get; set; }
+        bool IsAutoLayout { get; set; }
+        bool IsSequentialLayout { get; set; }
+        bool IsExplicitLayout { get; set; }
+        bool IsClass { get; set; }
+        bool IsInterface { get; set; }
+        bool IsAbstract { get; set; }
+        bool IsSealed { get; set; }
+        bool IsSpecialName { get; set; }
+        bool IsImport { get; set; }
+        bool IsSerializable { get; set; }
+        bool IsAnsiClass { get; set; }
+        bool IsUnicodeClass { get; set; }
+        bool IsAutoClass { get; set; }
+        bool IsBeforeFieldInit { get; set; }
+        bool IsRuntimeSpecialName { get; set; }
+        bool HasSecurity { get; set; }
+        bool IsForwarder { get; set; }
+        string FullName { get; }
+        ITypeDefinition Resolve ();
+        ITypeReference CreateReference ();
+    }
 
-	public class ExportedType : IMetadataTokenProvider {
+    public class ExportedType : IExportedType {
 
 		string @namespace;
 		string name;
@@ -38,7 +74,7 @@ namespace Mono.Cecil {
 		IMetadataScope scope;
 		IModuleDefinition module;
 		int identifier;
-		ExportedType declaring_type;
+        IExportedType declaring_type;
 		internal MetadataToken token;
 
 		public string Namespace {
@@ -65,7 +101,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public ExportedType DeclaringType {
+        public IExportedType DeclaringType
+        {
 			get { return declaring_type; }
 			set { declaring_type = value; }
 		}
@@ -240,7 +277,7 @@ namespace Mono.Cecil {
 			return module.Resolve (CreateReference ());
 		}
 
-		internal ITypeReference CreateReference ()
+        public ITypeReference CreateReference ()
 		{
 			return new TypeReference (@namespace, name, module, scope) {
 				DeclaringType = declaring_type != null ? declaring_type.CreateReference () : null,

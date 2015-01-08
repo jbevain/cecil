@@ -222,7 +222,7 @@ namespace Mono.Cecil {
         bool HasTypes { get; }
         IList<ITypeDefinition> Types { get; }
         bool HasExportedTypes { get; }
-        IList<ExportedType> ExportedTypes { get; }
+        IList<IExportedType> ExportedTypes { get; }
         IMethodDefinition EntryPoint { get; set; }
         bool HasDebugHeader { get; }
         bool HasTypeReference (string fullName);
@@ -298,7 +298,7 @@ namespace Mono.Cecil {
 		IList<IAssemblyNameReference> references;
 		IList<IModuleReference> modules;
         IList<IResource> resources;
-		IList<ExportedType> exported_types;
+        IList<IExportedType> exported_types;
 		TypeDefinitionCollection types;
 
         public IMetadataSystem MetadataSystem { get; private set; }
@@ -534,7 +534,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<ExportedType> ExportedTypes {
+        public IList<IExportedType> ExportedTypes
+        {
 			get {
 				if (exported_types != null)
 					return exported_types;
@@ -542,7 +543,7 @@ namespace Mono.Cecil {
 				if (HasImage)
                     return this.Read(ref exported_types, this, (_, reader) => reader.ReadExportedTypes());
 
-                return exported_types = new Collection<ExportedType>();
+                return exported_types = new Collection<IExportedType>();
 			}
 		}
 

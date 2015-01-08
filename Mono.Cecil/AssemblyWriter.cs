@@ -1034,11 +1034,11 @@ namespace Mono.Cecil {
 					GetStringIndex (exported_type.Namespace),
 					MakeCodedRID (GetExportedTypeScope (exported_type), CodedIndex.Implementation)));
 
-				exported_type.token = new MetadataToken (TokenType.ExportedType, rid);
+				exported_type.MetadataToken = new MetadataToken (TokenType.ExportedType, rid);
 			}
 		}
 
-		MetadataToken GetExportedTypeScope (ExportedType exported_type)
+        MetadataToken GetExportedTypeScope(IExportedType exported_type)
 		{
 			if (exported_type.DeclaringType != null)
 				return exported_type.DeclaringType.MetadataToken;
