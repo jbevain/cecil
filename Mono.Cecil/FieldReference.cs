@@ -31,7 +31,7 @@ using System;
 namespace Mono.Cecil {
     public interface IFieldReference: IMemberReference {
         ITypeReference FieldType { get; set; }
-        FieldDefinition Resolve ();
+        IFieldDefinition Resolve ();
     }
 
     public class FieldReference : MemberReference, IFieldReference {
@@ -75,7 +75,7 @@ namespace Mono.Cecil {
 			this.DeclaringType = declaringType;
 		}
 
-		public virtual FieldDefinition Resolve ()
+		public virtual IFieldDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

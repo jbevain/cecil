@@ -51,7 +51,7 @@ namespace Mono.Cecil {
 		internal ITypeDefinition [] Types;
 		internal ITypeReference [] TypeReferences;
 
-		internal FieldDefinition [] Fields;
+        internal IFieldDefinition[] Fields;
 		internal IMethodDefinition [] Methods;
 		internal IMemberReference [] MemberReferences;
 
@@ -187,7 +187,7 @@ namespace Mono.Cecil {
 			TypeReferences [type.MetadataToken.RID - 1] = type;
 		}
 
-		public FieldDefinition GetFieldDefinition (uint rid)
+        public IFieldDefinition GetFieldDefinition(uint rid)
 		{
 			if (rid < 1 || rid > Fields.Length)
 				return null;
@@ -195,9 +195,9 @@ namespace Mono.Cecil {
 			return Fields [rid - 1];
 		}
 
-		public void AddFieldDefinition (FieldDefinition field)
+        public void AddFieldDefinition(IFieldDefinition field)
 		{
-			Fields [field.token.RID - 1] = field;
+			Fields [field.MetadataToken.RID - 1] = field;
 		}
 
 		public IMethodDefinition GetMethodDefinition (uint rid)

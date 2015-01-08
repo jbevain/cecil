@@ -30,8 +30,28 @@ using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IFieldDefinition : IFieldReference, IMemberDefinition, IConstantProvider, IMarshalInfoProvider {
+        bool HasLayoutInfo { get; }
+        int Offset { get; set; }
+        int RVA { get; }
+        byte[] InitialValue { get; set; }
+        FieldAttributes Attributes { get; set; }
+        bool IsCompilerControlled { get; set; }
+        bool IsPrivate { get; set; }
+        bool IsFamilyAndAssembly { get; set; }
+        bool IsAssembly { get; set; }
+        bool IsFamily { get; set; }
+        bool IsFamilyOrAssembly { get; set; }
+        bool IsPublic { get; set; }
+        bool IsStatic { get; set; }
+        bool IsInitOnly { get; set; }
+        bool IsLiteral { get; set; }
+        bool IsNotSerialized { get; set; }
+        bool IsPInvokeImpl { get; set; }
+        bool HasDefault { get; set; }
+    }
 
-	public sealed class FieldDefinition : FieldReference, IMemberDefinition, IConstantProvider, IMarshalInfoProvider {
+    public sealed class FieldDefinition : FieldReference, IFieldDefinition {
 
 		ushort attributes;
 		IList<CustomAttribute> custom_attributes;
@@ -258,7 +278,7 @@ namespace Mono.Cecil {
 			this.attributes = (ushort) attributes;
 		}
 
-		public override FieldDefinition Resolve ()
+        public override IFieldDefinition Resolve()
 		{
 			return this;
 		}

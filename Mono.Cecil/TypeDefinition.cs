@@ -46,7 +46,7 @@ namespace Mono.Cecil {
         bool HasMethods { get; }
         IList<IMethodDefinition> Methods { get; }
         bool HasFields { get; }
-        IList<FieldDefinition> Fields { get; }
+        IList<IFieldDefinition> Fields { get; }
         bool HasEvents { get; }
         IList<EventDefinition> Events { get; }
         bool HasProperties { get; }
@@ -90,7 +90,7 @@ namespace Mono.Cecil {
 		IList<ITypeReference> interfaces;
 		IList<ITypeDefinition> nested_types;
 		IList<IMethodDefinition> methods;
-		IList<FieldDefinition> fields;
+        IList<IFieldDefinition> fields;
 		IList<EventDefinition> events;
 		IList<PropertyDefinition> properties;
 		IList<CustomAttribute> custom_attributes;
@@ -246,7 +246,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<FieldDefinition> Fields {
+        public IList<IFieldDefinition> Fields
+        {
 			get {
 				if (fields != null)
 					return fields;
@@ -254,7 +255,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref fields, this, (type, reader) => reader.ReadFields (type));
 
-				return fields = new MemberDefinitionCollection<FieldDefinition> (this);
+                return fields = new MemberDefinitionCollection<IFieldDefinition>(this);
 			}
 		}
 

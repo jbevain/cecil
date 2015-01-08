@@ -1105,7 +1105,7 @@ namespace Mono.Cecil {
 			var fields = type.Fields;
             type.FieldsRange = new Range(type.FieldsRange.Start, (uint)fields.Count);
 			for (int i = 0; i < fields.Count; i++)
-				fields [i].token = new MetadataToken (TokenType.Field, field_rid++);
+				fields [i].MetadataToken = new MetadataToken (TokenType.Field, field_rid++);
 		}
 
 		void AttachMethodsDefToken (ITypeDefinition type)
@@ -1369,7 +1369,7 @@ namespace Mono.Cecil {
 				AddField (fields [i]);
 		}
 
-		void AddField (FieldDefinition field)
+        void AddField(IFieldDefinition field)
 		{
 			field_table.AddRow (new FieldRow (
 				field.Attributes,
@@ -1392,18 +1392,18 @@ namespace Mono.Cecil {
 				AddMarshalInfo (field);
 		}
 
-		void AddFieldRVA (FieldDefinition field)
+        void AddFieldRVA(IFieldDefinition field)
 		{
 			var table = GetTable<FieldRVATable> (Table.FieldRVA);
 			table.AddRow (new FieldRVARow (
 				data.AddData (field.InitialValue),
-				field.token.RID));
+				field.MetadataToken.RID));
 		}
 
-		void AddFieldLayout (FieldDefinition field)
+        void AddFieldLayout(IFieldDefinition field)
 		{
 			var table = GetTable<FieldLayoutTable> (Table.FieldLayout);
-			table.AddRow (new FieldLayoutRow ((uint) field.Offset, field.token.RID));
+			table.AddRow (new FieldLayoutRow ((uint) field.Offset, field.MetadataToken.RID));
 		}
 
 		void AddMethods (ITypeDefinition type)

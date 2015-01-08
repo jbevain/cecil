@@ -1162,13 +1162,13 @@ namespace Mono.Cecil {
 			metadata.SetInterfaceMapping (type, AddMapping (metadata.Interfaces, type, @interface));
 		}
 
-		public Collection<FieldDefinition> ReadFields (ITypeDefinition type)
+        public Collection<IFieldDefinition> ReadFields(ITypeDefinition type)
 		{
 			var fields_range = type.FieldsRange;
 			if (fields_range.Length == 0)
-				return new MemberDefinitionCollection<FieldDefinition> (type);
+                return new MemberDefinitionCollection<IFieldDefinition>(type);
 
-			var fields = new MemberDefinitionCollection<FieldDefinition> (type, (int) fields_range.Length);
+            var fields = new MemberDefinitionCollection<IFieldDefinition>(type, (int)fields_range.Length);
 			this.context = type;
 
 			if (!MoveTo (Table.FieldPtr, fields_range.Start)) {
@@ -1183,7 +1183,7 @@ namespace Mono.Cecil {
 			return fields;
 		}
 
-		void ReadField (uint field_rid, Collection<FieldDefinition> fields)
+        void ReadField(uint field_rid, Collection<IFieldDefinition> fields)
 		{
 			var attributes = (FieldAttributes) ReadUInt16 ();
 			var name = ReadString ();
@@ -1219,10 +1219,10 @@ namespace Mono.Cecil {
 			return reader.ReadTypeSignature ();
 		}
 
-		public int ReadFieldRVA (FieldDefinition field)
+        public int ReadFieldRVA(IFieldDefinition field)
 		{
 			InitializeFieldRVAs ();
-			var rid = field.token.RID;
+			var rid = field.MetadataToken.RID;
 
 			RVA rva;
 			if (!metadata.FieldRVAs.TryGetValue (rid, out rva))
@@ -1311,10 +1311,10 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public int ReadFieldLayout (FieldDefinition field)
+        public int ReadFieldLayout(IFieldDefinition field)
 		{
 			InitializeFieldLayouts ();
-			var rid = field.token.RID;
+			var rid = field.MetadataToken.RID;
 			uint offset;
 			if (!metadata.FieldLayouts.TryGetValue (rid, out offset))
 				return Mixin.NoDataMarker;
@@ -2114,7 +2114,7 @@ namespace Mono.Cecil {
 			return element;
 		}
 
-		public FieldDefinition GetFieldDefinition (uint rid)
+        public IFieldDefinition GetFieldDefinition(uint rid)
 		{
 			InitializeTypeDefinitions ();
 
@@ -2125,7 +2125,7 @@ namespace Mono.Cecil {
 			return LookupField (rid);
 		}
 
-		FieldDefinition LookupField (uint rid)
+        IFieldDefinition LookupField(uint rid)
 		{
 			var type = metadata.GetFieldDeclaringType (rid);
 			if (type == null)

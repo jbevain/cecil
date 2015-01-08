@@ -13,7 +13,7 @@ namespace Mono.Cecil.Tests {
 			return self.Methods.Where (m => m.Name == name).First ();
 		}
 
-		public static FieldDefinition GetField (this ITypeDefinition self, string name)
+		public static IFieldDefinition GetField (this ITypeDefinition self, string name)
 		{
 			return self.Fields.Where (f => f.Name == name).First ();
 		}
@@ -80,7 +80,7 @@ namespace Mono.Cecil.Tests {
 			return reference;
 		}
 
-		public static FieldReference MakeGeneric (this FieldReference self, params ITypeReference [] arguments)
+		public static FieldReference MakeGeneric (this IFieldReference self, params ITypeReference [] arguments)
 		{
 			return new FieldReference {
 				Name = self.Name,

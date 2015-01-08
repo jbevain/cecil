@@ -256,7 +256,7 @@ namespace Mono.Cecil {
         void Write (Stream stream);
         void Write(string fileName, IWriterParameters parameters);
         void Write(Stream stream, IWriterParameters parameters);
-        FieldDefinition Resolve(IFieldReference field);
+        IFieldDefinition Resolve(IFieldReference field);
         IMethodDefinition Resolve (IMethodReference method);
         ITypeDefinition Resolve (ITypeReference type);
         bool HasImage { get; }
@@ -699,7 +699,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-        public FieldDefinition Resolve(IFieldReference field)
+        public IFieldDefinition Resolve(IFieldReference field)
 		{
 			return MetadataResolver.Resolve (field);
 		}
