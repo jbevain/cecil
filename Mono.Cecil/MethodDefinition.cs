@@ -517,7 +517,7 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-        public static ParameterDefinition GetParameter(this IMethodBody self, int index)
+        public static IParameterDefinition GetParameter(this IMethodBody self, int index)
 		{
 			var method = self.Method;
 

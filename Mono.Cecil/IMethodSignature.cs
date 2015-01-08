@@ -40,7 +40,7 @@ namespace Mono.Cecil {
 		MethodCallingConvention CallingConvention { get; set; }
 
 		bool HasParameters { get; }
-		IList<ParameterDefinition> Parameters { get; set; }
+		IList<IParameterDefinition> Parameters { get; set; }
 	    ITypeReference ReturnType { get; set; }
 		MethodReturnType MethodReturnType { get; }
 	}

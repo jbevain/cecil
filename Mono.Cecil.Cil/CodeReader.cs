@@ -223,7 +223,7 @@ namespace Mono.Cecil.Cil {
 			return reader.image.UserStringHeap.Read (token.RID);
 		}
 
-		public ParameterDefinition GetParameter (int index)
+		public IParameterDefinition GetParameter (int index)
 		{
 			return body.GetParameter (index);
 		}

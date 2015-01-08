@@ -36,7 +36,7 @@ namespace Mono.Cecil {
 	public sealed class MethodReturnType : IConstantProvider, ICustomAttributeProvider, IMarshalInfoProvider {
 
 		internal IMethodSignature method;
-		internal ParameterDefinition parameter;
+		internal IParameterDefinition parameter;
 		ITypeReference return_type;
 
 		public IMethodSignature Method {
@@ -48,7 +48,7 @@ namespace Mono.Cecil {
 			set { return_type = value; }
 		}
 
-		internal ParameterDefinition Parameter {
+		internal IParameterDefinition Parameter {
 			get {
 				if (parameter == null)
 					Interlocked.CompareExchange (ref parameter, new ParameterDefinition (return_type, method), null);

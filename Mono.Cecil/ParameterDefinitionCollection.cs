@@ -32,7 +32,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	sealed class ParameterDefinitionCollection : Collection<ParameterDefinition> {
+	sealed class ParameterDefinitionCollection : Collection<IParameterDefinition> {
 
 		readonly IMethodSignature method;
 
@@ -47,34 +47,34 @@ namespace Mono.Cecil {
 			this.method = method;
 		}
 
-		protected override void OnAdd (ParameterDefinition item, int index)
+		protected override void OnAdd (IParameterDefinition item, int index)
 		{
-			item.method = method;
-			item.index = index;
+			item.Method = method;
+			item.Index = index;
 		}
 
-		protected override void OnInsert (ParameterDefinition item, int index)
+		protected override void OnInsert (IParameterDefinition item, int index)
 		{
-			item.method = method;
-			item.index = index;
+			item.Method = method;
+			item.Index = index;
 
 			for (int i = index; i < size; i++)
-				items [i].index = i + 1;
+				items [i].Index = i + 1;
 		}
 
-		protected override void OnSet (ParameterDefinition item, int index)
+		protected override void OnSet (IParameterDefinition item, int index)
 		{
-			item.method = method;
-			item.index = index;
+			item.Method = method;
+			item.Index = index;
 		}
 
-		protected override void OnRemove (ParameterDefinition item, int index)
+		protected override void OnRemove (IParameterDefinition item, int index)
 		{
-			item.method = null;
-			item.index = -1;
+			item.Method = null;
+			item.Index = -1;
 
 			for (int i = index + 1; i < size; i++)
-				items [i].index = i - 1;
+				items [i].Index = i - 1;
 		}
 	}
 }

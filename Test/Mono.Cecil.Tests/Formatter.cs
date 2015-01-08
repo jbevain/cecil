@@ -115,7 +115,7 @@ namespace Mono.Cecil.Tests {
 				return;
 			}
 
-			var parameter = operand as ParameterDefinition;
+			var parameter = operand as IParameterDefinition;
 			if (parameter != null) {
 				writer.Write (ToInvariantCultureString (parameter.Sequence));
 				return;

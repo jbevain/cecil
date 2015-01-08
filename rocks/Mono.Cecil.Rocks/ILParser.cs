@@ -48,7 +48,7 @@ namespace Mono.Cecil.Rocks {
 		void OnInlineBranch (OpCode opcode, int offset);
 		void OnInlineSwitch (OpCode opcode, int [] offsets);
 		void OnInlineVariable (OpCode opcode, VariableDefinition variable);
-		void OnInlineArgument (OpCode opcode, ParameterDefinition parameter);
+		void OnInlineArgument (OpCode opcode, IParameterDefinition parameter);
 		void OnInlineSignature (OpCode opcode, CallSite callSite);
 		void OnInlineType (OpCode opcode, ITypeReference type);
 		void OnInlineField (OpCode opcode, FieldReference field);

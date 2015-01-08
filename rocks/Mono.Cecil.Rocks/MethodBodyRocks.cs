@@ -203,7 +203,7 @@ namespace Mono.Cecil.Rocks {
 				int index;
 				switch (instruction.OpCode.Code) {
 				case Code.Ldarg:
-					index = ((ParameterDefinition) instruction.Operand).Index;
+					index = ((IParameterDefinition) instruction.Operand).Index;
 					if (index == -1 && instruction.Operand == self.ThisParameter)
 						index = 0;
 					else if (method.HasThis)
@@ -271,7 +271,7 @@ namespace Mono.Cecil.Rocks {
 					}
 					break;
 				case Code.Ldarga:
-					index = ((ParameterDefinition) instruction.Operand).Index;
+					index = ((IParameterDefinition) instruction.Operand).Index;
 					if (index == -1 && instruction.Operand == self.ThisParameter)
 						index = 0;
 					else if (method.HasThis)

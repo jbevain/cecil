@@ -1490,7 +1490,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static bool RequiresParameterRow (ParameterDefinition parameter)
+		static bool RequiresParameterRow (IParameterDefinition parameter)
 		{
 			return !string.IsNullOrEmpty (parameter.Name)
 				|| parameter.Attributes != ParameterAttributes.None
@@ -1499,14 +1499,14 @@ namespace Mono.Cecil {
 				|| parameter.HasCustomAttributes;
 		}
 
-		void AddParameter (ushort sequence, ParameterDefinition parameter, ParamTable table)
+		void AddParameter (ushort sequence, IParameterDefinition parameter, ParamTable table)
 		{
 			table.AddRow (new ParamRow (
 				parameter.Attributes,
 				sequence,
 				GetStringIndex (parameter.Name)));
 
-			parameter.token = new MetadataToken (TokenType.Param, param_rid++);
+			parameter.MetadataToken = new MetadataToken (TokenType.Param, param_rid++);
 
 			if (parameter.HasCustomAttributes)
 				AddCustomAttributes (parameter);
@@ -1877,7 +1877,7 @@ namespace Mono.Cecil {
 				calling_convention |= 0x20;
 
 			uint param_count = 0;
-			Collection<ParameterDefinition> parameters = null;
+			Collection<IParameterDefinition> parameters = null;
 
 			if (property.HasParameters) {
 				parameters = property.Parameters;

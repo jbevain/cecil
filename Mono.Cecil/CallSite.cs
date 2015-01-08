@@ -57,7 +57,7 @@ namespace Mono.Cecil {
 			get { return signature.HasParameters; }
 		}
 
-		public IList<ParameterDefinition> Parameters
+		public IList<IParameterDefinition> Parameters
 		{
 		    get { return signature.Parameters; }
 		    set { signature.Parameters = value; }

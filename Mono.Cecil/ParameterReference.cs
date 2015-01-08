@@ -31,11 +31,9 @@ using System;
 namespace Mono.Cecil {
     public interface IParameterReference : IMetadataTokenProvider {
         string Name { get; set; }
-        int Index { get; }
+        int Index { get; set; }
         ITypeReference ParameterType { get; set; }
-        MetadataToken MetadataToken { get; set; }
-        string ToString ();
-        ParameterDefinition Resolve ();
+        IParameterDefinition Resolve ();
     }
 
     public abstract class ParameterReference : IParameterReference {
@@ -50,11 +48,13 @@ namespace Mono.Cecil {
 			set { name = value; }
 		}
 
-		public int Index {
-			get { return index; }
+		public int Index
+		{
+		    get { return index; }
+		    set { index = value; }
 		}
 
-		public ITypeReference ParameterType {
+        public ITypeReference ParameterType {
 			get { return parameter_type; }
 			set { parameter_type = value; }
 		}
@@ -78,6 +78,6 @@ namespace Mono.Cecil {
 			return name;
 		}
 
-		public abstract ParameterDefinition Resolve ();
+		public abstract IParameterDefinition Resolve ();
 	}
 }

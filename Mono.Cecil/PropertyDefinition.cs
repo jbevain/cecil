@@ -140,7 +140,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override Collection<ParameterDefinition> Parameters {
+		public override Collection<IParameterDefinition> Parameters {
 			get {
 				InitializeMethods ();
 
@@ -150,13 +150,13 @@ namespace Mono.Cecil {
 				if (set_method != null)
 					return MirrorParameters (set_method, 1);
 
-				return new Collection<ParameterDefinition> ();
+				return new Collection<IParameterDefinition> ();
 			}
 		}
 
-		static Collection<ParameterDefinition> MirrorParameters (IMethodDefinition method, int bound)
+		static Collection<IParameterDefinition> MirrorParameters (IMethodDefinition method, int bound)
 		{
-			var parameters = new Collection<ParameterDefinition> ();
+			var parameters = new Collection<IParameterDefinition> ();
 			if (!method.HasParameters)
 				return parameters;
 

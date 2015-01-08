@@ -42,7 +42,7 @@ namespace Mono.Cecil.Cil {
         bool HasExceptionHandlers { get; }
         Collection<ExceptionHandler> ExceptionHandlers { get; }
         Scope Scope { get; set; }
-        ParameterDefinition ThisParameter { get; }
+        IParameterDefinition ThisParameter { get; }
         ILProcessor GetILProcessor ();
     }
 
@@ -50,7 +50,7 @@ namespace Mono.Cecil.Cil {
 
 		readonly internal IMethodDefinition method;
 
-		internal ParameterDefinition this_parameter;
+		internal IParameterDefinition this_parameter;
 		internal int max_stack_size;
 		internal int code_size;
 		internal bool init_locals;
@@ -115,7 +115,7 @@ namespace Mono.Cecil.Cil {
 			set { scope = value; }
 		}
 
-		public ParameterDefinition ThisParameter {
+		public IParameterDefinition ThisParameter {
 			get {
 				if (method == null || method.DeclaringType == null)
 					throw new NotSupportedException ();
@@ -130,7 +130,7 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		static ParameterDefinition CreateThisParameter (IMethodDefinition method)
+		static IParameterDefinition CreateThisParameter (IMethodDefinition method)
 		{
 			var declaring_type = method.DeclaringType;
 			var type = declaring_type.IsValueType || declaring_type.IsPrimitive

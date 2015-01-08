@@ -1,5 +1,5 @@
 //
-// ParameterDefinition.cs
+// IParameterDefinition.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -30,8 +30,20 @@ using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IParameterDefinition : IParameterReference, ICustomAttributeProvider, IConstantProvider, IMarshalInfoProvider {
+        ParameterAttributes Attributes { get; set; }
+        IMethodSignature Method { get; set; }
+        int Sequence { get; }
+        bool IsIn { get; set; }
+        bool IsOut { get; set; }
+        bool IsLcid { get; set; }
+        bool IsReturnValue { get; set; }
+        bool IsOptional { get; set; }
+        bool HasDefault { get; set; }
+        bool HasFieldMarshal { get; set; }
+    }
 
-	public sealed class ParameterDefinition : ParameterReference, ICustomAttributeProvider, IConstantProvider, IMarshalInfoProvider {
+    public sealed class ParameterDefinition : ParameterReference, IParameterDefinition {
 
 		ushort attributes;
 
@@ -46,11 +58,13 @@ namespace Mono.Cecil {
 			set { attributes = (ushort) value; }
 		}
 
-		public IMethodSignature Method {
-			get { return method; }
+		public IMethodSignature Method
+		{
+		    get { return method; }
+		    set { method = value; }
 		}
 
-		public int Sequence {
+        public int Sequence {
 			get {
 				if (method == null)
 					return -1;
@@ -157,7 +171,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.Param);
 		}
 
-		public override ParameterDefinition Resolve ()
+		public override IParameterDefinition Resolve ()
 		{
 			return this;
 		}

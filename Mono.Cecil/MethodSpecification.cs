@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 			get { return method.HasParameters; }
 		}
 
-		public override IList<ParameterDefinition> Parameters {
+		public override IList<IParameterDefinition> Parameters {
 			get { return method.Parameters; }
 		}
 

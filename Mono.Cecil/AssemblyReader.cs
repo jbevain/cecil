@@ -1755,7 +1755,7 @@ namespace Mono.Cecil {
 				? method.MethodReturnType.Parameter
 				: method.Parameters [sequence - 1];
 
-			parameter.token = new MetadataToken (TokenType.Param, param_rid);
+			parameter.MetadataToken = new MetadataToken (TokenType.Param, param_rid);
 			parameter.Name = name;
 			parameter.Attributes = attributes;
 		}
@@ -2916,7 +2916,7 @@ namespace Mono.Cecil {
 			if (param_count == 0)
 				return;
 
-            IList<ParameterDefinition> parameters;
+            IList<IParameterDefinition> parameters;
 
 			var method_ref = method as IMethodReference;
 			if (method_ref != null)
@@ -2933,7 +2933,7 @@ namespace Mono.Cecil {
 			return ReadPrimitiveValue (type);
 		}
 
-        public void ReadCustomAttributeConstructorArguments(CustomAttribute attribute, IList<ParameterDefinition> parameters)
+        public void ReadCustomAttributeConstructorArguments(CustomAttribute attribute, IList<IParameterDefinition> parameters)
 		{
 			var count = parameters.Count;
 			if (count == 0)

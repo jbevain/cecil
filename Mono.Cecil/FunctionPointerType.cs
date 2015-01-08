@@ -57,7 +57,7 @@ namespace Mono.Cecil {
 			get { return function.HasParameters; }
 		}
 
-		public IList<ParameterDefinition> Parameters
+		public IList<IParameterDefinition> Parameters
 		{
 		    get { return function.Parameters; }
 		    set { function.Parameters = value; }

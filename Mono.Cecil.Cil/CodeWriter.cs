@@ -215,13 +215,13 @@ namespace Mono.Cecil.Cil {
 				WriteByte ((byte) GetVariableIndex ((VariableDefinition) operand));
 				break;
 			case OperandType.ShortInlineArg:
-				WriteByte ((byte) GetParameterIndex ((ParameterDefinition) operand));
+				WriteByte ((byte) GetParameterIndex ((IParameterDefinition) operand));
 				break;
 			case OperandType.InlineVar:
 				WriteInt16 ((short) GetVariableIndex ((VariableDefinition) operand));
 				break;
 			case OperandType.InlineArg:
-				WriteInt16 ((short) GetParameterIndex ((ParameterDefinition) operand));
+				WriteInt16 ((short) GetParameterIndex ((IParameterDefinition) operand));
 				break;
 			case OperandType.InlineSig:
 				WriteMetadataToken (GetStandAloneSignature ((CallSite) operand));
@@ -284,7 +284,7 @@ namespace Mono.Cecil.Cil {
 			return variable.Index;
 		}
 
-		int GetParameterIndex (ParameterDefinition parameter)
+		int GetParameterIndex (IParameterDefinition parameter)
 		{
 			if (body.Method.HasThis) {
 				if (parameter == body.ThisParameter)

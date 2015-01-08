@@ -291,7 +291,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static bool AreSame (IList<ParameterDefinition> a, IList<ParameterDefinition> b)
+		static bool AreSame (IList<IParameterDefinition> a, IList<IParameterDefinition> b)
 		{
 			var count = a.Count;
 

@@ -135,7 +135,7 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode, variable);
 		}
 
-		public Instruction Create (OpCode opcode, ParameterDefinition parameter)
+		public Instruction Create (OpCode opcode, IParameterDefinition parameter)
 		{
 			return Instruction.Create (opcode, parameter);
 		}
@@ -215,7 +215,7 @@ namespace Mono.Cecil.Cil {
 			Append (Create (opcode, variable));
 		}
 
-		public void Emit (OpCode opcode, ParameterDefinition parameter)
+		public void Emit (OpCode opcode, IParameterDefinition parameter)
 		{
 			Append (Create (opcode, parameter));
 		}

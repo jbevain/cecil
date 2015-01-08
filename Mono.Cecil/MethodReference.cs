@@ -42,7 +42,7 @@ namespace Mono.Cecil {
 
     public class MethodReference : MemberReference, IMethodReference {
 
-        internal IList<ParameterDefinition> parameters;
+        internal IList<IParameterDefinition> parameters;
 		MethodReturnType return_type;
 
 		bool has_this;
@@ -69,7 +69,7 @@ namespace Mono.Cecil {
 			get { return !parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual IList<ParameterDefinition> Parameters
+		public virtual IList<IParameterDefinition> Parameters
 		{
 		    get {
 				if (parameters == null)

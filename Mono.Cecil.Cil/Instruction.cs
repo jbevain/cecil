@@ -307,7 +307,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, variable);
 		}
 
-		public static Instruction Create (OpCode opcode, ParameterDefinition parameter)
+		public static Instruction Create (OpCode opcode, IParameterDefinition parameter)
 		{
 			if (parameter == null)
 				throw new ArgumentNullException ("parameter");

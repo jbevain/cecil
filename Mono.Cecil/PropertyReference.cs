@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 			set { property_type = value; }
 		}
 
-		public abstract Collection<ParameterDefinition> Parameters {
+		public abstract Collection<IParameterDefinition> Parameters {
 			get;
 		}
 
