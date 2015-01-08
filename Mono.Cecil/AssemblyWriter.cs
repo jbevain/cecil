@@ -1579,13 +1579,13 @@ namespace Mono.Cecil {
 				AddEvent (events [i]);
 		}
 
-		void AddEvent (EventDefinition @event)
+        void AddEvent(IEventDefinition @event)
 		{
 			event_table.AddRow (new EventRow (
 				@event.Attributes,
 				GetStringIndex (@event.Name),
 				MakeCodedRID (GetTypeToken (@event.EventType), CodedIndex.TypeDefOrRef)));
-			@event.token = new MetadataToken (TokenType.Event, event_rid++);
+			@event.MetadataToken = new MetadataToken (TokenType.Event, event_rid++);
 
 			var method = @event.AddMethod;
 			if (method != null)

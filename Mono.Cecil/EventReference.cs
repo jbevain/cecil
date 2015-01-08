@@ -29,8 +29,12 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IEventReference : IMemberReference {
+        ITypeReference EventType { get; set; }
+        IEventDefinition Resolve ();
+    }
 
-	public abstract class EventReference : MemberReference {
+    public abstract class EventReference : MemberReference, IEventReference {
 
 		ITypeReference event_type;
 
@@ -52,6 +56,6 @@ namespace Mono.Cecil {
 			event_type = eventType;
 		}
 
-		public abstract EventDefinition Resolve ();
+		public abstract IEventDefinition Resolve ();
 	}
 }

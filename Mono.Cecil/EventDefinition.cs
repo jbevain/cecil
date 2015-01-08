@@ -30,17 +30,26 @@ using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IEventDefinition : IEventReference, IMemberDefinition {
+        EventAttributes Attributes { get; set; }
+        IMethodDefinition AddMethod { get; set; }
+        IMethodDefinition InvokeMethod { get; set; }
+        IMethodDefinition RemoveMethod { get; set; }
+        new ITypeDefinition DeclaringType { get; set; }
+        bool HasOtherMethods { get; }
+        IList<IMethodDefinition> OtherMethods { get; set; }
+    }
 
-	public sealed class EventDefinition : EventReference, IMemberDefinition {
+    public sealed class EventDefinition : EventReference, IEventDefinition {
 
 		ushort attributes;
 
 		IList<CustomAttribute> custom_attributes;
 
-		internal IMethodDefinition add_method;
-		internal IMethodDefinition invoke_method;
-		internal IMethodDefinition remove_method;
-        internal IList<IMethodDefinition> other_methods;
+        private IMethodDefinition add_method;
+        private IMethodDefinition invoke_method;
+        private IMethodDefinition remove_method;
+        private IList<IMethodDefinition> other_methods;
 
 		public EventAttributes Attributes {
 			get { return (EventAttributes) attributes; }
@@ -90,8 +99,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<IMethodDefinition> OtherMethods {
-			get {
+		public IList<IMethodDefinition> OtherMethods
+		{
+		    get {
 				if (other_methods != null)
 					return other_methods;
 
@@ -102,9 +112,10 @@ namespace Mono.Cecil {
 
 				return other_methods = new Collection<IMethodDefinition> ();
 			}
+		    set { other_methods = value; }
 		}
 
-		public bool HasCustomAttributes {
+        public bool HasCustomAttributes {
 			get {
 				if (custom_attributes != null)
 					return custom_attributes.Count > 0;
@@ -166,7 +177,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override EventDefinition Resolve ()
+        public override IEventDefinition Resolve()
 		{
 			return this;
 		}

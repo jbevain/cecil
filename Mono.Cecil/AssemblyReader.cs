@@ -1352,15 +1352,15 @@ namespace Mono.Cecil {
 			return range.Length > 0;
 		}
 
-		public Collection<EventDefinition> ReadEvents (ITypeDefinition type)
+        public Collection<IEventDefinition> ReadEvents(ITypeDefinition type)
 		{
 			InitializeEvents ();
 			Range range;
 
 			if (!metadata.TryGetEventsRange (type, out range))
-				return new MemberDefinitionCollection<EventDefinition> (type);
+                return new MemberDefinitionCollection<IEventDefinition>(type);
 
-			var events = new MemberDefinitionCollection<EventDefinition> (type, (int) range.Length);
+            var events = new MemberDefinitionCollection<IEventDefinition>(type, (int)range.Length);
 
 			metadata.RemoveEventsRange (type);
 
@@ -1381,7 +1381,7 @@ namespace Mono.Cecil {
 			return events;
 		}
 
-		void ReadEvent (uint event_rid, Collection<EventDefinition> events)
+        void ReadEvent(uint event_rid, Collection<IEventDefinition> events)
 		{
 			var attributes = (EventAttributes) ReadUInt16 ();
 			var name = ReadString ();
@@ -1517,13 +1517,13 @@ namespace Mono.Cecil {
 
 			switch (row.Col1) {
 			case MethodSemanticsAttributes.AddOn:
-				GetEvent (type, row.Col2).add_method = method;
+				GetEvent (type, row.Col2).AddMethod = method;
 				break;
 			case MethodSemanticsAttributes.Fire:
-				GetEvent (type, row.Col2).invoke_method = method;
+				GetEvent (type, row.Col2).InvokeMethod = method;
 				break;
 			case MethodSemanticsAttributes.RemoveOn:
-				GetEvent (type, row.Col2).remove_method = method;
+				GetEvent (type, row.Col2).RemoveMethod = method;
 				break;
 			case MethodSemanticsAttributes.Getter:
 				GetProperty (type, row.Col2).get_method = method;
@@ -1535,10 +1535,10 @@ namespace Mono.Cecil {
 				switch (row.Col2.TokenType) {
 				case TokenType.Event: {
 					var @event = GetEvent (type, row.Col2);
-					if (@event.other_methods == null)
-						@event.other_methods = new Collection<IMethodDefinition> ();
+					if (@event.OtherMethods == null)
+                        @event.OtherMethods = new Collection<IMethodDefinition>();
 
-					@event.other_methods.Add (method);
+					@event.OtherMethods.Add (method);
 					break;
 				}
 				case TokenType.Property: {
@@ -1563,7 +1563,7 @@ namespace Mono.Cecil {
 			return row.Col1;
 		}
 
-		static EventDefinition GetEvent (ITypeDefinition type, MetadataToken token)
+        static IEventDefinition GetEvent(ITypeDefinition type, MetadataToken token)
 		{
 			if (token.TokenType != TokenType.Event)
 				throw new ArgumentException ();
@@ -1614,7 +1614,7 @@ namespace Mono.Cecil {
 			return property;
 		}
 
-		public EventDefinition ReadMethods (EventDefinition @event)
+        public IEventDefinition ReadMethods(IEventDefinition @event)
 		{
 			ReadAllSemantics (@event.DeclaringType);
 			return @event;
