@@ -158,7 +158,14 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public sealed class WriterParameters {
+    public interface IWriterParameters {
+        Stream SymbolStream { get; set; }
+        ISymbolWriterProvider SymbolWriterProvider { get; set; }
+        bool WriteSymbols { get; set; }
+        SR.StrongNameKeyPair StrongNameKeyPair { get; set; }
+    }
+
+    public sealed class WriterParameters : IWriterParameters {
 
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
@@ -247,8 +254,8 @@ namespace Mono.Cecil {
         void ReadSymbols (ISymbolReader reader);
         void Write (string fileName);
         void Write (Stream stream);
-        void Write (string fileName, WriterParameters parameters);
-        void Write (Stream stream, WriterParameters parameters);
+        void Write(string fileName, IWriterParameters parameters);
+        void Write(Stream stream, IWriterParameters parameters);
         FieldDefinition Resolve (FieldReference field);
         IMethodDefinition Resolve (IMethodReference method);
         ITypeDefinition Resolve (ITypeReference type);
@@ -1038,14 +1045,14 @@ namespace Mono.Cecil {
 			Write (stream, new WriterParameters ());
 		}
 
-		public void Write (string fileName, WriterParameters parameters)
+        public void Write(string fileName, IWriterParameters parameters)
 		{
 			using (var stream = GetFileStream (fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.None)) {
 				Write (stream, parameters);
 			}
 		}
 
-		public void Write (Stream stream, WriterParameters parameters)
+        public void Write(Stream stream, IWriterParameters parameters)
 		{
 			CheckStream (stream);
 			if (!stream.CanWrite || !stream.CanSeek)

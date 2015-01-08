@@ -79,7 +79,7 @@ namespace Mono.Cecil {
 
 	static class ModuleWriter {
 
-		public static void WriteModuleTo (IModuleDefinition module, Stream stream, WriterParameters parameters)
+        public static void WriteModuleTo(IModuleDefinition module, Stream stream, IWriterParameters parameters)
 		{
 			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
 				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");

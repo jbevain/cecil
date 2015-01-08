@@ -41,8 +41,8 @@ namespace Mono.Cecil {
         IMethodDefinition EntryPoint { get; set; }
         void Write (string fileName);
         void Write (Stream stream);
-        void Write (string fileName, WriterParameters parameters);
-        void Write (Stream stream, WriterParameters parameters);
+        void Write(string fileName, IWriterParameters parameters);
+        void Write(Stream stream, IWriterParameters parameters);
     }
 
     public sealed class AssemblyDefinition : IAssemblyDefinition {
@@ -182,12 +182,12 @@ namespace Mono.Cecil {
 			Write (stream, new WriterParameters ());
 		}
 
-		public void Write (string fileName, WriterParameters parameters)
+        public void Write(string fileName, IWriterParameters parameters)
 		{
 			main_module.Write (fileName, parameters);
 		}
 
-		public void Write (Stream stream, WriterParameters parameters)
+        public void Write(Stream stream, IWriterParameters parameters)
 		{
 			main_module.Write (stream, parameters);
 		}
