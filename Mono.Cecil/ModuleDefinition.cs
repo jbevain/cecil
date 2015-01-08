@@ -218,7 +218,7 @@ namespace Mono.Cecil {
         bool HasModuleReferences { get; }
         IList<IModuleReference> ModuleReferences { get; }
         bool HasResources { get; }
-        IList<Resource> Resources { get; }
+        IList<IResource> Resources { get; }
         bool HasTypes { get; }
         IList<ITypeDefinition> Types { get; }
         bool HasExportedTypes { get; }
@@ -297,7 +297,7 @@ namespace Mono.Cecil {
 		IList<CustomAttribute> custom_attributes;
 		IList<IAssemblyNameReference> references;
 		IList<IModuleReference> modules;
-		IList<Resource> resources;
+        IList<IResource> resources;
 		IList<ExportedType> exported_types;
 		TypeDefinitionCollection types;
 
@@ -478,7 +478,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<Resource> Resources {
+        public IList<IResource> Resources
+        {
 			get {
 				if (resources != null)
 					return resources;
@@ -486,7 +487,7 @@ namespace Mono.Cecil {
 				if (HasImage)
                     return this.Read(ref resources, this, (_, reader) => reader.ReadResources());
 
-                return resources = new Collection<Resource>();
+                return resources = new Collection<IResource>();
 			}
 		}
 

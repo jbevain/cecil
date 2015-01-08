@@ -375,7 +375,7 @@ namespace Mono.Cecil {
         Collection<IModuleDefinition> ReadModules ();
         Collection<IModuleReference> ReadModuleReferences ();
         bool HasFileResource ();
-        Collection<Resource> ReadResources ();
+        Collection<IResource> ReadResources();
         MemoryStream GetManagedResourceStream (uint offset);
         TypeDefinitionCollection ReadTypes ();
         bool HasNestedTypes (ITypeDefinition type);
@@ -685,10 +685,10 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		public Collection<Resource> ReadResources ()
+        public Collection<IResource> ReadResources()
 		{
 			int length = MoveTo (Table.ManifestResource);
-			var resources = new Collection<Resource> (length);
+            var resources = new Collection<IResource>(length);
 
 			for (int i = 1; i <= length; i++) {
 				var offset = ReadUInt32 ();
@@ -696,7 +696,7 @@ namespace Mono.Cecil {
 				var name = ReadString ();
 				var implementation = ReadMetadataToken (CodedIndex.Implementation);
 
-				Resource resource;
+                IResource resource;
 
 				if (implementation.RID == 0) {
 					resource = new EmbeddedResource (name, flags, offset, this);
