@@ -1945,11 +1945,11 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetSecurityDeclarationSignature (SecurityDeclaration declaration)
+        SignatureWriter GetSecurityDeclarationSignature(ISecurityDeclaration declaration)
 		{
 			var signature = CreateSignatureWriter ();
 
-			if (!declaration.resolved)
+			if (!declaration.Resolved)
 				signature.WriteBytes (declaration.GetBlob ());
 			else if (module.Runtime < TargetRuntime.Net_2_0)
 				signature.WriteXmlSecurityDeclaration (declaration);
@@ -2477,11 +2477,11 @@ namespace Mono.Cecil {
 			WriteBytes (buffer);
 		}
 
-		public void WriteSecurityDeclaration (SecurityDeclaration declaration)
+        public void WriteSecurityDeclaration(ISecurityDeclaration declaration)
 		{
 			WriteByte ((byte) '.');
 
-			var attributes = declaration.security_attributes;
+			var attributes = declaration.SecurityAttributes;
 			if (attributes == null)
 				throw new NotSupportedException ();
 
@@ -2491,7 +2491,7 @@ namespace Mono.Cecil {
 				WriteSecurityAttribute (attributes [i]);
 		}
 
-		public void WriteXmlSecurityDeclaration (SecurityDeclaration declaration)
+        public void WriteXmlSecurityDeclaration(ISecurityDeclaration declaration)
 		{
 			var xml = GetXmlSecurityDeclaration (declaration);
 			if (xml == null)
@@ -2500,12 +2500,12 @@ namespace Mono.Cecil {
 			WriteBytes (Encoding.Unicode.GetBytes (xml));
 		}
 
-		static string GetXmlSecurityDeclaration (SecurityDeclaration declaration)
+        static string GetXmlSecurityDeclaration(ISecurityDeclaration declaration)
 		{
-			if (declaration.security_attributes == null || declaration.security_attributes.Count != 1)
+            if (declaration.SecurityAttributes == null || declaration.SecurityAttributes.Count != 1)
 				return null;
 
-			var attribute = declaration.security_attributes [0];
+            var attribute = declaration.SecurityAttributes[0];
 
 			if (!attribute.AttributeType.IsTypeOf ("System.Security.Permissions", "PermissionSetAttribute"))
 				return null;

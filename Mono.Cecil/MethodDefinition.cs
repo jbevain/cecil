@@ -92,7 +92,7 @@ namespace Mono.Cecil {
 		internal volatile bool sem_attrs_ready;
 		internal MethodSemanticsAttributes sem_attrs;
 		IList<CustomAttribute> custom_attributes;
-        IList<SecurityDeclaration> security_declarations;
+        IList<ISecurityDeclaration> security_declarations;
 
 		internal RVA rva;
         internal IPInvokeInfo pinvoke;
@@ -151,7 +151,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<SecurityDeclaration> SecurityDeclarations {
+        public IList<ISecurityDeclaration> SecurityDeclarations
+        {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, Module)); }
 		}
 

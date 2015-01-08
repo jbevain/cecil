@@ -2524,15 +2524,15 @@ namespace Mono.Cecil {
 			return RangesSize (ranges) > 0;
 		}
 
-		public Collection<SecurityDeclaration> ReadSecurityDeclarations (ISecurityDeclarationProvider owner)
+        public Collection<ISecurityDeclaration> ReadSecurityDeclarations(ISecurityDeclarationProvider owner)
 		{
 			InitializeSecurityDeclarations ();
 
 			Range [] ranges;
 			if (!metadata.TryGetSecurityDeclarationRanges (owner, out ranges))
-				return new Collection<SecurityDeclaration> ();
+                return new Collection<ISecurityDeclaration>();
 
-			var security_declarations = new Collection<SecurityDeclaration> (RangesSize (ranges));
+            var security_declarations = new Collection<ISecurityDeclaration>(RangesSize(ranges));
 
 			for (int i = 0; i < ranges.Length; i++)
 				ReadSecurityDeclarationRange (ranges [i], security_declarations);
@@ -2542,7 +2542,7 @@ namespace Mono.Cecil {
 			return security_declarations;
 		}
 
-		void ReadSecurityDeclarationRange (Range range, Collection<SecurityDeclaration> security_declarations)
+        void ReadSecurityDeclarationRange(Range range, Collection<ISecurityDeclaration> security_declarations)
 		{
 			if (!MoveTo (Table.DeclSecurity, range.Start))
 				return;
@@ -2561,9 +2561,9 @@ namespace Mono.Cecil {
 			return ReadBlob (signature);
 		}
 
-		public void ReadSecurityDeclarationSignature (SecurityDeclaration declaration)
+        public void ReadSecurityDeclarationSignature(ISecurityDeclaration declaration)
 		{
-			var signature = declaration.signature;
+			var signature = declaration.Signature;
 			var reader = ReadSignature (signature);
 
 			if (reader.buffer [reader.position] != '.') {
@@ -2578,10 +2578,10 @@ namespace Mono.Cecil {
 			for (int i = 0; i < count; i++)
 				attributes.Add (reader.ReadSecurityAttribute ());
 
-			declaration.security_attributes = attributes;
+			declaration.SecurityAttributes = attributes;
 		}
 
-		void ReadXmlSecurityDeclaration (uint signature, SecurityDeclaration declaration)
+        void ReadXmlSecurityDeclaration(uint signature, ISecurityDeclaration declaration)
 		{
 			var blob = ReadBlob (signature);
 			var attributes = new Collection<SecurityAttribute> (1);
@@ -2599,7 +2599,7 @@ namespace Mono.Cecil {
 
 			attributes.Add (attribute);
 
-			declaration.security_attributes = attributes;
+			declaration.SecurityAttributes = attributes;
 		}
 
 		public Collection<ExportedType> ReadExportedTypes ()

@@ -52,7 +52,7 @@ namespace Mono.Cecil {
 		internal IModuleDefinition main_module;
 		IList<IModuleDefinition> modules;
 		IList<CustomAttribute> custom_attributes;
-		IList<SecurityDeclaration> security_declarations;
+        IList<ISecurityDeclaration> security_declarations;
 
 		public IAssemblyNameDefinition Name {
 			get { return name; }
@@ -111,7 +111,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public IList<SecurityDeclaration> SecurityDeclarations {
+        public IList<ISecurityDeclaration> SecurityDeclarations
+        {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, main_module)); }
 		}
 

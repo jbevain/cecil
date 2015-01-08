@@ -105,7 +105,7 @@ namespace Mono.Cecil.Tests {
 				+ "=neutral, PublicKeyToken=b77a5c561934e089\"\r\nversion=\"1\"\r\nFla"
 				+ "gs=\"UnmanagedCode\"/>\r\n</PermissionSet>\r\n";
 
-			var declaration = new SecurityDeclaration (SecurityAction.Deny, Encoding.Unicode.GetBytes (permission_set));
+			ISecurityDeclaration declaration = new SecurityDeclaration (SecurityAction.Deny, Encoding.Unicode.GetBytes (permission_set));
 			module.Assembly.SecurityDeclarations.Add (declaration);
 
 			module.Write (file);
