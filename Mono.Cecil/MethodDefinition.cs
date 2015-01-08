@@ -41,7 +41,7 @@ namespace Mono.Cecil {
         bool HasBody { get; }
         IMethodBody Body { get; set; }
         bool HasPInvokeInfo { get; }
-        PInvokeInfo PInvokeInfo { get; set; }
+        IPInvokeInfo PInvokeInfo { get; set; }
         bool HasOverrides { get; }
         IList<IMethodReference> Overrides { get; }
         bool IsCompilerControlled { get; set; }
@@ -95,7 +95,7 @@ namespace Mono.Cecil {
         IList<SecurityDeclaration> security_declarations;
 
 		internal RVA rva;
-		internal PInvokeInfo pinvoke;
+        internal IPInvokeInfo pinvoke;
         IList<IMethodReference> overrides;
 
         internal IMethodBody body;
@@ -221,7 +221,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public PInvokeInfo PInvokeInfo {
+        public IPInvokeInfo PInvokeInfo
+        {
 			get {
 				if (pinvoke != null)
 					return pinvoke;

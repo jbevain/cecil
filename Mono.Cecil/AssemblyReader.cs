@@ -1766,7 +1766,7 @@ namespace Mono.Cecil {
 			reader.ReadMethodSignature (method);
 		}
 
-		public PInvokeInfo ReadPInvokeInfo (IMethodDefinition method)
+        public IPInvokeInfo ReadPInvokeInfo(IMethodDefinition method)
 		{
 			InitializePInvokes ();
 			Row<PInvokeAttributes, uint, uint> row;

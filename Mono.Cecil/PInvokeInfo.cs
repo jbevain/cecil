@@ -27,8 +27,28 @@
 //
 
 namespace Mono.Cecil {
+    public interface IPInvokeInfo {
+        PInvokeAttributes Attributes { get; set; }
+        string EntryPoint { get; set; }
+        IModuleReference Module { get; set; }
+        bool IsNoMangle { get; set; }
+        bool IsCharSetNotSpec { get; set; }
+        bool IsCharSetAnsi { get; set; }
+        bool IsCharSetUnicode { get; set; }
+        bool IsCharSetAuto { get; set; }
+        bool SupportsLastError { get; set; }
+        bool IsCallConvWinapi { get; set; }
+        bool IsCallConvCdecl { get; set; }
+        bool IsCallConvStdCall { get; set; }
+        bool IsCallConvThiscall { get; set; }
+        bool IsCallConvFastcall { get; set; }
+        bool IsBestFitEnabled { get; set; }
+        bool IsBestFitDisabled { get; set; }
+        bool IsThrowOnUnmappableCharEnabled { get; set; }
+        bool IsThrowOnUnmappableCharDisabled { get; set; }
+    }
 
-	public sealed class PInvokeInfo {
+    public sealed class PInvokeInfo : IPInvokeInfo {
 
 		ushort attributes;
 		string entry_point;
