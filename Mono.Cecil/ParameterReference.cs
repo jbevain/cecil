@@ -19,9 +19,9 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
@@ -29,12 +29,18 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IParameterReference : IMetadataTokenProvider {
+        string Name { get; set; }
+        int Index { get; set; }
+        ITypeReference ParameterType { get; set; }
+        IParameterDefinition Resolve ();
+    }
 
-	public abstract class ParameterReference : IMetadataTokenProvider {
+    public abstract class ParameterReference : IParameterReference {
 
 		string name;
 		internal int index = -1;
-		protected TypeReference parameter_type;
+		protected ITypeReference parameter_type;
 		internal MetadataToken token;
 
 		public string Name {
@@ -42,11 +48,13 @@ namespace Mono.Cecil {
 			set { name = value; }
 		}
 
-		public int Index {
-			get { return index; }
+		public int Index
+		{
+		    get { return index; }
+		    set { index = value; }
 		}
 
-		public TypeReference ParameterType {
+        public ITypeReference ParameterType {
 			get { return parameter_type; }
 			set { parameter_type = value; }
 		}
@@ -56,7 +64,7 @@ namespace Mono.Cecil {
 			set { token = value; }
 		}
 
-		internal ParameterReference (string name, TypeReference parameterType)
+		internal ParameterReference (string name, ITypeReference parameterType)
 		{
 			if (parameterType == null)
 				throw new ArgumentNullException ("parameterType");
@@ -70,6 +78,6 @@ namespace Mono.Cecil {
 			return name;
 		}
 
-		public abstract ParameterDefinition Resolve ();
+		public abstract IParameterDefinition Resolve ();
 	}
 }

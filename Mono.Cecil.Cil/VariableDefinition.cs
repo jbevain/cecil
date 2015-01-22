@@ -34,12 +34,12 @@ namespace Mono.Cecil.Cil {
 			get { return variable_type.IsPinned; }
 		}
 
-		public VariableDefinition (TypeReference variableType)
+		public VariableDefinition (ITypeReference variableType)
 			: base (variableType)
 		{
 		}
 
-		public VariableDefinition (string name, TypeReference variableType)
+		public VariableDefinition (string name, ITypeReference variableType)
 			: base (name, variableType)
 		{
 		}

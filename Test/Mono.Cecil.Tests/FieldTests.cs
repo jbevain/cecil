@@ -352,7 +352,7 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNull (field.Constant);
 		}
 
-		static TypeDefinition GetPrivateImplementationType (ModuleDefinition module)
+		static ITypeDefinition GetPrivateImplementationType (IModuleDefinition module)
 		{
 			foreach (var type in module.Types)
 				if (type.FullName.Contains ("<PrivateImplementationDetails>"))
@@ -361,7 +361,7 @@ namespace Mono.Cecil.Tests {
 			return null;
 		}
 
-		static void AssertField (TypeDefinition type, string name, Type expected)
+		static void AssertField (ITypeDefinition type, string name, Type expected)
 		{
 			var field = type.GetField (name);
 			Assert.IsNotNull (field, name);

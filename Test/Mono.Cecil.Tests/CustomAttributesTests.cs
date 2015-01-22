@@ -371,7 +371,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual ("System.Type", argument.Type.FullName);
 
-				var type = argument.Value as TypeReference;
+				var type = argument.Value as ITypeReference;
 				Assert.IsNotNull (type);
 
 				Assert.AreEqual ("System.Collections.Generic.Dictionary`2", type.FullName);
@@ -394,7 +394,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual ("System.Type", argument.Type.FullName);
 
-				var type = argument.Value as TypeReference;
+				var type = argument.Value as ITypeReference;
 				Assert.IsNotNull (type);
 
 				Assert.AreEqual ("System.Collections.Generic.Dictionary`2<System.String,OpenGeneric`2<Machin,System.Int32>[,]>", type.FullName);
@@ -431,10 +431,10 @@ namespace Mono.Cecil.Tests {
 
 			buffer.WriteUInt16 (0); // named arguments
 
-			var blob = new byte [buffer.length];
-			Buffer.BlockCopy (buffer.buffer, 0, blob, 0, buffer.length);
+			var blob = new byte [buffer.Length];
+			Buffer.BlockCopy (buffer.Buffer, 0, blob, 0, buffer.Length);
 
-			var attribute = new CustomAttribute (assembly_title_ctor, blob);
+			ICustomAttribute attribute = new CustomAttribute (assembly_title_ctor, blob);
 			module.Assembly.CustomAttributes.Add (attribute);
 
 			module.Write (file);
@@ -447,7 +447,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
 		}
 
-		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
+		static void AssertCustomAttribute (string expected, ICustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));
 		}
@@ -465,7 +465,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (expected, result.ToString ());
 		}
 
-		static string PrettyPrint (CustomAttribute attribute)
+		static string PrettyPrint (ICustomAttribute attribute)
 		{
 			var signature = new StringBuilder ();
 			signature.Append (".ctor (");
@@ -539,15 +539,15 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
-		static void PrettyPrint (TypeReference type, StringBuilder signature)
+		static void PrettyPrint (ITypeReference type, StringBuilder signature)
 		{
 			if (type.IsArray) {
 				ArrayType array = (ArrayType) type;
-				signature.AppendFormat ("{0}[]", array.ElementType.etype.ToString ());
-			} else if (type.etype == ElementType.None) {
+				signature.AppendFormat ("{0}[]", array.ElementType.EType);
+			} else if (type.EType == ElementType.None) {
 				signature.Append (type.FullName);
 			} else
-				signature.Append (type.etype.ToString ());
+				signature.Append (type.EType);
 		}
 
 		static void AssertArgument<T> (T value, CustomAttributeNamedArgument named_argument)
@@ -566,7 +566,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (value, argument.Value);
 		}
 
-		static CustomAttribute GetAttribute (ICustomAttributeProvider owner, string type)
+		static ICustomAttribute GetAttribute (ICustomAttributeProvider owner, string type)
 		{
 			Assert.IsTrue (owner.HasCustomAttributes);
 

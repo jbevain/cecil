@@ -26,17 +26,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	public interface IGenericParameterProvider : IMetadataTokenProvider {
+	public interface IGenericParameterProvider : IMemberReference {
 
 		bool HasGenericParameters { get; }
-		bool IsDefinition { get; }
-		ModuleDefinition Module { get; }
-		Collection<GenericParameter> GenericParameters { get; }
+        IList<IGenericParameter> GenericParameters { get; }
 		GenericParameterType GenericParameterType { get; }
 	}
 
@@ -45,9 +43,9 @@ namespace Mono.Cecil {
 		Method
 	}
 
-	interface IGenericContext {
+    public interface IGenericContext : IMemberReference
+    {
 
-		bool IsDefinition { get; }
 		IGenericParameterProvider Type { get; }
 		IGenericParameterProvider Method { get; }
 	}
@@ -56,15 +54,15 @@ namespace Mono.Cecil {
 
 		public static bool GetHasGenericParameters (
 			this IGenericParameterProvider self,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasGenericParameters (provider));
 		}
 
-		public static Collection<GenericParameter> GetGenericParameters (
+        public static IList<IGenericParameter> GetGenericParameters(
 			this IGenericParameterProvider self,
-			ref Collection<GenericParameter> collection,
-			ModuleDefinition module)
+            ref IList<IGenericParameter> collection,
+			IModuleDefinition module)
 		{
 			return module.HasImage ()
 				? module.Read (ref collection, self, (provider, reader) => reader.ReadGenericParameters (provider))

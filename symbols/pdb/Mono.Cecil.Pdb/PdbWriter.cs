@@ -39,11 +39,11 @@ namespace Mono.Cecil.Pdb {
 
 	public class PdbWriter : Cil.ISymbolWriter {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
 
-		internal PdbWriter (ModuleDefinition module, SymWriter writer)
+		internal PdbWriter (IModuleDefinition module, SymWriter writer)
 		{
 			this.module = module;
 			this.writer = writer;
@@ -56,7 +56,7 @@ namespace Mono.Cecil.Pdb {
 			return true;
 		}
 
-		public void Write (MethodBody body)
+        public void Write(IMethodBody body)
 		{
 			var method_token = body.Method.MetadataToken;
 			var sym_token = new SymbolToken (method_token.ToInt32 ());
@@ -78,7 +78,7 @@ namespace Mono.Cecil.Pdb {
 			writer.CloseMethod ();
 		}
 
-		Collection<Instruction> CollectInstructions (MethodBody body)
+        Collection<Instruction> CollectInstructions(IMethodBody body)
 		{
 			var collection = new Collection<Instruction> ();
 			var instructions = body.Instructions;
@@ -96,7 +96,7 @@ namespace Mono.Cecil.Pdb {
 			return collection;
 		}
 
-		void DefineVariables (MethodBody body, int start_offset, int end_offset)
+        void DefineVariables(IMethodBody body, int start_offset, int end_offset)
 		{
 			if (!body.HasVariables)
 				return;

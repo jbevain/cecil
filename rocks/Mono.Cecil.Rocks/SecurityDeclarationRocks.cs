@@ -39,7 +39,7 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class SecurityDeclarationRocks {
 
-		public static PermissionSet ToPermissionSet (this SecurityDeclaration self)
+        public static PermissionSet ToPermissionSet(this ISecurityDeclaration self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -51,7 +51,7 @@ namespace Mono.Cecil.Rocks {
 			return CreatePermissionSet (self);
 		}
 
-		static bool TryProcessPermissionSetAttribute (SecurityDeclaration declaration, out PermissionSet set)
+        static bool TryProcessPermissionSetAttribute(ISecurityDeclaration declaration, out PermissionSet set)
 		{
 			set = null;
 
@@ -81,7 +81,7 @@ namespace Mono.Cecil.Rocks {
 			return true;
 		}
 
-		static PermissionSet CreatePermissionSet (SecurityDeclaration declaration)
+        static PermissionSet CreatePermissionSet(ISecurityDeclaration declaration)
 		{
 			var set = new PermissionSet (SSP.PermissionState.None);
 
@@ -93,7 +93,7 @@ namespace Mono.Cecil.Rocks {
 			return set;
 		}
 
-		static IPermission CreatePermission (SecurityDeclaration declaration, SecurityAttribute attribute)
+        static IPermission CreatePermission(ISecurityDeclaration declaration, SecurityAttribute attribute)
 		{
 			var attribute_type = Type.GetType (attribute.AttributeType.FullName);
 			if (attribute_type == null)
@@ -133,7 +133,7 @@ namespace Mono.Cecil.Rocks {
 				type.GetProperty (named_argument.Name).SetValue (security_attribute, named_argument.Argument.Value, null);
 		}
 
-		static SSP.SecurityAttribute CreateSecurityAttribute (Type attribute_type, SecurityDeclaration declaration)
+        static SSP.SecurityAttribute CreateSecurityAttribute(Type attribute_type, ISecurityDeclaration declaration)
 		{
 			SSP.SecurityAttribute security_attribute;
 			try {
@@ -146,7 +146,7 @@ namespace Mono.Cecil.Rocks {
 			return security_attribute;
 		}
 
-		public static SecurityDeclaration ToSecurityDeclaration (this PermissionSet self, SecurityAction action, ModuleDefinition module)
+        public static ISecurityDeclaration ToSecurityDeclaration(this PermissionSet self, SecurityAction action, IModuleDefinition module)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");

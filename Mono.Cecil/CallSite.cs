@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Mono.Cecil {
 
 	public sealed class CallSite : IMethodSignature {
 
-		readonly MethodReference signature;
+		readonly IMethodReference signature;
 
 		public bool HasThis {
 			get { return signature.HasThis; }
@@ -56,11 +57,13 @@ namespace Mono.Cecil {
 			get { return signature.HasParameters; }
 		}
 
-		public Collection<ParameterDefinition> Parameters {
-			get { return signature.Parameters; }
+		public IList<IParameterDefinition> Parameters
+		{
+		    get { return signature.Parameters; }
+		    set { signature.Parameters = value; }
 		}
 
-		public TypeReference ReturnType {
+	    public ITypeReference ReturnType {
 			get { return signature.MethodReturnType.ReturnType; }
 			set { signature.MethodReturnType.ReturnType = value; }
 		}
@@ -79,7 +82,7 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public ModuleDefinition Module {
+		public IModuleDefinition Module {
 			get { return ReturnType.Module; }
 		}
 
@@ -88,8 +91,8 @@ namespace Mono.Cecil {
 		}
 
 		public MetadataToken MetadataToken {
-			get { return signature.token; }
-			set { signature.token = value; }
+			get { return signature.MetadataToken; }
+			set { signature.MetadataToken = value; }
 		}
 
 		public string FullName {
@@ -104,10 +107,10 @@ namespace Mono.Cecil {
 		internal CallSite ()
 		{
 			this.signature = new MethodReference ();
-			this.signature.token = new MetadataToken (TokenType.Signature, 0);
+			this.signature.MetadataToken = new MetadataToken (TokenType.Signature, 0);
 		}
 
-		public CallSite (TypeReference returnType)
+		public CallSite (ITypeReference returnType)
 			: this ()
 		{
 			if (returnType == null)

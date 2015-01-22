@@ -27,16 +27,16 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
 	public abstract class MethodSpecification : MethodReference {
 
-		readonly MethodReference method;
+		readonly IMethodReference method;
 
-		public MethodReference ElementMethod {
+		public IMethodReference ElementMethod {
 			get { return method; }
 		}
 
@@ -65,12 +65,12 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public override TypeReference DeclaringType {
+		public override ITypeReference DeclaringType {
 			get { return method.DeclaringType; }
 			set { throw new InvalidOperationException (); }
 		}
 
-		public override ModuleDefinition Module {
+		public override IModuleDefinition Module {
 			get { return method.Module; }
 		}
 
@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 			get { return method.HasParameters; }
 		}
 
-		public override Collection<ParameterDefinition> Parameters {
+		public override IList<IParameterDefinition> Parameters {
 			get { return method.Parameters; }
 		}
 
@@ -86,7 +86,7 @@ namespace Mono.Cecil {
 			get { return method.ContainsGenericParameter; }
 		}
 
-		internal MethodSpecification (MethodReference method)
+		internal MethodSpecification (IMethodReference method)
 		{
 			if (method == null)
 				throw new ArgumentNullException ("method");
@@ -95,7 +95,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MethodSpec);
 		}
 
-		public sealed override MethodReference GetElementMethod ()
+		public sealed override IMethodReference GetElementMethod ()
 		{
 			return method.GetElementMethod ();
 		}

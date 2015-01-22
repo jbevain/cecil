@@ -27,11 +27,20 @@
 //
 
 namespace Mono.Cecil {
+    public interface IMemberReference : IMetadataTokenProvider {
+        string Name { get; set; }
+        string FullName { get; }
+        ITypeReference DeclaringType { get; set; }
+        IModuleDefinition Module { get; set; }
+        bool IsDefinition { get; }
+        bool ContainsGenericParameter { get; }
+        bool HasImage { get; }
+    }
 
-	public abstract class MemberReference : IMetadataTokenProvider {
+    public abstract class MemberReference : IMemberReference {
 
 		string name;
-		TypeReference declaring_type;
+		ITypeReference declaring_type;
 
 		internal MetadataToken token;
 
@@ -44,7 +53,7 @@ namespace Mono.Cecil {
 			get;
 		}
 
-		public virtual TypeReference DeclaringType {
+		public virtual ITypeReference DeclaringType {
 			get { return declaring_type; }
 			set { declaring_type = value; }
 		}
@@ -54,7 +63,7 @@ namespace Mono.Cecil {
 			set { token = value; }
 		}
 
-		internal bool HasImage {
+        public bool HasImage {
 			get {
 				var module = Module;
 				if (module == null)
@@ -64,11 +73,13 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public virtual ModuleDefinition Module {
-			get { return declaring_type != null ? declaring_type.Module : null; }
+		public virtual IModuleDefinition Module
+		{
+		    get { return declaring_type != null ? declaring_type.Module : null; }
+            set { }
 		}
 
-		public virtual bool IsDefinition {
+        public virtual bool IsDefinition {
 			get { return false; }
 		}
 

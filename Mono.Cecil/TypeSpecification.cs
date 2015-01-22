@@ -34,9 +34,9 @@ namespace Mono.Cecil {
 
 	public abstract class TypeSpecification : TypeReference {
 
-		readonly TypeReference element_type;
+		readonly ITypeReference element_type;
 
-		public TypeReference ElementType {
+		public ITypeReference ElementType {
 			get { return element_type; }
 		}
 
@@ -55,7 +55,7 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public override ModuleDefinition Module {
+		public override IModuleDefinition Module {
 			get { return element_type.Module; }
 		}
 
@@ -68,17 +68,17 @@ namespace Mono.Cecil {
 		}
 
 		public override MetadataType MetadataType {
-			get { return (MetadataType) etype; }
+			get { return (MetadataType) EType; }
 		}
 
-		internal TypeSpecification (TypeReference type)
+		internal TypeSpecification (ITypeReference type)
 			: base (null, null)
 		{
 			this.element_type = type;
 			this.token = new MetadataToken (TokenType.TypeSpec);
 		}
 
-		public override TypeReference GetElementType ()
+		public override ITypeReference GetElementType ()
 		{
 			return element_type.GetElementType ();
 		}
@@ -86,7 +86,7 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static void CheckType (TypeReference type)
+		public static void CheckType (ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ("type");

@@ -31,21 +31,27 @@ using System;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IPropertyReference : IMemberReference
+    {
+        ITypeReference PropertyType { get; set; }
+        Collection<IParameterDefinition> Parameters { get; }
+        IPropertyDefinition Resolve();
+    }
 
-	public abstract class PropertyReference : MemberReference {
+    public abstract class PropertyReference : MemberReference, IPropertyReference {
 
-		TypeReference property_type;
+		ITypeReference property_type;
 
-		public TypeReference PropertyType {
+		public ITypeReference PropertyType {
 			get { return property_type; }
 			set { property_type = value; }
 		}
 
-		public abstract Collection<ParameterDefinition> Parameters {
+		public abstract Collection<IParameterDefinition> Parameters {
 			get;
 		}
 
-		internal PropertyReference (string name, TypeReference propertyType)
+		internal PropertyReference (string name, ITypeReference propertyType)
 			: base (name)
 		{
 			if (propertyType == null)
@@ -54,6 +60,6 @@ namespace Mono.Cecil {
 			property_type = propertyType;
 		}
 
-		public abstract PropertyDefinition Resolve ();
+        public abstract IPropertyDefinition Resolve();
 	}
 }

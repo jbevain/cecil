@@ -29,12 +29,16 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IFieldReference: IMemberReference {
+        ITypeReference FieldType { get; set; }
+        IFieldDefinition Resolve ();
+    }
 
-	public class FieldReference : MemberReference {
+    public class FieldReference : MemberReference, IFieldReference {
 
-		TypeReference field_type;
+		ITypeReference field_type;
 
-		public TypeReference FieldType {
+		public ITypeReference FieldType {
 			get { return field_type; }
 			set { field_type = value; }
 		}
@@ -52,7 +56,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
-		public FieldReference (string name, TypeReference fieldType)
+		public FieldReference (string name, ITypeReference fieldType)
 			: base (name)
 		{
 			if (fieldType == null)
@@ -62,7 +66,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
-		public FieldReference (string name, TypeReference fieldType, TypeReference declaringType)
+		public FieldReference (string name, ITypeReference fieldType, ITypeReference declaringType)
 			: this (name, fieldType)
 		{
 			if (declaringType == null)
@@ -71,7 +75,7 @@ namespace Mono.Cecil {
 			this.DeclaringType = declaringType;
 		}
 
-		public virtual FieldDefinition Resolve ()
+		public virtual IFieldDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

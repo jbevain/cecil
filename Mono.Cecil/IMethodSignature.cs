@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -39,8 +40,8 @@ namespace Mono.Cecil {
 		MethodCallingConvention CallingConvention { get; set; }
 
 		bool HasParameters { get; }
-		Collection<ParameterDefinition> Parameters { get; }
-		TypeReference ReturnType { get; set; }
+		IList<IParameterDefinition> Parameters { get; set; }
+	    ITypeReference ReturnType { get; set; }
 		MethodReturnType MethodReturnType { get; }
 	}
 

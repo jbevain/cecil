@@ -86,7 +86,7 @@ namespace Mono.Cecil {
 
 		internal Guid guid;
 		internal string unmanaged_type;
-		internal TypeReference managed_type;
+		internal ITypeReference managed_type;
 		internal string cookie;
 
 		public Guid Guid {
@@ -99,7 +99,7 @@ namespace Mono.Cecil {
 			set { unmanaged_type = value; }
 		}
 
-		public TypeReference ManagedType {
+		public ITypeReference ManagedType {
 			get { return managed_type; }
 			set { managed_type = value; }
 		}

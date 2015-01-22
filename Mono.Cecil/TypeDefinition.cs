@@ -1,5 +1,5 @@
 //
-// TypeDefinition.cs
+// ITypeDefinition.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -27,37 +27,84 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface ITypeDefinition : ITypeReference, IMemberDefinition, ISecurityDeclarationProvider, IGenericContext
+    {
+        TypeAttributes Attributes { get; set; }
+        ITypeReference BaseType { get; set; }
+        bool HasLayoutInfo { get; }
+        short PackingSize { get; set; }
+        int ClassSize { get; set; }
+        bool HasInterfaces { get; }
+        IList<ITypeReference> Interfaces { get; }
+        bool HasNestedTypes { get; }
+        IList<ITypeDefinition> NestedTypes { get; }
+        bool HasMethods { get; }
+        IList<IMethodDefinition> Methods { get; }
+        bool HasFields { get; }
+        IList<IFieldDefinition> Fields { get; }
+        bool HasEvents { get; }
+        IList<IEventDefinition> Events { get; }
+        bool HasProperties { get; }
+        IList<IPropertyDefinition> Properties { get; }
+        bool IsNotPublic { get; set; }
+        bool IsPublic { get; set; }
+        bool IsNestedPublic { get; set; }
+        bool IsNestedPrivate { get; set; }
+        bool IsNestedFamily { get; set; }
+        bool IsNestedAssembly { get; set; }
+        bool IsNestedFamilyAndAssembly { get; set; }
+        bool IsNestedFamilyOrAssembly { get; set; }
+        bool IsAutoLayout { get; set; }
+        bool IsSequentialLayout { get; set; }
+        bool IsExplicitLayout { get; set; }
+        bool IsClass { get; set; }
+        bool IsInterface { get; set; }
+        bool IsAbstract { get; set; }
+        bool IsSealed { get; set; }
+        bool IsImport { get; set; }
+        bool IsSerializable { get; set; }
+        bool IsWindowsRuntime { get; set; }
+        bool IsAnsiClass { get; set; }
+        bool IsUnicodeClass { get; set; }
+        bool IsAutoClass { get; set; }
+        bool IsBeforeFieldInit { get; set; }
+        bool HasSecurity { get; set; }
+        bool IsEnum { get; }
+        Range FieldsRange { get; set; }
+        Range MethodsRange { get; set; }
+    }
 
-	public sealed class TypeDefinition : TypeReference, IMemberDefinition, ISecurityDeclarationProvider {
+    public sealed class TypeDefinition : TypeReference, ITypeDefinition {
 
 		uint attributes;
-		TypeReference base_type;
-		internal Range fields_range;
-		internal Range methods_range;
+		ITypeReference base_type;
 
 		short packing_size = Mixin.NotResolvedMarker;
 		int class_size = Mixin.NotResolvedMarker;
 
-		Collection<TypeReference> interfaces;
-		Collection<TypeDefinition> nested_types;
-		Collection<MethodDefinition> methods;
-		Collection<FieldDefinition> fields;
-		Collection<EventDefinition> events;
-		Collection<PropertyDefinition> properties;
-		Collection<CustomAttribute> custom_attributes;
-		Collection<SecurityDeclaration> security_declarations;
+		IList<ITypeReference> interfaces;
+		IList<ITypeDefinition> nested_types;
+		IList<IMethodDefinition> methods;
+        IList<IFieldDefinition> fields;
+        IList<IEventDefinition> events;
+        IList<IPropertyDefinition> properties;
+        IList<ICustomAttribute> custom_attributes;
+        IList<ISecurityDeclaration> security_declarations;
+
+        public Range FieldsRange { get; set; }
+		public Range MethodsRange { get; set; }
 
 		public TypeAttributes Attributes {
 			get { return (TypeAttributes) attributes; }
 			set { attributes = (uint) value; }
 		}
 
-		public TypeReference BaseType {
+		public ITypeReference BaseType {
 			get { return base_type; }
 			set { base_type = value; }
 		}
@@ -126,7 +173,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<TypeReference> Interfaces {
+		public IList<ITypeReference> Interfaces {
 			get {
 				if (interfaces != null)
 					return interfaces;
@@ -134,7 +181,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref interfaces, this, (type, reader) => reader.ReadInterfaces (type));
 
-				return interfaces = new Collection<TypeReference> ();
+			    return interfaces = new Collection<ITypeReference> ();
 			}
 		}
 
@@ -150,7 +197,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<TypeDefinition> NestedTypes {
+		public IList<ITypeDefinition> NestedTypes {
 			get {
 				if (nested_types != null)
 					return nested_types;
@@ -158,7 +205,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref nested_types, this, (type, reader) => reader.ReadNestedTypes (type));
 
-				return nested_types = new MemberDefinitionCollection<TypeDefinition> (this);
+				return nested_types = new MemberDefinitionCollection<ITypeDefinition> (this);
 			}
 		}
 
@@ -168,13 +215,14 @@ namespace Mono.Cecil {
 					return methods.Count > 0;
 
 				if (HasImage)
-					return methods_range.Length > 0;
+					return MethodsRange.Length > 0;
 
 				return false;
 			}
 		}
 
-		public Collection<MethodDefinition> Methods {
+        public IList<IMethodDefinition> Methods
+        {
 			get {
 				if (methods != null)
 					return methods;
@@ -182,7 +230,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref methods, this, (type, reader) => reader.ReadMethods (type));
 
-				return methods = new MemberDefinitionCollection<MethodDefinition> (this);
+				return methods = new MemberDefinitionCollection<IMethodDefinition> (this);
 			}
 		}
 
@@ -192,13 +240,14 @@ namespace Mono.Cecil {
 					return fields.Count > 0;
 
 				if (HasImage)
-					return fields_range.Length > 0;
+					return FieldsRange.Length > 0;
 
 				return false;
 			}
 		}
 
-		public Collection<FieldDefinition> Fields {
+        public IList<IFieldDefinition> Fields
+        {
 			get {
 				if (fields != null)
 					return fields;
@@ -206,7 +255,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref fields, this, (type, reader) => reader.ReadFields (type));
 
-				return fields = new MemberDefinitionCollection<FieldDefinition> (this);
+                return fields = new MemberDefinitionCollection<IFieldDefinition>(this);
 			}
 		}
 
@@ -222,7 +271,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<EventDefinition> Events {
+        public IList<IEventDefinition> Events
+        {
 			get {
 				if (events != null)
 					return events;
@@ -230,7 +280,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref events, this, (type, reader) => reader.ReadEvents (type));
 
-				return events = new MemberDefinitionCollection<EventDefinition> (this);
+                return events = new MemberDefinitionCollection<IEventDefinition>(this);
 			}
 		}
 
@@ -246,7 +296,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<PropertyDefinition> Properties {
+        public IList<IPropertyDefinition> Properties
+        {
 			get {
 				if (properties != null)
 					return properties;
@@ -254,7 +305,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref properties, this, (type, reader) => reader.ReadProperties (type));
 
-				return properties = new MemberDefinitionCollection<PropertyDefinition> (this);
+                return properties = new MemberDefinitionCollection<IPropertyDefinition>(this);
 			}
 		}
 
@@ -267,7 +318,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityDeclaration> SecurityDeclarations {
+        public IList<ISecurityDeclaration> SecurityDeclarations
+        {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, Module)); }
 		}
 
@@ -280,7 +332,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
@@ -293,7 +346,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override Collection<GenericParameter> GenericParameters {
+        public override IList<IGenericParameter> GenericParameters
+        {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
 		}
 
@@ -460,8 +514,8 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public new TypeDefinition DeclaringType {
-			get { return (TypeDefinition) base.DeclaringType; }
+		public new ITypeDefinition DeclaringType {
+			get { return (ITypeDefinition) base.DeclaringType; }
 			set { base.DeclaringType = value; }
 		}
 
@@ -472,13 +526,13 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.TypeDef);
 		}
 
-		public TypeDefinition (string @namespace, string name, TypeAttributes attributes, TypeReference baseType) :
+		public TypeDefinition (string @namespace, string name, TypeAttributes attributes, ITypeReference baseType) :
 			this (@namespace, name, attributes)
 		{
 			this.BaseType = baseType;
 		}
 
-		public override TypeDefinition Resolve ()
+		public override ITypeDefinition Resolve ()
 		{
 			return this;
 		}
@@ -486,7 +540,7 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static TypeReference GetEnumUnderlyingType (this TypeDefinition self)
+		public static ITypeReference GetEnumUnderlyingType (this ITypeDefinition self)
 		{
 			var fields = self.Fields;
 
@@ -499,7 +553,7 @@ namespace Mono.Cecil {
 			throw new ArgumentException ();
 		}
 
-		public static TypeDefinition GetNestedType (this TypeDefinition self, string fullname)
+		public static ITypeDefinition GetNestedType (this ITypeDefinition self, string fullname)
 		{
 			if (!self.HasNestedTypes)
 				return null;

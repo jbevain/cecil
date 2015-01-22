@@ -1,5 +1,5 @@
 //
-// TypeReference.cs
+// ITypeReference.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
@@ -67,18 +67,41 @@ namespace Mono.Cecil {
 		Pinned = ElementType.Pinned,
 	}
 
-	public class TypeReference : MemberReference, IGenericParameterProvider, IGenericContext {
+    public interface ITypeReference : IMemberReference, IGenericParameterProvider
+    {
+        string Namespace { get; set; }
+        bool IsValueType { get; set; }
+        IMetadataScope Scope { get; set; }
+        bool IsNested { get; }
+        bool IsByReference { get; }
+        bool IsPointer { get; }
+        bool IsSentinel { get; }
+        bool IsArray { get; }
+        bool IsGenericParameter { get; }
+        bool IsGenericInstance { get; }
+        bool IsRequiredModifier { get; }
+        bool IsOptionalModifier { get; }
+        bool IsPinned { get; }
+        bool IsFunctionPointer { get; }
+        bool IsPrimitive { get; }
+        MetadataType MetadataType { get; }
+        ITypeReference GetElementType ();
+        ITypeDefinition Resolve ();
+        ElementType EType { get; set; }
+    }
+
+    public class TypeReference : MemberReference, ITypeReference, IGenericContext {
 
 		string @namespace;
 		bool value_type;
 		internal IMetadataScope scope;
-		internal ModuleDefinition module;
+		internal IModuleDefinition module;
 
 		internal ElementType etype = ElementType.None;
 
 		string fullname;
 
-		protected Collection<GenericParameter> generic_parameters;
+        protected IList<IGenericParameter> generic_parameters;
 
 		public override string Name {
 			get { return base.Name; }
@@ -101,7 +124,7 @@ namespace Mono.Cecil {
 			set { value_type = value; }
 		}
 
-		public override ModuleDefinition Module {
+		public override IModuleDefinition Module {
 			get {
 				if (module != null)
 					return module;
@@ -112,6 +135,7 @@ namespace Mono.Cecil {
 
 				return null;
 			}
+		    set { module = value; }
 		}
 
 		IGenericParameterProvider IGenericContext.Type {
@@ -130,7 +154,8 @@ namespace Mono.Cecil {
 			get { return !generic_parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual Collection<GenericParameter> GenericParameters {
+        public virtual IList<IGenericParameter> GenericParameters
+        {
 			get {
 				if (generic_parameters != null)
 					return generic_parameters;
@@ -162,7 +187,7 @@ namespace Mono.Cecil {
 			get { return this.DeclaringType != null; }
 		}
 
-		public override TypeReference DeclaringType {
+		public override ITypeReference DeclaringType {
 			get { return base.DeclaringType; }
 			set {
 				base.DeclaringType = value;
@@ -239,32 +264,38 @@ namespace Mono.Cecil {
 			}
 		}
 
-		protected TypeReference (string @namespace, string name)
+        public ElementType EType
+        {
+            get { return etype; }
+            set { etype = value; }
+        }
+
+        protected TypeReference (string @namespace, string name)
 			: base (name)
 		{
 			this.@namespace = @namespace ?? string.Empty;
 			this.token = new MetadataToken (TokenType.TypeRef, 0);
 		}
 
-		public TypeReference (string @namespace, string name, ModuleDefinition module, IMetadataScope scope)
+		public TypeReference (string @namespace, string name, IModuleDefinition module, IMetadataScope scope)
 			: this (@namespace, name)
 		{
 			this.module = module;
 			this.scope = scope;
 		}
 
-		public TypeReference (string @namespace, string name, ModuleDefinition module, IMetadataScope scope, bool valueType) :
+		public TypeReference (string @namespace, string name, IModuleDefinition module, IMetadataScope scope, bool valueType) :
 			this (@namespace, name, module, scope)
 		{
 			value_type = valueType;
 		}
 
-		public virtual TypeReference GetElementType ()
+		public virtual ITypeReference GetElementType ()
 		{
 			return this;
 		}
 
-		public virtual TypeDefinition Resolve ()
+		public virtual ITypeDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)
@@ -299,22 +330,22 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public static string TypeFullName (this TypeReference self)
+		public static string TypeFullName (this ITypeReference self)
 		{
 			return string.IsNullOrEmpty (self.Namespace)
 				? self.Name
 				: self.Namespace + '.' + self.Name;
 		}
 
-		public static bool IsTypeOf (this TypeReference self, string @namespace, string name)
+		public static bool IsTypeOf (this ITypeReference self, string @namespace, string name)
 		{
 			return self.Name == name
 				&& self.Namespace == @namespace;
 		}
 
-		public static bool IsTypeSpecification (this TypeReference type)
+		public static bool IsTypeSpecification (this ITypeReference type)
 		{
-			switch (type.etype) {
+			switch (type.EType) {
 			case ElementType.Array:
 			case ElementType.ByRef:
 			case ElementType.CModOpt:
@@ -333,7 +364,7 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		public static TypeDefinition CheckedResolve (this TypeReference self)
+		public static ITypeDefinition CheckedResolve (this ITypeReference self)
 		{
 			var type = self.Resolve ();
 			if (type == null)

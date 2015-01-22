@@ -1,5 +1,5 @@
 //
-// MethodReference.cs
+// IMethodReference.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -27,21 +27,28 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IMethodReference : IMemberReference, IMethodSignature, IGenericParameterProvider, IGenericContext {
+        bool IsGenericInstance { get; }
+        IMethodReference GetElementMethod ();
+        IMethodDefinition Resolve ();
 
-	public class MethodReference : MemberReference, IMethodSignature, IGenericParameterProvider, IGenericContext {
+    }
 
-		internal ParameterDefinitionCollection parameters;
+    public class MethodReference : MemberReference, IMethodReference {
+
+        internal IList<IParameterDefinition> parameters;
 		MethodReturnType return_type;
 
 		bool has_this;
 		bool explicit_this;
 		MethodCallingConvention calling_convention;
-		internal Collection<GenericParameter> generic_parameters;
+        internal IList<IGenericParameter> generic_parameters;
 
 		public virtual bool HasThis {
 			get { return has_this; }
@@ -62,16 +69,18 @@ namespace Mono.Cecil {
 			get { return !parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual Collection<ParameterDefinition> Parameters {
-			get {
+		public virtual IList<IParameterDefinition> Parameters
+		{
+		    get {
 				if (parameters == null)
 					parameters = new ParameterDefinitionCollection (this);
 
 				return parameters;
 			}
+		    set { parameters = value; }
 		}
 
-		IGenericParameterProvider IGenericContext.Type {
+        IGenericParameterProvider IGenericContext.Type {
 			get {
 				var declaring_type = this.DeclaringType;
 				var instance = declaring_type as GenericInstanceType;
@@ -94,7 +103,8 @@ namespace Mono.Cecil {
 			get { return !generic_parameters.IsNullOrEmpty (); }
 		}
 
-		public virtual Collection<GenericParameter> GenericParameters {
+        public virtual IList<IGenericParameter> GenericParameters
+        {
 			get {
 				if (generic_parameters != null)
 					return generic_parameters;
@@ -103,7 +113,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public TypeReference ReturnType {
+		public ITypeReference ReturnType {
 			get {
 				var return_type = MethodReturnType;
 				return return_type != null ? return_type.ReturnType : null;
@@ -156,7 +166,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
-		public MethodReference (string name, TypeReference returnType)
+		public MethodReference (string name, ITypeReference returnType)
 			: base (name)
 		{
 			if (returnType == null)
@@ -167,7 +177,7 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.MemberRef);
 		}
 
-		public MethodReference (string name, TypeReference returnType, TypeReference declaringType)
+		public MethodReference (string name, ITypeReference returnType, ITypeReference declaringType)
 			: this (name, returnType)
 		{
 			if (declaringType == null)
@@ -176,12 +186,12 @@ namespace Mono.Cecil {
 			this.DeclaringType = declaringType;
 		}
 
-		public virtual MethodReference GetElementMethod ()
+		public virtual IMethodReference GetElementMethod ()
 		{
 			return this;
 		}
 
-		public virtual MethodDefinition Resolve ()
+		public virtual IMethodDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

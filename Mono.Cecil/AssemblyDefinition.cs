@@ -27,22 +27,34 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IAssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
+        IAssemblyNameDefinition Name { get; set; }
+        string FullName { get; }
+        IList<IModuleDefinition> Modules { get; }
+        IModuleDefinition MainModule { get; }
+        IMethodDefinition EntryPoint { get; set; }
+        void Write (string fileName);
+        void Write (Stream stream);
+        void Write(string fileName, IWriterParameters parameters);
+        void Write(Stream stream, IWriterParameters parameters);
+    }
 
-	public sealed class AssemblyDefinition : ICustomAttributeProvider, ISecurityDeclarationProvider {
+    public sealed class AssemblyDefinition : IAssemblyDefinition {
 
-		AssemblyNameDefinition name;
+		IAssemblyNameDefinition name;
 
-		internal ModuleDefinition main_module;
-		Collection<ModuleDefinition> modules;
-		Collection<CustomAttribute> custom_attributes;
-		Collection<SecurityDeclaration> security_declarations;
+		internal IModuleDefinition main_module;
+		IList<IModuleDefinition> modules;
+        IList<ICustomAttribute> custom_attributes;
+        IList<ISecurityDeclaration> security_declarations;
 
-		public AssemblyNameDefinition Name {
+		public IAssemblyNameDefinition Name {
 			get { return name; }
 			set { name = value; }
 		}
@@ -56,7 +68,7 @@ namespace Mono.Cecil {
 			set { }
 		}
 
-		public Collection<ModuleDefinition> Modules {
+		public IList<IModuleDefinition> Modules {
 			get {
 				if (modules != null)
 					return modules;
@@ -64,15 +76,15 @@ namespace Mono.Cecil {
 				if (main_module.HasImage)
 					return main_module.Read (ref modules, this, (_, reader) => reader.ReadModules ());
 
-				return modules = new Collection<ModuleDefinition> (1) { main_module };
+				return modules = new List<IModuleDefinition> (1) { main_module };
 			}
 		}
 
-		public ModuleDefinition MainModule {
+		public IModuleDefinition MainModule {
 			get { return main_module; }
 		}
 
-		public MethodDefinition EntryPoint {
+		public IMethodDefinition EntryPoint {
 			get { return main_module.EntryPoint; }
 			set { main_module.EntryPoint = value; }
 		}
@@ -86,7 +98,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, main_module)); }
 		}
 
@@ -99,7 +112,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityDeclaration> SecurityDeclarations {
+        public IList<ISecurityDeclaration> SecurityDeclarations
+        {
 			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, main_module)); }
 		}
 
@@ -108,12 +122,12 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-		public static AssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
+		public static IAssemblyDefinition CreateAssembly (IAssemblyNameDefinition assemblyName, string moduleName, ModuleKind kind)
 		{
 			return CreateAssembly (assemblyName, moduleName, new ModuleParameters { Kind = kind });
 		}
 
-		public static AssemblyDefinition CreateAssembly (AssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
+		public static IAssemblyDefinition CreateAssembly (IAssemblyNameDefinition assemblyName, string moduleName, ModuleParameters parameters)
 		{
 			if (assemblyName == null)
 				throw new ArgumentNullException ("assemblyName");
@@ -130,27 +144,27 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		public static AssemblyDefinition ReadAssembly (string fileName)
+		public static IAssemblyDefinition ReadAssembly (string fileName)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (fileName));
 		}
 
-		public static AssemblyDefinition ReadAssembly (string fileName, ReaderParameters parameters)
+		public static IAssemblyDefinition ReadAssembly (string fileName, ReaderParameters parameters)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (fileName, parameters));
 		}
 
-		public static AssemblyDefinition ReadAssembly (Stream stream)
+		public static IAssemblyDefinition ReadAssembly (Stream stream)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (stream));
 		}
 
-		public static AssemblyDefinition ReadAssembly (Stream stream, ReaderParameters parameters)
+		public static IAssemblyDefinition ReadAssembly (Stream stream, ReaderParameters parameters)
 		{
 			return ReadAssembly (ModuleDefinition.ReadModule (stream, parameters));
 		}
 
-		static AssemblyDefinition ReadAssembly (ModuleDefinition module)
+		static IAssemblyDefinition ReadAssembly (IModuleDefinition module)
 		{
 			var assembly = module.Assembly;
 			if (assembly == null)
@@ -170,12 +184,12 @@ namespace Mono.Cecil {
 			Write (stream, new WriterParameters ());
 		}
 
-		public void Write (string fileName, WriterParameters parameters)
+        public void Write(string fileName, IWriterParameters parameters)
 		{
 			main_module.Write (fileName, parameters);
 		}
 
-		public void Write (Stream stream, WriterParameters parameters)
+        public void Write(Stream stream, IWriterParameters parameters)
 		{
 			main_module.Write (stream, parameters);
 		}

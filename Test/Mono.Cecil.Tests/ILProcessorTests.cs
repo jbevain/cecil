@@ -53,7 +53,7 @@ namespace Mono.Cecil.Tests {
 			AssertOpCodeSequence (new [] { OpCodes.Ldloc_0, OpCodes.Ldloc_1, OpCodes.Ldloc_2, OpCodes.Ldloc_3 }, method);
 		}
 
-		static void AssertOpCodeSequence (OpCode [] expected, MethodBody body)
+		static void AssertOpCodeSequence (OpCode [] expected, IMethodBody body)
 		{
 			var opcodes = body.Instructions.Select (i => i.OpCode).ToArray ();
 			Assert.AreEqual (expected.Length, opcodes.Length);
@@ -62,7 +62,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (expected [i], opcodes [i]);
 		}
 
-		static MethodBody CreateTestMethod (params OpCode [] opcodes)
+		static IMethodBody CreateTestMethod (params OpCode [] opcodes)
 		{
 			var method = new MethodDefinition {
 				Name = "function",

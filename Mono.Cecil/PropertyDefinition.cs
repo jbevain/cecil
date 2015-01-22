@@ -26,22 +26,35 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.Text;
 
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IPropertyDefinition : IPropertyReference, IMemberDefinition, IConstantProvider {
+        PropertyAttributes Attributes { get; set; }
+        bool HasThis { get; set; }
+        IMethodDefinition GetMethod { get; set; }
+        IMethodDefinition SetMethod { get; set; }
+        bool HasOtherMethods { get; }
+        Collection<IMethodDefinition> OtherMethods { get; set; }
+        bool HasParameters { get; }
+        bool HasDefault { get; set; }
+        new ITypeDefinition DeclaringType { get; set; }
+        string ToString ();
+    }
 
-	public sealed class PropertyDefinition : PropertyReference, IMemberDefinition, IConstantProvider {
+    public sealed class PropertyDefinition : PropertyReference, IPropertyDefinition {
 
 		bool? has_this;
 		ushort attributes;
 
-		Collection<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 
-		internal MethodDefinition get_method;
-		internal MethodDefinition set_method;
-		internal Collection<MethodDefinition> other_methods;
+		internal IMethodDefinition get_method;
+		internal IMethodDefinition set_method;
+		internal Collection<IMethodDefinition> other_methods;
 
 		object constant = Mixin.NotResolved;
 
@@ -75,11 +88,12 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
-		public MethodDefinition GetMethod {
+		public IMethodDefinition GetMethod {
 			get {
 				if (get_method != null)
 					return get_method;
@@ -90,7 +104,7 @@ namespace Mono.Cecil {
 			set { get_method = value; }
 		}
 
-		public MethodDefinition SetMethod {
+		public IMethodDefinition SetMethod {
 			get {
 				if (set_method != null)
 					return set_method;
@@ -111,8 +125,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<MethodDefinition> OtherMethods {
-			get {
+		public Collection<IMethodDefinition> OtherMethods
+		{
+		    get {
 				if (other_methods != null)
 					return other_methods;
 
@@ -121,11 +136,12 @@ namespace Mono.Cecil {
 				if (other_methods != null)
 					return other_methods;
 
-				return other_methods = new Collection<MethodDefinition> ();
+				return other_methods = new Collection<IMethodDefinition> ();
 			}
+		    set { other_methods = value; }
 		}
 
-		public bool HasParameters {
+        public bool HasParameters {
 			get {
 				InitializeMethods ();
 
@@ -139,7 +155,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override Collection<ParameterDefinition> Parameters {
+		public override Collection<IParameterDefinition> Parameters {
 			get {
 				InitializeMethods ();
 
@@ -149,13 +165,13 @@ namespace Mono.Cecil {
 				if (set_method != null)
 					return MirrorParameters (set_method, 1);
 
-				return new Collection<ParameterDefinition> ();
+				return new Collection<IParameterDefinition> ();
 			}
 		}
 
-		static Collection<ParameterDefinition> MirrorParameters (MethodDefinition method, int bound)
+		static Collection<IParameterDefinition> MirrorParameters (IMethodDefinition method, int bound)
 		{
-			var parameters = new Collection<ParameterDefinition> ();
+			var parameters = new Collection<IParameterDefinition> ();
 			if (!method.HasParameters)
 				return parameters;
 
@@ -201,8 +217,8 @@ namespace Mono.Cecil {
 
 		#endregion
 
-		public new TypeDefinition DeclaringType {
-			get { return (TypeDefinition) base.DeclaringType; }
+		public new ITypeDefinition DeclaringType {
+			get { return (ITypeDefinition) base.DeclaringType; }
 			set { base.DeclaringType = value; }
 		}
 
@@ -230,7 +246,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public PropertyDefinition (string name, PropertyAttributes attributes, TypeReference propertyType)
+		public PropertyDefinition (string name, PropertyAttributes attributes, ITypeReference propertyType)
 			: base (name, propertyType)
 		{
 			this.attributes = (ushort) attributes;
@@ -247,14 +263,14 @@ namespace Mono.Cecil {
 				if (get_method != null || set_method != null)
 					return;
 
-				if (!module.HasImage ())
-					return;
+                if (!module.HasImage())
+                    return;
 
-				module.Read (this, (property, reader) => reader.ReadMethods (property));
+                module.Read(this, (property, reader) => reader.ReadMethods(property));
 			}
 		}
 
-		public override PropertyDefinition Resolve ()
+        public override IPropertyDefinition Resolve()
 		{
 			return this;
 		}

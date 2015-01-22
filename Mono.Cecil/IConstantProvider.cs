@@ -42,7 +42,7 @@ namespace Mono.Cecil {
 		public static void ResolveConstant (
 			this IConstantProvider self,
 			ref object constant,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			if (module == null) {
 				constant = Mixin.NoValue;

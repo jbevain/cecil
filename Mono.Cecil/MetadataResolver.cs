@@ -27,23 +27,23 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
 	public interface IAssemblyResolver {
-		AssemblyDefinition Resolve (AssemblyNameReference name);
-		AssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters);
+		IAssemblyDefinition Resolve (IAssemblyNameReference name);
+		IAssemblyDefinition Resolve (IAssemblyNameReference name, ReaderParameters parameters);
 
-		AssemblyDefinition Resolve (string fullName);
-		AssemblyDefinition Resolve (string fullName, ReaderParameters parameters);
+		IAssemblyDefinition Resolve (string fullName);
+		IAssemblyDefinition Resolve (string fullName, ReaderParameters parameters);
 	}
 
 	public interface IMetadataResolver {
-		TypeDefinition Resolve (TypeReference type);
-		FieldDefinition Resolve (FieldReference field);
-		MethodDefinition Resolve (MethodReference method);
+		ITypeDefinition Resolve (ITypeReference type);
+        IFieldDefinition Resolve(IFieldReference field);
+		IMethodDefinition Resolve (IMethodReference method);
 	}
 
 #if !SILVERLIGHT && !CF
@@ -51,15 +51,15 @@ namespace Mono.Cecil {
 #endif
 	public class ResolutionException : Exception {
 
-		readonly MemberReference member;
+		readonly IMemberReference member;
 
-		public MemberReference Member {
+		public IMemberReference Member {
 			get { return member; }
 		}
 
 		public IMetadataScope Scope {
 			get {
-				var type = member as TypeReference;
+				var type = member as ITypeReference;
 				if (type != null)
 					return type.Scope;
 
@@ -71,7 +71,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public ResolutionException (MemberReference member)
+		public ResolutionException (IMemberReference member)
 			: base ("Failed to resolve " + member.FullName)
 		{
 			if (member == null)
@@ -106,7 +106,7 @@ namespace Mono.Cecil {
 			assembly_resolver = assemblyResolver;
 		}
 
-		public virtual TypeDefinition Resolve (TypeReference type)
+		public virtual ITypeDefinition Resolve (ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ("type");
@@ -119,14 +119,14 @@ namespace Mono.Cecil {
 				return null;
 
 			switch (scope.MetadataScopeType) {
-			case MetadataScopeType.AssemblyNameReference:
-				var assembly = assembly_resolver.Resolve ((AssemblyNameReference) scope);
+			case MetadataScopeType.IAssemblyNameReference:
+				var assembly = assembly_resolver.Resolve ((IAssemblyNameReference) scope);
 				if (assembly == null)
 					return null;
 
 				return GetType (assembly.MainModule, type);
 			case MetadataScopeType.ModuleDefinition:
-				return GetType ((ModuleDefinition) scope, type);
+				return GetType ((IModuleDefinition) scope, type);
 			case MetadataScopeType.ModuleReference:
 				var modules = type.Module.Assembly.Modules;
 				var module_ref = (ModuleReference) scope;
@@ -141,7 +141,8 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		static TypeDefinition GetType (ModuleDefinition module, TypeReference reference)
+	 
+	    static ITypeDefinition GetType (IModuleDefinition module, ITypeReference reference)
 		{
 			var type = GetTypeDefinition (module, reference);
 			if (type != null)
@@ -166,7 +167,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static TypeDefinition GetTypeDefinition (ModuleDefinition module, TypeReference type)
+		static ITypeDefinition GetTypeDefinition (IModuleDefinition module, ITypeReference type)
 		{
 			if (!type.IsNested)
 				return module.GetType (type.Namespace, type.Name);
@@ -178,7 +179,7 @@ namespace Mono.Cecil {
 			return declaring_type.GetNestedType (type.TypeFullName ());
 		}
 
-		public virtual FieldDefinition Resolve (FieldReference field)
+        public virtual IFieldDefinition Resolve(IFieldReference field)
 		{
 			if (field == null)
 				throw new ArgumentNullException ("field");
@@ -193,7 +194,7 @@ namespace Mono.Cecil {
 			return GetField (type, field);
 		}
 
-		FieldDefinition GetField (TypeDefinition type, FieldReference reference)
+        IFieldDefinition GetField(ITypeDefinition type, IFieldReference reference)
 		{
 			while (type != null) {
 				var field = GetField (type.Fields, reference);
@@ -209,7 +210,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static FieldDefinition GetField (Collection<FieldDefinition> fields, FieldReference reference)
+        static IFieldDefinition GetField(IList<IFieldDefinition> fields, IFieldReference reference)
 		{
 			for (int i = 0; i < fields.Count; i++) {
 				var field = fields [i];
@@ -226,7 +227,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		public virtual MethodDefinition Resolve (MethodReference method)
+		public virtual IMethodDefinition Resolve (IMethodReference method)
 		{
 			if (method == null)
 				throw new ArgumentNullException ("method");
@@ -243,7 +244,7 @@ namespace Mono.Cecil {
 			return GetMethod (type, method);
 		}
 
-		MethodDefinition GetMethod (TypeDefinition type, MethodReference reference)
+		IMethodDefinition GetMethod (ITypeDefinition type, IMethodReference reference)
 		{
 			while (type != null) {
 				var method = GetMethod (type.Methods, reference);
@@ -259,7 +260,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		public static MethodDefinition GetMethod (Collection<MethodDefinition> methods, MethodReference reference)
+		public static IMethodDefinition GetMethod (IList<IMethodDefinition> methods, IMethodReference reference)
 		{
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
@@ -291,7 +292,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static bool AreSame (Collection<ParameterDefinition> a, Collection<ParameterDefinition> b)
+		static bool AreSame (IList<IParameterDefinition> a, IList<IParameterDefinition> b)
 		{
 			var count = a.Count;
 
@@ -352,12 +353,12 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		static bool AreSame (GenericParameter a, GenericParameter b)
+        static bool AreSame(IGenericParameter a, IGenericParameter b)
 		{
 			return a.Position == b.Position;
 		}
 
-		static bool AreSame (TypeReference a, TypeReference b)
+		static bool AreSame (ITypeReference a, ITypeReference b)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -365,11 +366,11 @@ namespace Mono.Cecil {
 			if (a == null || b == null)
 				return false;
 
-			if (a.etype != b.etype)
+            if (a.EType != b.EType)
 				return false;
 
 			if (a.IsGenericParameter)
-				return AreSame ((GenericParameter) a, (GenericParameter) b);
+                return AreSame((IGenericParameter)a, (IGenericParameter)b);
 
 			if (a.IsTypeSpecification ())
 				return AreSame ((TypeSpecification) a, (TypeSpecification) b);

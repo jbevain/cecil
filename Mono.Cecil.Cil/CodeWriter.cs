@@ -39,15 +39,14 @@ using RVA = System.UInt32;
 #if !READ_ONLY
 
 namespace Mono.Cecil.Cil {
-
-	sealed class CodeWriter : ByteBuffer {
+    public sealed class CodeWriter : ByteBuffer {
 
 		readonly RVA code_base;
 		internal readonly MetadataBuilder metadata;
 		readonly Dictionary<uint, MetadataToken> standalone_signatures;
 
 		RVA current;
-		MethodBody body;
+        IMethodBody body;
 
 		public CodeWriter (MetadataBuilder metadata)
 			: base (0)
@@ -58,12 +57,12 @@ namespace Mono.Cecil.Cil {
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
 		}
 
-		public RVA WriteMethodBody (MethodDefinition method)
+		public RVA WriteMethodBody (IMethodDefinition method)
 		{
 			var rva = BeginMethod ();
 
 			if (IsUnresolved (method)) {
-				if (method.rva == 0)
+				if (method.RVA == 0)
 					return 0;
 
 				WriteUnresolvedMethodBody (method);
@@ -80,20 +79,20 @@ namespace Mono.Cecil.Cil {
 			return rva;
 		}
 
-		static bool IsEmptyMethodBody (MethodBody body)
+        static bool IsEmptyMethodBody(IMethodBody body)
 		{
-			return body.instructions.IsNullOrEmpty ()
-				&& body.variables.IsNullOrEmpty ();
+			return body.Instructions.IsNullOrEmpty ()
+				&& body.Variables.IsNullOrEmpty ();
 		}
 
-		static bool IsUnresolved (MethodDefinition method)
+		static bool IsUnresolved (IMethodDefinition method)
 		{
-			return method.HasBody && method.HasImage && method.body == null;
+			return method.HasBody && method.HasImage && method.Body == null;
 		}
 
-		void WriteUnresolvedMethodBody (MethodDefinition method)
+		void WriteUnresolvedMethodBody (IMethodDefinition method)
 		{
-			var code_reader = metadata.module.Read (method, (_, reader) => reader.code);
+			var code_reader = metadata.module.Read (method, (_, reader) => reader.Code);
 
 			MethodSymbols symbols;
 			var buffer = code_reader.PatchRawMethodBody (method, this, out symbols);
@@ -103,7 +102,7 @@ namespace Mono.Cecil.Cil {
 			if (symbols.instructions.IsNullOrEmpty ())
 				return;
 
-			symbols.method_token = method.token;
+			symbols.method_token = method.MetadataToken;
 			symbols.local_var_token = GetLocalVarToken (buffer, symbols);
 
 			var symbol_writer = metadata.symbol_writer;
@@ -111,16 +110,16 @@ namespace Mono.Cecil.Cil {
 				symbol_writer.Write (symbols);
 		}
 
-		static MetadataToken GetLocalVarToken (ByteBuffer buffer, MethodSymbols symbols)
+        static MetadataToken GetLocalVarToken(IByteBuffer buffer, MethodSymbols symbols)
 		{
 			if (symbols.variables.IsNullOrEmpty ())
 				return MetadataToken.Zero;
 
-			buffer.position = 8;
+			buffer.Position = 8;
 			return new MetadataToken (buffer.ReadUInt32 ());
 		}
 
-		void WriteResolvedMethodBody (MethodDefinition method)
+		void WriteResolvedMethodBody (IMethodDefinition method)
 		{
 			body = method.Body;
 			ComputeHeader ();
@@ -150,12 +149,12 @@ namespace Mono.Cecil.Cil {
 
 			WriteByte (flags);
 			WriteByte (0x30);
-			WriteInt16 ((short) body.max_stack_size);
-			WriteInt32 (body.code_size);
-			body.local_var_token = body.HasVariables
+			WriteInt16 ((short) body.MaxStackSize);
+			WriteInt32 (body.CodeSize);
+			body.LocalVarToken = body.HasVariables
 				? GetStandAloneSignature (body.Variables)
 				: MetadataToken.Zero;
-			WriteMetadataToken (body.local_var_token);
+            WriteMetadataToken(body.LocalVarToken);
 		}
 
 		void WriteInstructions ()
@@ -215,13 +214,13 @@ namespace Mono.Cecil.Cil {
 				WriteByte ((byte) GetVariableIndex ((VariableDefinition) operand));
 				break;
 			case OperandType.ShortInlineArg:
-				WriteByte ((byte) GetParameterIndex ((ParameterDefinition) operand));
+				WriteByte ((byte) GetParameterIndex ((IParameterDefinition) operand));
 				break;
 			case OperandType.InlineVar:
 				WriteInt16 ((short) GetVariableIndex ((VariableDefinition) operand));
 				break;
 			case OperandType.InlineArg:
-				WriteInt16 ((short) GetParameterIndex ((ParameterDefinition) operand));
+				WriteInt16 ((short) GetParameterIndex ((IParameterDefinition) operand));
 				break;
 			case OperandType.InlineSig:
 				WriteMetadataToken (GetStandAloneSignature ((CallSite) operand));
@@ -264,7 +263,7 @@ namespace Mono.Cecil.Cil {
 		int GetTargetOffset (Instruction instruction)
 		{
 			if (instruction == null) {
-				var last = body.instructions [body.instructions.size - 1];
+				var last = body.Instructions [body.Instructions.size - 1];
 				return last.offset + last.GetSize ();
 			}
 
@@ -284,10 +283,10 @@ namespace Mono.Cecil.Cil {
 			return variable.Index;
 		}
 
-		int GetParameterIndex (ParameterDefinition parameter)
+		int GetParameterIndex (IParameterDefinition parameter)
 		{
-			if (body.method.HasThis) {
-				if (parameter == body.this_parameter)
+			if (body.Method.HasThis) {
+				if (parameter == body.ThisParameter)
 					return 0;
 
 				return parameter.Index + 1;
@@ -309,7 +308,7 @@ namespace Mono.Cecil.Cil {
 		void ComputeHeader ()
 		{
 			int offset = 0;
-			var instructions = body.instructions;
+			var instructions = body.Instructions;
 			var items = instructions.items;
 			var count = instructions.size;
 			var stack_size = 0;
@@ -327,8 +326,8 @@ namespace Mono.Cecil.Cil {
 				ComputeStackSize (instruction, ref stack_sizes, ref stack_size, ref max_stack);
 			}
 
-			body.code_size = offset;
-			body.max_stack_size = max_stack;
+			body.CodeSize = offset;
+			body.MaxStackSize = max_stack;
 		}
 
 		void ComputeExceptionHandlerStackSize (ref Dictionary<Instruction, int> stack_sizes)
@@ -434,7 +433,7 @@ namespace Mono.Cecil.Cil {
 				if (instruction.opcode.Code == Code.Calli)
 					stack_size--;
 				// push return value
-				if (method.ReturnType.etype != ElementType.Void || instruction.opcode.Code == Code.Newobj)
+				if (method.ReturnType.EType != ElementType.Void || instruction.opcode.Code == Code.Newobj)
 					stack_size++;
 				break;
 			}
@@ -636,12 +635,12 @@ namespace Mono.Cecil.Cil {
 		void Align (int align)
 		{
 			align--;
-			WriteBytes (((position + align) & ~align) - position);
+			WriteBytes (((Position + align) & ~align) - Position);
 		}
 
 		void EndMethod ()
 		{
-			current = (RVA) (code_base + position);
+			current = (RVA) (code_base + Position);
 		}
 	}
 }

@@ -443,7 +443,7 @@ namespace Mono.CompilerServices.SymbolWriter
 		}
 
 #if CECIL
-		protected MonoSymbolFile (string filename, Mono.Cecil.ModuleDefinition module)
+		protected MonoSymbolFile (string filename, Mono.Cecil.IModuleDefinition module)
 			: this (filename)
 		{
 			// Check that the MDB file matches the module, if we have been
@@ -454,12 +454,12 @@ namespace Mono.CompilerServices.SymbolWriter
 			CheckGuidMatch (module.Mvid, filename, module.FullyQualifiedName);
 		}
 
-		public static MonoSymbolFile ReadSymbolFile (Mono.Cecil.ModuleDefinition module)
+		public static MonoSymbolFile ReadSymbolFile (Mono.Cecil.IModuleDefinition module)
 		{
 			return ReadSymbolFile (module, module.FullyQualifiedName);
 		}
 
-		public static MonoSymbolFile ReadSymbolFile (Mono.Cecil.ModuleDefinition module, string filename)
+		public static MonoSymbolFile ReadSymbolFile (Mono.Cecil.IModuleDefinition module, string filename)
 		{
 			string name = filename + ".mdb";
 

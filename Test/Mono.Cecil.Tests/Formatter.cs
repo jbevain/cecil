@@ -14,14 +14,14 @@ namespace Mono.Cecil.Tests {
 			return writer.ToString ();
 		}
 
-		public static string FormatMethodBody (MethodDefinition method)
+		public static string FormatMethodBody (IMethodDefinition method)
 		{
 			var writer = new StringWriter ();
 			WriteMethodBody (writer, method);
 			return writer.ToString ();
 		}
 
-		public static void WriteMethodBody (TextWriter writer, MethodDefinition method)
+		public static void WriteMethodBody (TextWriter writer, IMethodDefinition method)
 		{
 			var body = method.Body;
 
@@ -43,7 +43,7 @@ namespace Mono.Cecil.Tests {
 			WriteExceptionHandlers (writer, body);
 		}
 
-		static void WriteVariables (TextWriter writer, MethodBody body)
+		static void WriteVariables (TextWriter writer, IMethodBody body)
 		{
 			var variables = body.Variables;
 
@@ -115,7 +115,7 @@ namespace Mono.Cecil.Tests {
 				return;
 			}
 
-			var parameter = operand as ParameterDefinition;
+			var parameter = operand as IParameterDefinition;
 			if (parameter != null) {
 				writer.Write (ToInvariantCultureString (parameter.Sequence));
 				return;
@@ -137,7 +137,7 @@ namespace Mono.Cecil.Tests {
 			writer.Write (")");
 		}
 
-		static void WriteExceptionHandlers (TextWriter writer, MethodBody body)
+		static void WriteExceptionHandlers (TextWriter writer, IMethodBody body)
 		{
 			if (!body.HasExceptionHandlers)
 				return;

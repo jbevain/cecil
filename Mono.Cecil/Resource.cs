@@ -34,7 +34,15 @@ namespace Mono.Cecil {
 		AssemblyLinked,
 	}
 
-	public abstract class Resource {
+    public interface IResource {
+        string Name { get; set; }
+        ManifestResourceAttributes Attributes { get; set; }
+        ResourceType ResourceType { get; }
+        bool IsPublic { get; set; }
+        bool IsPrivate { get; set; }
+    }
+
+    public abstract class Resource : IResource {
 
 		string name;
 		uint attributes;

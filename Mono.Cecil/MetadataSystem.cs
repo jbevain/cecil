@@ -32,49 +32,135 @@ using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
-
-	struct Range {
-		public uint Start;
-		public uint Length;
+    public struct Range {
+        public uint Start;
+        public uint Length;
 
 		public Range (uint index, uint length)
 		{
-			this.Start = index;
-			this.Length = length;
+			Start = index;
+			Length = length;
 		}
 	}
 
-	sealed class MetadataSystem {
+    public interface IMetadataSystem {
+        void Clear ();
+        ITypeDefinition GetTypeDefinition (uint rid);
+        void AddTypeDefinition (ITypeDefinition type);
+        ITypeReference GetTypeReference (uint rid);
+        void AddTypeReference (ITypeReference type);
+        IFieldDefinition GetFieldDefinition(uint rid);
+        void AddFieldDefinition(IFieldDefinition field);
+        IMethodDefinition GetMethodDefinition (uint rid);
+        void AddMethodDefinition (IMethodDefinition method);
+        IMemberReference GetMemberReference (uint rid);
+        void AddMemberReference (IMemberReference member);
+        bool TryGetNestedTypeMapping (ITypeDefinition type, out uint [] mapping);
+        void SetNestedTypeMapping (uint type_rid, uint [] mapping);
+        void RemoveNestedTypeMapping (ITypeDefinition type);
+        bool TryGetReverseNestedTypeMapping (ITypeDefinition type, out uint declaring);
+        void SetReverseNestedTypeMapping (uint nested, uint declaring);
+        void RemoveReverseNestedTypeMapping (ITypeDefinition type);
+        bool TryGetInterfaceMapping (ITypeDefinition type, out MetadataToken [] mapping);
+        void SetInterfaceMapping (uint type_rid, MetadataToken [] mapping);
+        void RemoveInterfaceMapping (ITypeDefinition type);
+        void AddPropertiesRange (uint type_rid, Range range);
+        bool TryGetPropertiesRange (ITypeDefinition type, out Range range);
+        void RemovePropertiesRange (ITypeDefinition type);
+        void AddEventsRange (uint type_rid, Range range);
+        bool TryGetEventsRange (ITypeDefinition type, out Range range);
+        void RemoveEventsRange (ITypeDefinition type);
+        bool TryGetGenericParameterRanges (IGenericParameterProvider owner, out Range [] ranges);
+        void RemoveGenericParameterRange (IGenericParameterProvider owner);
+        bool TryGetCustomAttributeRanges (ICustomAttributeProvider owner, out Range [] ranges);
+        void RemoveCustomAttributeRange (ICustomAttributeProvider owner);
+        bool TryGetSecurityDeclarationRanges (ISecurityDeclarationProvider owner, out Range [] ranges);
+        void RemoveSecurityDeclarationRange (ISecurityDeclarationProvider owner);
+        bool TryGetGenericConstraintMapping(IGenericParameter generic_parameter, out MetadataToken[] mapping);
+        void SetGenericConstraintMapping (uint gp_rid, MetadataToken [] mapping);
+        void RemoveGenericConstraintMapping(IGenericParameter generic_parameter);
+        bool TryGetOverrideMapping (IMethodDefinition method, out MetadataToken [] mapping);
+        void SetOverrideMapping (uint rid, MetadataToken [] mapping);
+        void RemoveOverrideMapping (IMethodDefinition method);
+        ITypeDefinition GetFieldDeclaringType (uint field_rid);
+        ITypeDefinition GetMethodDeclaringType (uint method_rid);
+        ITypeDefinition[] Types { get; set; }
+        IAssemblyNameReference[] AssemblyReferences { get; set; }
+        IModuleReference[] ModuleReferences { get; set; }
+        Dictionary<uint, uint[]> NestedTypes { get; set; }
+        Dictionary<uint, uint> ReverseNestedTypes { get; set; }
+        Dictionary<uint, Row<ushort, uint>> ClassLayouts { get; set; }
+        ITypeReference[] TypeReferences { get; set; }
+        IFieldDefinition[] Fields { get; set; }
+        IMethodDefinition[] Methods { get; set; }
+        IMemberReference[] MemberReferences { get; set; }
+        Dictionary<uint, MetadataToken[]> Interfaces { get; set; }
+        Dictionary<uint, uint> FieldLayouts { get; set; }
+        Dictionary<uint, uint> FieldRVAs { get; set; }
+        Dictionary<MetadataToken, uint> FieldMarshals { get; set; }
+        Dictionary<MetadataToken, Row<ElementType, uint>> Constants { get; set; }
+        Dictionary<uint, MetadataToken[]> Overrides { get; set; }
+        Dictionary<MetadataToken, Range[]> CustomAttributes { get; set; }
+        Dictionary<MetadataToken, Range[]> SecurityDeclarations { get; set; }
+        Dictionary<uint, Range> Events { get; set; }
+        Dictionary<uint, Range> Properties { get; set; }
+        Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics { get; set; }
+        Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes { get; set; }
+        Dictionary<MetadataToken, Range[]> GenericParameters { get; set; }
+        Dictionary<uint, MetadataToken[]> GenericConstraints { get; set; }
 
-		internal AssemblyNameReference [] AssemblyReferences;
-		internal ModuleReference [] ModuleReferences;
+    }
 
-		internal TypeDefinition [] Types;
-		internal TypeReference [] TypeReferences;
+    public sealed class MetadataSystem : IMetadataSystem {
+        static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
 
-		internal FieldDefinition [] Fields;
-		internal MethodDefinition [] Methods;
-		internal MemberReference [] MemberReferences;
+        public Dictionary<uint, uint> FieldRVAs { get; set; }
 
-		internal Dictionary<uint, uint []> NestedTypes;
-		internal Dictionary<uint, uint> ReverseNestedTypes;
-		internal Dictionary<uint, MetadataToken []> Interfaces;
-		internal Dictionary<uint, Row<ushort, uint>> ClassLayouts;
-		internal Dictionary<uint, uint> FieldLayouts;
-		internal Dictionary<uint, uint> FieldRVAs;
-		internal Dictionary<MetadataToken, uint> FieldMarshals;
-		internal Dictionary<MetadataToken, Row<ElementType, uint>> Constants;
-		internal Dictionary<uint, MetadataToken []> Overrides;
-		internal Dictionary<MetadataToken, Range []> CustomAttributes;
-		internal Dictionary<MetadataToken, Range []> SecurityDeclarations;
-		internal Dictionary<uint, Range> Events;
-		internal Dictionary<uint, Range> Properties;
-		internal Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics;
-		internal Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes;
-		internal Dictionary<MetadataToken, Range []> GenericParameters;
-		internal Dictionary<uint, MetadataToken []> GenericConstraints;
+        public Dictionary<MetadataToken, uint> FieldMarshals{ get; set; }
 
-		static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
+        public Dictionary<MetadataToken, Row<ElementType, uint>> Constants{ get; set; }
+
+        public Dictionary<uint, MetadataToken[]> Overrides{ get; set; }
+
+        public Dictionary<MetadataToken, Range[]> CustomAttributes{ get; set; }
+
+        public Dictionary<MetadataToken, Range[]> SecurityDeclarations{ get; set; }
+
+        public Dictionary<uint, Range> Events{ get; set; }
+
+        public Dictionary<uint, Range> Properties{ get; set; }
+
+        public Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics{ get; set; }
+
+        public Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes{ get; set; }
+
+        public Dictionary<MetadataToken, Range[]> GenericParameters{ get; set; }
+
+        public Dictionary<uint, MetadataToken[]> GenericConstraints{ get; set; }
+
+        public ITypeDefinition[] Types { get; set; }
+
+        public IAssemblyNameReference[] AssemblyReferences { get; set; }
+
+        public IModuleReference[] ModuleReferences { get; set; }
+
+        public Dictionary<uint, uint[]> NestedTypes { get; set; }
+
+        public Dictionary<uint, uint> ReverseNestedTypes { get; set; }
+
+        public Dictionary<uint, Row<ushort, uint>> ClassLayouts { get; set; }
+
+        public ITypeReference[] TypeReferences { get; set; }
+
+        public IFieldDefinition[] Fields { get; set; }
+
+        public IMethodDefinition[] Methods { get; set; }
+
+        public IMemberReference[] MemberReferences { get; set; }
+
+        public Dictionary<uint, MetadataToken[]> Interfaces { get; set; }
+
+        public Dictionary<uint, uint> FieldLayouts { get; set; }
 
 		static void InitializePrimitives ()
 		{
@@ -100,24 +186,24 @@ namespace Mono.Cecil {
 			};
 		}
 
-		public static void TryProcessPrimitiveTypeReference (TypeReference type)
+		public static void TryProcessPrimitiveTypeReference (ITypeReference type)
 		{
 			if (type.Namespace != "System")
 				return;
 
-			var scope = type.scope;
-			if (scope == null || scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
+			var scope = type.Scope;
+			if (scope == null || scope.MetadataScopeType != MetadataScopeType.IAssemblyNameReference)
 				return;
 
 			Row<ElementType, bool> primitive_data;
 			if (!TryGetPrimitiveData (type, out primitive_data))
 				return;
 
-			type.etype = primitive_data.Col1;
+			type.EType = primitive_data.Col1;
 			type.IsValueType = primitive_data.Col2;
 		}
 
-		public static bool TryGetPrimitiveElementType (TypeDefinition type, out ElementType etype)
+		public static bool TryGetPrimitiveElementType (ITypeDefinition type, out ElementType etype)
 		{
 			etype = ElementType.None;
 
@@ -133,7 +219,7 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		static bool TryGetPrimitiveData (TypeReference type, out Row<ElementType, bool> primitive_data)
+		static bool TryGetPrimitiveData (ITypeReference type, out Row<ElementType, bool> primitive_data)
 		{
 			if (primitive_value_types == null)
 				InitializePrimitives ();
@@ -162,7 +248,7 @@ namespace Mono.Cecil {
 			if (GenericConstraints != null) GenericConstraints.Clear ();
 		}
 
-		public TypeDefinition GetTypeDefinition (uint rid)
+		public ITypeDefinition GetTypeDefinition (uint rid)
 		{
 			if (rid < 1 || rid > Types.Length)
 				return null;
@@ -170,12 +256,12 @@ namespace Mono.Cecil {
 			return Types [rid - 1];
 		}
 
-		public void AddTypeDefinition (TypeDefinition type)
+		public void AddTypeDefinition (ITypeDefinition type)
 		{
-			Types [type.token.RID - 1] = type;
+			Types [type.MetadataToken.RID - 1] = type;
 		}
 
-		public TypeReference GetTypeReference (uint rid)
+		public ITypeReference GetTypeReference (uint rid)
 		{
 			if (rid < 1 || rid > TypeReferences.Length)
 				return null;
@@ -183,12 +269,12 @@ namespace Mono.Cecil {
 			return TypeReferences [rid - 1];
 		}
 
-		public void AddTypeReference (TypeReference type)
+		public void AddTypeReference (ITypeReference type)
 		{
-			TypeReferences [type.token.RID - 1] = type;
+			TypeReferences [type.MetadataToken.RID - 1] = type;
 		}
 
-		public FieldDefinition GetFieldDefinition (uint rid)
+        public IFieldDefinition GetFieldDefinition(uint rid)
 		{
 			if (rid < 1 || rid > Fields.Length)
 				return null;
@@ -196,12 +282,12 @@ namespace Mono.Cecil {
 			return Fields [rid - 1];
 		}
 
-		public void AddFieldDefinition (FieldDefinition field)
+        public void AddFieldDefinition(IFieldDefinition field)
 		{
-			Fields [field.token.RID - 1] = field;
+			Fields [field.MetadataToken.RID - 1] = field;
 		}
 
-		public MethodDefinition GetMethodDefinition (uint rid)
+		public IMethodDefinition GetMethodDefinition (uint rid)
 		{
 			if (rid < 1 || rid > Methods.Length)
 				return null;
@@ -209,12 +295,12 @@ namespace Mono.Cecil {
 			return Methods [rid - 1];
 		}
 
-		public void AddMethodDefinition (MethodDefinition method)
+		public void AddMethodDefinition (IMethodDefinition method)
 		{
-			Methods [method.token.RID - 1] = method;
+			Methods [method.MetadataToken.RID - 1] = method;
 		}
 
-		public MemberReference GetMemberReference (uint rid)
+		public IMemberReference GetMemberReference (uint rid)
 		{
 			if (rid < 1 || rid > MemberReferences.Length)
 				return null;
@@ -222,14 +308,14 @@ namespace Mono.Cecil {
 			return MemberReferences [rid - 1];
 		}
 
-		public void AddMemberReference (MemberReference member)
+		public void AddMemberReference (IMemberReference member)
 		{
-			MemberReferences [member.token.RID - 1] = member;
+			MemberReferences [member.MetadataToken.RID - 1] = member;
 		}
 
-		public bool TryGetNestedTypeMapping (TypeDefinition type, out uint [] mapping)
+		public bool TryGetNestedTypeMapping (ITypeDefinition type, out uint [] mapping)
 		{
-			return NestedTypes.TryGetValue (type.token.RID, out mapping);
+			return NestedTypes.TryGetValue (type.MetadataToken.RID, out mapping);
 		}
 
 		public void SetNestedTypeMapping (uint type_rid, uint [] mapping)
@@ -237,14 +323,14 @@ namespace Mono.Cecil {
 			NestedTypes [type_rid] = mapping;
 		}
 
-		public void RemoveNestedTypeMapping (TypeDefinition type)
+		public void RemoveNestedTypeMapping (ITypeDefinition type)
 		{
-			NestedTypes.Remove (type.token.RID);
+			NestedTypes.Remove (type.MetadataToken.RID);
 		}
 
-		public bool TryGetReverseNestedTypeMapping (TypeDefinition type, out uint declaring)
+		public bool TryGetReverseNestedTypeMapping (ITypeDefinition type, out uint declaring)
 		{
-			return ReverseNestedTypes.TryGetValue (type.token.RID, out declaring);
+			return ReverseNestedTypes.TryGetValue (type.MetadataToken.RID, out declaring);
 		}
 
 		public void SetReverseNestedTypeMapping (uint nested, uint declaring)
@@ -252,14 +338,14 @@ namespace Mono.Cecil {
 			ReverseNestedTypes.Add (nested, declaring);
 		}
 
-		public void RemoveReverseNestedTypeMapping (TypeDefinition type)
+		public void RemoveReverseNestedTypeMapping (ITypeDefinition type)
 		{
-			ReverseNestedTypes.Remove (type.token.RID);
+			ReverseNestedTypes.Remove (type.MetadataToken.RID);
 		}
 
-		public bool TryGetInterfaceMapping (TypeDefinition type, out MetadataToken [] mapping)
+		public bool TryGetInterfaceMapping (ITypeDefinition type, out MetadataToken [] mapping)
 		{
-			return Interfaces.TryGetValue (type.token.RID, out mapping);
+			return Interfaces.TryGetValue (type.MetadataToken.RID, out mapping);
 		}
 
 		public void SetInterfaceMapping (uint type_rid, MetadataToken [] mapping)
@@ -267,9 +353,9 @@ namespace Mono.Cecil {
 			Interfaces [type_rid] = mapping;
 		}
 
-		public void RemoveInterfaceMapping (TypeDefinition type)
+		public void RemoveInterfaceMapping (ITypeDefinition type)
 		{
-			Interfaces.Remove (type.token.RID);
+			Interfaces.Remove (type.MetadataToken.RID);
 		}
 
 		public void AddPropertiesRange (uint type_rid, Range range)
@@ -277,14 +363,14 @@ namespace Mono.Cecil {
 			Properties.Add (type_rid, range);
 		}
 
-		public bool TryGetPropertiesRange (TypeDefinition type, out Range range)
+		public bool TryGetPropertiesRange (ITypeDefinition type, out Range range)
 		{
-			return Properties.TryGetValue (type.token.RID, out range);
+			return Properties.TryGetValue (type.MetadataToken.RID, out range);
 		}
 
-		public void RemovePropertiesRange (TypeDefinition type)
+		public void RemovePropertiesRange (ITypeDefinition type)
 		{
-			Properties.Remove (type.token.RID);
+			Properties.Remove (type.MetadataToken.RID);
 		}
 
 		public void AddEventsRange (uint type_rid, Range range)
@@ -292,14 +378,14 @@ namespace Mono.Cecil {
 			Events.Add (type_rid, range);
 		}
 
-		public bool TryGetEventsRange (TypeDefinition type, out Range range)
+		public bool TryGetEventsRange (ITypeDefinition type, out Range range)
 		{
-			return Events.TryGetValue (type.token.RID, out range);
+			return Events.TryGetValue (type.MetadataToken.RID, out range);
 		}
 
-		public void RemoveEventsRange (TypeDefinition type)
+		public void RemoveEventsRange (ITypeDefinition type)
 		{
-			Events.Remove (type.token.RID);
+			Events.Remove (type.MetadataToken.RID);
 		}
 
 		public bool TryGetGenericParameterRanges (IGenericParameterProvider owner, out Range [] ranges)
@@ -332,9 +418,9 @@ namespace Mono.Cecil {
 			SecurityDeclarations.Remove (owner.MetadataToken);
 		}
 
-		public bool TryGetGenericConstraintMapping (GenericParameter generic_parameter, out MetadataToken [] mapping)
+        public bool TryGetGenericConstraintMapping(IGenericParameter generic_parameter, out MetadataToken[] mapping)
 		{
-			return GenericConstraints.TryGetValue (generic_parameter.token.RID, out mapping);
+			return GenericConstraints.TryGetValue (generic_parameter.MetadataToken.RID, out mapping);
 		}
 
 		public void SetGenericConstraintMapping (uint gp_rid, MetadataToken [] mapping)
@@ -342,14 +428,14 @@ namespace Mono.Cecil {
 			GenericConstraints [gp_rid] = mapping;
 		}
 
-		public void RemoveGenericConstraintMapping (GenericParameter generic_parameter)
+        public void RemoveGenericConstraintMapping(IGenericParameter generic_parameter)
 		{
-			GenericConstraints.Remove (generic_parameter.token.RID);
+			GenericConstraints.Remove (generic_parameter.MetadataToken.RID);
 		}
 
-		public bool TryGetOverrideMapping (MethodDefinition method, out MetadataToken [] mapping)
+		public bool TryGetOverrideMapping (IMethodDefinition method, out MetadataToken [] mapping)
 		{
-			return Overrides.TryGetValue (method.token.RID, out mapping);
+			return Overrides.TryGetValue (method.MetadataToken.RID, out mapping);
 		}
 
 		public void SetOverrideMapping (uint rid, MetadataToken [] mapping)
@@ -357,29 +443,29 @@ namespace Mono.Cecil {
 			Overrides [rid] = mapping;
 		}
 
-		public void RemoveOverrideMapping (MethodDefinition method)
+		public void RemoveOverrideMapping (IMethodDefinition method)
 		{
-			Overrides.Remove (method.token.RID);
+			Overrides.Remove (method.MetadataToken.RID);
 		}
 
-		public TypeDefinition GetFieldDeclaringType (uint field_rid)
+		public ITypeDefinition GetFieldDeclaringType (uint field_rid)
 		{
 			return BinaryRangeSearch (Types, field_rid, true);
 		}
 
-		public TypeDefinition GetMethodDeclaringType (uint method_rid)
+		public ITypeDefinition GetMethodDeclaringType (uint method_rid)
 		{
 			return BinaryRangeSearch (Types, method_rid, false);
 		}
 
-		static TypeDefinition BinaryRangeSearch (TypeDefinition [] types, uint rid, bool field)
+		static ITypeDefinition BinaryRangeSearch (ITypeDefinition [] types, uint rid, bool field)
 		{
 			int min = 0;
 			int max = types.Length - 1;
 			while (min <= max) {
 				int mid = min + ((max - min) / 2);
 				var type = types [mid];
-				var range = field ? type.fields_range : type.methods_range;
+				var range = field ? type.FieldsRange : type.MethodsRange;
 
 				if (rid < range.Start)
 					max = mid - 1;

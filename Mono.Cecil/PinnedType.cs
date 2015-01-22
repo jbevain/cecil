@@ -43,11 +43,11 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public PinnedType (TypeReference type)
+		public PinnedType (ITypeReference type)
 			: base (type)
 		{
 			Mixin.CheckType (type);
-			this.etype = MD.ElementType.Pinned;
+			this.EType = MD.ElementType.Pinned;
 		}
 	}
 }

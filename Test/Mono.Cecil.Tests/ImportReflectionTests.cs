@@ -319,7 +319,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
 		}
 
-		delegate void Emitter (ModuleDefinition module, MethodBody body);
+		delegate void Emitter (IModuleDefinition module, IMethodBody body);
 
 		[MethodImpl (MethodImplOptions.NoInlining)]
 		static TDelegate Compile<TDelegate> (Emitter emitter)
@@ -344,7 +344,7 @@ namespace Mono.Cecil.Tests {
 			return assembly.GetType (name);
 		}
 
-		static SR.Assembly LoadTestModule (ModuleDefinition module)
+		static SR.Assembly LoadTestModule (IModuleDefinition module)
 		{
 			using (var stream = new MemoryStream ()) {
 				module.Write (stream);
@@ -353,7 +353,7 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
-		static ModuleDefinition CreateTestModule<TDelegate> (string name, Emitter emitter)
+		static IModuleDefinition CreateTestModule<TDelegate> (string name, Emitter emitter)
 		{
 			var module = CreateModule (name);
 
@@ -392,7 +392,7 @@ namespace Mono.Cecil.Tests {
 			return method;
 		}
 
-		static ModuleDefinition CreateModule (string name)
+		static IModuleDefinition CreateModule (string name)
 		{
 			return ModuleDefinition.CreateModule (name, ModuleKind.Dll);
 		}

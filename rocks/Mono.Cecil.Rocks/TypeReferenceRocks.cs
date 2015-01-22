@@ -37,12 +37,12 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class TypeReferenceRocks {
 
-		public static ArrayType MakeArrayType (this TypeReference self)
+		public static ArrayType MakeArrayType (this ITypeReference self)
 		{
 			return new ArrayType (self);
 		}
 
-		public static ArrayType MakeArrayType (this TypeReference self, int rank)
+		public static ArrayType MakeArrayType (this ITypeReference self, int rank)
 		{
 			if (rank == 0)
 				throw new ArgumentOutOfRangeException ("rank");
@@ -55,27 +55,27 @@ namespace Mono.Cecil.Rocks {
 			return array;
 		}
 
-		public static PointerType MakePointerType (this TypeReference self)
+		public static PointerType MakePointerType (this ITypeReference self)
 		{
 			return new PointerType (self);
 		}
 
-		public static ByReferenceType MakeByReferenceType (this TypeReference self)
+		public static ByReferenceType MakeByReferenceType (this ITypeReference self)
 		{
 			return new ByReferenceType (self);
 		}
 
-		public static OptionalModifierType MakeOptionalModifierType (this TypeReference self, TypeReference modifierType)
+		public static OptionalModifierType MakeOptionalModifierType (this ITypeReference self, ITypeReference modifierType)
 		{
 			return new OptionalModifierType (modifierType, self);
 		}
 
-		public static RequiredModifierType MakeRequiredModifierType (this TypeReference self, TypeReference modifierType)
+		public static RequiredModifierType MakeRequiredModifierType (this ITypeReference self, ITypeReference modifierType)
 		{
 			return new RequiredModifierType (modifierType, self);
 		}
 
-		public static GenericInstanceType MakeGenericInstanceType (this TypeReference self, params TypeReference [] arguments)
+		public static GenericInstanceType MakeGenericInstanceType (this ITypeReference self, params ITypeReference [] arguments)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -94,12 +94,12 @@ namespace Mono.Cecil.Rocks {
 			return instance;
 		}
 
-		public static PinnedType MakePinnedType (this TypeReference self)
+		public static PinnedType MakePinnedType (this ITypeReference self)
 		{
 			return new PinnedType (self);
 		}
 
-		public static SentinelType MakeSentinelType (this TypeReference self)
+		public static SentinelType MakeSentinelType (this ITypeReference self)
 		{
 			return new SentinelType (self);
 		}

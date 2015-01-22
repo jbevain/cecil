@@ -32,12 +32,25 @@ using System.Threading;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil {
+    public interface IMethodBody : IVariableDefinitionProvider {
+        IMethodDefinition Method { get; }
+        int MaxStackSize { get; set; }
+        int CodeSize { get; set; }
+        bool InitLocals { get; set; }
+        MetadataToken LocalVarToken { get; set; }
+        Collection<Instruction> Instructions { get; set; }
+        bool HasExceptionHandlers { get; }
+        Collection<ExceptionHandler> ExceptionHandlers { get; }
+        Scope Scope { get; set; }
+        IParameterDefinition ThisParameter { get; }
+        ILProcessor GetILProcessor ();
+    }
 
-	public sealed class MethodBody : IVariableDefinitionProvider {
+    public sealed class MethodBody : IMethodBody {
 
-		readonly internal MethodDefinition method;
+		readonly internal IMethodDefinition method;
 
-		internal ParameterDefinition this_parameter;
+		internal IParameterDefinition this_parameter;
 		internal int max_stack_size;
 		internal int code_size;
 		internal bool init_locals;
@@ -48,7 +61,7 @@ namespace Mono.Cecil.Cil {
 		internal Collection<VariableDefinition> variables;
 		Scope scope;
 
-		public MethodDefinition Method {
+		public IMethodDefinition Method {
 			get { return method; }
 		}
 
@@ -57,11 +70,13 @@ namespace Mono.Cecil.Cil {
 			set { max_stack_size = value; }
 		}
 
-		public int CodeSize {
-			get { return code_size; }
+		public int CodeSize
+		{
+		    get { return code_size; }
+		    set { code_size = value; }
 		}
 
-		public bool InitLocals {
+        public bool InitLocals {
 			get { return init_locals; }
 			set { init_locals = value; }
 		}
@@ -71,11 +86,13 @@ namespace Mono.Cecil.Cil {
 			set { local_var_token = value; }
 		}
 
-		public Collection<Instruction> Instructions {
-			get { return instructions ?? (instructions = new InstructionCollection ()); }
+		public Collection<Instruction> Instructions
+		{
+		    get { return instructions ?? (instructions = new InstructionCollection ()); }
+		    set { instructions = value; }
 		}
 
-		public bool HasExceptionHandlers {
+        public bool HasExceptionHandlers {
 			get { return !exceptions.IsNullOrEmpty (); }
 		}
 
@@ -87,16 +104,18 @@ namespace Mono.Cecil.Cil {
 			get { return !variables.IsNullOrEmpty (); }
 		}
 
-		public Collection<VariableDefinition> Variables {
-			get { return variables ?? (variables = new VariableDefinitionCollection ()); }
+		public Collection<VariableDefinition> Variables
+		{
+		    get { return variables ?? (variables = new VariableDefinitionCollection ()); }
+		    set { variables = value; }
 		}
 
-		public Scope Scope {
+        public Scope Scope {
 			get { return scope; }
 			set { scope = value; }
 		}
 
-		public ParameterDefinition ThisParameter {
+		public IParameterDefinition ThisParameter {
 			get {
 				if (method == null || method.DeclaringType == null)
 					throw new NotSupportedException ();
@@ -111,17 +130,17 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		static ParameterDefinition CreateThisParameter (MethodDefinition method)
+		static IParameterDefinition CreateThisParameter (IMethodDefinition method)
 		{
 			var declaring_type = method.DeclaringType;
 			var type = declaring_type.IsValueType || declaring_type.IsPrimitive
 				? new PointerType (declaring_type)
-				: declaring_type as TypeReference;
+				: declaring_type as ITypeReference;
 
 			return new ParameterDefinition (type, method);
 		}
 
-		public MethodBody (MethodDefinition method)
+		public MethodBody (IMethodDefinition method)
 		{
 			this.method = method;
 		}
@@ -134,10 +153,10 @@ namespace Mono.Cecil.Cil {
 
 	public interface IVariableDefinitionProvider {
 		bool HasVariables { get; }
-		Collection<VariableDefinition> Variables { get; }
+		Collection<VariableDefinition> Variables { get; set; }
 	}
 
-	class VariableDefinitionCollection : Collection<VariableDefinition> {
+    public class VariableDefinitionCollection : Collection<VariableDefinition> {
 
 		internal VariableDefinitionCollection ()
 		{

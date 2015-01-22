@@ -27,8 +27,10 @@
 //
 
 namespace Mono.Cecil {
+    public interface IModuleReference : IMetadataScope {
+    }
 
-	public class ModuleReference : IMetadataScope {
+    public class ModuleReference : IModuleReference {
 
 		string name;
 

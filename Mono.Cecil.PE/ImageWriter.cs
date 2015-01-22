@@ -40,7 +40,7 @@ namespace Mono.Cecil.PE {
 
 	sealed class ImageWriter : BinaryStreamWriter {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly MetadataBuilder metadata;
 		readonly TextMap text_map;
 
@@ -67,7 +67,7 @@ namespace Mono.Cecil.PE {
 
 		ushort sections;
 
-		ImageWriter (ModuleDefinition module, MetadataBuilder metadata, Stream stream)
+		ImageWriter (IModuleDefinition module, MetadataBuilder metadata, Stream stream)
 			: base (stream)
 		{
 			this.module = module;
@@ -104,15 +104,10 @@ namespace Mono.Cecil.PE {
 
 		Section GetImageResourceSection ()
 		{
-			if (!module.HasImage)
-				return null;
-
-			const string rsrc_section = ".rsrc";
-
-			return module.Image.GetSection (rsrc_section);
+            return module.GetSection(".rsrc");
 		}
 
-		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Stream stream)
+		public static ImageWriter CreateWriter (IModuleDefinition module, MetadataBuilder metadata, Stream stream)
 		{
 			var writer = new ImageWriter (module, metadata, stream);
 			writer.BuildSections ();
@@ -129,7 +124,7 @@ namespace Mono.Cecil.PE {
 			var previous = text;
 
 			if (has_win32_resources) {
-				rsrc = CreateSection (".rsrc", (uint) win32_resources.length, previous);
+				rsrc = CreateSection (".rsrc", (uint) win32_resources.Length, previous);
 
 				PatchWin32Resources (win32_resources);
 				previous = rsrc;
@@ -459,7 +454,7 @@ namespace Mono.Cecil.PE {
 
 			// Data
 
-			if (metadata.data.length > 0) {
+			if (metadata.data.Length > 0) {
 				MoveToRVA (TextSegment.Data);
 				WriteBuffer (metadata.data);
 			}
@@ -504,7 +499,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (1);	// MinorVersion
 			WriteUInt32 (0);	// Reserved
 
-			var version = GetZeroTerminatedString (module.runtime_version);
+			var version = GetZeroTerminatedString (module.RuntimeVersion);
 			WriteUInt32 ((uint) version.Length);
 			WriteBytes (version);
 			WriteUInt16 (0);	// Flags
@@ -682,19 +677,19 @@ namespace Mono.Cecil.PE {
 		{
 			var map = metadata.text_map;
 
-			map.AddMap (TextSegment.Code, metadata.code.length, !pe64 ? 4 : 16);
-			map.AddMap (TextSegment.Resources, metadata.resources.length, 8);
-			map.AddMap (TextSegment.Data, metadata.data.length, 4);
-			if (metadata.data.length > 0)
+			map.AddMap (TextSegment.Code, metadata.code.Length, !pe64 ? 4 : 16);
+			map.AddMap (TextSegment.Resources, metadata.resources.Length, 8);
+			map.AddMap (TextSegment.Data, metadata.data.Length, 4);
+			if (metadata.data.Length > 0)
 				metadata.table_heap.FixupData (map.GetRVA (TextSegment.Data));
 			map.AddMap (TextSegment.StrongNameSignature, GetStrongNameLength (), 4);
 
 			map.AddMap (TextSegment.MetadataHeader, GetMetadataHeaderLength ());
-			map.AddMap (TextSegment.TableHeap, metadata.table_heap.length, 4);
-			map.AddMap (TextSegment.StringHeap, metadata.string_heap.length, 4);
-			map.AddMap (TextSegment.UserStringHeap, metadata.user_string_heap.IsEmpty ? 0 : metadata.user_string_heap.length, 4);
+			map.AddMap (TextSegment.TableHeap, metadata.table_heap.Length, 4);
+			map.AddMap (TextSegment.StringHeap, metadata.string_heap.Length, 4);
+			map.AddMap (TextSegment.UserStringHeap, metadata.user_string_heap.IsEmpty ? 0 : metadata.user_string_heap.Length, 4);
 			map.AddMap (TextSegment.GuidHeap, 16);
-			map.AddMap (TextSegment.BlobHeap, metadata.blob_heap.IsEmpty ? 0 : metadata.blob_heap.length, 4);
+			map.AddMap (TextSegment.BlobHeap, metadata.blob_heap.IsEmpty ? 0 : metadata.blob_heap.Length, 4);
 
 			int debug_dir_len = 0;
 			if (!debug_data.IsNullOrEmpty ()) {
@@ -810,22 +805,22 @@ namespace Mono.Cecil.PE {
 			resources.Advance (4);
 			var child = resources.ReadUInt32 ();
 
-			var position = resources.position;
-			resources.position = (int) child & 0x7fffffff;
+			var position = resources.Position;
+			resources.Position = (int) child & 0x7fffffff;
 
 			if ((child & 0x80000000) != 0)
 				PatchResourceDirectoryTable (resources);
 			else
 				PatchResourceDataEntry (resources);
 
-			resources.position = position;
+			resources.Position = position;
 		}
 
 		void PatchResourceDataEntry (ByteBuffer resources)
 		{
 			var old_rsrc = GetImageResourceSection ();
 			var rva = resources.ReadUInt32 ();
-			resources.position -= 4;
+			resources.Position -= 4;
 			resources.WriteUInt32 (rva - old_rsrc.VirtualAddress + rsrc.VirtualAddress);
 		}
 	}

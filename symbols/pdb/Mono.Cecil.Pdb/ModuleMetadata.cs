@@ -145,17 +145,17 @@ namespace Mono.Cecil.Pdb {
 
 	class ModuleMetadata : IMetaDataEmit, IMetaDataImport {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 
-		Dictionary<uint, TypeDefinition> types;
-		Dictionary<uint, MethodDefinition> methods;
+		Dictionary<uint, ITypeDefinition> types;
+		Dictionary<uint, IMethodDefinition> methods;
 
-		public ModuleMetadata (ModuleDefinition module)
+		public ModuleMetadata (IModuleDefinition module)
 		{
 			this.module = module;
 		}
 
-		bool TryGetType (uint token, out TypeDefinition type)
+		bool TryGetType (uint token, out ITypeDefinition type)
 		{
 			if (types == null)
 				InitializeMetadata (module);
@@ -163,7 +163,7 @@ namespace Mono.Cecil.Pdb {
 			return types.TryGetValue (token, out type);
 		}
 
-		bool TryGetMethod (uint token, out MethodDefinition method)
+		bool TryGetMethod (uint token, out IMethodDefinition method)
 		{
 			if (methods == null)
 				InitializeMetadata (module);
@@ -171,10 +171,10 @@ namespace Mono.Cecil.Pdb {
 			return methods.TryGetValue (token, out method);
 		}
 
-		void InitializeMetadata (ModuleDefinition module)
+		void InitializeMetadata (IModuleDefinition module)
 		{
-			types = new Dictionary<uint, TypeDefinition> ();
-			methods = new Dictionary<uint, MethodDefinition> ();
+			types = new Dictionary<uint, ITypeDefinition> ();
+			methods = new Dictionary<uint, IMethodDefinition> ();
 
 			foreach (var type in module.GetTypes ()) {
 				types.Add (type.MetadataToken.ToUInt32 (), type);
@@ -182,7 +182,7 @@ namespace Mono.Cecil.Pdb {
 			}
 		}
 
-		void InitializeMethods (TypeDefinition type)
+		void InitializeMethods (ITypeDefinition type)
 		{
 			foreach (var method in type.Methods)
 				methods.Add (method.MetadataToken.ToUInt32 (), method);
@@ -480,7 +480,7 @@ namespace Mono.Cecil.Pdb {
 
 		public uint GetTypeDefProps (uint td, IntPtr szTypeDef, uint cchTypeDef, out uint pchTypeDef, IntPtr pdwTypeDefFlags)
 		{
-			TypeDefinition type;
+			ITypeDefinition type;
 			if (!TryGetType (td, out type)) {
 				Marshal.WriteInt16 (szTypeDef, 0);
 				pchTypeDef = 1;
@@ -601,7 +601,7 @@ namespace Mono.Cecil.Pdb {
 
 		public uint GetMethodProps (uint mb, out uint pClass, IntPtr szMethod, uint cchMethod, out uint pchMethod, IntPtr pdwAttr, IntPtr ppvSigBlob, IntPtr pcbSigBlob, IntPtr pulCodeRVA)
 		{
-			MethodDefinition method;
+			IMethodDefinition method;
 			if (!TryGetMethod (mb, out method)) {
 				Marshal.WriteInt16 (szMethod, 0);
 				pchMethod = 1;
@@ -774,7 +774,7 @@ namespace Mono.Cecil.Pdb {
 
 		public uint GetNestedClassProps (uint tdNestedClass)
 		{
-			TypeDefinition type;
+			ITypeDefinition type;
 			if (!TryGetType (tdNestedClass, out type))
 				return 0;
 

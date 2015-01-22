@@ -268,7 +268,7 @@ namespace Mono.Cecil {
 			return fullname.Substring (start, position - start);
 		}
 
-		public static TypeReference ParseType (ModuleDefinition module, string fullname)
+		public static ITypeReference ParseType (IModuleDefinition module, string fullname)
 		{
 			if (string.IsNullOrEmpty (fullname))
 				return null;
@@ -277,16 +277,16 @@ namespace Mono.Cecil {
 			return GetTypeReference (module, parser.ParseType (true));
 		}
 
-		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info)
+		static ITypeReference GetTypeReference (IModuleDefinition module, Type type_info)
 		{
-			TypeReference type;
+			ITypeReference type;
 			if (!TryGetDefinition (module, type_info, out type))
 				type = CreateReference (type_info, module, GetMetadataScope (module, type_info));
 
 			return CreateSpecs (type, type_info);
 		}
 
-		static TypeReference CreateSpecs (TypeReference type, Type type_info)
+		static ITypeReference CreateSpecs (ITypeReference type, Type type_info)
 		{
 			type = TryCreateGenericInstanceType (type, type_info);
 
@@ -320,7 +320,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		static TypeReference TryCreateGenericInstanceType (TypeReference type, Type type_info)
+		static ITypeReference TryCreateGenericInstanceType (ITypeReference type, Type type_info)
 		{
 			var generic_arguments = type_info.generic_arguments;
 			if (generic_arguments.IsNullOrEmpty ())
@@ -348,7 +348,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static TypeReference CreateReference (Type type_info, ModuleDefinition module, IMetadataScope scope)
+		static ITypeReference CreateReference (Type type_info, IModuleDefinition module, IMetadataScope scope)
 		{
 			string @namespace, name;
 			SplitFullName (type_info.type_fullname, out @namespace, out name);
@@ -373,7 +373,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		static void AdjustGenericParameters (TypeReference type)
+		static void AdjustGenericParameters (ITypeReference type)
 		{
 			int arity;
 			if (!TryGetArity (type.Name, out arity))
@@ -383,7 +383,7 @@ namespace Mono.Cecil {
 				type.GenericParameters.Add (new GenericParameter (type));
 		}
 
-		static IMetadataScope GetMetadataScope (ModuleDefinition module, Type type_info)
+		static IMetadataScope GetMetadataScope (IModuleDefinition module, Type type_info)
 		{
 			if (string.IsNullOrEmpty (type_info.assembly))
 				return module.TypeSystem.Corlib;
@@ -391,7 +391,7 @@ namespace Mono.Cecil {
 			return MatchReference (module, AssemblyNameReference.Parse (type_info.assembly));
 		}
 
-		static AssemblyNameReference MatchReference (ModuleDefinition module, AssemblyNameReference pattern)
+		static IAssemblyNameReference MatchReference (IModuleDefinition module, IAssemblyNameReference pattern)
 		{
 			var references = module.AssemblyReferences;
 
@@ -404,7 +404,7 @@ namespace Mono.Cecil {
 			return pattern;
 		}
 
-		static bool TryGetDefinition (ModuleDefinition module, Type type_info, out TypeReference type)
+		static bool TryGetDefinition (IModuleDefinition module, Type type_info, out ITypeReference type)
 		{
 			type = null;
 			if (!TryCurrentModule (module, type_info))
@@ -424,18 +424,18 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		static bool TryCurrentModule (ModuleDefinition module, Type type_info)
+		static bool TryCurrentModule (IModuleDefinition module, Type type_info)
 		{
 			if (string.IsNullOrEmpty (type_info.assembly))
 				return true;
 
-			if (module.assembly != null && module.assembly.Name.FullName == type_info.assembly)
+			if (module.Assembly != null && module.Assembly.Name.FullName == type_info.assembly)
 				return true;
 
 			return false;
 		}
 
-		public static string ToParseable (TypeReference type)
+		public static string ToParseable (ITypeReference type)
 		{
 			if (type == null)
 				return null;
@@ -455,7 +455,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void AppendType (TypeReference type, StringBuilder name, bool fq_name, bool top_level)
+		static void AppendType (ITypeReference type, StringBuilder name, bool fq_name, bool top_level)
 		{
 			var declaring_type = type.DeclaringType;
 			if (declaring_type != null) {
@@ -483,14 +483,14 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static string GetScopeFullName (TypeReference type)
+		static string GetScopeFullName (ITypeReference type)
 		{
 			var scope = type.Scope;
 			switch (scope.MetadataScopeType) {
-			case MetadataScopeType.AssemblyNameReference:
-				return ((AssemblyNameReference) scope).FullName;
+			case MetadataScopeType.IAssemblyNameReference:
+				return ((IAssemblyNameReference) scope).FullName;
 			case MetadataScopeType.ModuleDefinition:
-				return ((ModuleDefinition) scope).Assembly.Name.FullName;
+				return ((IModuleDefinition) scope).Assembly.Name.FullName;
 			}
 
 			throw new ArgumentException ();
@@ -501,7 +501,7 @@ namespace Mono.Cecil {
 			if (type.ElementType.IsTypeSpecification ())
 				AppendTypeSpecification ((TypeSpecification) type.ElementType, name);
 
-			switch (type.etype) {
+			switch (type.EType) {
 			case ElementType.Ptr:
 				name.Append ('*');
 				break;
@@ -549,7 +549,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static bool RequiresFullyQualifiedName (TypeReference type, bool top_level)
+		static bool RequiresFullyQualifiedName (ITypeReference type, bool top_level)
 		{
 			if (type.Scope == type.Module)
 				return false;

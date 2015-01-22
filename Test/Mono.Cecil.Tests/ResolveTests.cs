@@ -97,7 +97,7 @@ namespace Mono.Cecil.Tests {
 
 		class CustomResolver : DefaultAssemblyResolver {
 
-			public void Register (AssemblyDefinition assembly)
+			public void Register (IAssemblyDefinition assembly)
 			{
 				this.RegisterAssembly (assembly);
 				this.AddSearchDirectory (Path.GetDirectoryName (assembly.MainModule.FullyQualifiedName));
@@ -239,7 +239,7 @@ namespace Mono.Cecil.Tests {
 			return reference;
 		}
 
-		static object GetReturnee (MethodDefinition method)
+		static object GetReturnee (IMethodDefinition method)
 		{
 			Assert.IsTrue (method.HasBody);
 
@@ -264,7 +264,7 @@ namespace Mono.Cecil.Tests {
 			throw new InvalidOperationException ();
 		}
 
-		MethodDefinition GetMethodFromDelegate (Delegate @delegate)
+		IMethodDefinition GetMethodFromDelegate (Delegate @delegate)
 		{
 			var method = @delegate.Method;
 			var type = (TypeDefinition) TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);

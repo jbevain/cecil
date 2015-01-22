@@ -172,7 +172,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, null);
 		}
 
-		public static Instruction Create (OpCode opcode, TypeReference type)
+		public static Instruction Create (OpCode opcode, ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ("type");
@@ -193,7 +193,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, site);
 		}
 
-		public static Instruction Create (OpCode opcode, MethodReference method)
+		public static Instruction Create (OpCode opcode, IMethodReference method)
 		{
 			if (method == null)
 				throw new ArgumentNullException ("method");
@@ -204,7 +204,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, method);
 		}
 
-		public static Instruction Create (OpCode opcode, FieldReference field)
+        public static Instruction Create(OpCode opcode, IFieldReference field)
 		{
 			if (field == null)
 				throw new ArgumentNullException ("field");
@@ -307,7 +307,7 @@ namespace Mono.Cecil.Cil {
 			return new Instruction (opcode, variable);
 		}
 
-		public static Instruction Create (OpCode opcode, ParameterDefinition parameter)
+		public static Instruction Create (OpCode opcode, IParameterDefinition parameter)
 		{
 			if (parameter == null)
 				throw new ArgumentNullException ("parameter");

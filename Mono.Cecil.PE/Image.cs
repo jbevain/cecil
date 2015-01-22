@@ -35,8 +35,7 @@ using Mono.Cecil.Metadata;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
-
-	sealed class Image {
+    public sealed class Image {
 
 		public ModuleKind Kind;
 		public string RuntimeVersion;
@@ -137,7 +136,7 @@ namespace Mono.Cecil.PE {
 		{
 			var section = GetSectionAtVirtualAddress (Debug.VirtualAddress);
 			var buffer = new ByteBuffer (section.Data);
-			buffer.position = (int) (Debug.VirtualAddress - section.VirtualAddress);
+			buffer.Position = (int) (Debug.VirtualAddress - section.VirtualAddress);
 
 			var directory = new ImageDebugDirectory {
 				Characteristics = buffer.ReadInt32 (),
@@ -155,10 +154,10 @@ namespace Mono.Cecil.PE {
 				return directory;
 			}
 
-			buffer.position = (int) (directory.PointerToRawData - section.PointerToRawData);
+			buffer.Position = (int) (directory.PointerToRawData - section.PointerToRawData);
 
 			header = new byte [directory.SizeOfData];
-			Buffer.BlockCopy (buffer.buffer, buffer.position, header, 0, header.Length);
+			Buffer.BlockCopy (buffer.Buffer, buffer.Position, header, 0, header.Length);
 
 			return directory;
 		}

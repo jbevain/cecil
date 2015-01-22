@@ -27,7 +27,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -50,20 +50,22 @@ namespace Mono.Cecil {
 		NonCasInheritance = 15
 	}
 
-	public interface ISecurityDeclarationProvider : IMetadataTokenProvider {
+    public interface ISecurityDeclarationProvider : IMetadataTokenProvider
+    {
 
 		bool HasSecurityDeclarations { get; }
-		Collection<SecurityDeclaration> SecurityDeclarations { get; }
+        IList<ISecurityDeclaration> SecurityDeclarations { get; }
 	}
 
-	public sealed class SecurityAttribute : ICustomAttribute {
+    public sealed class SecurityAttribute : IAttribute
+    {
 
-		TypeReference attribute_type;
+		ITypeReference attribute_type;
 
-		internal Collection<CustomAttributeNamedArgument> fields;
-		internal Collection<CustomAttributeNamedArgument> properties;
+		internal IList<CustomAttributeNamedArgument> fields = new Collection<CustomAttributeNamedArgument> ();
+        internal IList<CustomAttributeNamedArgument> properties = new Collection<CustomAttributeNamedArgument>();
 
-		public TypeReference AttributeType {
+		public ITypeReference AttributeType {
 			get { return attribute_type; }
 			set { attribute_type = value; }
 		}
@@ -72,33 +74,58 @@ namespace Mono.Cecil {
 			get { return !fields.IsNullOrEmpty (); }
 		}
 
-		public Collection<CustomAttributeNamedArgument> Fields {
-			get { return fields ?? (fields = new Collection<CustomAttributeNamedArgument> ()); }
+		public IList<CustomAttributeNamedArgument> Fields
+		{
+		    get { return fields; }
+		    set { fields = value; }
 		}
 
-		public bool HasProperties {
+        public bool HasProperties {
 			get { return !properties.IsNullOrEmpty (); }
 		}
 
-		public Collection<CustomAttributeNamedArgument> Properties {
-			get { return properties ?? (properties = new Collection<CustomAttributeNamedArgument> ()); }
+		public IList<CustomAttributeNamedArgument> Properties {
+            get { return properties; }
+            set { fields = value; }
+
 		}
 
-		public SecurityAttribute (TypeReference attributeType)
+        public IList<CustomAttributeNamedArgument> GetFields ()
+        {
+            return fields;
+        }
+
+        public IList<CustomAttributeNamedArgument> GetProperties ()
+        {
+            return properties;
+        }
+
+        public SecurityAttribute (ITypeReference attributeType)
 		{
 			this.attribute_type = attributeType;
 		}
 	}
 
-	public sealed class SecurityDeclaration {
+    public interface ISecurityDeclaration {
+        SecurityAction Action { get; set; }
+        bool HasSecurityAttributes { get; }
+        IList<SecurityAttribute> SecurityAttributes { get; set; }
+        bool Resolved { get; set; }
+        uint Signature { get; set; }
+        byte [] GetBlob ();
+    }
 
-		readonly internal uint signature;
+    public sealed class SecurityDeclaration : ISecurityDeclaration {
+
 		byte [] blob;
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 
-		internal bool resolved;
 		SecurityAction action;
-		internal Collection<SecurityAttribute> security_attributes;
+		internal IList<SecurityAttribute> security_attributes;
+
+        public bool Resolved { get; set; }
+
+        public uint Signature { get; set; }
 
 		public SecurityAction Action {
 			get { return action; }
@@ -113,35 +140,37 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<SecurityAttribute> SecurityAttributes {
-			get {
+		public IList<SecurityAttribute> SecurityAttributes
+		{
+		    get {
 				Resolve ();
 
-				return security_attributes ?? (security_attributes = new Collection<SecurityAttribute> ());
+			    return security_attributes ?? (security_attributes = new Collection<SecurityAttribute> ());
 			}
+		    set { security_attributes = value; }
 		}
 
-		internal bool HasImage {
+        internal bool HasImage {
 			get { return module != null && module.HasImage; }
 		}
 
-		internal SecurityDeclaration (SecurityAction action, uint signature, ModuleDefinition module)
+		internal SecurityDeclaration (SecurityAction action, uint signature, IModuleDefinition module)
 		{
 			this.action = action;
-			this.signature = signature;
+			this.Signature = signature;
 			this.module = module;
 		}
 
 		public SecurityDeclaration (SecurityAction action)
 		{
 			this.action = action;
-			this.resolved = true;
+			this.Resolved = true;
 		}
 
 		public SecurityDeclaration (SecurityAction action, byte [] blob)
 		{
 			this.action = action;
-			this.resolved = false;
+			this.Resolved = false;
 			this.blob = blob;
 		}
 
@@ -150,15 +179,15 @@ namespace Mono.Cecil {
 			if (blob != null)
 				return blob;
 
-			if (!HasImage || signature == 0)
+			if (!HasImage || Signature == 0)
 				throw new NotSupportedException ();
 
-			return blob = module.Read (this, (declaration, reader) => reader.ReadSecurityDeclarationBlob (declaration.signature));
+            return blob = module.Read(this, (declaration, reader) => reader.ReadSecurityDeclarationBlob(declaration.Signature));
 		}
 
 		void Resolve ()
 		{
-			if (resolved || !HasImage)
+			if (Resolved || !HasImage)
 				return;
 
 			module.Read (this, (declaration, reader) => {
@@ -166,7 +195,7 @@ namespace Mono.Cecil {
 				return this;
 			});
 
-			resolved = true;
+			Resolved = true;
 		}
 	}
 
@@ -174,19 +203,19 @@ namespace Mono.Cecil {
 
 		public static bool GetHasSecurityDeclarations (
 			this ISecurityDeclarationProvider self,
-			ModuleDefinition module)
+			IModuleDefinition module)
 		{
 			return module.HasImage () && module.Read (self, (provider, reader) => reader.HasSecurityDeclarations (provider));
 		}
 
-		public static Collection<SecurityDeclaration> GetSecurityDeclarations (
+        public static IList<ISecurityDeclaration> GetSecurityDeclarations(
 			this ISecurityDeclarationProvider self,
-			ref Collection<SecurityDeclaration> variable,
-			ModuleDefinition module)
+            ref IList<ISecurityDeclaration> variable,
+			IModuleDefinition module)
 		{
-			return module.HasImage ()
-				? module.Read (ref variable, self, (provider, reader) => reader.ReadSecurityDeclarations (provider))
-				: variable = new Collection<SecurityDeclaration>();
+		    return module.HasImage ()
+		        ? module.Read (ref variable, self, (provider, reader) => reader.ReadSecurityDeclarations (provider))
+                : variable = new Collection<ISecurityDeclaration>();
 		}
 	}
 }

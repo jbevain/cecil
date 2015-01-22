@@ -32,14 +32,14 @@ namespace Mono.Cecil.Cil {
 
 		string name;
 		internal int index = -1;
-		protected TypeReference variable_type;
+		protected ITypeReference variable_type;
 
 		public string Name {
 			get { return name; }
 			set { name = value; }
 		}
 
-		public TypeReference VariableType {
+		public ITypeReference VariableType {
 			get { return variable_type; }
 			set { variable_type = value; }
 		}
@@ -48,12 +48,12 @@ namespace Mono.Cecil.Cil {
 			get { return index; }
 		}
 
-		internal VariableReference (TypeReference variable_type)
+		internal VariableReference (ITypeReference variable_type)
 			: this (string.Empty, variable_type)
 		{
 		}
 
-		internal VariableReference (string name, TypeReference variable_type)
+		internal VariableReference (string name, ITypeReference variable_type)
 		{
 			this.name = name;
 			this.variable_type = variable_type;

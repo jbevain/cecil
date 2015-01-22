@@ -217,8 +217,12 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ModuleWithoutBlob ()
 		{
-			TestModule ("noblob.dll", module => {
-				Assert.IsNull (module.Image.BlobHeap);
+			TestModule ("noblob.dll", moduleDefinition => {
+                Assert.IsInstanceOf<ModuleDefinition> (moduleDefinition);
+
+			    var module = moduleDefinition as ModuleDefinition;
+
+                Assert.IsNull(module.Image.BlobHeap);
 			});
 		}
 

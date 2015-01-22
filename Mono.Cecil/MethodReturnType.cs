@@ -26,6 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.Threading;
 
 using Mono.Collections.Generic;
@@ -35,19 +36,19 @@ namespace Mono.Cecil {
 	public sealed class MethodReturnType : IConstantProvider, ICustomAttributeProvider, IMarshalInfoProvider {
 
 		internal IMethodSignature method;
-		internal ParameterDefinition parameter;
-		TypeReference return_type;
+		internal IParameterDefinition parameter;
+		ITypeReference return_type;
 
 		public IMethodSignature Method {
 			get { return method; }
 		}
 
-		public TypeReference ReturnType {
+		public ITypeReference ReturnType {
 			get { return return_type; }
 			set { return_type = value; }
 		}
 
-		internal ParameterDefinition Parameter {
+		internal IParameterDefinition Parameter {
 			get {
 				if (parameter == null)
 					Interlocked.CompareExchange (ref parameter, new ParameterDefinition (return_type, method), null);
@@ -70,7 +71,8 @@ namespace Mono.Cecil {
 			get { return parameter != null && parameter.HasCustomAttributes; }
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return Parameter.CustomAttributes; }
 		}
 

@@ -79,7 +79,7 @@ namespace Mono.Cecil {
 
 	static class ModuleWriter {
 
-		public static void WriteModuleTo (ModuleDefinition module, Stream stream, WriterParameters parameters)
+        public static void WriteModuleTo(IModuleDefinition module, Stream stream, IWriterParameters parameters)
 		{
 			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
 				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
@@ -89,7 +89,7 @@ namespace Mono.Cecil {
 
 			module.MetadataSystem.Clear ();
 
-			var name = module.assembly != null ? module.assembly.Name : null;
+			var name = module.Assembly != null ? module.Assembly.Name : null;
 			var fq_name = stream.GetFullyQualifiedName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
@@ -107,8 +107,8 @@ namespace Mono.Cecil {
 
 			BuildMetadata (module, metadata);
 
-			if (module.symbol_reader != null)
-				module.symbol_reader.Dispose ();
+			if (module.SymbolReader != null)
+                module.SymbolReader.Dispose();
 
 			var writer = ImageWriter.CreateWriter (module, metadata, stream);
 
@@ -122,7 +122,7 @@ namespace Mono.Cecil {
 				symbol_writer.Dispose ();
 		}
 
-		static void BuildMetadata (ModuleDefinition module, MetadataBuilder metadata)
+		static void BuildMetadata (IModuleDefinition module, MetadataBuilder metadata)
 		{
 			if (!module.HasImage) {
 				metadata.BuildMetadata ();
@@ -135,7 +135,7 @@ namespace Mono.Cecil {
 			});
 		}
 
-		static ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider)
+		static ISymbolWriter GetSymbolWriter (IModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider)
 		{
 			if (symbol_writer_provider == null)
 				return null;
@@ -548,7 +548,7 @@ namespace Mono.Cecil {
 
 		public override void Write (TableHeapBuffer buffer)
 		{
-			position = buffer.position;
+			position = buffer.Position;
 			for (int i = 0; i < length; i++) {
 				buffer.WriteUInt32 (rows [i].Col1);		// RVA
 				buffer.WriteRID (rows [i].Col2, Table.Field);	// Field
@@ -685,9 +685,9 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataBuilder {
+    public sealed class MetadataBuilder {
 
-		readonly internal ModuleDefinition module;
+		readonly internal IModuleDefinition module;
 		readonly internal ISymbolWriterProvider symbol_writer_provider;
 		readonly internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
@@ -697,7 +697,7 @@ namespace Mono.Cecil {
 		readonly Dictionary<uint, MetadataToken> type_spec_map;
 		readonly Dictionary<MemberRefRow, MetadataToken> member_ref_map;
 		readonly Dictionary<MethodSpecRow, MetadataToken> method_spec_map;
-		readonly Collection<GenericParameter> generic_parameters;
+        readonly Collection<IGenericParameter> generic_parameters;
 		readonly Dictionary<MetadataToken, MetadataToken> method_def_map;
 
 		readonly internal CodeWriter code;
@@ -737,7 +737,7 @@ namespace Mono.Cecil {
 
 		readonly internal bool write_symbols;
 
-		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
+		public MetadataBuilder (IModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
 		{
 			this.module = module;
 			this.text_map = CreateTextMap ();
@@ -776,7 +776,7 @@ namespace Mono.Cecil {
 			type_spec_map = new Dictionary<uint, MetadataToken> ();
 			member_ref_map = new Dictionary<MemberRefRow, MetadataToken> (row_equality_comparer);
 			method_spec_map = new Dictionary<MethodSpecRow, MetadataToken> (row_equality_comparer);
-			generic_parameters = new Collection<GenericParameter> ();
+            generic_parameters = new Collection<IGenericParameter>();
 			if (write_symbols)
 				method_def_map = new Dictionary<MetadataToken, MetadataToken> ();
 		}
@@ -802,9 +802,9 @@ namespace Mono.Cecil {
 			return string_heap.GetStringIndex (@string);
 		}
 
-		uint GetBlobIndex (ByteBuffer blob)
+        uint GetBlobIndex(IByteBuffer blob)
 		{
-			if (blob.length == 0)
+			if (blob.Length  == 0)
 				return 0;
 
 			return blob_heap.GetBlobIndex (blob);
@@ -946,7 +946,7 @@ namespace Mono.Cecil {
 					GetStringIndex (reference.Culture),
 					GetBlobIndex (reference.Hash)));
 
-				reference.token = new MetadataToken (TokenType.AssemblyRef, rid);
+				reference.MetadataToken = new MetadataToken (TokenType.AssemblyRef, rid);
 			}
 		}
 
@@ -958,7 +958,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
 
-				reference.token = new MetadataToken (
+				reference.MetadataToken = new MetadataToken (
 					TokenType.ModuleRef,
 					table.AddRow (GetStringIndex (reference.Name)));
 			}
@@ -1034,11 +1034,11 @@ namespace Mono.Cecil {
 					GetStringIndex (exported_type.Namespace),
 					MakeCodedRID (GetExportedTypeScope (exported_type), CodedIndex.Implementation)));
 
-				exported_type.token = new MetadataToken (TokenType.ExportedType, rid);
+				exported_type.MetadataToken = new MetadataToken (TokenType.ExportedType, rid);
 			}
 		}
 
-		MetadataToken GetExportedTypeScope (ExportedType exported_type)
+        MetadataToken GetExportedTypeScope(IExportedType exported_type)
 		{
 			if (exported_type.DeclaringType != null)
 				return exported_type.DeclaringType.MetadataToken;
@@ -1077,11 +1077,11 @@ namespace Mono.Cecil {
 				AttachTypeDefToken (types [i]);
 		}
 
-		void AttachTypeDefToken (TypeDefinition type)
+		void AttachTypeDefToken (ITypeDefinition type)
 		{
-			type.token = new MetadataToken (TokenType.TypeDef, type_rid++);
-			type.fields_range.Start = field_rid;
-			type.methods_range.Start = method_rid;
+			type.MetadataToken = new MetadataToken (TokenType.TypeDef, type_rid++);
+            type.FieldsRange = new Range(field_rid, type.FieldsRange.Length);
+            type.MethodsRange = new Range(method_rid, type.MethodsRange.Length);
 
 			if (type.HasFields)
 				AttachFieldsDefToken (type);
@@ -1093,33 +1093,33 @@ namespace Mono.Cecil {
 				AttachNestedTypesDefToken (type);
 		}
 
-		void AttachNestedTypesDefToken (TypeDefinition type)
+		void AttachNestedTypesDefToken (ITypeDefinition type)
 		{
 			var nested_types = type.NestedTypes;
 			for (int i = 0; i < nested_types.Count; i++)
 				AttachTypeDefToken (nested_types [i]);
 		}
 
-		void AttachFieldsDefToken (TypeDefinition type)
+		void AttachFieldsDefToken (ITypeDefinition type)
 		{
 			var fields = type.Fields;
-			type.fields_range.Length = (uint) fields.Count;
+            type.FieldsRange = new Range(type.FieldsRange.Start, (uint)fields.Count);
 			for (int i = 0; i < fields.Count; i++)
-				fields [i].token = new MetadataToken (TokenType.Field, field_rid++);
+				fields [i].MetadataToken = new MetadataToken (TokenType.Field, field_rid++);
 		}
 
-		void AttachMethodsDefToken (TypeDefinition type)
+		void AttachMethodsDefToken (ITypeDefinition type)
 		{
 			var methods = type.Methods;
-			type.methods_range.Length = (uint) methods.Count;
+            type.MethodsRange = new Range(type.MethodsRange.Start, (uint)methods.Count);
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 				var new_token = new MetadataToken (TokenType.Method, method_rid++);
 
-				if (write_symbols && method.token != MetadataToken.Zero)
-					method_def_map.Add (new_token, method.token);
+				if (write_symbols && method.MetadataToken != MetadataToken.Zero)
+                    method_def_map.Add(new_token, method.MetadataToken);
 
-				method.token = new_token;
+                method.MetadataToken = new_token;
 			}
 		}
 
@@ -1128,13 +1128,13 @@ namespace Mono.Cecil {
 			return method_def_map.TryGetValue (new_token, out original);
 		}
 
-		MetadataToken GetTypeToken (TypeReference type)
+		MetadataToken GetTypeToken (ITypeReference type)
 		{
 			if (type == null)
 				return MetadataToken.Zero;
 
 			if (type.IsDefinition)
-				return type.token;
+				return type.MetadataToken;
 
 			if (type.IsTypeSpecification ())
 				return GetTypeSpecToken (type);
@@ -1142,7 +1142,7 @@ namespace Mono.Cecil {
 			return GetTypeRefToken (type);
 		}
 
-		MetadataToken GetTypeSpecToken (TypeReference type)
+		MetadataToken GetTypeSpecToken (ITypeReference type)
 		{
 			var row = GetBlobIndex (GetTypeSpecSignature (type));
 
@@ -1153,16 +1153,16 @@ namespace Mono.Cecil {
 			return AddTypeSpecification (type, row);
 		}
 
-		MetadataToken AddTypeSpecification (TypeReference type, uint row)
+		MetadataToken AddTypeSpecification (ITypeReference type, uint row)
 		{
-			type.token = new MetadataToken (TokenType.TypeSpec, typespec_table.AddRow (row));
+			type.MetadataToken = new MetadataToken (TokenType.TypeSpec, typespec_table.AddRow (row));
 
-			var token = type.token;
+			var token = type.MetadataToken;
 			type_spec_map.Add (row, token);
 			return token;
 		}
 
-		MetadataToken GetTypeRefToken (TypeReference type)
+		MetadataToken GetTypeRefToken (ITypeReference type)
 		{
 			var row = CreateTypeRefRow (type);
 
@@ -1173,7 +1173,7 @@ namespace Mono.Cecil {
 			return AddTypeReference (type, row);
 		}
 
-		TypeRefRow CreateTypeRefRow (TypeReference type)
+		TypeRefRow CreateTypeRefRow (ITypeReference type)
 		{
 			var scope_token = GetScopeToken (type);
 
@@ -1183,7 +1183,7 @@ namespace Mono.Cecil {
 				GetStringIndex (type.Namespace));
 		}
 
-		MetadataToken GetScopeToken (TypeReference type)
+		MetadataToken GetScopeToken (ITypeReference type)
 		{
 			if (type.IsNested)
 				return GetTypeRefToken (type.DeclaringType);
@@ -1206,11 +1206,11 @@ namespace Mono.Cecil {
 			return index.CompressMetadataToken (token);
 		}
 
-		MetadataToken AddTypeReference (TypeReference type, TypeRefRow row)
+		MetadataToken AddTypeReference (ITypeReference type, TypeRefRow row)
 		{
-			type.token = new MetadataToken (TokenType.TypeRef, type_ref_table.AddRow (row));
+			type.MetadataToken = new MetadataToken (TokenType.TypeRef, type_ref_table.AddRow (row));
 
-			var token = type.token;
+			var token = type.MetadataToken;
 			type_ref_map.Add (row, token);
 			return token;
 		}
@@ -1223,15 +1223,15 @@ namespace Mono.Cecil {
 				AddType (types [i]);
 		}
 
-		void AddType (TypeDefinition type)
+		void AddType (ITypeDefinition type)
 		{
 			type_def_table.AddRow (new TypeDefRow (
 				type.Attributes,
 				GetStringIndex (type.Name),
 				GetStringIndex (type.Namespace),
 				MakeCodedRID (GetTypeToken (type.BaseType), CodedIndex.TypeDefOrRef),
-				type.fields_range.Start,
-				type.methods_range.Start));
+				type.FieldsRange.Start,
+				type.MethodsRange.Start));
 
 			if (type.HasGenericParameters)
 				AddGenericParameters (type);
@@ -1272,9 +1272,10 @@ namespace Mono.Cecil {
 				generic_parameters.Add (parameters [i]);
 		}
 
-		sealed class GenericParameterComparer : IComparer<GenericParameter> {
+        sealed class GenericParameterComparer : IComparer<IGenericParameter>
+        {
 
-			public int Compare (GenericParameter a, GenericParameter b)
+            public int Compare(IGenericParameter a, IGenericParameter b)
 			{
 				var a_owner = MakeCodedRID (a.Owner, CodedIndex.TypeOrMethodDef);
 				var b_owner = MakeCodedRID (b.Owner, CodedIndex.TypeOrMethodDef);
@@ -1306,7 +1307,7 @@ namespace Mono.Cecil {
 					MakeCodedRID (generic_parameter.Owner, CodedIndex.TypeOrMethodDef),
 					GetStringIndex (generic_parameter.Name)));
 
-				generic_parameter.token = new MetadataToken (TokenType.GenericParam, rid);
+				generic_parameter.MetadataToken = new MetadataToken (TokenType.GenericParam, rid);
 
 				if (generic_parameter.HasConstraints)
 					AddConstraints (generic_parameter, generic_param_constraint_table);
@@ -1316,11 +1317,11 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddConstraints (GenericParameter generic_parameter, GenericParamConstraintTable table)
+        void AddConstraints(IGenericParameter generic_parameter, GenericParamConstraintTable table)
 		{
 			var constraints = generic_parameter.Constraints;
 
-			var rid = generic_parameter.token.RID;
+			var rid = generic_parameter.MetadataToken.RID;
 
 			for (int i = 0; i < constraints.Count; i++)
 				table.AddRow (new GenericParamConstraintRow (
@@ -1328,10 +1329,10 @@ namespace Mono.Cecil {
 					MakeCodedRID (GetTypeToken (constraints [i]), CodedIndex.TypeDefOrRef)));
 		}
 
-		void AddInterfaces (TypeDefinition type)
+		void AddInterfaces (ITypeDefinition type)
 		{
 			var interfaces = type.Interfaces;
-			var type_rid = type.token.RID;
+			var type_rid = type.MetadataToken.RID;
 
 			for (int i = 0; i < interfaces.Count; i++)
 				iface_impl_table.AddRow (new InterfaceImplRow (
@@ -1339,17 +1340,17 @@ namespace Mono.Cecil {
 					MakeCodedRID (GetTypeToken (interfaces [i]), CodedIndex.TypeDefOrRef)));
 		}
 
-		void AddLayoutInfo (TypeDefinition type)
+		void AddLayoutInfo (ITypeDefinition type)
 		{
 			var table = GetTable<ClassLayoutTable> (Table.ClassLayout);
 
 			table.AddRow (new ClassLayoutRow (
 				(ushort) type.PackingSize,
 				(uint) type.ClassSize,
-				type.token.RID));
+				type.MetadataToken.RID));
 		}
 
-		void AddNestedTypes (TypeDefinition type)
+		void AddNestedTypes (ITypeDefinition type)
 		{
 			var nested_types = type.NestedTypes;
 			var nested_table = GetTable<NestedClassTable> (Table.NestedClass);
@@ -1357,11 +1358,11 @@ namespace Mono.Cecil {
 			for (int i = 0; i < nested_types.Count; i++) {
 				var nested = nested_types [i];
 				AddType (nested);
-				nested_table.AddRow (new NestedClassRow (nested.token.RID, type.token.RID));
+                nested_table.AddRow(new NestedClassRow(nested.MetadataToken.RID, type.MetadataToken.RID));
 			}
 		}
 
-		void AddFields (TypeDefinition type)
+		void AddFields (ITypeDefinition type)
 		{
 			var fields = type.Fields;
 
@@ -1369,7 +1370,7 @@ namespace Mono.Cecil {
 				AddField (fields [i]);
 		}
 
-		void AddField (FieldDefinition field)
+        void AddField(IFieldDefinition field)
 		{
 			field_table.AddRow (new FieldRow (
 				field.Attributes,
@@ -1392,21 +1393,21 @@ namespace Mono.Cecil {
 				AddMarshalInfo (field);
 		}
 
-		void AddFieldRVA (FieldDefinition field)
+        void AddFieldRVA(IFieldDefinition field)
 		{
 			var table = GetTable<FieldRVATable> (Table.FieldRVA);
 			table.AddRow (new FieldRVARow (
 				data.AddData (field.InitialValue),
-				field.token.RID));
+				field.MetadataToken.RID));
 		}
 
-		void AddFieldLayout (FieldDefinition field)
+        void AddFieldLayout(IFieldDefinition field)
 		{
 			var table = GetTable<FieldLayoutTable> (Table.FieldLayout);
-			table.AddRow (new FieldLayoutRow ((uint) field.Offset, field.token.RID));
+			table.AddRow (new FieldLayoutRow ((uint) field.Offset, field.MetadataToken.RID));
 		}
 
-		void AddMethods (TypeDefinition type)
+		void AddMethods (ITypeDefinition type)
 		{
 			var methods = type.Methods;
 
@@ -1414,7 +1415,7 @@ namespace Mono.Cecil {
 				AddMethod (methods [i]);
 		}
 
-		void AddMethod (MethodDefinition method)
+		void AddMethod (IMethodDefinition method)
 		{
 			method_table.AddRow (new MethodRow (
 				method.HasBody ? code.WriteMethodBody (method) : 0,
@@ -1442,7 +1443,7 @@ namespace Mono.Cecil {
 				AddOverrides (method);
 		}
 
-		void AddParameters (MethodDefinition method)
+		void AddParameters (IMethodDefinition method)
 		{
 			var return_parameter = method.MethodReturnType.parameter;
 
@@ -1463,7 +1464,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddPInvokeInfo (MethodDefinition method)
+		void AddPInvokeInfo (IMethodDefinition method)
 		{
 			var pinvoke = method.PInvokeInfo;
 			if (pinvoke == null)
@@ -1477,20 +1478,20 @@ namespace Mono.Cecil {
 				pinvoke.Module.MetadataToken.RID));
 		}
 
-		void AddOverrides (MethodDefinition method)
+		void AddOverrides (IMethodDefinition method)
 		{
 			var overrides = method.Overrides;
 			var table = GetTable<MethodImplTable> (Table.MethodImpl);
 
 			for (int i = 0; i < overrides.Count; i++) {
 				table.AddRow (new MethodImplRow (
-					method.DeclaringType.token.RID,
+                    method.DeclaringType.MetadataToken.RID,
 					MakeCodedRID (method, CodedIndex.MethodDefOrRef),
 					MakeCodedRID (LookupToken (overrides [i]), CodedIndex.MethodDefOrRef)));
 			}
 		}
 
-		static bool RequiresParameterRow (ParameterDefinition parameter)
+		static bool RequiresParameterRow (IParameterDefinition parameter)
 		{
 			return !string.IsNullOrEmpty (parameter.Name)
 				|| parameter.Attributes != ParameterAttributes.None
@@ -1499,14 +1500,14 @@ namespace Mono.Cecil {
 				|| parameter.HasCustomAttributes;
 		}
 
-		void AddParameter (ushort sequence, ParameterDefinition parameter, ParamTable table)
+		void AddParameter (ushort sequence, IParameterDefinition parameter, ParamTable table)
 		{
 			table.AddRow (new ParamRow (
 				parameter.Attributes,
 				sequence,
 				GetStringIndex (parameter.Name)));
 
-			parameter.token = new MetadataToken (TokenType.Param, param_rid++);
+			parameter.MetadataToken = new MetadataToken (TokenType.Param, param_rid++);
 
 			if (parameter.HasCustomAttributes)
 				AddCustomAttributes (parameter);
@@ -1527,23 +1528,23 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetMarshalInfoSignature (owner))));
 		}
 
-		void AddProperties (TypeDefinition type)
+		void AddProperties (ITypeDefinition type)
 		{
 			var properties = type.Properties;
 
-			property_map_table.AddRow (new PropertyMapRow (type.token.RID, property_rid));
+            property_map_table.AddRow(new PropertyMapRow(type.MetadataToken.RID, property_rid));
 
 			for (int i = 0; i < properties.Count; i++)
 				AddProperty (properties [i]);
 		}
 
-		void AddProperty (PropertyDefinition property)
+        void AddProperty(IPropertyDefinition property)
 		{
 			property_table.AddRow (new PropertyRow (
 				property.Attributes,
 				GetStringIndex (property.Name),
 				GetBlobIndex (GetPropertySignature (property))));
-			property.token = new MetadataToken (TokenType.Property, property_rid++);
+			property.MetadataToken = new MetadataToken (TokenType.Property, property_rid++);
 
 			var method = property.GetMethod;
 			if (method != null)
@@ -1563,29 +1564,29 @@ namespace Mono.Cecil {
 				AddConstant (property, property.PropertyType);
 		}
 
-		void AddOtherSemantic (IMetadataTokenProvider owner, Collection<MethodDefinition> others)
+        void AddOtherSemantic(IMetadataTokenProvider owner, IList<IMethodDefinition> others)
 		{
 			for (int i = 0; i < others.Count; i++)
 				AddSemantic (MethodSemanticsAttributes.Other, owner, others [i]);
 		}
 
-		void AddEvents (TypeDefinition type)
+		void AddEvents (ITypeDefinition type)
 		{
 			var events = type.Events;
 
-			event_map_table.AddRow (new EventMapRow (type.token.RID, event_rid));
+            event_map_table.AddRow(new EventMapRow(type.MetadataToken.RID, event_rid));
 
 			for (int i = 0; i < events.Count; i++)
 				AddEvent (events [i]);
 		}
 
-		void AddEvent (EventDefinition @event)
+        void AddEvent(IEventDefinition @event)
 		{
 			event_table.AddRow (new EventRow (
 				@event.Attributes,
 				GetStringIndex (@event.Name),
 				MakeCodedRID (GetTypeToken (@event.EventType), CodedIndex.TypeDefOrRef)));
-			@event.token = new MetadataToken (TokenType.Event, event_rid++);
+			@event.MetadataToken = new MetadataToken (TokenType.Event, event_rid++);
 
 			var method = @event.AddMethod;
 			if (method != null)
@@ -1606,18 +1607,18 @@ namespace Mono.Cecil {
 				AddCustomAttributes (@event);
 		}
 
-		void AddSemantic (MethodSemanticsAttributes semantics, IMetadataTokenProvider provider, MethodDefinition method)
+		void AddSemantic (MethodSemanticsAttributes semantics, IMetadataTokenProvider provider, IMethodDefinition method)
 		{
 			method.SemanticsAttributes = semantics;
 			var table = GetTable<MethodSemanticsTable> (Table.MethodSemantics);
 
 			table.AddRow (new MethodSemanticsRow (
 				semantics,
-				method.token.RID,
+                method.MetadataToken.RID,
 				MakeCodedRID (provider, CodedIndex.HasSemantics)));
 		}
 
-		void AddConstant (IConstantProvider owner, TypeReference type)
+		void AddConstant (IConstantProvider owner, ITypeReference type)
 		{
 			var constant = owner.Constant;
 			var etype = GetConstantType (type, constant);
@@ -1628,12 +1629,12 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetConstantSignature (etype, constant))));
 		}
 
-		static ElementType GetConstantType (TypeReference constant_type, object constant)
+		static ElementType GetConstantType (ITypeReference constant_type, object constant)
 		{
 			if (constant == null)
 				return ElementType.Class;
 
-			var etype = constant_type.etype;
+			var etype = constant_type.EType;
 			switch (etype) {
 			case ElementType.None:
 				var type = constant_type.CheckedResolve ();
@@ -1743,7 +1744,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		MetadataToken GetMemberRefToken (MemberReference member)
+		MetadataToken GetMemberRefToken (IMemberReference member)
 		{
 			var row = CreateMemberRefRow (member);
 
@@ -1753,10 +1754,10 @@ namespace Mono.Cecil {
 
 			AddMemberReference (member, row);
 
-			return member.token;
+			return member.MetadataToken;
 		}
 
-		MemberRefRow CreateMemberRefRow (MemberReference member)
+		MemberRefRow CreateMemberRefRow (IMemberReference member)
 		{
 			return new MemberRefRow (
 				MakeCodedRID (GetTypeToken (member.DeclaringType), CodedIndex.MemberRefParent),
@@ -1764,10 +1765,10 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetMemberRefSignature (member)));
 		}
 
-		void AddMemberReference (MemberReference member, MemberRefRow row)
+		void AddMemberReference (IMemberReference member, MemberRefRow row)
 		{
-			member.token = new MetadataToken (TokenType.MemberRef, member_ref_table.AddRow (row));
-			member_ref_map.Add (row, member.token);
+			member.MetadataToken = new MetadataToken (TokenType.MemberRef, member_ref_table.AddRow (row));
+			member_ref_map.Add (row, member.MetadataToken);
 		}
 
 		MetadataToken GetMethodSpecToken (MethodSpecification method_spec)
@@ -1841,7 +1842,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetFieldSignature (FieldReference field)
+        SignatureWriter GetFieldSignature(IFieldReference field)
 		{
 			var signature = CreateSignatureWriter ();
 			signature.WriteByte (0x6);
@@ -1856,20 +1857,20 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetMemberRefSignature (MemberReference member)
+		SignatureWriter GetMemberRefSignature (IMemberReference member)
 		{
-			var field = member as FieldReference;
+            var field = member as IFieldReference;
 			if (field != null)
 				return GetFieldSignature (field);
 
-			var method = member as MethodReference;
+			var method = member as IMethodReference;
 			if (method != null)
 				return GetMethodSignature (method);
 
 			throw new NotSupportedException ();
 		}
 
-		SignatureWriter GetPropertySignature (PropertyDefinition property)
+        SignatureWriter GetPropertySignature(IPropertyDefinition property)
 		{
 			var signature = CreateSignatureWriter ();
 			byte calling_convention = 0x8;
@@ -1877,7 +1878,7 @@ namespace Mono.Cecil {
 				calling_convention |= 0x20;
 
 			uint param_count = 0;
-			Collection<ParameterDefinition> parameters = null;
+			Collection<IParameterDefinition> parameters = null;
 
 			if (property.HasParameters) {
 				parameters = property.Parameters;
@@ -1897,7 +1898,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetTypeSpecSignature (TypeReference type)
+		SignatureWriter GetTypeSpecSignature (ITypeReference type)
 		{
 			var signature = CreateSignatureWriter ();
 			signature.WriteTypeSignature (type);
@@ -1928,10 +1929,10 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetCustomAttributeSignature (CustomAttribute attribute)
+        SignatureWriter GetCustomAttributeSignature(ICustomAttribute attribute)
 		{
 			var signature = CreateSignatureWriter ();
-			if (!attribute.resolved) {
+			if (!attribute.IsResolved) {
 				signature.WriteBytes (attribute.GetBlob ());
 				return signature;
 			}
@@ -1945,11 +1946,11 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		SignatureWriter GetSecurityDeclarationSignature (SecurityDeclaration declaration)
+        SignatureWriter GetSecurityDeclarationSignature(ISecurityDeclaration declaration)
 		{
 			var signature = CreateSignatureWriter ();
 
-			if (!declaration.resolved)
+			if (!declaration.Resolved)
 				signature.WriteBytes (declaration.GetBlob ());
 			else if (module.Runtime < TargetRuntime.Net_2_0)
 				signature.WriteXmlSecurityDeclaration (declaration);
@@ -1968,7 +1969,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		static Exception CreateForeignMemberException (MemberReference member)
+		static Exception CreateForeignMemberException (IMemberReference member)
 		{
 			return new ArgumentException (string.Format ("Member '{0}' is declared in another module and needs to be imported", member));
 		}
@@ -1994,7 +1995,7 @@ namespace Mono.Cecil {
 			case TokenType.TypeRef:
 			case TokenType.TypeSpec:
 			case TokenType.GenericParam:
-				return GetTypeToken ((TypeReference) provider);
+				return GetTypeToken ((ITypeReference) provider);
 			case TokenType.MethodSpec:
 				return GetMethodSpecToken ((MethodSpecification) provider);
 			case TokenType.MemberRef:
@@ -2067,22 +2068,22 @@ namespace Mono.Cecil {
 				WriteTypeSignature (parameters [i].ParameterType);
 		}
 
-		uint MakeTypeDefOrRefCodedRID (TypeReference type)
+		uint MakeTypeDefOrRefCodedRID (ITypeReference type)
 		{
 			return CodedIndex.TypeDefOrRef.CompressMetadataToken (metadata.LookupToken (type));
 		}
 
-		public void WriteTypeSignature (TypeReference type)
+		public void WriteTypeSignature (ITypeReference type)
 		{
 			if (type == null)
 				throw new ArgumentNullException ();
 
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.MVar:
 			case ElementType.Var: {
-				var generic_parameter = (GenericParameter) type;
+                var generic_parameter = (IGenericParameter)type;
 
 				WriteElementType (etype);
 				var position = generic_parameter.Position;
@@ -2213,9 +2214,9 @@ namespace Mono.Cecil {
 			WriteTypeSignature (type.ElementType);
 		}
 
-		bool TryWriteElementType (TypeReference type)
+		bool TryWriteElementType (ITypeReference type)
 		{
-			var element = type.etype;
+			var element = type.EType;
 
 			if (element == ElementType.None)
 				return false;
@@ -2234,7 +2235,7 @@ namespace Mono.Cecil {
 			WritePrimitiveValue (value);
 		}
 
-		public void WriteCustomAttributeConstructorArguments (CustomAttribute attribute)
+        public void WriteCustomAttributeConstructorArguments(ICustomAttribute attribute)
 		{
 			if (!attribute.HasConstructorArguments)
 				return;
@@ -2249,7 +2250,7 @@ namespace Mono.Cecil {
 				WriteCustomAttributeFixedArgument (parameters [i].ParameterType, arguments [i]);
 		}
 
-		void WriteCustomAttributeFixedArgument (TypeReference type, CustomAttributeArgument argument)
+		void WriteCustomAttributeFixedArgument (ITypeReference type, CustomAttributeArgument argument)
 		{
 			if (type.IsArray) {
 				WriteCustomAttributeFixedArrayArgument ((ArrayType) type, argument);
@@ -2279,14 +2280,14 @@ namespace Mono.Cecil {
 				WriteCustomAttributeElement (element_type, values [i]);
 		}
 
-		void WriteCustomAttributeElement (TypeReference type, CustomAttributeArgument argument)
+		void WriteCustomAttributeElement (ITypeReference type, CustomAttributeArgument argument)
 		{
 			if (type.IsArray) {
 				WriteCustomAttributeFixedArrayArgument ((ArrayType) type, argument);
 				return;
 			}
 
-			if (type.etype == ElementType.Object) {
+			if (type.EType == ElementType.Object) {
 				argument = (CustomAttributeArgument) argument.Value;
 				type = argument.Type;
 
@@ -2298,9 +2299,9 @@ namespace Mono.Cecil {
 			WriteCustomAttributeValue (type, argument.Value);
 		}
 
-		void WriteCustomAttributeValue (TypeReference type, object value)
+		void WriteCustomAttributeValue (ITypeReference type, object value)
 		{
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.String:
@@ -2312,7 +2313,7 @@ namespace Mono.Cecil {
 				break;
 			case ElementType.None:
 				if (type.IsTypeOf ("System", "Type"))
-					WriteTypeReference ((TypeReference) value);
+					WriteTypeReference ((ITypeReference) value);
 				else
 					WriteCustomAttributeEnumValue (type, value);
 				break;
@@ -2369,7 +2370,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void WriteCustomAttributeEnumValue (TypeReference enum_type, object value)
+		void WriteCustomAttributeEnumValue (ITypeReference enum_type, object value)
 		{
 			var type = enum_type.CheckedResolve ();
 			if (!type.IsEnum)
@@ -2378,7 +2379,7 @@ namespace Mono.Cecil {
 			WriteCustomAttributeValue (type.GetEnumUnderlyingType (), value);
 		}
 
-		void WriteCustomAttributeFieldOrPropType (TypeReference type)
+		void WriteCustomAttributeFieldOrPropType (ITypeReference type)
 		{
 			if (type.IsArray) {
 				var array = (ArrayType) type;
@@ -2387,7 +2388,7 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			var etype = type.etype;
+			var etype = type.EType;
 
 			switch (etype) {
 			case ElementType.Object:
@@ -2407,7 +2408,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public void WriteCustomAttributeNamedArguments (CustomAttribute attribute)
+        public void WriteCustomAttributeNamedArguments(ICustomAttribute attribute)
 		{
 			var count = GetNamedArgumentCount (attribute);
 
@@ -2419,7 +2420,7 @@ namespace Mono.Cecil {
 			WriteICustomAttributeNamedArguments (attribute);
 		}
 
-		static int GetNamedArgumentCount (ICustomAttribute attribute)
+		static int GetNamedArgumentCount (IAttribute attribute)
 		{
 			int count = 0;
 
@@ -2432,7 +2433,7 @@ namespace Mono.Cecil {
 			return count;
 		}
 
-		void WriteICustomAttributeNamedArguments (ICustomAttribute attribute)
+		void WriteICustomAttributeNamedArguments (IAttribute attribute)
 		{
 			if (attribute.HasFields)
 				WriteCustomAttributeNamedArguments (0x53, attribute.Fields);
@@ -2441,7 +2442,7 @@ namespace Mono.Cecil {
 				WriteCustomAttributeNamedArguments (0x54, attribute.Properties);
 		}
 
-		void WriteCustomAttributeNamedArguments (byte kind, Collection<CustomAttributeNamedArgument> named_arguments)
+		void WriteCustomAttributeNamedArguments (byte kind, IList<CustomAttributeNamedArgument> named_arguments)
 		{
 			for (int i = 0; i < named_arguments.Count; i++)
 				WriteCustomAttributeNamedArgument (kind, named_arguments [i]);
@@ -2473,15 +2474,15 @@ namespace Mono.Cecil {
 			buffer.WriteCompressedUInt32 ((uint) count);
 			buffer.WriteICustomAttributeNamedArguments (attribute);
 
-			WriteCompressedUInt32 ((uint) buffer.length);
+			WriteCompressedUInt32 ((uint) buffer.Length);
 			WriteBytes (buffer);
 		}
 
-		public void WriteSecurityDeclaration (SecurityDeclaration declaration)
+        public void WriteSecurityDeclaration(ISecurityDeclaration declaration)
 		{
 			WriteByte ((byte) '.');
 
-			var attributes = declaration.security_attributes;
+			var attributes = declaration.SecurityAttributes;
 			if (attributes == null)
 				throw new NotSupportedException ();
 
@@ -2491,7 +2492,7 @@ namespace Mono.Cecil {
 				WriteSecurityAttribute (attributes [i]);
 		}
 
-		public void WriteXmlSecurityDeclaration (SecurityDeclaration declaration)
+        public void WriteXmlSecurityDeclaration(ISecurityDeclaration declaration)
 		{
 			var xml = GetXmlSecurityDeclaration (declaration);
 			if (xml == null)
@@ -2500,12 +2501,12 @@ namespace Mono.Cecil {
 			WriteBytes (Encoding.Unicode.GetBytes (xml));
 		}
 
-		static string GetXmlSecurityDeclaration (SecurityDeclaration declaration)
+        static string GetXmlSecurityDeclaration(ISecurityDeclaration declaration)
 		{
-			if (declaration.security_attributes == null || declaration.security_attributes.Count != 1)
+            if (declaration.SecurityAttributes == null || declaration.SecurityAttributes.Count != 1)
 				return null;
 
-			var attribute = declaration.security_attributes [0];
+            var attribute = declaration.SecurityAttributes[0];
 
 			if (!attribute.AttributeType.IsTypeOf ("System.Security.Permissions", "PermissionSetAttribute"))
 				return null;
@@ -2520,7 +2521,7 @@ namespace Mono.Cecil {
 			return (string) property.Argument.Value;
 		}
 
-		void WriteTypeReference (TypeReference type)
+		void WriteTypeReference (ITypeReference type)
 		{
 			WriteUTF8String (TypeParser.ToParseable (type));
 		}

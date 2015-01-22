@@ -135,14 +135,14 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public ArrayType (TypeReference type)
+		public ArrayType (ITypeReference type)
 			: base (type)
 		{
 			Mixin.CheckType (type);
-			this.etype = MD.ElementType.Array;
+			this.EType = MD.ElementType.Array;
 		}
 
-		public ArrayType (TypeReference type, int rank)
+		public ArrayType (ITypeReference type, int rank)
 			: this (type)
 		{
 			Mixin.CheckType (type);
@@ -153,7 +153,7 @@ namespace Mono.Cecil {
 			dimensions = new Collection<ArrayDimension> (rank);
 			for (int i = 0; i < rank; i++)
 				dimensions.Add (new ArrayDimension ());
-			this.etype = MD.ElementType.Array;
+			this.EType = MD.ElementType.Array;
 		}
 	}
 }

@@ -26,14 +26,35 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IFieldDefinition : IFieldReference, IMemberDefinition, IConstantProvider, IMarshalInfoProvider {
+        bool HasLayoutInfo { get; }
+        int Offset { get; set; }
+        int RVA { get; }
+        byte[] InitialValue { get; set; }
+        FieldAttributes Attributes { get; set; }
+        bool IsCompilerControlled { get; set; }
+        bool IsPrivate { get; set; }
+        bool IsFamilyAndAssembly { get; set; }
+        bool IsAssembly { get; set; }
+        bool IsFamily { get; set; }
+        bool IsFamilyOrAssembly { get; set; }
+        bool IsPublic { get; set; }
+        bool IsStatic { get; set; }
+        bool IsInitOnly { get; set; }
+        bool IsLiteral { get; set; }
+        bool IsNotSerialized { get; set; }
+        bool IsPInvokeImpl { get; set; }
+        bool HasDefault { get; set; }
+    }
 
-	public sealed class FieldDefinition : FieldReference, IMemberDefinition, IConstantProvider, IMarshalInfoProvider {
+    public sealed class FieldDefinition : FieldReference, IFieldDefinition {
 
 		ushort attributes;
-		Collection<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 
 		int offset = Mixin.NotResolvedMarker;
 
@@ -145,7 +166,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
@@ -246,18 +268,18 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public new TypeDefinition DeclaringType {
-			get { return (TypeDefinition) base.DeclaringType; }
+		public new ITypeDefinition DeclaringType {
+			get { return (ITypeDefinition) base.DeclaringType; }
 			set { base.DeclaringType = value; }
 		}
 
-		public FieldDefinition (string name, FieldAttributes attributes, TypeReference fieldType)
+		public FieldDefinition (string name, FieldAttributes attributes, ITypeReference fieldType)
 			: base (name, fieldType)
 		{
 			this.attributes = (ushort) attributes;
 		}
 
-		public override FieldDefinition Resolve ()
+        public override IFieldDefinition Resolve()
 		{
 			return this;
 		}

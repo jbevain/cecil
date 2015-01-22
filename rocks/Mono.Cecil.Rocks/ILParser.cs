@@ -48,11 +48,11 @@ namespace Mono.Cecil.Rocks {
 		void OnInlineBranch (OpCode opcode, int offset);
 		void OnInlineSwitch (OpCode opcode, int [] offsets);
 		void OnInlineVariable (OpCode opcode, VariableDefinition variable);
-		void OnInlineArgument (OpCode opcode, ParameterDefinition parameter);
+		void OnInlineArgument (OpCode opcode, IParameterDefinition parameter);
 		void OnInlineSignature (OpCode opcode, CallSite callSite);
-		void OnInlineType (OpCode opcode, TypeReference type);
-		void OnInlineField (OpCode opcode, FieldReference field);
-		void OnInlineMethod (OpCode opcode, MethodReference method);
+		void OnInlineType (OpCode opcode, ITypeReference type);
+        void OnInlineField(OpCode opcode, IFieldReference field);
+		void OnInlineMethod (OpCode opcode, IMethodReference method);
 	}
 
 #if INSIDE_ROCKS
@@ -62,12 +62,12 @@ namespace Mono.Cecil.Rocks {
 
 		class ParseContext {
 			public CodeReader Code { get; set; }
-			public MetadataReader Metadata { get; set; }
+			public IMetadataReader Metadata { get; set; }
 			public Collection<VariableDefinition> Variables { get; set; }
 			public IILVisitor Visitor { get; set; }
 		}
 
-		public static void Parse (MethodDefinition method, IILVisitor visitor)
+		public static void Parse (IMethodDefinition method, IILVisitor visitor)
 		{
 			if (method == null)
 				throw new ArgumentNullException ("method");
@@ -89,7 +89,7 @@ namespace Mono.Cecil.Rocks {
 				ParseCode (code_size, context);
 				break;
 			case 0x3: // fat
-				code.position--;
+				code.Position--;
 				ParseFatMethod (context);
 				break;
 			default:
@@ -97,9 +97,9 @@ namespace Mono.Cecil.Rocks {
 			}
 		}
 
-		static ParseContext CreateContext (MethodDefinition method, IILVisitor visitor)
+		static ParseContext CreateContext (IMethodDefinition method, IILVisitor visitor)
 		{
-			var code = method.Module.Read (method, (_, reader) => new CodeReader (reader.image.MetadataSection, reader));
+			var code = method.Module.Read (method, (_, reader) => new CodeReader (reader.Image.MetadataSection, reader));
 
 			return new ParseContext {
 				Code = code,
@@ -128,10 +128,10 @@ namespace Mono.Cecil.Rocks {
 			var metadata = context.Metadata;
 			var visitor = context.Visitor;
 
-			var start = code.position;
+			var start = code.Position;
 			var end = start + code_size;
 
-			while (code.position < end) {
+			while (code.Position < end) {
 				var il_opcode = code.ReadByte ();
 				var opcode = il_opcode != 0xfe
 					? OpCodes.OneByteOpCode [il_opcode]
@@ -199,23 +199,23 @@ namespace Mono.Cecil.Rocks {
 					case TokenType.TypeDef:
 					case TokenType.TypeRef:
 					case TokenType.TypeSpec:
-						visitor.OnInlineType (opcode, (TypeReference) member);
+						visitor.OnInlineType (opcode, (ITypeReference) member);
 						break;
 					case TokenType.Method:
 					case TokenType.MethodSpec:
-						visitor.OnInlineMethod (opcode, (MethodReference) member);
+						visitor.OnInlineMethod (opcode, (IMethodReference) member);
 						break;
 					case TokenType.Field:
-						visitor.OnInlineField (opcode, (FieldReference) member);
+                        visitor.OnInlineField(opcode, (IFieldReference)member);
 						break;
 					case TokenType.MemberRef:
-						var field_ref = member as FieldReference;
+                        var field_ref = member as IFieldReference;
 						if (field_ref != null) {
 							visitor.OnInlineField (opcode, field_ref);
 							break;
 						}
 
-						var method_ref = member as MethodReference;
+						var method_ref = member as IMethodReference;
 						if (method_ref != null) {
 							visitor.OnInlineMethod (opcode, method_ref);
 							break;

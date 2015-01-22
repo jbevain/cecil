@@ -38,12 +38,12 @@ namespace Mono.Cecil.Mdb {
 
 	public class MdbReaderProvider : ISymbolReaderProvider {
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
+		public ISymbolReader GetSymbolReader (IModuleDefinition module, string fileName)
 		{
 			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (module, fileName));
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (IModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}
@@ -51,11 +51,11 @@ namespace Mono.Cecil.Mdb {
 
 	public class MdbReader : ISymbolReader {
 
-		readonly ModuleDefinition module;
+		readonly IModuleDefinition module;
 		readonly MonoSymbolFile symbol_file;
 		readonly Dictionary<string, Document> documents;
 
-		public MdbReader (ModuleDefinition module, MonoSymbolFile symFile)
+		public MdbReader (IModuleDefinition module, MonoSymbolFile symFile)
 		{
 			this.module = module;
 			this.symbol_file = symFile;
@@ -67,7 +67,7 @@ namespace Mono.Cecil.Mdb {
 			return symbol_file.Guid == module.Mvid;
 		}
 
-		public void Read (MethodBody body, InstructionMapper mapper)
+        public void Read(IMethodBody body, InstructionMapper mapper)
 		{
 			var method_token = body.Method.MetadataToken;
 			var entry = symbol_file.GetMethodByToken (method_token.ToInt32	());
@@ -79,7 +79,7 @@ namespace Mono.Cecil.Mdb {
 			ReadLocalVariables (entry, body, scopes);
 		}
 
-		static void ReadLocalVariables (MethodEntry entry, MethodBody body, Scope [] scopes)
+        static void ReadLocalVariables(MethodEntry entry, IMethodBody body, Scope[] scopes)
 		{
 			var locals = entry.GetLocals ();
 
@@ -136,7 +136,7 @@ namespace Mono.Cecil.Mdb {
 			return document;
 		}
 
-		static Scope [] ReadScopes (MethodEntry entry, MethodBody body, InstructionMapper mapper)
+        static Scope[] ReadScopes(MethodEntry entry, IMethodBody body, InstructionMapper mapper)
 		{
 			var blocks = entry.GetCodeBlocks ();
 			var scopes = new Scope [blocks.Length];

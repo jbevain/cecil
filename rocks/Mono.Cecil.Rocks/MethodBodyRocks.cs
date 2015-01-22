@@ -37,7 +37,7 @@ namespace Mono.Cecil.Rocks {
 #endif
 	static class MethodBodyRocks {
 
-		public static void SimplifyMacros (this MethodBody self)
+        public static void SimplifyMacros(this IMethodBody self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -192,7 +192,7 @@ namespace Mono.Cecil.Rocks {
 			instruction.Operand = null;
 		}
 
-		public static void OptimizeMacros (this MethodBody self)
+        public static void OptimizeMacros(this IMethodBody self)
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
@@ -203,7 +203,7 @@ namespace Mono.Cecil.Rocks {
 				int index;
 				switch (instruction.OpCode.Code) {
 				case Code.Ldarg:
-					index = ((ParameterDefinition) instruction.Operand).Index;
+					index = ((IParameterDefinition) instruction.Operand).Index;
 					if (index == -1 && instruction.Operand == self.ThisParameter)
 						index = 0;
 					else if (method.HasThis)
@@ -271,7 +271,7 @@ namespace Mono.Cecil.Rocks {
 					}
 					break;
 				case Code.Ldarga:
-					index = ((ParameterDefinition) instruction.Operand).Index;
+					index = ((IParameterDefinition) instruction.Operand).Index;
 					if (index == -1 && instruction.Operand == self.ThisParameter)
 						index = 0;
 					else if (method.HasThis)
@@ -328,7 +328,7 @@ namespace Mono.Cecil.Rocks {
 			OptimizeBranches (self);
 		}
 
-		static void OptimizeBranches (MethodBody body)
+        static void OptimizeBranches(IMethodBody body)
 		{
 			ComputeOffsets (body);
 
@@ -395,7 +395,7 @@ namespace Mono.Cecil.Rocks {
 			return true;
 		}
 
-		static void ComputeOffsets (MethodBody body)
+        static void ComputeOffsets(IMethodBody body)
 		{
 			var offset = 0;
 			foreach (var instruction in body.Instructions) {

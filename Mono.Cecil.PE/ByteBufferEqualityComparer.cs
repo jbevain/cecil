@@ -31,29 +31,30 @@ using System.Collections.Generic;
 
 namespace Mono.Cecil.PE {
 
-	sealed class ByteBufferEqualityComparer : IEqualityComparer<ByteBuffer> {
+    sealed class ByteBufferEqualityComparer : IEqualityComparer<IByteBuffer>
+    {
 
-		public bool Equals (ByteBuffer x, ByteBuffer y)
+        public bool Equals(IByteBuffer x, IByteBuffer y)
 		{
-			if (x.length != y.length)
+			if (x.Length != y.Length)
 				return false;
 
-			var x_buffer = x.buffer;
-			var y_buffer = y.buffer;
+			var x_buffer = x.Buffer;
+			var y_buffer = y.Buffer;
 
-			for (int i = 0; i < x.length; i++)
+			for (int i = 0; i < x.Length; i++)
 				if (x_buffer [i] != y_buffer [i])
 					return false;
 
 			return true;
 		}
 
-		public int GetHashCode (ByteBuffer buffer)
+        public int GetHashCode(IByteBuffer buffer)
 		{
 #if !BYTE_BUFFER_WELL_DISTRIBUTED_HASH
 			var hash = 0;
-			var bytes = buffer.buffer;
-			for (int i = 0; i < buffer.length; i++)
+			var bytes = buffer.Buffer;
+			for (int i = 0; i < buffer.Length; i++)
 				hash = (hash * 37) ^ bytes [i];
 
 			return hash;

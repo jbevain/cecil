@@ -29,12 +29,16 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IEventReference : IMemberReference {
+        ITypeReference EventType { get; set; }
+        IEventDefinition Resolve ();
+    }
 
-	public abstract class EventReference : MemberReference {
+    public abstract class EventReference : MemberReference, IEventReference {
 
-		TypeReference event_type;
+		ITypeReference event_type;
 
-		public TypeReference EventType {
+		public ITypeReference EventType {
 			get { return event_type; }
 			set { event_type = value; }
 		}
@@ -43,7 +47,7 @@ namespace Mono.Cecil {
 			get { return event_type.FullName + " " + MemberFullName (); }
 		}
 
-		protected EventReference (string name, TypeReference eventType)
+		protected EventReference (string name, ITypeReference eventType)
 			: base (name)
 		{
 			if (eventType == null)
@@ -52,6 +56,6 @@ namespace Mono.Cecil {
 			event_type = eventType;
 		}
 
-		public abstract EventDefinition Resolve ();
+		public abstract IEventDefinition Resolve ();
 	}
 }

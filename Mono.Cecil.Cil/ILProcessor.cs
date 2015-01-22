@@ -34,14 +34,15 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class ILProcessor {
 
-		readonly MethodBody body;
+        readonly IMethodBody body;
 		readonly Collection<Instruction> instructions;
 
-		public MethodBody Body {
+        public IMethodBody Body
+        {
 			get { return body; }
 		}
 
-		internal ILProcessor (MethodBody body)
+        internal ILProcessor(IMethodBody body)
 		{
 			this.body = body;
 			this.instructions = body.Instructions;
@@ -52,7 +53,7 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode);
 		}
 
-		public Instruction Create (OpCode opcode, TypeReference type)
+		public Instruction Create (OpCode opcode, ITypeReference type)
 		{
 			return Instruction.Create (opcode, type);
 		}
@@ -62,12 +63,12 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode, site);
 		}
 
-		public Instruction Create (OpCode opcode, MethodReference method)
+		public Instruction Create (OpCode opcode, IMethodReference method)
 		{
 			return Instruction.Create (opcode, method);
 		}
 
-		public Instruction Create (OpCode opcode, FieldReference field)
+        public Instruction Create(OpCode opcode, IFieldReference field)
 		{
 			return Instruction.Create (opcode, field);
 		}
@@ -134,7 +135,7 @@ namespace Mono.Cecil.Cil {
 			return Instruction.Create (opcode, variable);
 		}
 
-		public Instruction Create (OpCode opcode, ParameterDefinition parameter)
+		public Instruction Create (OpCode opcode, IParameterDefinition parameter)
 		{
 			return Instruction.Create (opcode, parameter);
 		}
@@ -144,12 +145,12 @@ namespace Mono.Cecil.Cil {
 			Append (Create (opcode));
 		}
 
-		public void Emit (OpCode opcode, TypeReference type)
+		public void Emit (OpCode opcode, ITypeReference type)
 		{
 			Append (Create (opcode, type));
 		}
 
-		public void Emit (OpCode opcode, MethodReference method)
+		public void Emit (OpCode opcode, IMethodReference method)
 		{
 			Append (Create (opcode, method));
 		}
@@ -159,7 +160,7 @@ namespace Mono.Cecil.Cil {
 			Append (Create (opcode, site));
 		}
 
-		public void Emit (OpCode opcode, FieldReference field)
+        public void Emit(OpCode opcode, IFieldReference field)
 		{
 			Append (Create (opcode, field));
 		}
@@ -214,7 +215,7 @@ namespace Mono.Cecil.Cil {
 			Append (Create (opcode, variable));
 		}
 
-		public void Emit (OpCode opcode, ParameterDefinition parameter)
+		public void Emit (OpCode opcode, IParameterDefinition parameter)
 		{
 			Append (Create (opcode, parameter));
 		}

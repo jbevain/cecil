@@ -116,7 +116,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (@int, foo_string_int.GenericArguments [1]);
 		}
 
-		static TypeReference GetTypeReference (Type type)
+		static ITypeReference GetTypeReference (Type type)
 		{
 			return ModuleDefinition.ReadModule (typeof (TypeReferenceRocksTests).Module.FullyQualifiedName).Import (type);
 		}

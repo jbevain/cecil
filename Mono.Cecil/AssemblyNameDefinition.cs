@@ -1,5 +1,5 @@
 //
-// AssemblyNameDefinition.cs
+// IAssemblyNameDefinition.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -29,8 +29,10 @@
 using System;
 
 namespace Mono.Cecil {
+    public interface IAssemblyNameDefinition: IAssemblyNameReference {
+    }
 
-	public sealed class AssemblyNameDefinition : AssemblyNameReference {
+    public sealed class AssemblyNameDefinition : AssemblyNameReference, IAssemblyNameDefinition {
 
 		public override byte [] Hash {
 			get { return Empty<byte>.Array; }

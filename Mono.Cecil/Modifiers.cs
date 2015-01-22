@@ -33,15 +33,15 @@ using MD = Mono.Cecil.Metadata;
 namespace Mono.Cecil {
 
 	public interface IModifierType {
-		TypeReference ModifierType { get; }
-		TypeReference ElementType { get; }
+		ITypeReference ModifierType { get; }
+		ITypeReference ElementType { get; }
 	}
 
 	public sealed class OptionalModifierType : TypeSpecification, IModifierType {
 
-		TypeReference modifier_type;
+		ITypeReference modifier_type;
 
-		public TypeReference ModifierType {
+		public ITypeReference ModifierType {
 			get { return modifier_type; }
 			set { modifier_type = value; }
 		}
@@ -71,20 +71,20 @@ namespace Mono.Cecil {
 			get { return modifier_type.ContainsGenericParameter || base.ContainsGenericParameter; }
 		}
 
-		public OptionalModifierType (TypeReference modifierType, TypeReference type)
+		public OptionalModifierType (ITypeReference modifierType, ITypeReference type)
 			: base (type)
 		{
 			Mixin.CheckModifier (modifierType, type);
 			this.modifier_type = modifierType;
-			this.etype = MD.ElementType.CModOpt;
+			this.EType = MD.ElementType.CModOpt;
 		}
 	}
 
 	public sealed class RequiredModifierType : TypeSpecification, IModifierType {
 
-		TypeReference modifier_type;
+		ITypeReference modifier_type;
 
-		public TypeReference ModifierType {
+		public ITypeReference ModifierType {
 			get { return modifier_type; }
 			set { modifier_type = value; }
 		}
@@ -114,19 +114,19 @@ namespace Mono.Cecil {
 			get { return modifier_type.ContainsGenericParameter || base.ContainsGenericParameter; }
 		}
 
-		public RequiredModifierType (TypeReference modifierType, TypeReference type)
+		public RequiredModifierType (ITypeReference modifierType, ITypeReference type)
 			: base (type)
 		{
 			Mixin.CheckModifier (modifierType, type);
 			this.modifier_type = modifierType;
-			this.etype = MD.ElementType.CModReqD;
+			this.EType = MD.ElementType.CModReqD;
 		}
 
 	}
 
 	static partial class Mixin {
 
-		public static void CheckModifier (TypeReference modifierType, TypeReference type)
+		public static void CheckModifier (ITypeReference modifierType, ITypeReference type)
 		{
 			if (modifierType == null)
 				throw new ArgumentNullException ("modifierType");

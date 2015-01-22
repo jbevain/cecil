@@ -26,27 +26,37 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IEventDefinition : IEventReference, IMemberDefinition {
+        EventAttributes Attributes { get; set; }
+        IMethodDefinition AddMethod { get; set; }
+        IMethodDefinition InvokeMethod { get; set; }
+        IMethodDefinition RemoveMethod { get; set; }
+        new ITypeDefinition DeclaringType { get; set; }
+        bool HasOtherMethods { get; }
+        IList<IMethodDefinition> OtherMethods { get; set; }
+    }
 
-	public sealed class EventDefinition : EventReference, IMemberDefinition {
+    public sealed class EventDefinition : EventReference, IEventDefinition {
 
 		ushort attributes;
 
-		Collection<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 
-		internal MethodDefinition add_method;
-		internal MethodDefinition invoke_method;
-		internal MethodDefinition remove_method;
-		internal Collection<MethodDefinition> other_methods;
+        private IMethodDefinition add_method;
+        private IMethodDefinition invoke_method;
+        private IMethodDefinition remove_method;
+        private IList<IMethodDefinition> other_methods;
 
 		public EventAttributes Attributes {
 			get { return (EventAttributes) attributes; }
 			set { attributes = (ushort) value; }
 		}
 
-		public MethodDefinition AddMethod {
+		public IMethodDefinition AddMethod {
 			get {
 				if (add_method != null)
 					return add_method;
@@ -57,7 +67,7 @@ namespace Mono.Cecil {
 			set { add_method = value; }
 		}
 
-		public MethodDefinition InvokeMethod {
+		public IMethodDefinition InvokeMethod {
 			get {
 				if (invoke_method != null)
 					return invoke_method;
@@ -68,7 +78,7 @@ namespace Mono.Cecil {
 			set { invoke_method = value; }
 		}
 
-		public MethodDefinition RemoveMethod {
+		public IMethodDefinition RemoveMethod {
 			get {
 				if (remove_method != null)
 					return remove_method;
@@ -89,8 +99,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<MethodDefinition> OtherMethods {
-			get {
+		public IList<IMethodDefinition> OtherMethods
+		{
+		    get {
 				if (other_methods != null)
 					return other_methods;
 
@@ -99,11 +110,12 @@ namespace Mono.Cecil {
 				if (other_methods != null)
 					return other_methods;
 
-				return other_methods = new Collection<MethodDefinition> ();
+				return other_methods = new Collection<IMethodDefinition> ();
 			}
+		    set { other_methods = value; }
 		}
 
-		public bool HasCustomAttributes {
+        public bool HasCustomAttributes {
 			get {
 				if (custom_attributes != null)
 					return custom_attributes.Count > 0;
@@ -112,7 +124,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
@@ -130,8 +143,8 @@ namespace Mono.Cecil {
 
 		#endregion
 
-		public new TypeDefinition DeclaringType {
-			get { return (TypeDefinition) base.DeclaringType; }
+		public new ITypeDefinition DeclaringType {
+			get { return (ITypeDefinition) base.DeclaringType; }
 			set { base.DeclaringType = value; }
 		}
 
@@ -139,7 +152,7 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public EventDefinition (string name, EventAttributes attributes, TypeReference eventType)
+		public EventDefinition (string name, EventAttributes attributes, ITypeReference eventType)
 			: base (name, eventType)
 		{
 			this.attributes = (ushort) attributes;
@@ -165,7 +178,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override EventDefinition Resolve ()
+        public override IEventDefinition Resolve()
 		{
 			return this;
 		}

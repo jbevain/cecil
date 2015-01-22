@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Mono.Collections.Generic;
 using MD = Mono.Cecil.Metadata;
@@ -35,7 +36,7 @@ namespace Mono.Cecil {
 
 	public sealed class FunctionPointerType : TypeSpecification, IMethodSignature {
 
-		readonly MethodReference function;
+		readonly IMethodReference function;
 
 		public bool HasThis {
 			get { return function.HasThis; }
@@ -56,11 +57,13 @@ namespace Mono.Cecil {
 			get { return function.HasParameters; }
 		}
 
-		public Collection<ParameterDefinition> Parameters {
-			get { return function.Parameters; }
+		public IList<IParameterDefinition> Parameters
+		{
+		    get { return function.Parameters; }
+		    set { function.Parameters = value; }
 		}
 
-		public TypeReference ReturnType {
+	    public ITypeReference ReturnType {
 			get { return function.MethodReturnType.ReturnType; }
 			set { function.MethodReturnType.ReturnType = value; }
 		}
@@ -79,7 +82,7 @@ namespace Mono.Cecil {
 			set { throw new InvalidOperationException (); }
 		}
 
-		public override ModuleDefinition Module {
+		public override IModuleDefinition Module {
 			get { return ReturnType.Module; }
 		}
 
@@ -113,15 +116,15 @@ namespace Mono.Cecil {
 		{
 			this.function = new MethodReference ();
 			this.function.Name = "method";
-			this.etype = MD.ElementType.FnPtr;
+			this.EType = MD.ElementType.FnPtr;
 		}
 
-		public override TypeDefinition Resolve ()
+		public override ITypeDefinition Resolve ()
 		{
 			return null;
 		}
 
-		public override TypeReference GetElementType ()
+		public override ITypeReference GetElementType ()
 		{
 			return this;
 		}

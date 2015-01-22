@@ -31,8 +31,7 @@ using System;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
-
-	struct DataDirectory {
+    public struct DataDirectory {
 
 		public readonly RVA VirtualAddress;
 		public readonly uint Size;

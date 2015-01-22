@@ -105,7 +105,7 @@ namespace Mono.Cecil.Tests {
 				+ "=neutral, PublicKeyToken=b77a5c561934e089\"\r\nversion=\"1\"\r\nFla"
 				+ "gs=\"UnmanagedCode\"/>\r\n</PermissionSet>\r\n";
 
-			var declaration = new SecurityDeclaration (SecurityAction.Deny, Encoding.Unicode.GetBytes (permission_set));
+			ISecurityDeclaration declaration = new SecurityDeclaration (SecurityAction.Deny, Encoding.Unicode.GetBytes (permission_set));
 			module.Assembly.SecurityDeclarations.Add (declaration);
 
 			module.Write (file);
@@ -268,15 +268,17 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
-		static void PrettyPrint (TypeReference type, StringBuilder signature)
+		static void PrettyPrint (ITypeReference type, StringBuilder signature)
 		{
 			if (type.IsArray) {
 				ArrayType array = (ArrayType) type;
-				signature.AppendFormat ("{0}[]", array.ElementType.etype.ToString ());
-			} else if (type.etype == ElementType.None) {
+				signature.AppendFormat ("{0}[]", array.ElementType.EType);
+            }
+            else if (type.EType == ElementType.None)
+            {
 				signature.Append (type.FullName);
 			} else
-				signature.Append (type.etype.ToString ());
+                signature.Append(type.EType);
 		}
 
 		static void AssertArgument<T> (T value, CustomAttributeNamedArgument named_argument)

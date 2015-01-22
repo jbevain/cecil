@@ -31,8 +31,7 @@ using System;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
-
-	sealed class Section {
+    public sealed class Section {
 		public string Name;
 		public RVA VirtualAddress;
 		public uint VirtualSize;

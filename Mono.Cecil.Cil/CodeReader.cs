@@ -34,34 +34,33 @@ using Mono.Collections.Generic;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.Cil {
+    public sealed class CodeReader : ByteBuffer {
 
-	sealed class CodeReader : ByteBuffer {
-
-		readonly internal MetadataReader reader;
+        readonly internal IMetadataReader reader;
 
 		int start;
 		Section code_section;
 
-		MethodDefinition method;
-		MethodBody body;
+		IMethodDefinition method;
+        IMethodBody body;
 
 		int Offset {
-			get { return base.position - start; }
+			get { return base.Position - start; }
 		}
 
-		public CodeReader (Section section, MetadataReader reader)
+        public CodeReader(Section section, IMetadataReader reader)
 			: base (section.Data)
 		{
 			this.code_section = section;
 			this.reader = reader;
 		}
 
-		public MethodBody ReadMethodBody (MethodDefinition method)
+        public IMethodBody ReadMethodBody(IMethodDefinition method)
 		{
 			this.method = method;
 			this.body = new MethodBody (method);
 
-			reader.context = method;
+			reader.Context = method;
 
 			ReadMethodBody ();
 
@@ -71,11 +70,11 @@ namespace Mono.Cecil.Cil {
 		public void MoveTo (int rva)
 		{
 			if (!IsInSection (rva)) {
-				code_section = reader.image.GetSectionAtVirtualAddress ((uint) rva);
+				code_section = reader.Image.GetSectionAtVirtualAddress ((uint) rva);
 				Reset (code_section.Data);
 			}
 
-			base.position = rva - (int) code_section.VirtualAddress;
+			base.Position = rva - (int) code_section.VirtualAddress;
 		}
 
 		bool IsInSection (int rva)
@@ -90,19 +89,19 @@ namespace Mono.Cecil.Cil {
 			var flags = ReadByte ();
 			switch (flags & 0x3) {
 			case 0x2: // tiny
-				body.code_size = flags >> 2;
+				body.CodeSize = flags >> 2;
 				body.MaxStackSize = 8;
 				ReadCode ();
 				break;
 			case 0x3: // fat
-				base.position--;
+				base.Position--;
 				ReadFatMethod ();
 				break;
 			default:
 				throw new InvalidOperationException ();
 			}
 
-			var symbol_reader = reader.module.symbol_reader;
+			var symbol_reader = reader.Module.SymbolReader;
 
 			if (symbol_reader != null) {
 				var instructions = body.Instructions;
@@ -113,13 +112,13 @@ namespace Mono.Cecil.Cil {
 		void ReadFatMethod ()
 		{
 			var flags = ReadUInt16 ();
-			body.max_stack_size = ReadUInt16 ();
-			body.code_size = (int) ReadUInt32 ();
-			body.local_var_token = new MetadataToken (ReadUInt32 ());
-			body.init_locals = (flags & 0x10) != 0;
+			body.MaxStackSize = ReadUInt16 ();
+			body.CodeSize = (int) ReadUInt32 ();
+			body.LocalVarToken = new MetadataToken (ReadUInt32 ());
+			body.InitLocals = (flags & 0x10) != 0;
 
-			if (body.local_var_token.RID != 0)
-				body.variables = ReadVariables (body.local_var_token);
+            if (body.LocalVarToken.RID != 0)
+                body.Variables = ReadVariables(body.LocalVarToken);
 
 			ReadCode ();
 
@@ -129,26 +128,26 @@ namespace Mono.Cecil.Cil {
 
 		public VariableDefinitionCollection ReadVariables (MetadataToken local_var_token)
 		{
-			var position = reader.position;
+			var position = reader.Position;
 			var variables = reader.ReadVariables (local_var_token);
-			reader.position = position;
+			reader.Position = position;
 
 			return variables;
 		}
 
 		void ReadCode ()
 		{
-			start = position;
-			var code_size = body.code_size;
+			start = Position;
+			var code_size = body.CodeSize;
 
-			if (code_size < 0 || buffer.Length <= (uint) (code_size + position))
+			if (code_size < 0 || Buffer.Length <= (uint) (code_size + Position))
 				code_size = 0;
 
 			var end = start + code_size;
-			var instructions = body.instructions = new InstructionCollection ((code_size + 1) / 2);
+			var instructions = body.Instructions = new InstructionCollection ((code_size + 1) / 2);
 
-			while (position < end) {
-				var offset = base.position - start;
+			while (Position < end) {
+				var offset = base.Position - start;
 				var opcode = ReadOpCode ();
 				var current = new Instruction (offset, opcode);
 
@@ -220,10 +219,10 @@ namespace Mono.Cecil.Cil {
 
 		public string GetString (MetadataToken token)
 		{
-			return reader.image.UserStringHeap.Read (token.RID);
+			return reader.Image.UserStringHeap.Read (token.RID);
 		}
 
-		public ParameterDefinition GetParameter (int index)
+		public IParameterDefinition GetParameter (int index)
 		{
 			return body.GetParameter (index);
 		}
@@ -323,7 +322,7 @@ namespace Mono.Cecil.Cil {
 
 		void ReadFatSection ()
 		{
-			position--;
+			Position--;
 			var count = (ReadInt32 () >> 8) / 24;
 
 			ReadExceptionHandlers (
@@ -355,7 +354,7 @@ namespace Mono.Cecil.Cil {
 		{
 			switch (handler.HandlerType) {
 			case ExceptionHandlerType.Catch:
-				handler.CatchType = (TypeReference) reader.LookupToken (ReadToken ());
+				handler.CatchType = (ITypeReference) reader.LookupToken (ReadToken ());
 				break;
 			case ExceptionHandlerType.Filter:
 				handler.FilterStart = GetInstruction (ReadInt32 ());
@@ -369,7 +368,7 @@ namespace Mono.Cecil.Cil {
 		void Align (int align)
 		{
 			align--;
-			Advance (((position + align) & ~align) - position);
+			Advance (((Position + align) & ~align) - Position);
 		}
 
 		public MetadataToken ReadToken ()
@@ -379,13 +378,13 @@ namespace Mono.Cecil.Cil {
 
 #if !READ_ONLY
 
-		public ByteBuffer PatchRawMethodBody (MethodDefinition method, CodeWriter writer, out MethodSymbols symbols)
+        public IByteBuffer PatchRawMethodBody(IMethodDefinition method, CodeWriter writer, out MethodSymbols symbols)
 		{
 			var buffer = new ByteBuffer ();
 			symbols = new MethodSymbols (method.Name);
 
 			this.method = method;
-			reader.context = method;
+			reader.Context = method;
 
 			MoveTo (method.RVA);
 
@@ -401,7 +400,7 @@ namespace Mono.Cecil.Cil {
 				PatchRawCode (buffer, symbols.code_size, writer);
 				break;
 			case 0x3: // fat
-				base.position--;
+				base.Position--;
 
 				PatchRawFatMethod (buffer, symbols, writer, out local_var_token);
 				break;
@@ -409,7 +408,7 @@ namespace Mono.Cecil.Cil {
 				throw new NotSupportedException ();
 			}
 
-			var symbol_reader = reader.module.symbol_reader;
+			var symbol_reader = reader.Module.SymbolReader;
 			if (symbol_reader != null && writer.metadata.write_symbols) {
 				symbols.method_token = GetOriginalToken (writer.metadata, method);
 				symbols.local_var_token = local_var_token;
@@ -419,7 +418,7 @@ namespace Mono.Cecil.Cil {
 			return buffer;
 		}
 
-		void PatchRawFatMethod (ByteBuffer buffer, MethodSymbols symbols, CodeWriter writer, out MetadataToken local_var_token)
+        void PatchRawFatMethod(IByteBuffer buffer, MethodSymbols symbols, CodeWriter writer, out MetadataToken local_var_token)
 		{
 			var flags = ReadUInt16 ();
 			buffer.WriteUInt16 (flags);
@@ -442,23 +441,23 @@ namespace Mono.Cecil.Cil {
 				PatchRawSection (buffer, writer.metadata);
 		}
 
-		static MetadataToken GetOriginalToken (MetadataBuilder metadata, MethodDefinition method)
+		static MetadataToken GetOriginalToken (MetadataBuilder metadata, IMethodDefinition method)
 		{
 			MetadataToken original;
-			if (metadata.TryGetOriginalMethodToken (method.token, out original))
+			if (metadata.TryGetOriginalMethodToken (method.MetadataToken, out original))
 				return original;
 
 			return MetadataToken.Zero;
 		}
 
-		void PatchRawCode (ByteBuffer buffer, int code_size, CodeWriter writer)
+        void PatchRawCode(IByteBuffer buffer, int code_size, CodeWriter writer)
 		{
 			var metadata = writer.metadata;
 			buffer.WriteBytes (ReadBytes (code_size));
-			var end = buffer.position;
-			buffer.position -= code_size;
+			var end = buffer.Position;
+			buffer.Position -= code_size;
 
-			while (buffer.position < end) {
+			while (buffer.Position < end) {
 				OpCode opcode;
 				var il_opcode = buffer.ReadByte ();
 				if (il_opcode != 0xfe) {
@@ -473,28 +472,28 @@ namespace Mono.Cecil.Cil {
 				case OperandType.ShortInlineBrTarget:
 				case OperandType.ShortInlineVar:
 				case OperandType.ShortInlineArg:
-					buffer.position += 1;
+					buffer.Position += 1;
 					break;
 				case OperandType.InlineVar:
 				case OperandType.InlineArg:
-					buffer.position += 2;
+					buffer.Position += 2;
 					break;
 				case OperandType.InlineBrTarget:
 				case OperandType.ShortInlineR:
 				case OperandType.InlineI:
-					buffer.position += 4;
+					buffer.Position += 4;
 					break;
 				case OperandType.InlineI8:
 				case OperandType.InlineR:
-					buffer.position += 8;
+					buffer.Position += 8;
 					break;
 				case OperandType.InlineSwitch:
 					var length = buffer.ReadInt32 ();
-					buffer.position += length * 4;
+					buffer.Position += length * 4;
 					break;
 				case OperandType.InlineString:
 					var @string = GetString (new MetadataToken (buffer.ReadUInt32 ()));
-					buffer.position -= 4;
+					buffer.Position -= 4;
 					buffer.WriteUInt32 (
 						new MetadataToken (
 							TokenType.String,
@@ -502,7 +501,7 @@ namespace Mono.Cecil.Cil {
 					break;
 				case OperandType.InlineSig:
 					var call_site = GetCallSite (new MetadataToken (buffer.ReadUInt32 ()));
-					buffer.position -= 4;
+					buffer.Position -= 4;
 					buffer.WriteUInt32 (writer.GetStandAloneSignature (call_site).ToUInt32 ());
 					break;
 				case OperandType.InlineTok:
@@ -510,18 +509,18 @@ namespace Mono.Cecil.Cil {
 				case OperandType.InlineMethod:
 				case OperandType.InlineField:
 					var provider = reader.LookupToken (new MetadataToken (buffer.ReadUInt32 ()));
-					buffer.position -= 4;
+					buffer.Position -= 4;
 					buffer.WriteUInt32 (metadata.LookupToken (provider).ToUInt32 ());
 					break;
 				}
 			}
 		}
 
-		void PatchRawSection (ByteBuffer buffer, MetadataBuilder metadata)
+        void PatchRawSection(IByteBuffer buffer, MetadataBuilder metadata)
 		{
-			var position = base.position;
+			var position = base.Position;
 			Align (4);
-			buffer.WriteBytes (base.position - position);
+			buffer.WriteBytes (base.Position - position);
 
 			const byte fat_format = 0x40;
 			const byte more_sects = 0x80;
@@ -537,7 +536,7 @@ namespace Mono.Cecil.Cil {
 				PatchRawSection (buffer, metadata);
 		}
 
-		void PatchRawSmallSection (ByteBuffer buffer, MetadataBuilder metadata)
+        void PatchRawSmallSection(IByteBuffer buffer, MetadataBuilder metadata)
 		{
 			var length = ReadByte ();
 			buffer.WriteByte (length);
@@ -550,9 +549,9 @@ namespace Mono.Cecil.Cil {
 			PatchRawExceptionHandlers (buffer, metadata, count, false);
 		}
 
-		void PatchRawFatSection (ByteBuffer buffer, MetadataBuilder metadata)
+        void PatchRawFatSection(IByteBuffer buffer, MetadataBuilder metadata)
 		{
-			position--;
+			Position--;
 			var length = ReadInt32 ();
 			buffer.WriteInt32 (length);
 
@@ -561,7 +560,7 @@ namespace Mono.Cecil.Cil {
 			PatchRawExceptionHandlers (buffer, metadata, count, true);
 		}
 
-		void PatchRawExceptionHandlers (ByteBuffer buffer, MetadataBuilder metadata, int count, bool fat_entry)
+        void PatchRawExceptionHandlers(IByteBuffer buffer, MetadataBuilder metadata, int count, bool fat_entry)
 		{
 			const int fat_entry_size = 16;
 			const int small_entry_size = 6;

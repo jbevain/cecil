@@ -39,12 +39,12 @@ namespace Mono.Cecil.Mdb {
 #if !READ_ONLY
 	public class MdbWriterProvider : ISymbolWriterProvider {
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		public ISymbolWriter GetSymbolWriter (IModuleDefinition module, string fileName)
 		{
 			return new MdbWriter (module.Mvid, fileName);
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (IModuleDefinition module, Stream symbolStream)
 		{
 			throw new NotImplementedException ();
 		}
@@ -63,7 +63,7 @@ namespace Mono.Cecil.Mdb {
 			this.source_files = new Dictionary<string, SourceFile> ();
 		}
 
-		static Collection<Instruction> GetInstructions (MethodBody body)
+        static Collection<Instruction> GetInstructions(IMethodBody body)
 		{
 			var instructions = new Collection<Instruction> ();
 			foreach (var instruction in body.Instructions)
@@ -109,7 +109,7 @@ namespace Mono.Cecil.Mdb {
 			file = source_file;
 		}
 
-		public void Write (MethodBody body)
+        public void Write(IMethodBody body)
 		{
 			var method = new SourceMethod (body.Method);
 
@@ -231,7 +231,7 @@ namespace Mono.Cecil.Mdb {
 
 		class SourceMethod : IMethodDef {
 
-			readonly MethodDefinition method;
+			readonly IMethodDefinition method;
 
 			public string Name {
 				get { return method.Name; }
@@ -241,7 +241,7 @@ namespace Mono.Cecil.Mdb {
 				get { return method.MetadataToken.ToInt32 (); }
 			}
 
-			public SourceMethod (MethodDefinition method)
+			public SourceMethod (IMethodDefinition method)
 			{
 				this.method = method;
 			}

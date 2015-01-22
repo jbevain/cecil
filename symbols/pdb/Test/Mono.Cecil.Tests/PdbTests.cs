@@ -127,7 +127,7 @@ namespace Mono.Cecil.Tests {
 			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.Import (typeof (object)));
 			module.Types.Add (type);
 
-			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.Import (typeof (string)));
+			IMethodDefinition method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.Import (typeof (string)));
 			type.Methods.Add (method);
 
 			var body = method.Body;
@@ -165,7 +165,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("temp", method.Body.Variables [0].Name);
 		}
 
-		static void AssertCode (string expected, MethodDefinition method)
+		static void AssertCode (string expected, IMethodDefinition method)
 		{
 			Assert.IsTrue (method.HasBody);
 			Assert.IsNotNull (method.Body);

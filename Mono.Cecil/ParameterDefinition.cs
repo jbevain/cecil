@@ -1,5 +1,5 @@
 //
-// ParameterDefinition.cs
+// IParameterDefinition.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
@@ -26,18 +26,31 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
+    public interface IParameterDefinition : IParameterReference, ICustomAttributeProvider, IConstantProvider, IMarshalInfoProvider {
+        ParameterAttributes Attributes { get; set; }
+        IMethodSignature Method { get; set; }
+        int Sequence { get; }
+        bool IsIn { get; set; }
+        bool IsOut { get; set; }
+        bool IsLcid { get; set; }
+        bool IsReturnValue { get; set; }
+        bool IsOptional { get; set; }
+        bool HasDefault { get; set; }
+        bool HasFieldMarshal { get; set; }
+    }
 
-	public sealed class ParameterDefinition : ParameterReference, ICustomAttributeProvider, IConstantProvider, IMarshalInfoProvider {
+    public sealed class ParameterDefinition : ParameterReference, IParameterDefinition {
 
 		ushort attributes;
 
 		internal IMethodSignature method;
 
 		object constant = Mixin.NotResolved;
-		Collection<CustomAttribute> custom_attributes;
+        IList<ICustomAttribute> custom_attributes;
 		MarshalInfo marshal_info;
 
 		public ParameterAttributes Attributes {
@@ -45,11 +58,13 @@ namespace Mono.Cecil {
 			set { attributes = (ushort) value; }
 		}
 
-		public IMethodSignature Method {
-			get { return method; }
+		public IMethodSignature Method
+		{
+		    get { return method; }
+		    set { method = value; }
 		}
 
-		public int Sequence {
+        public int Sequence {
 			get {
 				if (method == null)
 					return -1;
@@ -81,7 +96,8 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public Collection<CustomAttribute> CustomAttributes {
+        public IList<ICustomAttribute> CustomAttributes
+        {
 			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, parameter_type.Module)); }
 		}
 
@@ -138,25 +154,25 @@ namespace Mono.Cecil {
 
 		#endregion
 
-		internal ParameterDefinition (TypeReference parameterType, IMethodSignature method)
+		internal ParameterDefinition (ITypeReference parameterType, IMethodSignature method)
 			: this (string.Empty, ParameterAttributes.None, parameterType)
 		{
 			this.method = method;
 		}
 
-		public ParameterDefinition (TypeReference parameterType)
+		public ParameterDefinition (ITypeReference parameterType)
 			: this (string.Empty, ParameterAttributes.None, parameterType)
 		{
 		}
 
-		public ParameterDefinition (string name, ParameterAttributes attributes, TypeReference parameterType)
+		public ParameterDefinition (string name, ParameterAttributes attributes, ITypeReference parameterType)
 			: base (name, parameterType)
 		{
 			this.attributes = (ushort) attributes;
 			this.token = new MetadataToken (TokenType.Param);
 		}
 
-		public override ParameterDefinition Resolve ()
+		public override IParameterDefinition Resolve ()
 		{
 			return this;
 		}

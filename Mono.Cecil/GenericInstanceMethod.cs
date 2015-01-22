@@ -35,14 +35,14 @@ namespace Mono.Cecil {
 
 	public sealed class GenericInstanceMethod : MethodSpecification, IGenericInstance, IGenericContext {
 
-		Collection<TypeReference> arguments;
+		Collection<ITypeReference> arguments;
 
 		public bool HasGenericArguments {
 			get { return !arguments.IsNullOrEmpty (); }
 		}
 
-		public Collection<TypeReference> GenericArguments {
-			get { return arguments ?? (arguments = new Collection<TypeReference> ()); }
+		public Collection<ITypeReference> GenericArguments {
+			get { return arguments ?? (arguments = new Collection<ITypeReference> ()); }
 		}
 
 		public override bool IsGenericInstance {
@@ -77,7 +77,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public GenericInstanceMethod (MethodReference method)
+		public GenericInstanceMethod (IMethodReference method)
 			: base (method)
 		{
 		}

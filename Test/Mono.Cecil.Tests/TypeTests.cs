@@ -167,7 +167,7 @@ namespace Mono.Cecil.Tests {
 				var method = baz.GetMethod ("PrintAnswer");
 
 				var box = method.Body.Instructions.Where (i => i.OpCode == OpCodes.Box).First ();
-				var int32 = (TypeReference) box.Operand;
+				var int32 = (ITypeReference) box.Operand;
 
 				Assert.IsTrue (int32.IsValueType);
 			});

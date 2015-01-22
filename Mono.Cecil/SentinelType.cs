@@ -43,11 +43,11 @@ namespace Mono.Cecil {
 			get { return true; }
 		}
 
-		public SentinelType (TypeReference type)
+		public SentinelType (ITypeReference type)
 			: base (type)
 		{
 			Mixin.CheckType (type);
-			this.etype = MD.ElementType.Sentinel;
+			this.EType = MD.ElementType.Sentinel;
 		}
 	}
 }
