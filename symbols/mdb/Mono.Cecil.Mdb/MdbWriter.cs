@@ -137,7 +137,7 @@ namespace Mono.Cecil.Mdb {
 
 
 
-			if (body.Scope != null)
+			if (body.Scope != null && body.Scope.HasScopes)
 				WriteScope (body.Scope, true);
 			else 
 				if (body.HasVariables)
