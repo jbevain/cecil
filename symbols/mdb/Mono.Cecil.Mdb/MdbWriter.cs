@@ -135,10 +135,39 @@ namespace Mono.Cecil.Mdb {
 					start_cols [i],
 					false);
 
-			if (body.HasVariables)
-				AddVariables (body.Variables);
+
+
+			if (body.Scope != null && body.Scope.HasScopes)
+				WriteScope (body.Scope, true);
+			else 
+				if (body.HasVariables)
+					AddVariables (body.Variables);
 
 			writer.CloseMethod ();
+		}
+
+		private void WriteScope (Scope scope, bool root)
+		{
+			if (scope.Start.Offset == scope.End.Offset) return;
+			writer.OpenScope (scope.Start.Offset);
+
+
+			if (scope.HasVariables)
+			{
+				foreach (var el in scope.Variables)
+				{
+					if (!String.IsNullOrEmpty (el.Name))
+						writer.DefineLocalVariable (el.Index, el.Name);
+				}
+			}
+
+			if (scope.HasScopes)
+			{
+				foreach (var el in scope.Scopes)
+					WriteScope (el, false);
+			}
+
+			writer.CloseScope (scope.End.Offset + scope.End.GetSize());
 		}
 
 		readonly static byte [] empty_header = new byte [0];
