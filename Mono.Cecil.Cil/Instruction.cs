@@ -35,6 +35,7 @@ namespace Mono.Cecil.Cil {
 
 		internal int offset;
 		internal OpCode opcode;
+		internal byte[] raw;
 		internal object operand;
 
 		internal Instruction previous;
@@ -48,8 +49,23 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public OpCode OpCode {
-			get { return opcode; }
-			set { opcode = value; }
+			get {
+				if (raw != null)
+					throw new InvalidOperationException ("This is a raw instruction.");
+
+				return opcode;
+			}
+			set {
+				if (raw != null)
+					throw new InvalidOperationException ("This is a raw instruction.");
+
+				opcode = value;
+			}
+		}
+
+		public byte[] Raw {
+			get { return raw; }
+			set { raw = value; }
 		}
 
 		public object Operand {
@@ -84,9 +100,40 @@ namespace Mono.Cecil.Cil {
 			this.operand = operand;
 		}
 
+		internal Instruction (byte[] raw, object operand)
+		{
+			this.raw = raw;
+			this.operand = operand;
+
+			// We assign whatever opcode happens to have an
+			// operand matching what we were given. This is a
+			// bit dirty, but it allows us to switch on the
+			// operand type in a few places (such as GetSize
+			// and ToString) instead of doing type checks.
+			if (operand != null) {
+				this.opcode =
+					operand is TypeReference ? OpCodes.Sizeof :
+					operand is CallSite ? OpCodes.Calli :
+					operand is MethodReference ? OpCodes.Call :
+					operand is FieldReference ? OpCodes.Ldfld :
+					operand is string ? OpCodes.Ldstr :
+					operand is sbyte ? OpCodes.Ldc_I4_S :
+					operand is byte ? OpCodes.No :
+					operand is int ? OpCodes.Ldc_I4 :
+					operand is long ? OpCodes.Ldc_I8 :
+					operand is float ? OpCodes.Ldc_R4 :
+					operand is double ? OpCodes.Ldc_R8 :
+					operand is Instruction ? OpCodes.Br :
+					operand is Instruction [] ? OpCodes.Switch :
+					operand is VariableDefinition ? OpCodes.Ldloc :
+					operand is ParameterDefinition ? OpCodes.Ldarg :
+					default(OpCode);
+			}
+		}
+
 		public int GetSize ()
 		{
-			int size = opcode.Size;
+			int size = raw != null ? raw.Length : opcode.Size;
 
 			switch (opcode.OperandType) {
 			case OperandType.InlineSwitch:
@@ -124,7 +171,7 @@ namespace Mono.Cecil.Cil {
 			AppendLabel (instruction, this);
 			instruction.Append (':');
 			instruction.Append (' ');
-			instruction.Append (opcode.Name);
+			instruction.Append (raw != null ? "<raw>" : opcode.Name);
 
 			if (operand == null)
 				return instruction.ToString ();
@@ -316,6 +363,37 @@ namespace Mono.Cecil.Cil {
 				throw new ArgumentException ("opcode");
 
 			return new Instruction (opcode, parameter);
+		}
+
+		public static Instruction CreateRaw (byte[] raw, object operand)
+		{
+			if (raw == null)
+				throw new ArgumentNullException ("raw");
+
+			// Only allow operands that we can handle as part
+			// of regular CIL instructions. For everything else,
+			// the user can serialize the data themselves and
+			// emit it as the data in a raw instruction (with
+			// no operand).
+			if (operand != null &&
+			    !(operand is TypeReference) &&
+			    !(operand is CallSite) &&
+			    !(operand is MethodReference) &&
+			    !(operand is FieldReference) &&
+			    !(operand is string) &&
+			    !(operand is sbyte) &&
+			    !(operand is byte) &&
+			    !(operand is int) &&
+			    !(operand is long) &&
+			    !(operand is float) &&
+			    !(operand is double) &&
+			    !(operand is Instruction) &&
+			    !(operand is Instruction []) &&
+			    !(operand is VariableDefinition) &&
+			    !(operand is ParameterDefinition))
+				throw new ArgumentException ("operand");
+
+			return new Instruction (raw, operand);
 		}
 	}
 }

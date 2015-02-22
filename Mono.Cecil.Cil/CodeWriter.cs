@@ -166,7 +166,12 @@ namespace Mono.Cecil.Cil {
 
 			for (int i = 0; i < size; i++) {
 				var instruction = items [i];
-				WriteOpCode (instruction.opcode);
+
+				if (instruction.raw != null)
+					WriteBytes (instruction.raw);
+				else
+					WriteOpCode (instruction.opcode);
+
 				WriteOperand (instruction);
 			}
 		}
@@ -192,23 +197,25 @@ namespace Mono.Cecil.Cil {
 			if (operand == null)
 				throw new ArgumentException ();
 
+			var size = instruction.raw != null ? instruction.raw.Length : opcode.Size;
+
 			switch (operand_type) {
 			case OperandType.InlineSwitch: {
 				var targets = (Instruction []) operand;
 				WriteInt32 (targets.Length);
-				var diff = instruction.Offset + opcode.Size + (4 * (targets.Length + 1));
+				var diff = instruction.Offset + size + (4 * (targets.Length + 1));
 				for (int i = 0; i < targets.Length; i++)
 					WriteInt32 (GetTargetOffset (targets [i]) - diff);
 				break;
 			}
 			case OperandType.ShortInlineBrTarget: {
 				var target = (Instruction) operand;
-				WriteSByte ((sbyte) (GetTargetOffset (target) - (instruction.Offset + opcode.Size + 1)));
+				WriteSByte ((sbyte) (GetTargetOffset (target) - (instruction.Offset + size + 1)));
 				break;
 			}
 			case OperandType.InlineBrTarget: {
 				var target = (Instruction) operand;
-				WriteInt32 (GetTargetOffset (target) - (instruction.Offset + opcode.Size + 4));
+				WriteInt32 (GetTargetOffset (target) - (instruction.Offset + size + 4));
 				break;
 			}
 			case OperandType.ShortInlineVar:
@@ -409,6 +416,9 @@ namespace Mono.Cecil.Cil {
 
 		static void ComputeStackSize (Instruction instruction, ref int stack_size)
 		{
+			if (instruction.raw != null)
+				return;
+
 			switch (instruction.opcode.FlowControl) {
 			case FlowControl.Branch:
 			case FlowControl.Break:
@@ -439,6 +449,8 @@ namespace Mono.Cecil.Cil {
 				break;
 			}
 			default:
+				if (instruction.raw != null)
+					break;
 				ComputePopDelta (instruction.opcode.StackBehaviourPop, ref stack_size);
 				ComputePushDelta (instruction.opcode.StackBehaviourPush, ref stack_size);
 				break;
