@@ -221,6 +221,22 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("T Mono.Cecil.Tests.ImportCecilTests/Generic`1::Method(T)", method.FullName);
 		}
 
+		[TestCase (GenericParameterType.Type)]
+		[TestCase (GenericParameterType.Method)]
+		public void ImportOwnerlessGenericParameter (GenericParameterType genericParameterType)
+		{
+			var module = ModuleDefinition.CreateModule ("foo", ModuleKind.Dll);
+			var openEnumerable = module.Import (typeof (IEnumerable<>));
+			var instanceEnumerable = new GenericInstanceType (openEnumerable);
+			var T = new GenericParameter (0, genericParameterType, module);
+			instanceEnumerable.GenericArguments.Add (T);
+
+			var module2 = ModuleDefinition.CreateModule ("bar", ModuleKind.Dll);
+			var imported = module2.Import (instanceEnumerable);
+
+			Assert.AreEqual (module2, imported.Module);
+		}
+
 		public class ContextGeneric1Method2<G1>
 		{
 			public G1 GenericMethod<R1, S1> (R1 r, S1 s)
