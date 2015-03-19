@@ -849,6 +849,9 @@ namespace Mono.Cecil {
 
 			metadata.AddTypeDefinition (type);
 
+			if (type.IsTypeOf ("System", "Object"))
+				metadata.HasSystemObject = true;
+
 			this.context = type;
 
 			type.BaseType = GetTypeDefOrRef (ReadMetadataToken (CodedIndex.TypeDefOrRef));

@@ -96,12 +96,13 @@ namespace Mono.Cecil {
 					return corlib;
 
 				const string mscorlib = "mscorlib";
+				const string system_runtime = "System.Runtime";
 
 				var references = module.AssemblyReferences;
 
 				for (int i = 0; i < references.Count; i++) {
 					var reference = references [i];
-					if (reference.Name == mscorlib)
+					if (reference.Name == mscorlib || reference.Name == system_runtime)
 						return corlib = reference;
 				}
 
