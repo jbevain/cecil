@@ -49,7 +49,7 @@ namespace Mono.Cecil.PE {
 
 		ByteBuffer win32_resources;
 
-		const uint pe_header_size = 0x178u;
+		const uint pe_header_size = 0x98u;
 		const uint section_header_size = 0x28u;
 		const uint file_alignment = 0x200;
 		const uint section_alignment = 0x2000;
@@ -189,6 +189,11 @@ namespace Mono.Cecil.PE {
 			});
 		}
 
+		ushort SizeOfOptionalHeader ()
+		{
+			return (ushort) (!pe64 ? 0xe0 : 0xf0);
+		}
+
 		void WritePEFileHeader ()
 		{
 			WriteUInt32 (0x00004550);		// Magic
@@ -197,7 +202,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (time_stamp);
 			WriteUInt32 (0);	// PointerToSymbolTable
 			WriteUInt32 (0);	// NumberOfSymbols
-			WriteUInt16 ((ushort) (!pe64 ? 0xe0 : 0xf0));	// SizeOfOptionalHeader
+			WriteUInt16 (SizeOfOptionalHeader ());	// SizeOfOptionalHeader
 
 			// ExecutableImage | (pe64 ? 32BitsMachine : LargeAddressAware)
 			var characteristics = (ushort) (0x0002 | (!pe64 ? 0x0100 : 0x0020));
@@ -787,7 +792,7 @@ namespace Mono.Cecil.PE {
 
 		public uint GetHeaderSize ()
 		{
-			return pe_header_size + (sections * section_header_size);
+			return pe_header_size + SizeOfOptionalHeader () + (sections * section_header_size);
 		}
 
 		void PatchWin32Resources (ByteBuffer resources)
