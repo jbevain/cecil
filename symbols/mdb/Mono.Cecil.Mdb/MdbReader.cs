@@ -124,10 +124,7 @@ namespace Mono.Cecil.Mdb {
 				if (document == null)
 					document = GetDocument (entry.CompileUnit.SourceFile);
 
-				instruction.SequencePoint = new SequencePoint (document) {
-					StartLine = line.Row,
-					EndLine = line.Row,
-				};
+				instruction.SequencePoint = LineToSequencePoint (line, entry, document);
 			}
 		}
 
@@ -205,10 +202,9 @@ namespace Mono.Cecil.Mdb {
 			for (int i = 0; i < lines.Length; i++) {
 				var line = lines [i];
 
-				instructions.Add (new InstructionSymbol (line.Offset, new SequencePoint (GetDocument (entry.CompileUnit.SourceFile)) {
-					StartLine = line.Row,
-					EndLine = line.Row,
-				}));
+				instructions.Add (new InstructionSymbol (
+					line.Offset,
+					LineToSequencePoint (line, entry, GetDocument (entry.CompileUnit.SourceFile))));
 			}
 		}
 
@@ -223,9 +219,32 @@ namespace Mono.Cecil.Mdb {
 			}
 		}
 
+		static SequencePoint LineToSequencePoint (LineNumberEntry line, MethodEntry entry, Document document)
+		{
+			return new SequencePoint (document) {
+				StartLine = line.Row,
+				EndLine = line.EndRow,
+				StartColumn = line.Column,
+				EndColumn = line.EndColumn,
+			};
+		}
+
 		public void Dispose ()
 		{
 			symbol_file.Dispose ();
+		}
+	}
+
+	static class MethodEntryExtensions {
+
+		public static bool HasColumnInfo (this MethodEntry entry)
+		{
+			return (entry.MethodFlags & MethodEntry.Flags.ColumnsInfoIncluded) != 0;
+		}
+
+		public static bool HasEndInfo (this MethodEntry entry)
+		{
+			return (entry.MethodFlags & MethodEntry.Flags.EndInfoIncluded) != 0;
 		}
 	}
 }
