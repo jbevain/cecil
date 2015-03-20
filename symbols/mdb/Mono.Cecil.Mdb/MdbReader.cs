@@ -40,12 +40,21 @@ namespace Mono.Cecil.Mdb {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
-			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (module, fileName));
+			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (fileName + ".mdb", module.Mvid));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
-			throw new NotImplementedException ();
+			var symbolFile = MonoSymbolFile.ReadSymbolFile (symbolStream);
+			if (module.Mvid != symbolFile.Guid)
+			{
+				var fileStream = symbolStream as FileStream;
+				if (fileStream != null)
+					throw new MonoSymbolFileException ("Symbol file `{0}' does not match assembly", fileStream.Name);
+				else
+					throw new MonoSymbolFileException ("Symbol file from stream does not match assembly");
+			}
+			return new MdbReader (module, symbolFile);
 		}
 	}
 

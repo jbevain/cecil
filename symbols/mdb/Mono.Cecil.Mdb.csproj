@@ -26,6 +26,7 @@
     <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolFile.cs" />
     <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolTable.cs" />
     <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolWriter.cs" />
+    <Compile Include="Mono.CompilerServices.SymbolWriter\SourceMethodBuilder.cs" />
     <Compile Include="Mono.CompilerServices.SymbolWriter\SymbolWriterImpl.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
