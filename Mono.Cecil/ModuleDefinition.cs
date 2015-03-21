@@ -691,7 +691,7 @@ namespace Mono.Cecil {
 
 #if !CF
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (Type type)
 		{
 			return ImportReference (type, null);
@@ -702,7 +702,7 @@ namespace Mono.Cecil {
 			return ImportReference (type, null);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (Type type, IGenericParameterProvider context)
 		{
 			return ImportReference (type, context);
@@ -716,13 +716,13 @@ namespace Mono.Cecil {
 			return ReflectionImporter.ImportReference (type, context);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public FieldReference Import (SR.FieldInfo field)
 		{
 			return ImportReference (field, null);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
 		{
 			return ImportReference (field, context);
@@ -741,13 +741,13 @@ namespace Mono.Cecil {
 			return ReflectionImporter.ImportReference (field, context);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public MethodReference Import (SR.MethodBase method)
 		{
 			return ImportReference (method, null);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
 		{
 			return ImportReference (method, context);
@@ -767,13 +767,13 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (TypeReference type)
 		{
 			return ImportReference (type, null);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
 		{
 			return ImportReference (type, context);
@@ -796,13 +796,13 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportReference (type, context);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public FieldReference Import (FieldReference field)
 		{
 			return ImportReference (field, null);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public FieldReference Import (FieldReference field, IGenericParameterProvider context)
 		{
 			return ImportReference (field, context);
@@ -825,13 +825,13 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportReference (field, context);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public MethodReference Import (MethodReference method)
 		{
 			return ImportReference (method, null);
 		}
 
-		[Obsolete]
+		[Obsolete ("Use ImportReference", error: false)]
 		public MethodReference Import (MethodReference method, IGenericParameterProvider context)
 		{
 			return ImportReference (method, context);
