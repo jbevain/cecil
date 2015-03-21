@@ -30,35 +30,35 @@ namespace Mono.Cecil.Tests {
 			return GetResourcePath (Path.Combine ("il", name), assembly);
 		}
 
-		public static ModuleDefinition GetResourceModule (string name)
+		public ModuleDefinition GetResourceModule (string name)
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly));
 		}
 
-		public static ModuleDefinition GetResourceModule (string name, ReaderParameters parameters)
+		public ModuleDefinition GetResourceModule (string name, ReaderParameters parameters)
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly), parameters);
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), parameters);
 		}
 
-		public static ModuleDefinition GetResourceModule (string name, ReadingMode mode)
+		public ModuleDefinition GetResourceModule (string name, ReadingMode mode)
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly), new ReaderParameters (mode));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), new ReaderParameters (mode));
 		}
 
-		internal static Image GetResourceImage (string name)
+		internal Image GetResourceImage (string name)
 		{
-			using (var fs = new FileStream (GetAssemblyResourcePath (name, typeof (BaseTestFixture).Assembly), FileMode.Open, FileAccess.Read))
+			using (var fs = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read))
 				return ImageReader.ReadImageFrom (fs);
 		}
 
-		public static ModuleDefinition GetCurrentModule ()
+		public ModuleDefinition GetCurrentModule ()
 		{
-			return ModuleDefinition.ReadModule (typeof (BaseTestFixture).Module.FullyQualifiedName);
+			return ModuleDefinition.ReadModule (GetType ().Module.FullyQualifiedName);
 		}
 
-		public static ModuleDefinition GetCurrentModule (ReaderParameters parameters)
+		public ModuleDefinition GetCurrentModule (ReaderParameters parameters)
 		{
-			return ModuleDefinition.ReadModule (typeof (BaseTestFixture).Module.FullyQualifiedName, parameters);
+			return ModuleDefinition.ReadModule (GetType ().Module.FullyQualifiedName, parameters);
 		}
 
 		public static string FindResourcesDirectory (Assembly assembly)
@@ -192,9 +192,14 @@ namespace Mono.Cecil.Tests {
 		ModuleDefinition GetModule ()
 		{
 			var location = test_case.ModuleLocation;
+			var directory = Path.GetDirectoryName (location);
+
+			var resolver = new DefaultAssemblyResolver ();
+			resolver.AddSearchDirectory (directory);
 
 			var parameters = new ReaderParameters {
 				SymbolReaderProvider = GetSymbolReaderProvider (),
+				AssemblyResolver = resolver,
 			};
 
 			switch (type) {

@@ -175,13 +175,12 @@ namespace Mono.Cecil {
 				if (fullname != null)
 					return fullname;
 
+				fullname = this.TypeFullName ();
+
 				if (IsNested)
-					return fullname = DeclaringType.FullName + "/" + Name;
+					fullname = DeclaringType.FullName + "/" + fullname;
 
-				if (string.IsNullOrEmpty (@namespace))
-					return fullname = Name;
-
-				return fullname = @namespace + "." + Name;
+				return fullname;
 			}
 		}
 
@@ -298,6 +297,13 @@ namespace Mono.Cecil {
 			default:
 				return false;
 			}
+		}
+
+		public static string TypeFullName (this TypeReference self)
+		{
+			return string.IsNullOrEmpty (self.Namespace)
+				? self.Name
+				: self.Namespace + '.' + self.Name;
 		}
 
 		public static bool IsTypeOf (this TypeReference self, string @namespace, string name)

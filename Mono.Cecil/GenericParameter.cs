@@ -206,7 +206,7 @@ namespace Mono.Cecil {
 
 		}
 
-		public GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
+		internal GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
 			: base (string.Empty, string.Empty)
 		{
 			if (module == null)

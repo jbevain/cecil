@@ -66,5 +66,14 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("fang_Handler", other.Name);
 			});
 		}
+
+		[Test]
+		public void UnattachedEvent ()
+		{
+			var int32 = typeof (int).ToDefinition ();
+			var evt = new EventDefinition ("Event", EventAttributes.None, int32);
+
+			Assert.AreEqual (null, evt.AddMethod);
+		}
 	}
 }

@@ -175,7 +175,7 @@ namespace Mono.Cecil {
 			if (declaring_type == null)
 				return null;
 
-			return declaring_type.GetNestedType (type.Name);
+			return declaring_type.GetNestedType (type.TypeFullName ());
 		}
 
 		public virtual FieldDefinition Resolve (FieldReference field)

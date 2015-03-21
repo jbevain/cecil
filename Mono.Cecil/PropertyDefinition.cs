@@ -240,6 +240,9 @@ namespace Mono.Cecil {
 		void InitializeMethods ()
 		{
 			var module = this.Module;
+			if (module == null)
+				return;
+
 			lock (module.SyncRoot) {
 				if (get_method != null || set_method != null)
 					return;

@@ -170,8 +170,6 @@ namespace Mono.Cecil.Tests {
 			Assert.IsTrue (method.HasBody);
 			Assert.IsNotNull (method.Body);
 
-			System.Console.WriteLine (Formatter.FormatMethodBody (method));
-
 			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
 		}
 

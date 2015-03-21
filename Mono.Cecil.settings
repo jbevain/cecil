@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">net_4_0_Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <BuildDirectory Condition=" '$(BuildDirectory)' == '' ">$(MSBuildThisFileDirectory)</BuildDirectory>
+    <FileAlignment>512</FileAlignment>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputType>Library</OutputType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\mono.snk</AssemblyOriginatorKeyFile>
+    <OutputType>Library</OutputType>
+    <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.EndsWith('Release')) ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('net_2_0')) ">
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('net_3_5')) ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DefineConstants>$(DefineConstants);NET_3_5;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('net_4_0')) ">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('net_4_5')) ">
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;NET_4_5;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('silverlight')) ">
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;SILVERLIGHT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('winphone')) ">
+    <TargetFrameworkProfile>WindowsPhone</TargetFrameworkProfile>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;SILVERLIGHT;CF</DefineConstants>
+  </PropertyGroup>
+  <!-- Shared References -->
+  <ItemGroup Condition=" '$(TargetFrameworkVersion)' != 'v2.0' ">
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <!-- The following keeps Visual Studio happy; let's keep Visual Studio happy -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_2_0_Debug' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_5_Debug' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'silverlight_Debug' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'winphone_Debug' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_2_0_Release' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Release' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_5_Release' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'silverlight_Release' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'winphone_Release' ">
+  </PropertyGroup>
+</Project>

@@ -116,5 +116,13 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (type.GetMethod ("get_Bingo"), property.GetMethod);
 			});
 		}
+
+		[Test]
+		public void UnattachedProperty ()
+		{
+			var property = new PropertyDefinition ("Property", PropertyAttributes.None, typeof (int).ToDefinition ());
+
+			Assert.IsNull (property.GetMethod);
+		}
 	}
 }

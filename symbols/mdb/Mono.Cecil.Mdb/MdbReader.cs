@@ -40,12 +40,20 @@ namespace Mono.Cecil.Mdb {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
-			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (module, fileName));
+			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (fileName + ".mdb", module.Mvid));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
-			throw new NotImplementedException ();
+			var file = MonoSymbolFile.ReadSymbolFile (symbolStream);
+			if (module.Mvid != file.Guid) {
+				var file_stream = symbolStream as FileStream;
+				if (file_stream != null)
+					throw new MonoSymbolFileException ("Symbol file `{0}' does not match assembly", file_stream.Name);
+
+				throw new MonoSymbolFileException ("Symbol file from stream does not match assembly");
+			}
+			return new MdbReader (module, file);
 		}
 	}
 
@@ -115,10 +123,7 @@ namespace Mono.Cecil.Mdb {
 				if (document == null)
 					document = GetDocument (entry.CompileUnit.SourceFile);
 
-				instruction.SequencePoint = new SequencePoint (document) {
-					StartLine = line.Row,
-					EndLine = line.Row,
-				};
+				instruction.SequencePoint = LineToSequencePoint (line, entry, document);
 			}
 		}
 
@@ -196,10 +201,9 @@ namespace Mono.Cecil.Mdb {
 			for (int i = 0; i < lines.Length; i++) {
 				var line = lines [i];
 
-				instructions.Add (new InstructionSymbol (line.Offset, new SequencePoint (GetDocument (entry.CompileUnit.SourceFile)) {
-					StartLine = line.Row,
-					EndLine = line.Row,
-				}));
+				instructions.Add (new InstructionSymbol (
+					line.Offset,
+					LineToSequencePoint (line, entry, GetDocument (entry.CompileUnit.SourceFile))));
 			}
 		}
 
@@ -214,9 +218,32 @@ namespace Mono.Cecil.Mdb {
 			}
 		}
 
+		static SequencePoint LineToSequencePoint (LineNumberEntry line, MethodEntry entry, Document document)
+		{
+			return new SequencePoint (document) {
+				StartLine = line.Row,
+				EndLine = line.EndRow,
+				StartColumn = line.Column,
+				EndColumn = line.EndColumn,
+			};
+		}
+
 		public void Dispose ()
 		{
 			symbol_file.Dispose ();
+		}
+	}
+
+	static class MethodEntryExtensions {
+
+		public static bool HasColumnInfo (this MethodEntry entry)
+		{
+			return (entry.MethodFlags & MethodEntry.Flags.ColumnsInfoIncluded) != 0;
+		}
+
+		public static bool HasEndInfo (this MethodEntry entry)
+		{
+			return (entry.MethodFlags & MethodEntry.Flags.EndInfoIncluded) != 0;
 		}
 	}
 }
