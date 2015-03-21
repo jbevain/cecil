@@ -8,6 +8,7 @@
     <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\ProjectInfo.cs" />
     <Compile Include="Mono.Cecil.Rocks\AssemblyInfo.cs" />
     <Compile Include="Mono.Cecil.Rocks\MethodDefinitionRocks.cs" />
     <Compile Include="Mono.Cecil.Rocks\SecurityDeclarationRocks.cs" />

@@ -1,10 +1,10 @@
 //
-// AssemblyInfo.cs
+// ProjectInfo.cs
 //
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -26,9 +26,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle ("Mono.Cecil.Mdb")]
+[assembly: AssemblyProduct ("Mono.Cecil")]
+[assembly: AssemblyCopyright ("Copyright © 2008 - 2015 Jb Evain")]
 
-[assembly: CLSCompliant (false)]
+[assembly: ComVisible (false)]
+
+[assembly: AssemblyVersion ("0.9.5.0")]
+#if !CF
+[assembly: AssemblyFileVersion ("0.9.5.0")]
+#endif

@@ -7,6 +7,7 @@
     <AssemblyName>Mono.Cecil.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\ProjectInfo.cs" />
     <Compile Include="Mono.Cecil.Tests\AssemblyTests.cs" />
     <Compile Include="Mono.Cecil.Tests\AssemblyInfo.cs" />
     <Compile Include="Mono.Cecil.Tests\BaseTestFixture.cs" />

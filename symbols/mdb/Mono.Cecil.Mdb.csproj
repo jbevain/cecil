@@ -20,6 +20,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\ProjectInfo.cs" />
     <Compile Include="Mono.Cecil.Mdb\AssemblyInfo.cs" />
     <Compile Include="Mono.Cecil.Mdb\MdbReader.cs" />
     <Compile Include="Mono.Cecil.Mdb\MdbWriter.cs" />

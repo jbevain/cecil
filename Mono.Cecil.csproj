@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Mono.Cecil.settings" />
   <PropertyGroup>
@@ -133,6 +133,7 @@
     <Compile Include="Mono.Collections.Generic\ReadOnlyCollection.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoConvert.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoService.cs" />
+    <Compile Include="ProjectInfo.cs" />
     <Compile Include="System.Runtime.CompilerServices\ExtensionAttribute.cs" />
     <Compile Include="Mono\Actions.cs" />
     <Compile Include="Mono\Empty.cs" />
