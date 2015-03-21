@@ -57,7 +57,7 @@ namespace Mono.Cecil.Tests {
 	IL_0020: ldloc.1
 	IL_0021: ret
 ", main);
-			}, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -77,7 +77,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -97,7 +97,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.Basic, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -117,12 +117,14 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.FSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
 		public void CreateMethodFromScratch ()
 		{
+			IgnoreOnMono ();
+
 			var module = ModuleDefinition.CreateModule ("Pan", ModuleKind.Dll);
 			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.Import (typeof (object)));
 			module.Types.Add (type);

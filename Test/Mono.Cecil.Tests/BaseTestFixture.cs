@@ -10,6 +10,12 @@ namespace Mono.Cecil.Tests {
 
 	public abstract class BaseTestFixture {
 
+		protected static void IgnoreOnMono ()
+		{
+			if (Platform.OnMono)
+				Assert.Ignore ();
+		}
+
 		public static string GetResourcePath (string name, Assembly assembly)
 		{
 			return Path.Combine (FindResourcesDirectory (assembly), name);
@@ -73,19 +79,19 @@ namespace Mono.Cecil.Tests {
 			return Path.Combine (path, "Resources");
 		}
 
-		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, Type symbolReaderProvider = null, Type symbolWriterProvider = null)
+		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null)
 		{
-			Run (new ModuleTestCase (file, test, verify, symbolReaderProvider, symbolWriterProvider));
+			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider));
 		}
 
-		public static void TestCSharp (string file, Action<ModuleDefinition> test, bool verify = true, Type symbolReaderProvider = null, Type symbolWriterProvider = null)
+		public static void TestCSharp (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null)
 		{
-			Run (new CSharpTestCase (file, test, verify, symbolReaderProvider, symbolWriterProvider));
+			Run (new CSharpTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider));
 		}
 
-		public static void TestIL (string file, Action<ModuleDefinition> test, bool verify = true, Type symbolReaderProvider = null, Type symbolWriterProvider = null)
+		public static void TestIL (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null)
 		{
-			Run (new ILTestCase (file, test, verify, symbolReaderProvider, symbolWriterProvider));
+			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider));
 		}
 
 		private static void Run (TestCase testCase)
@@ -95,6 +101,9 @@ namespace Mono.Cecil.Tests {
 
 			runner = new TestRunner (testCase, TestCaseType.ReadImmediate);
 			runner.RunTest ();
+
+			if (testCase.ReadOnly)
+				return;
 
 			runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred);
 			runner.RunTest();
@@ -107,6 +116,7 @@ namespace Mono.Cecil.Tests {
 	abstract class TestCase {
 
 		public readonly bool Verify;
+		public readonly bool ReadOnly;
 		public readonly Type SymbolReaderProvider;
 		public readonly Type SymbolWriterProvider;
 		public readonly Action<ModuleDefinition> Test;
@@ -115,10 +125,11 @@ namespace Mono.Cecil.Tests {
 
 		protected Assembly Assembly { get { return Test.Method.Module.Assembly; } }
 
-		protected TestCase (Action<ModuleDefinition> test, bool verify, Type symbolReaderProvider, Type symbolWriterProvider)
+		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider)
 		{
 			Test = test;
 			Verify = verify;
+			ReadOnly = readOnly;
 			SymbolReaderProvider = symbolReaderProvider;
 			SymbolWriterProvider = symbolWriterProvider;
 		}
@@ -128,8 +139,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string Module;
 
-		public ModuleTestCase (string module, Action<ModuleDefinition> test, bool verify, Type symbolReaderProvider, Type symbolWriterProvider)
-			: base (test, verify, symbolReaderProvider, symbolWriterProvider)
+		public ModuleTestCase (string module, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider)
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider)
 		{
 			Module = module;
 		}
@@ -144,8 +155,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string File;
 
-		public CSharpTestCase (string file, Action<ModuleDefinition> test, bool verify, Type symbolReaderProvider, Type symbolWriterProvider)
-			: base (test, verify, symbolReaderProvider, symbolWriterProvider)
+		public CSharpTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider)
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider)
 		{
 			File = file;
 		}
@@ -154,7 +165,7 @@ namespace Mono.Cecil.Tests {
 		{
 			get
 			{
-				return CompilationService.CompileResource(BaseTestFixture.GetCSharpResourcePath(File, Assembly));
+				return CompilationService.CompileResource (BaseTestFixture.GetCSharpResourcePath (File, Assembly));
 			}
 		}
 	}
@@ -163,8 +174,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string File;
 
-		public ILTestCase (string file, Action<ModuleDefinition> test, bool verify, Type symbolReaderProvider, Type symbolWriterProvider)
-			: base (test, verify, symbolReaderProvider, symbolWriterProvider)
+		public ILTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider)
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider)
 		{
 			File = file;
 		}
@@ -173,7 +184,7 @@ namespace Mono.Cecil.Tests {
 		{
 			get
 			{
-				return CompilationService.CompileResource(BaseTestFixture.GetILResourcePath(File, Assembly)); ;
+				return CompilationService.CompileResource (BaseTestFixture.GetILResourcePath (File, Assembly)); ;
 			}
 		}
 	}
@@ -183,7 +194,7 @@ namespace Mono.Cecil.Tests {
 		readonly TestCase test_case;
 		readonly TestCaseType type;
 
-		public TestRunner(TestCase testCase, TestCaseType type)
+		public TestRunner (TestCase testCase, TestCaseType type)
 		{
 			this.test_case = testCase;
 			this.type = type;
@@ -274,5 +285,4 @@ namespace Mono.Cecil.Tests {
 		WriteFromImmediate,
 		WriteFromDeferred,
 	}
-
 }

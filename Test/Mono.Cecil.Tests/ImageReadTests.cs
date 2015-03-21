@@ -161,7 +161,7 @@ namespace Mono.Cecil.Tests {
 		{
 			TestModule ("metro.exe", module => {
 				Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
-			}, verify: false);
+			}, verify: false, readOnly: Platform.OnMono);
 		}
 	}
 }

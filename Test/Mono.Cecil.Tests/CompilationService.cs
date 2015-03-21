@@ -20,7 +20,7 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 
-	class Platform {
+	public static class Platform {
 
 		public static bool OnMono { get { return typeof (object).Assembly.GetType ("Mono.Runtime") != null; } }
 	}
