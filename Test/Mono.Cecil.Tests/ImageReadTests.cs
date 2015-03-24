@@ -94,7 +94,7 @@ namespace Mono.Cecil.Tests {
 			TestModule ("hello.x64.exe", module => {
 				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
-			});
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
@@ -103,7 +103,7 @@ namespace Mono.Cecil.Tests {
 			TestModule ("hello.textonly.x64.exe", module => {
 				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
-			});
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
@@ -112,7 +112,7 @@ namespace Mono.Cecil.Tests {
 			TestModule ("hello.ia64.exe", module => {
 				Assert.AreEqual (TargetArchitecture.IA64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
-			});
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
