@@ -2948,8 +2948,11 @@ namespace Mono.Cecil {
 
 		public void ReadCustomAttributeNamedArguments (ushort count, ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
 		{
-			for (int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++) {
+				if (!CanReadMore ())
+					return;
 				ReadCustomAttributeNamedArgument (ref fields, ref properties);
+			}
 		}
 
 		void ReadCustomAttributeNamedArgument (ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
