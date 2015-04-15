@@ -114,7 +114,10 @@ namespace Mono.Cecil {
 
 				return initial_value;
 			}
-			set { initial_value = value; }
+			set {
+				initial_value = value;
+				rva = 0;
+			}
 		}
 
 		public FieldAttributes Attributes {
