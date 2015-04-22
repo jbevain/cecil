@@ -67,10 +67,7 @@ namespace Mono.Cecil {
 				if (constraints != null)
 					return constraints.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (generic_parameter, reader) => reader.HasGenericConstraints (generic_parameter));
-
-				return false;
+				return HasImage && Module.Read (this, (generic_parameter, reader) => reader.HasGenericConstraints (generic_parameter));
 			}
 		}
 

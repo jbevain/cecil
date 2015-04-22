@@ -120,10 +120,7 @@ namespace Mono.Cecil {
 				if (interfaces != null)
 					return interfaces.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasInterfaces (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasInterfaces (type));
 			}
 		}
 
@@ -144,10 +141,7 @@ namespace Mono.Cecil {
 				if (nested_types != null)
 					return nested_types.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasNestedTypes (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasNestedTypes (type));
 			}
 		}
 
@@ -168,10 +162,7 @@ namespace Mono.Cecil {
 				if (methods != null)
 					return methods.Count > 0;
 
-				if (HasImage)
-					return methods_range.Length > 0;
-
-				return false;
+				return HasImage && methods_range.Length > 0;
 			}
 		}
 
@@ -192,10 +183,7 @@ namespace Mono.Cecil {
 				if (fields != null)
 					return fields.Count > 0;
 
-				if (HasImage)
-					return fields_range.Length > 0;
-
-				return false;
+				return HasImage && fields_range.Length > 0;
 			}
 		}
 
@@ -216,10 +204,7 @@ namespace Mono.Cecil {
 				if (events != null)
 					return events.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasEvents (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasEvents (type));
 			}
 		}
 
@@ -240,10 +225,7 @@ namespace Mono.Cecil {
 				if (properties != null)
 					return properties.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasProperties (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasProperties (type));
 			}
 		}
 

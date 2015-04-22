@@ -190,10 +190,7 @@ namespace Mono.Cecil {
 				if (overrides != null)
 					return overrides.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (method, reader) => reader.HasOverrides (method));
-
-				return false;
+				return HasImage && Module.Read (this, (method, reader) => reader.HasOverrides (method));
 			}
 		}
 
