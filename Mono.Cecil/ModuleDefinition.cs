@@ -1011,15 +1011,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void CheckStream (object stream)
-		{
-			if (stream == null)
-				throw new ArgumentNullException ("stream");
-		}
-
 		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
 		{
-			CheckStream (stream);
+			Mixin.CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)
 				throw new ArgumentException ();
 			Mixin.CheckParameters (parameters);
@@ -1060,7 +1054,7 @@ namespace Mono.Cecil {
 
 		public void Write (Stream stream, WriterParameters parameters)
 		{
-			CheckStream (stream);
+			Mixin.CheckStream (stream);
 			if (!stream.CanWrite || !stream.CanSeek)
 				throw new ArgumentException ();
 			Mixin.CheckParameters (parameters);
@@ -1073,6 +1067,12 @@ namespace Mono.Cecil {
 	}
 
 	static partial class Mixin {
+
+		public static void CheckStream (object stream)
+		{
+			if (stream == null)
+				throw new ArgumentNullException ("stream");
+		}
 
 #if !READ_ONLY
 
