@@ -308,7 +308,7 @@ namespace Mono.Cecil {
 #else
 			var name = AssemblyNameReference.Parse (assembly.FullName);
 
-			if (TryGetAssemblyNameReference (name, out scope))
+			if (module.TryGetAssemblyNameReference (name, out scope))
 				return scope;
 
 			module.AssemblyReferences.Add (name);
@@ -528,7 +528,7 @@ namespace Mono.Cecil {
 		AssemblyNameReference ImportAssemblyName (AssemblyNameReference name)
 		{
 			AssemblyNameReference reference;
-			if (TryGetAssemblyNameReference (name, out reference))
+			if (module.TryGetAssemblyNameReference (name, out reference))
 				return reference;
 
 			reference = new AssemblyNameReference (name.Name, name.Version) {
@@ -549,23 +549,6 @@ namespace Mono.Cecil {
 			module.AssemblyReferences.Add (reference);
 
 			return reference;
-		}
-
-		bool TryGetAssemblyNameReference (AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)
-		{
-			var references = module.AssemblyReferences;
-
-			for (int i = 0; i < references.Count; i++) {
-				var reference = references [i];
-				if (name_reference.FullName != reference.FullName) // TODO compare field by field
-					continue;
-
-				assembly_reference = reference;
-				return true;
-			}
-
-			assembly_reference = null;
-			return false;
 		}
 
 		static void ImportGenericParameters (IGenericParameterProvider imported, IGenericParameterProvider original)
@@ -738,6 +721,26 @@ namespace Mono.Cecil {
 		{
 			Mixin.CheckMethod (method);
 			return ImportMethod (method, ImportGenericContext.For (context));
+		}
+	}
+
+	static partial class Mixin {
+
+		public static bool TryGetAssemblyNameReference (this ModuleDefinition module, AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)
+		{
+			var references = module.AssemblyReferences;
+
+			for (int i = 0; i < references.Count; i++) {
+				var reference = references [i];
+				if (name_reference.FullName != reference.FullName) // TODO compare field by field
+					continue;
+
+				assembly_reference = reference;
+				return true;
+			}
+
+			assembly_reference = null;
+			return false;
 		}
 	}
 
