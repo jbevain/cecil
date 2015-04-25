@@ -126,10 +126,10 @@ namespace Mono.Cecil.Tests {
 			IgnoreOnMono ();
 
 			var module = ModuleDefinition.CreateModule ("Pan", ModuleKind.Dll);
-			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.Import (typeof (object)));
+			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.ImportReference (typeof (object)));
 			module.Types.Add (type);
 
-			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.Import (typeof (string)));
+			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.ImportReference (typeof (string)));
 			type.Methods.Add (method);
 
 			var body = method.Body;
@@ -137,7 +137,7 @@ namespace Mono.Cecil.Tests {
 			body.InitLocals = true;
 
 			var il = body.GetILProcessor ();
-			var temp = new VariableDefinition ("temp", module.Import (typeof (string)));
+			var temp = new VariableDefinition ("temp", module.ImportReference (typeof (string)));
 			body.Variables.Add (temp);
 
 			il.Emit (OpCodes.Nop);

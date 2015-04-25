@@ -54,10 +54,10 @@ namespace Mono.Cecil.Tests {
 
 				type.Methods.Add (method_by_ref);
 
-				method_by_ref.MethodReturnType.ReturnType = module.Import (typeof (void));
+				method_by_ref.MethodReturnType.ReturnType = module.ImportReference (typeof (void));
 
-				method_by_ref.Parameters.Add (new ParameterDefinition (module.Import (typeof (string))));
-				method_by_ref.Parameters.Add (new ParameterDefinition (module.Import (typeof (string).MakeByRefType ())));
+				method_by_ref.Parameters.Add (new ParameterDefinition (module.ImportReference (typeof (string))));
+				method_by_ref.Parameters.Add (new ParameterDefinition (module.ImportReference (typeof (string).MakeByRefType ())));
 
 				var m_il = method_by_ref.Body.GetILProcessor ();
 				m_il.Emit (OpCodes.Ldarg_1);
@@ -65,7 +65,7 @@ namespace Mono.Cecil.Tests {
 				m_il.Emit (OpCodes.Stind_Ref);
 				m_il.Emit (OpCodes.Ret);
 
-				var v_0 = new VariableDefinition (module.Import (typeof (string)));
+				var v_0 = new VariableDefinition (module.ImportReference (typeof (string)));
 				body.Variables.Add (v_0);
 
 				var il = body.GetILProcessor ();
@@ -100,7 +100,7 @@ namespace Mono.Cecil.Tests {
 		{
 			var get_empty = Compile<Func<string>> ((module, body) => {
 				var il = body.GetILProcessor ();
-				il.Emit (OpCodes.Ldsfld, module.Import (typeof (string).GetField ("Empty")));
+				il.Emit (OpCodes.Ldsfld, module.ImportReference (typeof (string).GetField ("Empty")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -114,7 +114,7 @@ namespace Mono.Cecil.Tests {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Call, module.Import (typeof (string).GetMethod ("Concat", new [] { typeof (string), typeof (string) })));
+				il.Emit (OpCodes.Call, module.ImportReference (typeof (string).GetMethod ("Concat", new [] { typeof (string), typeof (string) })));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -146,7 +146,7 @@ namespace Mono.Cecil.Tests {
 			var get_field = Compile<Func<Generic<string>, string>> ((module, body) => {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
-				il.Emit (OpCodes.Ldfld, module.Import (typeof (Generic<string>).GetField ("Field")));
+				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<string>).GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -164,7 +164,7 @@ namespace Mono.Cecil.Tests {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Callvirt, module.Import (typeof (Generic<int>).GetMethod ("Method")));
+				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<int>).GetMethod ("Method")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -179,7 +179,7 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Callvirt, module.Import (typeof (Generic<string>).GetMethod ("GenericMethod").MakeGenericMethod (typeof (int))));
+				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetMethod ("GenericMethod").MakeGenericMethod (typeof (int))));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -194,8 +194,8 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Callvirt, module.Import (typeof (Generic<string>).GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
-				il.Emit (OpCodes.Ldfld, module.Import (typeof (Generic<string>).GetField ("Field")));
+				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
+				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<string>).GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -211,8 +211,8 @@ namespace Mono.Cecil.Tests {
 		{
 			var module = typeof (Foo<>).ToDefinition ().Module;
 
-			var foo_def = module.Import (typeof (Foo<>));
-			var foo_open = module.Import (typeof (Foo<>), foo_def);
+			var foo_def = module.ImportReference (typeof (Foo<>));
+			var foo_open = module.ImportReference (typeof (Foo<>), foo_def);
 
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1", foo_def.FullName);
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>", foo_open.FullName);
@@ -227,7 +227,7 @@ namespace Mono.Cecil.Tests {
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			var module = foo_def.Module;
 
-			var generic_foo = module.Import (generic_list_foo_open, foo_def);
+			var generic_foo = module.ImportReference (generic_list_foo_open, foo_def);
 
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>",
 				generic_foo.FullName);
@@ -242,7 +242,7 @@ namespace Mono.Cecil.Tests {
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			var module = foo_def.Module;
 
-			var generic_foo = module.Import (generic_foo_open, foo_def);
+			var generic_foo = module.ImportReference (generic_foo_open, foo_def);
 
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Generic`1<Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>>",
 				generic_foo.FullName);
@@ -257,7 +257,7 @@ namespace Mono.Cecil.Tests {
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			var module = foo_def.Module;
 
-			var array_foo = module.Import (foo_open_array, foo_def);
+			var array_foo = module.ImportReference (foo_open_array, foo_def);
 
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportReflectionTests/Foo`1<TFoo>[]",
 				array_foo.FullName);
@@ -273,7 +273,7 @@ namespace Mono.Cecil.Tests {
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			var module = foo_def.Module;
 
-			var generic_field = module.Import (generic_list_foo_open_field, foo_def);
+			var generic_field = module.ImportReference (generic_list_foo_open_field, foo_def);
 
 			Assert.AreEqual ("T Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Field",
 				generic_field.FullName);
@@ -289,7 +289,7 @@ namespace Mono.Cecil.Tests {
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			var module = foo_def.Module;
 
-			var generic_method = module.Import (generic_list_foo_open_method, foo_def);
+			var generic_method = module.ImportReference (generic_list_foo_open_method, foo_def);
 
 			Assert.AreEqual ("T Mono.Cecil.Tests.ImportReflectionTests/Generic`1<System.Collections.Generic.List`1<TFoo>>::Method(T)",
 				generic_method.FullName);
@@ -300,7 +300,7 @@ namespace Mono.Cecil.Tests {
 		{
 			var module = typeof (Generic<>).ToDefinition ().Module;
 
-			var method = module.Import (typeof (Generic<>).GetMethod ("Method"));
+			var method = module.ImportReference (typeof (Generic<>).GetMethod ("Method"));
 
 			Assert.AreEqual ("T Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::Method(T)", method.FullName);
 		}
@@ -310,11 +310,11 @@ namespace Mono.Cecil.Tests {
 		{
 			var module = typeof (Generic<>).ToDefinition ().Module;
 
-			var generic_method = module.Import (typeof (Generic<>).GetMethod ("GenericMethod"));
+			var generic_method = module.ImportReference (typeof (Generic<>).GetMethod ("GenericMethod"));
 
 			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod(T,TS)", generic_method.FullName);
 
-			generic_method = module.Import (typeof (Generic<>).GetMethod ("GenericMethod"), generic_method);
+			generic_method = module.ImportReference (typeof (Generic<>).GetMethod ("GenericMethod"), generic_method);
 
 			Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
 		}
@@ -361,7 +361,7 @@ namespace Mono.Cecil.Tests {
 				"",
 				name,
 				TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Abstract,
-				module.Import (typeof (object)));
+				module.ImportReference (typeof (object)));
 
 			module.Types.Add (type);
 
@@ -384,10 +384,10 @@ namespace Mono.Cecil.Tests {
 
 			type.Methods.Add (method);
 
-			method.MethodReturnType.ReturnType = module.Import (pattern.ReturnType);
+			method.MethodReturnType.ReturnType = module.ImportReference (pattern.ReturnType);
 
 			foreach (var parameter_pattern in pattern.GetParameters ())
-				method.Parameters.Add (new ParameterDefinition (module.Import (parameter_pattern.ParameterType)));
+				method.Parameters.Add (new ParameterDefinition (module.ImportReference (parameter_pattern.ParameterType)));
 
 			return method;
 		}

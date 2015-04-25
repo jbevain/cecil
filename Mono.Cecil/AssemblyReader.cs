@@ -63,11 +63,20 @@ namespace Mono.Cecil {
 			var reader = CreateModuleReader (image, parameters.ReadingMode);
 			var module = reader.module;
 
-			if (parameters.AssemblyResolver != null)
-				module.assembly_resolver = parameters.AssemblyResolver;
+			if (parameters.assembly_resolver != null)
+				module.assembly_resolver = parameters.assembly_resolver;
 
-			if (parameters.MetadataResolver != null)
-				module.metadata_resolver = parameters.MetadataResolver;
+			if (parameters.metadata_resolver != null)
+				module.metadata_resolver = parameters.metadata_resolver;
+
+#if !READ_ONLY
+			if (parameters.metadata_importer_provider != null)
+				module.metadata_importer = parameters.metadata_importer_provider.GetMetadataImporter (module);
+#if !CF
+			if (parameters.reflection_importer_provider != null)
+				module.reflection_importer = parameters.reflection_importer_provider.GetReflectionImporter (module);
+#endif
+#endif
 
 			reader.ReadModule ();
 
