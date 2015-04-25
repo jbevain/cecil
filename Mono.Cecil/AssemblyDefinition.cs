@@ -91,6 +91,11 @@ namespace Mono.Cecil {
 
 		public void Dispose ()
 		{
+			if (this.modules == null) {
+				main_module.Dispose ();
+				return;
+			}
+
 			var modules = this.Modules;
 			for (int i = 0; i < modules.Count; i++)
 				modules [i].Dispose ();
