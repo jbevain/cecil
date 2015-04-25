@@ -40,10 +40,16 @@ namespace Mono.Cecil {
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
+		bool in_memory;
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
 			set { reading_mode = value; }
+		}
+
+		public bool InMemory {
+			get { return in_memory; }
+			set { in_memory = value; }
 		}
 
 		public IAssemblyResolver AssemblyResolver {
@@ -93,6 +99,7 @@ namespace Mono.Cecil {
 		public ReaderParameters (ReadingMode readingMode)
 		{
 			this.reading_mode = readingMode;
+			this.in_memory = true; // back compatibility
 		}
 	}
 
@@ -320,6 +327,7 @@ namespace Mono.Cecil {
 			get { return assembly; }
 		}
 
+#if !CF
 		internal IReflectionImporter ReflectionImporter {
 			get {
 				if (reflection_importer == null)
@@ -329,6 +337,7 @@ namespace Mono.Cecil {
 			}
 
 		}
+#endif
 
 		internal IMetadataImporter MetadataImporter {
 			get {
@@ -1013,7 +1022,17 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			return ReadModule (GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read), parameters);
+			var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read) as Stream;
+
+			if (parameters.InMemory) {
+				var memory = new MemoryStream ((int) stream.Length);
+				using (stream)
+					stream.CopyTo (memory);
+
+				stream = memory;
+			}
+
+			return ReadModule (stream, parameters);
 		}
 
 		static void CheckStream (object stream)
@@ -1132,6 +1151,16 @@ namespace Mono.Cecil {
 			return string.Empty;
 #endif
 		}
+
+#if !NET_4_0
+		public static void CopyTo (this Stream self, Stream target)
+		{
+			var buffer = new byte [1024 * 8];
+			int read;
+			while ((read = self.Read (buffer, 0, buffer.Length)) > 0)
+				target.Write (buffer, 0, read);
+		}
+#endif
 
 		public static TargetRuntime ParseRuntime (this string self)
 		{
