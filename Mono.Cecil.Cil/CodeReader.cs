@@ -1,29 +1,11 @@
 //
-// CodeReader.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -82,7 +64,7 @@ namespace Mono.Cecil.Cil {
 				throw new InvalidOperationException ();
 			}
 
-			var symbol_reader = reader.module.SymbolReader;
+			var symbol_reader = reader.module.symbol_reader;
 
 			if (symbol_reader != null) {
 				var instructions = body.Instructions;
@@ -125,7 +107,7 @@ namespace Mono.Cecil.Cil {
 				code_size = 0;
 
 			var end = start + code_size;
-			var instructions = body.instructions = new InstructionCollection (code_size / 3);
+			var instructions = body.instructions = new InstructionCollection ((code_size + 1) / 2);
 
 			while (Position < end) {
 				var offset = Position - start;
@@ -384,7 +366,7 @@ namespace Mono.Cecil.Cil {
 				throw new NotSupportedException ();
 			}
 
-			var symbol_reader = reader.module.SymbolReader;
+			var symbol_reader = reader.module.symbol_reader;
 			if (symbol_reader != null && writer.metadata.write_symbols) {
 				symbols.method_token = GetOriginalToken (writer.metadata, method);
 				symbols.local_var_token = local_var_token;

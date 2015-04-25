@@ -1,29 +1,11 @@
 //
-// AssemblyWriter.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -82,7 +64,7 @@ namespace Mono.Cecil {
 		public static void WriteModuleTo (ModuleDefinition module, Stream stream, WriterParameters parameters)
 		{
 			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
-				throw new ArgumentException ();
+				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
 
 			if (module.HasImage && module.ReadingMode == ReadingMode.Deferred)
 				ImmediateModuleReader.ReadModule (module);
@@ -97,20 +79,18 @@ namespace Mono.Cecil {
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider);
 
 #if !SILVERLIGHT && !CF
-			if (parameters.StrongNameKeyPair != null && name != null)
+			if (parameters.StrongNameKeyPair != null && name != null) {
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
-#endif
-
-			if (name != null && name.HasPublicKey)
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
-
+			}
+#endif
 			var metadata = new MetadataBuilder (module, fq_name,
 				symbol_writer_provider, symbol_writer);
 
 			BuildMetadata (module, metadata);
 
-			if (module.SymbolReader != null)
-				module.SymbolReader.Dispose ();
+			if (module.symbol_reader != null)
+				module.symbol_reader.Dispose ();
 
 			var writer = ImageWriter.CreateWriter (module, metadata, stream);
 
@@ -789,7 +769,7 @@ namespace Mono.Cecil {
 		TextMap CreateTextMap ()
 		{
 			var map = new TextMap ();
-			map.AddMap (TextSegment.ImportAddressTable, module.Architecture == TargetArchitecture.I386 ? 8 : 16);
+			map.AddMap (TextSegment.ImportAddressTable, module.Architecture == TargetArchitecture.I386 ? 8 : 0);
 			map.AddMap (TextSegment.CLIHeader, 0x48, 8);
 			return map;
 		}
@@ -1180,14 +1160,25 @@ namespace Mono.Cecil {
 
 		TypeRefRow CreateTypeRefRow (TypeReference type)
 		{
-			var scope_token = type.IsNested
-				? GetTypeRefToken (type.DeclaringType)
-				: type.Scope.MetadataToken;
+			var scope_token = GetScopeToken (type);
 
 			return new TypeRefRow (
 				MakeCodedRID (scope_token, CodedIndex.ResolutionScope),
 				GetStringIndex (type.Name),
 				GetStringIndex (type.Namespace));
+		}
+
+		MetadataToken GetScopeToken (TypeReference type)
+		{
+			if (type.IsNested)
+				return GetTypeRefToken (type.DeclaringType);
+
+			var scope = type.Scope;
+
+			if (scope == null)
+				return MetadataToken.Zero;
+
+			return scope.MetadataToken;
 		}
 
 		static CodedRID MakeCodedRID (IMetadataTokenProvider provider, CodedIndex index)
@@ -1645,6 +1636,11 @@ namespace Mono.Cecil {
 			case ElementType.Var:
 				return ElementType.Class;
 			case ElementType.GenericInst:
+				var generic_instance = (GenericInstanceType) constant_type;
+				if (generic_instance.ElementType.IsTypeOf ("System", "Nullable`1"))
+					return GetConstantType (generic_instance.GenericArguments [0], constant);
+
+				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
 			case ElementType.CModOpt:
 			case ElementType.CModReqD:
 			case ElementType.ByRef:

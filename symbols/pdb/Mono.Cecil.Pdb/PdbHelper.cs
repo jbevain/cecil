@@ -1,29 +1,11 @@
 //
-// PdbHelper.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -104,6 +86,7 @@ namespace Mono.Cecil.Pdb {
 			AddMapping (DocumentLanguage.JScript, new Guid (0x3a12d0b6, 0xc26c, 0x11d0, 0xb4, 0x42, 0x0, 0xa0, 0x24, 0x4a, 0x1d, 0xd2));
 			AddMapping (DocumentLanguage.Smc, new Guid (0xd9b9f7b, 0x6611, 0x11d3, 0xbd, 0x2a, 0x0, 0x0, 0xf8, 0x8, 0x49, 0xbd));
 			AddMapping (DocumentLanguage.MCpp, new Guid (0x4b35fde8, 0x07c6, 0x11d3, 0x90, 0x53, 0x0, 0xc0, 0x4f, 0xa3, 0x02, 0xa1));
+			AddMapping (DocumentLanguage.FSharp, new Guid (0xab4f38c9, 0xb6e6, 0x43ba, 0xbe, 0x3b, 0x58, 0x08, 0x0b, 0x2c, 0xcc, 0xe3));
 		}
 
 		static void AddMapping (DocumentLanguage language, Guid guid)

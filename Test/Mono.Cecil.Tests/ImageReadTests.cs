@@ -27,10 +27,10 @@ namespace Mono.Cecil.Tests {
 		public void ImageMetadataVersion ()
 		{
 			using (var image = GetResourceImage ("hello.exe"))
-				Assert.AreEqual (TargetRuntime.Net_2_0, image.Runtime);
+				Assert.AreEqual (TargetRuntime.Net_2_0, image.RuntimeVersion.ParseRuntime ());
 
 			using (var image = GetResourceImage ("hello1.exe"))
-				Assert.AreEqual (TargetRuntime.Net_1_1, image.Runtime);
+				Assert.AreEqual (TargetRuntime.Net_1_1, image.RuntimeVersion.ParseRuntime ());
 		}
 
 		[Test]
@@ -90,40 +90,79 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void ReadX64Image ()
+		public void X64Module ()
 		{
-			using (var image = GetResourceImage ("hello.x64.exe")) {
-
-				Assert.AreEqual (TargetArchitecture.AMD64, image.Architecture);
-				Assert.AreEqual (ModuleAttributes.ILOnly, image.Attributes);
-			}
+			TestModule ("hello.x64.exe", module => {
+				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
+				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
-		public void ReadIA64Image ()
+		public void X64ModuleTextOnlySection ()
 		{
-			using (var image = GetResourceImage ("hello.ia64.exe")) {
-				Assert.AreEqual (TargetArchitecture.IA64, image.Architecture);
-				Assert.AreEqual (ModuleAttributes.ILOnly, image.Attributes);
-			}
+			TestModule ("hello.textonly.x64.exe", module => {
+				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
+				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
-		public void ReadX86Image ()
+		public void IA64Module ()
 		{
-			using (var image = GetResourceImage ("hello.x86.exe")) {
-				Assert.AreEqual (TargetArchitecture.I386, image.Architecture);
-				Assert.AreEqual (ModuleAttributes.ILOnly | ModuleAttributes.Required32Bit, image.Attributes);
-			}
+			TestModule ("hello.ia64.exe", module => {
+				Assert.AreEqual (TargetArchitecture.IA64, module.Image.Architecture);
+				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
-		public void ReadAnyCpuImage ()
+		public void X86Module ()
 		{
-			using (var image = GetResourceImage ("hello.anycpu.exe")) {
-				Assert.AreEqual (TargetArchitecture.I386, image.Architecture);
-				Assert.AreEqual (ModuleAttributes.ILOnly, image.Attributes);
-			}
+			TestModule ("hello.x86.exe", module => {
+				Assert.AreEqual (TargetArchitecture.I386, module.Image.Architecture);
+				Assert.AreEqual (ModuleAttributes.ILOnly | ModuleAttributes.Required32Bit, module.Image.Attributes);
+			});
+		}
+
+		[Test]
+		public void AnyCpuModule ()
+		{
+			TestModule ("hello.anycpu.exe", module => {
+				Assert.AreEqual (TargetArchitecture.I386, module.Image.Architecture);
+				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
+			});
+		}
+
+		[Test]
+		public void DelaySignedAssembly ()
+		{
+			TestModule ("delay-signed.dll", module => {
+				Assert.IsNotNull (module.Assembly.Name.PublicKey);
+				Assert.AreNotEqual (0, module.Assembly.Name.PublicKey.Length);
+				Assert.AreNotEqual (ModuleAttributes.StrongNameSigned, module.Attributes & ModuleAttributes.StrongNameSigned);
+				Assert.AreNotEqual (0, module.Image.StrongName.VirtualAddress);
+				Assert.AreNotEqual (0, module.Image.StrongName.Size);
+			});
+		}
+
+		[Test]
+		public void WindowsPhoneNonSignedAssembly ()
+		{
+			TestModule ("wp7.dll", module => {
+				Assert.AreEqual (0, module.Assembly.Name.PublicKey.Length);
+				Assert.AreNotEqual (ModuleAttributes.StrongNameSigned, module.Attributes & ModuleAttributes.StrongNameSigned);
+				Assert.AreEqual (0, module.Image.StrongName.VirtualAddress);
+				Assert.AreEqual (0, module.Image.StrongName.Size);
+			}, verify: false);
+		}
+
+		[Test]
+		public void MetroAssembly ()
+		{
+			TestModule ("metro.exe", module => {
+				Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
+			}, verify: false, readOnly: Platform.OnMono);
 		}
 	}
 }

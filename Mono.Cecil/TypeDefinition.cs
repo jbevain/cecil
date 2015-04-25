@@ -1,33 +1,16 @@
 //
-// TypeDefinition.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
 
+using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -118,10 +101,7 @@ namespace Mono.Cecil {
 				if (interfaces != null)
 					return interfaces.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasInterfaces (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasInterfaces (type));
 			}
 		}
 
@@ -131,7 +111,7 @@ namespace Mono.Cecil {
 					return interfaces;
 
 				if (HasImage)
-					return interfaces = Module.Read (this, (type, reader) => reader.ReadInterfaces (type));
+					return Module.Read (ref interfaces, this, (type, reader) => reader.ReadInterfaces (type));
 
 				return interfaces = new Collection<TypeReference> ();
 			}
@@ -142,10 +122,7 @@ namespace Mono.Cecil {
 				if (nested_types != null)
 					return nested_types.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasNestedTypes (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasNestedTypes (type));
 			}
 		}
 
@@ -155,7 +132,7 @@ namespace Mono.Cecil {
 					return nested_types;
 
 				if (HasImage)
-					return nested_types = Module.Read (this, (type, reader) => reader.ReadNestedTypes (type));
+					return Module.Read (ref nested_types, this, (type, reader) => reader.ReadNestedTypes (type));
 
 				return nested_types = new MemberDefinitionCollection<TypeDefinition> (this);
 			}
@@ -166,10 +143,7 @@ namespace Mono.Cecil {
 				if (methods != null)
 					return methods.Count > 0;
 
-				if (HasImage)
-					return methods_range.Length > 0;
-
-				return false;
+				return HasImage && methods_range.Length > 0;
 			}
 		}
 
@@ -179,7 +153,7 @@ namespace Mono.Cecil {
 					return methods;
 
 				if (HasImage)
-					return methods = Module.Read (this, (type, reader) => reader.ReadMethods (type));
+					return Module.Read (ref methods, this, (type, reader) => reader.ReadMethods (type));
 
 				return methods = new MemberDefinitionCollection<MethodDefinition> (this);
 			}
@@ -190,10 +164,7 @@ namespace Mono.Cecil {
 				if (fields != null)
 					return fields.Count > 0;
 
-				if (HasImage)
-					return fields_range.Length > 0;
-
-				return false;
+				return HasImage && fields_range.Length > 0;
 			}
 		}
 
@@ -203,7 +174,7 @@ namespace Mono.Cecil {
 					return fields;
 
 				if (HasImage)
-					return fields = Module.Read (this, (type, reader) => reader.ReadFields (type));
+					return Module.Read (ref fields, this, (type, reader) => reader.ReadFields (type));
 
 				return fields = new MemberDefinitionCollection<FieldDefinition> (this);
 			}
@@ -214,10 +185,7 @@ namespace Mono.Cecil {
 				if (events != null)
 					return events.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasEvents (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasEvents (type));
 			}
 		}
 
@@ -227,7 +195,7 @@ namespace Mono.Cecil {
 					return events;
 
 				if (HasImage)
-					return events = Module.Read (this, (type, reader) => reader.ReadEvents (type));
+					return Module.Read (ref events, this, (type, reader) => reader.ReadEvents (type));
 
 				return events = new MemberDefinitionCollection<EventDefinition> (this);
 			}
@@ -238,10 +206,7 @@ namespace Mono.Cecil {
 				if (properties != null)
 					return properties.Count > 0;
 
-				if (HasImage)
-					return Module.Read (this, (type, reader) => reader.HasProperties (type));
-
-				return false;
+				return HasImage && Module.Read (this, (type, reader) => reader.HasProperties (type));
 			}
 		}
 
@@ -251,7 +216,7 @@ namespace Mono.Cecil {
 					return properties;
 
 				if (HasImage)
-					return properties = Module.Read (this, (type, reader) => reader.ReadProperties (type));
+					return Module.Read (ref properties, this, (type, reader) => reader.ReadProperties (type));
 
 				return properties = new MemberDefinitionCollection<PropertyDefinition> (this);
 			}
@@ -267,7 +232,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<SecurityDeclaration> SecurityDeclarations {
-			get { return security_declarations ?? (security_declarations = this.GetSecurityDeclarations (Module)); }
+			get { return security_declarations ?? (this.GetSecurityDeclarations (ref security_declarations, Module)); }
 		}
 
 		public bool HasCustomAttributes {
@@ -280,7 +245,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (Module)); }
+			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, Module)); }
 		}
 
 		public override bool HasGenericParameters {
@@ -293,7 +258,7 @@ namespace Mono.Cecil {
 		}
 
 		public override Collection<GenericParameter> GenericParameters {
-			get { return generic_parameters ?? (generic_parameters = this.GetGenericParameters (Module)); }
+			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
 		}
 
 		#region TypeAttributes
@@ -388,6 +353,11 @@ namespace Mono.Cecil {
 			set { attributes = attributes.SetAttributes ((uint) TypeAttributes.Serializable, value); }
 		}
 
+		public bool IsWindowsRuntime {
+			get { return attributes.GetAttributes ((uint) TypeAttributes.WindowsRuntime); }
+			set { attributes = attributes.SetAttributes ((uint) TypeAttributes.WindowsRuntime, value); }
+		}
+
 		public bool IsAnsiClass {
 			get { return attributes.GetMaskedAttributes ((uint) TypeAttributes.StringFormatMask, (uint) TypeAttributes.AnsiClass); }
 			set { attributes = attributes.SetMaskedAttributes ((uint) TypeAttributes.StringFormatMask, (uint) TypeAttributes.AnsiClass, value); }
@@ -430,6 +400,23 @@ namespace Mono.Cecil {
 					return false;
 
 				return base_type.IsTypeOf ("System", "Enum") || (base_type.IsTypeOf ("System", "ValueType") && !this.IsTypeOf ("System", "Enum"));
+			}
+		}
+
+		public override bool IsPrimitive {
+			get {
+				ElementType primitive_etype;
+				return MetadataSystem.TryGetPrimitiveElementType (this, out primitive_etype);
+			}
+		}
+
+		public override MetadataType MetadataType {
+			get {
+				ElementType primitive_etype;
+				if (MetadataSystem.TryGetPrimitiveElementType (this, out primitive_etype))
+					return (MetadataType) primitive_etype;
+
+				return base.MetadataType;
 			}
 		}
 
@@ -476,7 +463,7 @@ namespace Mono.Cecil {
 			throw new ArgumentException ();
 		}
 
-		public static TypeDefinition GetNestedType (this TypeDefinition self, string name)
+		public static TypeDefinition GetNestedType (this TypeDefinition self, string fullname)
 		{
 			if (!self.HasNestedTypes)
 				return null;
@@ -485,7 +472,8 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < nested_types.Count; i++) {
 				var nested_type = nested_types [i];
-				if (nested_type.Name == name)
+
+				if (nested_type.TypeFullName () == fullname)
 					return nested_type;
 			}
 

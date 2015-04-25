@@ -1,6 +1,11 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) Microsoft Corporation.  All Rights Reserved.
+// Copyright (c) Microsoft. All rights reserved.
+// This code is licensed under the Microsoft Public License.
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 //
 //-----------------------------------------------------------------------------
 using System;
@@ -8,12 +13,13 @@ using System;
 namespace Microsoft.Cci.Pdb {
   internal class PdbSlot {
     internal uint slot;
+    internal uint typeToken;
     internal string name;
     internal ushort flags;
-    internal uint segment;
-    internal uint address;
+    //internal uint segment;
+    //internal uint address;
 
-    internal PdbSlot(BitAccess bits, out uint typind) {
+    internal PdbSlot(BitAccess bits) {
       AttrSlotSym slot;
 
       bits.ReadUInt32(out slot.index);
@@ -24,12 +30,12 @@ namespace Microsoft.Cci.Pdb {
       bits.ReadCString(out slot.name);
 
       this.slot = slot.index;
+      this.typeToken = slot.typind;
       this.name = slot.name;
       this.flags = slot.flags;
-      this.segment = slot.segCod;
-      this.address = slot.offCod;
+      //this.segment = slot.segCod;
+      //this.address = slot.offCod;
 
-      typind = slot.typind;
     }
   }
 }

@@ -1,29 +1,11 @@
 //
-// ImageReader.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -95,13 +77,14 @@ namespace Mono.Cecil.PE {
 			// Characteristics		2
 			ushort characteristics = ReadUInt16 ();
 
-			ushort subsystem;
-			ReadOptionalHeaders (out subsystem);
+			ushort subsystem, dll_characteristics;
+			ReadOptionalHeaders (out subsystem, out dll_characteristics);
 			ReadSections (sections);
 			ReadCLIHeader ();
 			ReadMetadata ();
 
 			image.Kind = GetModuleKind (characteristics, subsystem);
+			image.Characteristics = (ModuleCharacteristics) dll_characteristics;
 		}
 
 		TargetArchitecture ReadArchitecture ()
@@ -114,6 +97,8 @@ namespace Mono.Cecil.PE {
 				return TargetArchitecture.AMD64;
 			case 0x0200:
 				return TargetArchitecture.IA64;
+			case 0x01c4:
+				return TargetArchitecture.ARMv7;
 			}
 
 			throw new NotSupportedException ();
@@ -130,7 +115,7 @@ namespace Mono.Cecil.PE {
 			return ModuleKind.Console;
 		}
 
-		void ReadOptionalHeaders (out ushort subsystem)
+		void ReadOptionalHeaders (out ushort subsystem, out ushort dll_characteristics)
 		{
 			// - PEOptionalHeader
 			//   - StandardFieldsHeader
@@ -170,6 +155,7 @@ namespace Mono.Cecil.PE {
 			subsystem = ReadUInt16 ();
 
 			// DLLFlags				2
+			dll_characteristics = ReadUInt16 ();
 			// StackReserveSize		4 || 8
 			// StackCommitSize		4 || 8
 			// HeapReserveSize		4 || 8
@@ -186,7 +172,7 @@ namespace Mono.Cecil.PE {
 			// CertificateTable		8
 			// BaseRelocationTable	8
 
-			Advance (pe64 ? 90 : 74);
+			Advance (pe64 ? 88 : 72);
 
 			// Debug				8
 			image.Debug = ReadDataDirectory ();
@@ -296,6 +282,7 @@ namespace Mono.Cecil.PE {
 			// Resources				8
 			image.Resources = ReadDataDirectory ();
 			// StrongNameSignature		8
+			image.StrongName = ReadDataDirectory ();
 			// CodeManagerTable			8
 			// VTableFixups				8
 			// ExportAddressTableJumps	8
@@ -314,8 +301,7 @@ namespace Mono.Cecil.PE {
 			// Reserved				4
 			Advance (8);
 
-			var version = ReadZeroTerminatedString (ReadInt32 ());
-			image.Runtime = version.ParseRuntime ();
+			image.RuntimeVersion = ReadZeroTerminatedString (ReadInt32 ());
 
 			// Flags		2
 			Advance (2);
@@ -579,6 +565,8 @@ namespace Mono.Cecil.PE {
 						+ GetTableIndexSize (Table.Field);	// Field
 					break;
 				case Table.EncLog:
+					size = 8;
+					break;
 				case Table.EncMap:
 					size = 4;
 					break;

@@ -1,34 +1,17 @@
 //
-// ModuleDefinition.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using SR = System.Reflection;
 
 using Mono.Cecil.Cil;
@@ -46,8 +29,14 @@ namespace Mono.Cecil {
 	public sealed class ReaderParameters {
 
 		ReadingMode reading_mode;
-		IAssemblyResolver assembly_resolver;
-		IMetadataResolver metadata_resolver;
+		internal IAssemblyResolver assembly_resolver;
+		internal IMetadataResolver metadata_resolver;
+#if !READ_ONLY
+		internal IMetadataImporterProvider metadata_importer_provider;
+#if !CF
+		internal IReflectionImporterProvider reflection_importer_provider;
+#endif
+#endif
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
@@ -66,6 +55,20 @@ namespace Mono.Cecil {
 			get { return metadata_resolver; }
 			set { metadata_resolver = value; }
 		}
+
+#if !READ_ONLY
+		public IMetadataImporterProvider MetadataImporterProvider {
+			get { return metadata_importer_provider; }
+			set { metadata_importer_provider = value; }
+		}
+
+#if !CF
+		public IReflectionImporterProvider ReflectionImporterProvider {
+			get { return reflection_importer_provider; }
+			set { reflection_importer_provider = value; }
+		}
+#endif
+#endif
 
 		public Stream SymbolStream {
 			get { return symbol_stream; }
@@ -102,6 +105,12 @@ namespace Mono.Cecil {
 		TargetArchitecture architecture;
 		IAssemblyResolver assembly_resolver;
 		IMetadataResolver metadata_resolver;
+#if !READ_ONLY
+		IMetadataImporterProvider metadata_importer_provider;
+#if !CF
+		IReflectionImporterProvider reflection_importer_provider;
+#endif
+#endif
 
 		public ModuleKind Kind {
 			get { return kind; }
@@ -128,10 +137,24 @@ namespace Mono.Cecil {
 			set { metadata_resolver = value; }
 		}
 
+#if !READ_ONLY
+		public IMetadataImporterProvider MetadataImporterProvider {
+			get { return metadata_importer_provider; }
+			set { metadata_importer_provider = value; }
+		}
+
+#if !CF
+		public IReflectionImporterProvider ReflectionImporterProvider {
+			get { return reflection_importer_provider; }
+			set { reflection_importer_provider = value; }
+		}
+#endif
+#endif
+
 		public ModuleParameters ()
 		{
 			this.kind = ModuleKind.Dll;
-			this.runtime = GetCurrentRuntime ();
+			this.Runtime = GetCurrentRuntime ();
 			this.architecture = TargetArchitecture.I386;
 		}
 
@@ -195,8 +218,8 @@ namespace Mono.Cecil {
 		internal MetadataSystem MetadataSystem;
 		internal ReadingMode ReadingMode;
 		internal ISymbolReaderProvider SymbolReaderProvider;
-		internal ISymbolReader SymbolReader;
 
+		internal ISymbolReader symbol_reader;
 		internal IAssemblyResolver assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
 		internal TypeSystem type_system;
@@ -204,17 +227,22 @@ namespace Mono.Cecil {
 		readonly MetadataReader reader;
 		readonly string fq_name;
 
+		internal string runtime_version;
 		internal ModuleKind kind;
 		TargetRuntime runtime;
 		TargetArchitecture architecture;
 		ModuleAttributes attributes;
+		ModuleCharacteristics characteristics;
 		Guid mvid;
 
 		internal AssemblyDefinition assembly;
 		MethodDefinition entry_point;
 
 #if !READ_ONLY
-		MetadataImporter importer;
+#if !CF
+		internal IReflectionImporter reflection_importer;
+#endif
+		internal IMetadataImporter metadata_importer;
 #endif
 		Collection<CustomAttribute> custom_attributes;
 		Collection<AssemblyNameReference> references;
@@ -234,7 +262,18 @@ namespace Mono.Cecil {
 
 		public TargetRuntime Runtime {
 			get { return runtime; }
-			set { runtime = value; }
+			set {
+				runtime = value;
+				runtime_version = runtime.RuntimeVersionString ();
+			}
+		}
+
+		public string RuntimeVersion {
+			get { return runtime_version; }
+			set {
+				runtime_version = value;
+				runtime = runtime_version.ParseRuntime ();
+			}
 		}
 
 		public TargetArchitecture Architecture {
@@ -245,6 +284,11 @@ namespace Mono.Cecil {
 		public ModuleAttributes Attributes {
 			get { return attributes; }
 			set { attributes = value; }
+		}
+
+		public ModuleCharacteristics Characteristics {
+			get { return characteristics; }
+			set { characteristics = value; }
 		}
 
 		public string FullyQualifiedName {
@@ -261,7 +305,11 @@ namespace Mono.Cecil {
 		}
 
 		public bool HasSymbols {
-			get { return SymbolReader != null; }
+			get { return symbol_reader != null; }
+		}
+
+		public ISymbolReader SymbolReader {
+			get { return symbol_reader; }
 		}
 
 		public override MetadataScopeType MetadataScopeType {
@@ -272,22 +320,50 @@ namespace Mono.Cecil {
 			get { return assembly; }
 		}
 
-#if !READ_ONLY
-		internal MetadataImporter MetadataImporter {
-			get { return importer ?? (importer = new MetadataImporter (this)); }
+		internal IReflectionImporter ReflectionImporter {
+			get {
+				if (reflection_importer == null)
+					Interlocked.CompareExchange (ref reflection_importer, new ReflectionImporter (this), null);
+
+				return reflection_importer;
+			}
+
 		}
-#endif
+
+		internal IMetadataImporter MetadataImporter {
+			get {
+				if (metadata_importer == null)
+					Interlocked.CompareExchange (ref metadata_importer, new MetadataImporter (this), null);
+
+				return metadata_importer;
+			}
+		}
 
 		public IAssemblyResolver AssemblyResolver {
-			get { return assembly_resolver; }
+			get {
+				if (assembly_resolver == null)
+					Interlocked.CompareExchange (ref assembly_resolver, new AssemblyResolver (), null);
+
+				return assembly_resolver;
+			}
 		}
 
 		public IMetadataResolver MetadataResolver {
-			get { return metadata_resolver ?? (metadata_resolver = new MetadataResolver (assembly_resolver)); }
+			get {
+				if (metadata_resolver == null)
+					Interlocked.CompareExchange (ref metadata_resolver, new MetadataResolver (this.AssemblyResolver), null);
+
+				return metadata_resolver;
+			}
 		}
 
 		public TypeSystem TypeSystem {
-			get { return type_system ?? (type_system = TypeSystem.CreateTypeSystem (this)); }
+			get {
+				if (type_system == null)
+					Interlocked.CompareExchange (ref type_system, TypeSystem.CreateTypeSystem (this), null);
+
+				return type_system;
+			}
 		}
 
 		public bool HasAssemblyReferences {
@@ -305,7 +381,7 @@ namespace Mono.Cecil {
 					return references;
 
 				if (HasImage)
-					return references = Read (this, (_, reader) => reader.ReadAssemblyReferences ());
+					return Read (ref references, this, (_, reader) => reader.ReadAssemblyReferences ());
 
 				return references = new Collection<AssemblyNameReference> ();
 			}
@@ -326,7 +402,7 @@ namespace Mono.Cecil {
 					return modules;
 
 				if (HasImage)
-					return modules = Read (this, (_, reader) => reader.ReadModuleReferences ());
+					return Read (ref modules, this, (_, reader) => reader.ReadModuleReferences ());
 
 				return modules = new Collection<ModuleReference> ();
 			}
@@ -350,7 +426,7 @@ namespace Mono.Cecil {
 					return resources;
 
 				if (HasImage)
-					return resources = Read (this, (_, reader) => reader.ReadResources ());
+					return Read (ref resources, this, (_, reader) => reader.ReadResources ());
 
 				return resources = new Collection<Resource> ();
 			}
@@ -366,7 +442,7 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get { return custom_attributes ?? (custom_attributes = this.GetCustomAttributes (this)); }
+			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, this)); }
 		}
 
 		public bool HasTypes {
@@ -384,7 +460,7 @@ namespace Mono.Cecil {
 					return types;
 
 				if (HasImage)
-					return types = Read (this, (_, reader) => reader.ReadTypes ());
+					return Read (ref types, this, (_, reader) => reader.ReadTypes ());
 
 				return types = new TypeDefinitionCollection (this);
 			}
@@ -405,7 +481,7 @@ namespace Mono.Cecil {
 					return exported_types;
 
 				if (HasImage)
-					return exported_types = Read (this, (_, reader) => reader.ReadExportedTypes ());
+					return Read (ref exported_types, this, (_, reader) => reader.ReadExportedTypes ());
 
 				return exported_types = new Collection<ExportedType> ();
 			}
@@ -417,7 +493,7 @@ namespace Mono.Cecil {
 					return entry_point;
 
 				if (HasImage)
-					return entry_point = Read (this, (_, reader) => reader.ReadEntryPoint ());
+					return Read (ref entry_point, this, (_, reader) => reader.ReadEntryPoint ());
 
 				return entry_point = null;
 			}
@@ -428,7 +504,6 @@ namespace Mono.Cecil {
 		{
 			this.MetadataSystem = new MetadataSystem ();
 			this.token = new MetadataToken (TokenType.Module, 1);
-			this.assembly_resolver = new AssemblyResolver ();
 		}
 
 		internal ModuleDefinition (Image image)
@@ -436,9 +511,10 @@ namespace Mono.Cecil {
 		{
 			this.Image = image;
 			this.kind = image.Kind;
-			this.runtime = image.Runtime;
+			this.RuntimeVersion = image.RuntimeVersion;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
+			this.characteristics = image.Characteristics;
 			this.fq_name = image.Stream.GetFullyQualifiedName ();
 
 			this.reader = new MetadataReader (this);
@@ -595,24 +671,6 @@ namespace Mono.Cecil {
 
 #if !READ_ONLY
 
-		static void CheckType (object type)
-		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-		}
-
-		static void CheckField (object field)
-		{
-			if (field == null)
-				throw new ArgumentNullException ("field");
-		}
-
-		static void CheckMethod (object method)
-		{
-			if (method == null)
-				throw new ArgumentNullException ("method");
-		}
-
 		static void CheckContext (IGenericParameterProvider context, ModuleDefinition module)
 		{
 			if (context == null)
@@ -623,185 +681,168 @@ namespace Mono.Cecil {
 		}
 
 #if !CF
+
+		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (Type type)
 		{
-			CheckType (type);
-
-			return MetadataImporter.ImportType (type, null, ImportGenericKind.Definition);
+			return ImportReference (type, null);
 		}
 
-		public TypeReference Import (Type type, TypeReference context)
+		public TypeReference ImportReference (Type type)
 		{
-			return Import (type, (IGenericParameterProvider) context);
+			return ImportReference (type, null);
 		}
 
-		public TypeReference Import (Type type, MethodReference context)
+		[Obsolete ("Use ImportReference", error: false)]
+		public TypeReference Import (Type type, IGenericParameterProvider context)
 		{
-			return Import (type, (IGenericParameterProvider) context);
+			return ImportReference (type, context);
 		}
 
-		TypeReference Import (Type type, IGenericParameterProvider context)
+		public TypeReference ImportReference (Type type, IGenericParameterProvider context)
 		{
-			CheckType (type);
+			Mixin.CheckType (type);
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportType (
-				type,
-				(IGenericContext) context,
-				context != null
-					? ImportGenericKind.Open
-					: ImportGenericKind.Definition);
+			return ReflectionImporter.ImportReference (type, context);
 		}
 
+		[Obsolete ("Use ImportReference", error: false)]
 		public FieldReference Import (SR.FieldInfo field)
 		{
-			CheckField (field);
-
-			return MetadataImporter.ImportField (field, null);
+			return ImportReference (field, null);
 		}
 
-		public FieldReference Import (SR.FieldInfo field, TypeReference context)
+		[Obsolete ("Use ImportReference", error: false)]
+		public FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
 		{
-			return Import (field, (IGenericParameterProvider) context);
+			return ImportReference (field, context);
 		}
 
-		public FieldReference Import (SR.FieldInfo field, MethodReference context)
+		public FieldReference ImportReference (SR.FieldInfo field)
 		{
-			return Import (field, (IGenericParameterProvider) context);
+			return ImportReference (field, null);
 		}
 
-		FieldReference Import (SR.FieldInfo field, IGenericParameterProvider context)
+		public FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context)
 		{
-			CheckField (field);
+			Mixin.CheckField (field);
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportField (field, (IGenericContext) context);
+			return ReflectionImporter.ImportReference (field, context);
 		}
 
+		[Obsolete ("Use ImportReference", error: false)]
 		public MethodReference Import (SR.MethodBase method)
 		{
-			CheckMethod (method);
-
-			return MetadataImporter.ImportMethod (method, null, ImportGenericKind.Definition);
+			return ImportReference (method, null);
 		}
 
-		public MethodReference Import (SR.MethodBase method, TypeReference context)
+		[Obsolete ("Use ImportReference", error: false)]
+		public MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
 		{
-			return Import (method, (IGenericParameterProvider) context);
+			return ImportReference (method, context);
 		}
 
-		public MethodReference Import (SR.MethodBase method, MethodReference context)
+		public MethodReference ImportReference (SR.MethodBase method)
 		{
-			return Import (method, (IGenericParameterProvider) context);
+			return ImportReference (method, null);
 		}
 
-		MethodReference Import (SR.MethodBase method, IGenericParameterProvider context)
+		public MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context)
 		{
-			CheckMethod (method);
+			Mixin.CheckMethod (method);
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportMethod (method,
-				(IGenericContext) context,
-				context != null
-					? ImportGenericKind.Open
-					: ImportGenericKind.Definition);
+			return ReflectionImporter.ImportReference (method, context);
 		}
 #endif
 
+		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (TypeReference type)
 		{
-			CheckType (type);
-
-			if (type.Module == this)
-				return type;
-
-			return MetadataImporter.ImportType (type, null);
+			return ImportReference (type, null);
 		}
 
-		public TypeReference Import (TypeReference type, TypeReference context)
+		[Obsolete ("Use ImportReference", error: false)]
+		public TypeReference Import (TypeReference type, IGenericParameterProvider context)
 		{
-			return Import (type, (IGenericParameterProvider) context);
+			return ImportReference (type, context);
 		}
 
-		public TypeReference Import (TypeReference type, MethodReference context)
+		public TypeReference ImportReference (TypeReference type)
 		{
-			return Import (type, (IGenericParameterProvider) context);
+			return ImportReference (type, null);
 		}
 
-		TypeReference Import (TypeReference type, IGenericParameterProvider context)
+		public TypeReference ImportReference (TypeReference type, IGenericParameterProvider context)
 		{
-			CheckType (type);
+			Mixin.CheckType (type);
 
 			if (type.Module == this)
 				return type;
 
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportType (type, (IGenericContext) context);
+			return MetadataImporter.ImportReference (type, context);
 		}
 
+		[Obsolete ("Use ImportReference", error: false)]
 		public FieldReference Import (FieldReference field)
 		{
-			CheckField (field);
-
-			if (field.Module == this)
-				return field;
-
-			return MetadataImporter.ImportField (field, null);
+			return ImportReference (field, null);
 		}
 
-		public FieldReference Import (FieldReference field, TypeReference context)
+		[Obsolete ("Use ImportReference", error: false)]
+		public FieldReference Import (FieldReference field, IGenericParameterProvider context)
 		{
-			return Import (field, (IGenericParameterProvider) context);
+			return ImportReference (field, context);
 		}
 
-		public FieldReference Import (FieldReference field, MethodReference context)
+		public FieldReference ImportReference (FieldReference field)
 		{
-			return Import (field, (IGenericParameterProvider) context);
+			return ImportReference (field, null);
 		}
 
-		FieldReference Import (FieldReference field, IGenericParameterProvider context)
+		public FieldReference ImportReference (FieldReference field, IGenericParameterProvider context)
 		{
-			CheckField (field);
+			Mixin.CheckField (field);
 
 			if (field.Module == this)
 				return field;
 
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportField (field, (IGenericContext) context);
+			return MetadataImporter.ImportReference (field, context);
 		}
 
+		[Obsolete ("Use ImportReference", error: false)]
 		public MethodReference Import (MethodReference method)
 		{
-			CheckMethod (method);
-
-			if (method.Module == this)
-				return method;
-
-			return MetadataImporter.ImportMethod (method, null);
+			return ImportReference (method, null);
 		}
 
-		public MethodReference Import (MethodReference method, TypeReference context)
+		[Obsolete ("Use ImportReference", error: false)]
+		public MethodReference Import (MethodReference method, IGenericParameterProvider context)
 		{
-			return Import (method, (IGenericParameterProvider) context);
+			return ImportReference (method, context);
 		}
 
-		public MethodReference Import (MethodReference method, MethodReference context)
+		public MethodReference ImportReference (MethodReference method)
 		{
-			return Import (method, (IGenericParameterProvider) context);
+			return ImportReference (method, null);
 		}
 
-		MethodReference Import (MethodReference method, IGenericParameterProvider context)
+		public MethodReference ImportReference (MethodReference method, IGenericParameterProvider context)
 		{
-			CheckMethod (method);
+			Mixin.CheckMethod (method);
 
 			if (method.Module == this)
 				return method;
 
 			CheckContext (context, this);
 
-			return MetadataImporter.ImportMethod (method, (IGenericContext) context);
+			return MetadataImporter.ImportReference (method, context);
 		}
 
 #endif
@@ -816,28 +857,66 @@ namespace Mono.Cecil {
 			return Read (token, (t, reader) => reader.LookupToken (t));
 		}
 
+		readonly object module_lock = new object();
+
+		internal object SyncRoot {
+			get { return module_lock; }
+		}
+
 		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
 		{
-			var position = reader.position;
-			var context = reader.context;
+			lock (module_lock) {
+				var position = reader.position;
+				var context = reader.context;
 
-			var ret = read (item, reader);
+				var ret = read (item, reader);
 
-			reader.position = position;
-			reader.context = context;
+				reader.position = position;
+				reader.context = context;
 
-			return ret;
+				return ret;
+			}
+		}
+
+		internal TRet Read<TItem, TRet> (ref TRet variable, TItem item, Func<TItem, MetadataReader, TRet> read) where TRet : class
+		{
+			lock (module_lock) {
+				if (variable != null)
+					return variable;
+
+				var position = reader.position;
+				var context = reader.context;
+
+				var ret = read (item, reader);
+
+				reader.position = position;
+				reader.context = context;
+
+				return variable = ret;
+			}
+		}
+
+		public bool HasDebugHeader {
+			get { return Image != null && !Image.Debug.IsZero; }
+		}
+
+		public ImageDebugDirectory GetDebugHeader (out byte [] header)
+		{
+			if (!HasDebugHeader)
+				throw new InvalidOperationException ();
+
+			return Image.GetDebugHeader (out header);
 		}
 
 		void ProcessDebugHeader ()
 		{
-			if (Image == null || Image.Debug.IsZero)
+			if (!HasDebugHeader)
 				return;
 
 			byte [] header;
-			var directory = Image.GetDebugHeader (out header);
+			var directory = GetDebugHeader (out header);
 
-			if (!SymbolReader.ProcessDebugHeader (directory, header))
+			if (!symbol_reader.ProcessDebugHeader (directory, header))
 				throw new InvalidOperationException ();
 		}
 
@@ -856,10 +935,11 @@ namespace Mono.Cecil {
 			var module = new ModuleDefinition {
 				Name = name,
 				kind = parameters.Kind,
-				runtime = parameters.Runtime,
+				Runtime = parameters.Runtime,
 				architecture = parameters.Architecture,
 				mvid = Guid.NewGuid (),
 				Attributes = ModuleAttributes.ILOnly,
+				Characteristics = (ModuleCharacteristics) 0x8540,
 			};
 
 			if (parameters.AssemblyResolver != null)
@@ -867,6 +947,15 @@ namespace Mono.Cecil {
 
 			if (parameters.MetadataResolver != null)
 				module.metadata_resolver = parameters.MetadataResolver;
+
+#if !READ_ONLY
+			if (parameters.MetadataImporterProvider != null)
+				module.metadata_importer = parameters.MetadataImporterProvider.GetMetadataImporter (module);
+#if !CF
+			if (parameters.ReflectionImporterProvider != null)
+				module.reflection_importer = parameters.ReflectionImporterProvider.GetReflectionImporter (module);
+#endif
+#endif
 
 			if (parameters.Kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();
@@ -907,7 +996,7 @@ namespace Mono.Cecil {
 			if (reader == null)
 				throw new ArgumentNullException ("reader");
 
-			SymbolReader = reader;
+			symbol_reader = reader;
 
 			ProcessDebugHeader ();
 		}
@@ -990,6 +1079,28 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
+#if !READ_ONLY
+
+		public static void CheckType (object type)
+		{
+			if (type == null)
+				throw new ArgumentNullException ("type");
+		}
+
+		public static void CheckField (object field)
+		{
+			if (field == null)
+				throw new ArgumentNullException ("field");
+		}
+
+		public static void CheckMethod (object method)
+		{
+			if (method == null)
+				throw new ArgumentNullException ("method");
+		}
+
+#endif
+
 		public static void CheckParameters (object parameters)
 		{
 			if (parameters == null)
@@ -999,6 +1110,14 @@ namespace Mono.Cecil {
 		public static bool HasImage (this ModuleDefinition self)
 		{
 			return self != null && self.HasImage;
+		}
+
+		public static bool IsCorlib (this ModuleDefinition module)
+		{
+			if (module.Assembly == null)
+				return false;
+
+			return module.Assembly.Name.Name == "mscorlib";
 		}
 
 		public static string GetFullyQualifiedName (this Stream self)
@@ -1026,6 +1145,21 @@ namespace Mono.Cecil {
 			case '4':
 			default:
 				return TargetRuntime.Net_4_0;
+			}
+		}
+
+		public static string RuntimeVersionString (this TargetRuntime runtime)
+		{
+			switch (runtime) {
+			case TargetRuntime.Net_1_0:
+				return "v1.0.3705";
+			case TargetRuntime.Net_1_1:
+				return "v1.1.4322";
+			case TargetRuntime.Net_2_0:
+				return "v2.0.50727";
+			case TargetRuntime.Net_4_0:
+			default:
+				return "v4.0.30319";
 			}
 		}
 	}

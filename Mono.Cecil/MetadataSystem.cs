@@ -1,29 +1,11 @@
 //
-// MetadataSystem.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -65,20 +47,20 @@ namespace Mono.Cecil {
 		internal Dictionary<MetadataToken, uint> FieldMarshals;
 		internal Dictionary<MetadataToken, Row<ElementType, uint>> Constants;
 		internal Dictionary<uint, MetadataToken []> Overrides;
-		internal Dictionary<MetadataToken, Range> CustomAttributes;
-		internal Dictionary<MetadataToken, Range> SecurityDeclarations;
+		internal Dictionary<MetadataToken, Range []> CustomAttributes;
+		internal Dictionary<MetadataToken, Range []> SecurityDeclarations;
 		internal Dictionary<uint, Range> Events;
 		internal Dictionary<uint, Range> Properties;
 		internal Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> Semantics;
 		internal Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes;
-		internal Dictionary<MetadataToken, Range> GenericParameters;
+		internal Dictionary<MetadataToken, Range []> GenericParameters;
 		internal Dictionary<uint, MetadataToken []> GenericConstraints;
 
 		static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
 
 		static void InitializePrimitives ()
 		{
-			primitive_value_types = new Dictionary<string, Row<ElementType, bool>> (18) {
+			primitive_value_types = new Dictionary<string, Row<ElementType, bool>> (18, StringComparer.Ordinal) {
 				{ "Void", new Row<ElementType, bool> (ElementType.Void, false) },
 				{ "Boolean", new Row<ElementType, bool> (ElementType.Boolean, true) },
 				{ "Char", new Row<ElementType, bool> (ElementType.Char, true) },
@@ -100,30 +82,45 @@ namespace Mono.Cecil {
 			};
 		}
 
-		public static void TryProcessPrimitiveType (TypeReference type)
+		public static void TryProcessPrimitiveTypeReference (TypeReference type)
 		{
-			var scope = type.scope;
-			if (scope == null)
-				return;
-
-			if (scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
-				return;
-
-			if (scope.Name != "mscorlib")
-				return;
-
 			if (type.Namespace != "System")
 				return;
 
-			if (primitive_value_types == null)
-				InitializePrimitives ();
+			var scope = type.scope;
+			if (scope == null || scope.MetadataScopeType != MetadataScopeType.AssemblyNameReference)
+				return;
 
 			Row<ElementType, bool> primitive_data;
-			if (!primitive_value_types.TryGetValue (type.Name, out primitive_data))
+			if (!TryGetPrimitiveData (type, out primitive_data))
 				return;
 
 			type.etype = primitive_data.Col1;
 			type.IsValueType = primitive_data.Col2;
+		}
+
+		public static bool TryGetPrimitiveElementType (TypeDefinition type, out ElementType etype)
+		{
+			etype = ElementType.None;
+
+			if (type.Namespace != "System")
+				return false;
+
+			Row<ElementType, bool> primitive_data;
+			if (TryGetPrimitiveData (type, out primitive_data) && primitive_data.Col1.IsPrimitive ()) {
+				etype = primitive_data.Col1;
+				return true;
+			}
+
+			return false;
+		}
+
+		static bool TryGetPrimitiveData (TypeReference type, out Row<ElementType, bool> primitive_data)
+		{
+			if (primitive_value_types == null)
+				InitializePrimitives ();
+
+			return primitive_value_types.TryGetValue (type.Name, out primitive_data);
 		}
 
 		public void Clear ()
@@ -287,9 +284,9 @@ namespace Mono.Cecil {
 			Events.Remove (type.token.RID);
 		}
 
-		public bool TryGetGenericParameterRange (IGenericParameterProvider owner, out Range range)
+		public bool TryGetGenericParameterRanges (IGenericParameterProvider owner, out Range [] ranges)
 		{
-			return GenericParameters.TryGetValue (owner.MetadataToken, out range);
+			return GenericParameters.TryGetValue (owner.MetadataToken, out ranges);
 		}
 
 		public void RemoveGenericParameterRange (IGenericParameterProvider owner)
@@ -297,9 +294,9 @@ namespace Mono.Cecil {
 			GenericParameters.Remove (owner.MetadataToken);
 		}
 
-		public bool TryGetCustomAttributeRange (ICustomAttributeProvider owner, out Range range)
+		public bool TryGetCustomAttributeRanges (ICustomAttributeProvider owner, out Range [] ranges)
 		{
-			return CustomAttributes.TryGetValue (owner.MetadataToken, out range);
+			return CustomAttributes.TryGetValue (owner.MetadataToken, out ranges);
 		}
 
 		public void RemoveCustomAttributeRange (ICustomAttributeProvider owner)
@@ -307,9 +304,9 @@ namespace Mono.Cecil {
 			CustomAttributes.Remove (owner.MetadataToken);
 		}
 
-		public bool TryGetSecurityDeclarationRange (ISecurityDeclarationProvider owner, out Range range)
+		public bool TryGetSecurityDeclarationRanges (ISecurityDeclarationProvider owner, out Range [] ranges)
 		{
-			return SecurityDeclarations.TryGetValue (owner.MetadataToken, out range);
+			return SecurityDeclarations.TryGetValue (owner.MetadataToken, out ranges);
 		}
 
 		public void RemoveSecurityDeclarationRange (ISecurityDeclarationProvider owner)

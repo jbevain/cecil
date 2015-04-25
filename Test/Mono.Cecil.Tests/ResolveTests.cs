@@ -212,7 +212,22 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (resolver.Resolve (reference));
 		}
 
-		static TRet GetReference<TDel, TRet> (TDel code)
+		[Test]
+		public void ResolvePortableClassLibraryReference ()
+		{
+			var resolver = new DefaultAssemblyResolver ();
+			var parameters = new ReaderParameters { AssemblyResolver = resolver };
+			var pcl = GetResourceModule ("PortableClassLibrary.dll", parameters);
+
+			foreach (var reference in pcl.AssemblyReferences) {
+				Assert.IsTrue (reference.IsRetargetable);
+				var assembly = resolver.Resolve (reference);
+				Assert.IsNotNull (assembly);
+				Assert.AreEqual (typeof (object).Assembly.GetName ().Version, assembly.Name.Version);
+			}
+		}
+
+		TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
 			if (@delegate == null)
@@ -250,7 +265,7 @@ namespace Mono.Cecil.Tests {
 			throw new InvalidOperationException ();
 		}
 
-		static MethodDefinition GetMethodFromDelegate (Delegate @delegate)
+		MethodDefinition GetMethodFromDelegate (Delegate @delegate)
 		{
 			var method = @delegate.Method;
 			var type = (TypeDefinition) TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);
