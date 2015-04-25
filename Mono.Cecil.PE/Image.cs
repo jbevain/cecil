@@ -143,12 +143,6 @@ namespace Mono.Cecil.PE {
 			return directory;
 		}
 
-		~Image ()
-		{
-			if (Stream != null)
-				Stream.Dispose ();
-		}
-
 		public void Dispose ()
 		{
 			Stream.Dispose ();
