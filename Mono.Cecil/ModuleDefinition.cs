@@ -333,7 +333,7 @@ namespace Mono.Cecil {
 		internal IMetadataImporter MetadataImporter {
 			get {
 				if (metadata_importer == null)
-					Interlocked.CompareExchange(ref metadata_importer, new MetadataImporter(this), null);
+					Interlocked.CompareExchange (ref metadata_importer, new MetadataImporter (this), null);
 
 				return metadata_importer;
 			}
