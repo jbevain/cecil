@@ -332,6 +332,7 @@ namespace Mono.Cecil {
 			get { return assembly; }
 		}
 
+#if !READ_ONLY
 #if !CF
 		internal IReflectionImporter ReflectionImporter {
 			get {
@@ -340,10 +341,8 @@ namespace Mono.Cecil {
 
 				return reflection_importer;
 			}
-
 		}
 #endif
-
 		internal IMetadataImporter MetadataImporter {
 			get {
 				if (metadata_importer == null)
@@ -352,6 +351,7 @@ namespace Mono.Cecil {
 				return metadata_importer;
 			}
 		}
+#endif
 
 		public IAssemblyResolver AssemblyResolver {
 			get {
@@ -1041,12 +1041,6 @@ namespace Mono.Cecil {
 			return ReadModule (stream, fileName, parameters);
 		}
 
-		static void CheckStream (object stream)
-		{
-			if (stream == null)
-				throw new ArgumentNullException ("stream");
-		}
-
 		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
 		{
 			return ReadModule (stream, "", parameters);
@@ -1054,7 +1048,7 @@ namespace Mono.Cecil {
 
 		static ModuleDefinition ReadModule (Stream stream, string fileName, ReaderParameters parameters)
 		{
-			CheckStream (stream);
+			Mixin.CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)
 				throw new ArgumentException ();
 			Mixin.CheckParameters (parameters);
@@ -1095,7 +1089,7 @@ namespace Mono.Cecil {
 
 		public void Write (Stream stream, WriterParameters parameters)
 		{
-			CheckStream (stream);
+			Mixin.CheckStream (stream);
 			if (!stream.CanWrite || !stream.CanSeek)
 				throw new ArgumentException ();
 			Mixin.CheckParameters (parameters);
@@ -1108,6 +1102,12 @@ namespace Mono.Cecil {
 	}
 
 	static partial class Mixin {
+
+		public static void CheckStream (object stream)
+		{
+			if (stream == null)
+				throw new ArgumentNullException ("stream");
+		}
 
 #if !READ_ONLY
 
