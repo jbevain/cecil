@@ -2682,9 +2682,9 @@ namespace Mono.Cecil {
 			: base (reader.image.BlobHeap.data)
 		{
 			this.reader = reader;
-			this.start = blob;
-			this.position = (int) this.start;
+			this.position = (int) blob;
 			this.sig_length = ReadCompressedUInt32();
+			this.start = (uint) this.position;
 		}
 
 		MetadataToken ReadTypeTokenSignature ()
@@ -3199,7 +3199,7 @@ namespace Mono.Cecil {
 
 		public bool CanReadMore ()
 		{
-			return position - start <= sig_length;
+			return position - start < sig_length;
 		}
 	}
 }
