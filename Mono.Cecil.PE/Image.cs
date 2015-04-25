@@ -119,14 +119,22 @@ namespace Mono.Cecil.PE {
 
 		public BinaryStreamReader GetReaderAt (RVA rva)
 		{
+			var section = GetSectionAtVirtualAddress (rva);
+			if (section == null)
+				return null;
+
 			var reader = new BinaryStreamReader (Stream);
-			reader.MoveTo (ResolveVirtualAddress (rva));
+			reader.MoveTo (ResolveVirtualAddressInSection (rva, section));
 			return reader;
 		}
 
 		public ImageDebugDirectory GetDebugHeader (out byte [] header)
 		{
 			var reader = GetReaderAt (Debug.VirtualAddress);
+			if (reader == null) {
+				header = Empty<byte>.Array;
+				return new ImageDebugDirectory ();
+			}
 
 			var directory = new ImageDebugDirectory {
 				Characteristics = reader.ReadInt32 (),
@@ -140,7 +148,10 @@ namespace Mono.Cecil.PE {
 			};
 
 			reader = GetReaderAt ((uint) directory.AddressOfRawData);
-			header = reader.ReadBytes (directory.SizeOfData);
+			header = reader != null
+				? reader.ReadBytes (directory.SizeOfData)
+				: Empty<byte>.Array;
+
 			return directory;
 		}
 

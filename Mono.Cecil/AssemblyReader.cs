@@ -662,6 +662,9 @@ namespace Mono.Cecil {
 		public MemoryStream GetManagedResourceStream (uint offset)
 		{
 			var reader = image.GetReaderAt (image.Resources.VirtualAddress);
+			if (reader == null)
+				return new MemoryStream ();
+
 			reader.Advance ((int) offset);
 			return new MemoryStream (reader.ReadBytes (reader.ReadInt32 ()));
 		}
@@ -1225,7 +1228,9 @@ namespace Mono.Cecil {
 		byte [] GetFieldInitializeValue (int size, RVA rva)
 		{
 			var reader = image.GetReaderAt (rva);
-			return reader.ReadBytes (size);
+			return reader != null
+				? reader.ReadBytes (size)
+				: Empty<byte>.Array;
 		}
 
 		static int GetFieldTypeSize (TypeReference type)
