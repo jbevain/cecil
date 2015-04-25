@@ -208,7 +208,7 @@ namespace Mono.Cecil.Tests {
 		public void Win32FileVersion ()
 		{
 			TestModule ("libhello.dll", module => {
-				var version = FileVersionInfo.GetVersionInfo (module.FullyQualifiedName);
+				var version = FileVersionInfo.GetVersionInfo (module.FileName);
 
 				Assert.AreEqual ("0.0.0.0", version.FileVersion);
 			});

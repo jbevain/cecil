@@ -97,7 +97,7 @@ namespace Mono.Cecil {
 
 				var reader = parameters.SymbolStream != null
 					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream)
-					: symbol_reader_provider.GetSymbolReader (module, module.FullyQualifiedName);
+					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
 
 				module.ReadSymbols (reader);
 			}
@@ -564,10 +564,10 @@ namespace Mono.Cecil {
 
 		string GetModuleFileName (string name)
 		{
-			if (module.FullyQualifiedName == null)
+			if (module.FileName == null)
 				throw new NotSupportedException ();
 
-			var path = Path.GetDirectoryName (module.FullyQualifiedName);
+			var path = Path.GetDirectoryName (module.FileName);
 			return Path.Combine (path, name);
 		}
 

@@ -21,6 +21,7 @@ namespace Mono.Cecil.PE {
 	sealed class Image : IDisposable {
 
 		public Stream Stream;
+		public string FileName;
 
 		public ModuleKind Kind;
 		public string RuntimeVersion;

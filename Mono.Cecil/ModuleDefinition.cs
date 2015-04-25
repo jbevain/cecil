@@ -232,7 +232,7 @@ namespace Mono.Cecil {
 		internal TypeSystem type_system;
 
 		readonly MetadataReader reader;
-		readonly string fq_name;
+		readonly string file_name;
 
 		internal string runtime_version;
 		internal ModuleKind kind;
@@ -298,8 +298,13 @@ namespace Mono.Cecil {
 			set { characteristics = value; }
 		}
 
+		[Obsolete("Use FileName")]
 		public string FullyQualifiedName {
-			get { return fq_name; }
+			get { return file_name; }
+		}
+
+		public string FileName {
+			get { return file_name; }
 		}
 
 		public Guid Mvid {
@@ -524,7 +529,7 @@ namespace Mono.Cecil {
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
 			this.characteristics = image.Characteristics;
-			this.fq_name = image.Stream.GetFullyQualifiedName ();
+			this.file_name = image.FileName;
 
 			this.reader = new MetadataReader (this);
 		}
@@ -990,14 +995,14 @@ namespace Mono.Cecil {
 
 		public void ReadSymbols ()
 		{
-			if (string.IsNullOrEmpty (fq_name))
+			if (string.IsNullOrEmpty (file_name))
 				throw new InvalidOperationException ();
 
 			var provider = SymbolProvider.GetPlatformReaderProvider ();
 			if (provider == null)
 				throw new InvalidOperationException ();
 
-			ReadSymbols (provider.GetSymbolReader (this, fq_name));
+			ReadSymbols (provider.GetSymbolReader (this, file_name));
 		}
 
 		public void ReadSymbols (ISymbolReader reader)
@@ -1029,10 +1034,11 @@ namespace Mono.Cecil {
 				using (stream)
 					stream.CopyTo (memory);
 
+				memory.Position = 0;
 				stream = memory;
 			}
 
-			return ReadModule (stream, parameters);
+			return ReadModule (stream, fileName, parameters);
 		}
 
 		static void CheckStream (object stream)
@@ -1043,13 +1049,18 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
 		{
+			return ReadModule (stream, "", parameters);
+		}
+
+		static ModuleDefinition ReadModule (Stream stream, string fileName, ReaderParameters parameters)
+		{
 			CheckStream (stream);
 			if (!stream.CanRead || !stream.CanSeek)
 				throw new ArgumentException ();
 			Mixin.CheckParameters (parameters);
 
 			return ModuleReader.CreateModuleFrom (
-				ImageReader.ReadImageFrom (stream),
+				ImageReader.ReadImageFrom (stream, fileName),
 				parameters);
 		}
 

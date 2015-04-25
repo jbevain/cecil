@@ -100,7 +100,7 @@ namespace Mono.Cecil.Tests {
 			public void Register (AssemblyDefinition assembly)
 			{
 				this.RegisterAssembly (assembly);
-				this.AddSearchDirectory (Path.GetDirectoryName (assembly.MainModule.FullyQualifiedName));
+				this.AddSearchDirectory (Path.GetDirectoryName (assembly.MainModule.FileName));
 			}
 		}
 

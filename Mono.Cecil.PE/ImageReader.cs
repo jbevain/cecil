@@ -26,11 +26,12 @@ namespace Mono.Cecil.PE {
 
 		uint table_heap_offset;
 
-		public ImageReader (Stream stream)
+		public ImageReader (Stream stream, string file_name)
 			: base (stream)
 		{
 			image = new Image ();
 			image.Stream = stream;
+			image.FileName = file_name;
 		}
 
 		void MoveTo (DataDirectory directory)
@@ -637,10 +638,10 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static Image ReadImageFrom (Stream stream)
+		public static Image ReadImageFrom (Stream stream, string file_name)
 		{
 			try {
-				var reader = new ImageReader (stream);
+				var reader = new ImageReader (stream, file_name);
 				reader.ReadImage ();
 				return reader.image;
 			} catch (EndOfStreamException e) {

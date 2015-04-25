@@ -54,7 +54,7 @@ namespace Mono.Cecil.Tests {
 		internal Image GetResourceImage (string name)
 		{
 			using (var fs = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read))
-				return ImageReader.ReadImageFrom (fs);
+				return ImageReader.ReadImageFrom (fs, fs.Name);
 		}
 
 		public ModuleDefinition GetCurrentModule ()
