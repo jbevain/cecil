@@ -1030,7 +1030,7 @@ namespace Mono.Cecil {
 			var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read) as Stream;
 
 			if (parameters.InMemory) {
-				var memory = new MemoryStream ((int) stream.Length);
+				var memory = new MemoryStream (stream.CanSeek ? (int) stream.Length : 0);
 				using (stream)
 					stream.CopyTo (memory);
 
