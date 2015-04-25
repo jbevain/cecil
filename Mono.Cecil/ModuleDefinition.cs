@@ -320,6 +320,8 @@ namespace Mono.Cecil {
 			get { return assembly; }
 		}
 
+#if !READ_ONLY
+#if !CF
 		internal IReflectionImporter ReflectionImporter {
 			get {
 				if (reflection_importer == null)
@@ -327,9 +329,8 @@ namespace Mono.Cecil {
 
 				return reflection_importer;
 			}
-
 		}
-
+#endif
 		internal IMetadataImporter MetadataImporter {
 			get {
 				if (metadata_importer == null)
@@ -338,6 +339,7 @@ namespace Mono.Cecil {
 				return metadata_importer;
 			}
 		}
+#endif
 
 		public IAssemblyResolver AssemblyResolver {
 			get {
