@@ -236,9 +236,9 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (int_to_string);
 
 			var this_parameter_type = int_to_string.Body.ThisParameter.ParameterType;
-			Assert.IsTrue (this_parameter_type.IsPointer);
+			Assert.IsTrue (this_parameter_type.IsByReference);
 
-			var element_type = ((PointerType) this_parameter_type).ElementType;
+			var element_type = ((ByReferenceType) this_parameter_type).ElementType;
 			Assert.AreEqual (int32, element_type);
 		}
 
@@ -250,9 +250,9 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (token_to_string);
 
 			var this_parameter_type = token_to_string.Body.ThisParameter.ParameterType;
-			Assert.IsTrue (this_parameter_type.IsPointer);
+			Assert.IsTrue (this_parameter_type.IsByReference);
 
-			var element_type = ((PointerType) this_parameter_type).ElementType;
+			var element_type = ((ByReferenceType) this_parameter_type).ElementType;
 			Assert.AreEqual (token, element_type);
 		}
 
