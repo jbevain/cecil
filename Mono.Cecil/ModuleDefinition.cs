@@ -160,10 +160,10 @@ namespace Mono.Cecil {
 
 		static TargetRuntime GetCurrentRuntime ()
 		{
-#if !CF
+#if !CF && !NET_CORE
 			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
 #else
-			var corlib_version = typeof (object).Assembly.GetName ().Version;
+			var corlib_version = typeof (object).GetAssembly ().GetName ().Version;
 			switch (corlib_version.Major) {
 			case 1:
 				return corlib_version.Minor == 0
@@ -185,7 +185,7 @@ namespace Mono.Cecil {
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 		SR.StrongNameKeyPair key_pair;
 #endif
 		public Stream SymbolStream {
@@ -202,7 +202,7 @@ namespace Mono.Cecil {
 			get { return write_symbols; }
 			set { write_symbols = value; }
 		}
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 		public SR.StrongNameKeyPair StrongNameKeyPair {
 			get { return key_pair; }
 			set { key_pair = value; }
@@ -321,7 +321,7 @@ namespace Mono.Cecil {
 		}
 
 #if !READ_ONLY
-#if !CF
+#if !CF && !NET_CORE
 		internal IReflectionImporter ReflectionImporter {
 			get {
 				if (reflection_importer == null)
@@ -673,7 +673,11 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 		}
 
-#if !CF
+#if !CF && !NET_CORE
+		static ImportGenericContext GenericContextFor (IGenericParameterProvider context)
+		{
+			return context != null ? new ImportGenericContext (context) : default (ImportGenericContext);
+		}
 
 		[Obsolete ("Use ImportReference", error: false)]
 		public TypeReference Import (Type type)

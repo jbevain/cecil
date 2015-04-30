@@ -121,7 +121,7 @@ namespace Mono.Cecil {
 	}
 
 
-#if !CF
+#if !CF && !NET_CORE
 	public class ReflectionImporter : IReflectionImporter {
 
 		readonly ModuleDefinition module;

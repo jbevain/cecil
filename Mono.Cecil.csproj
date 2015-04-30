@@ -138,6 +138,7 @@
     <Compile Include="Mono\Actions.cs" />
     <Compile Include="Mono\Empty.cs" />
     <Compile Include="Mono\Funcs.cs" />
+    <Compile Include="Mono\Type.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

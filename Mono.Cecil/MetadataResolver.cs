@@ -28,7 +28,7 @@ namespace Mono.Cecil {
 		MethodDefinition Resolve (MethodReference method);
 	}
 
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 	[Serializable]
 #endif
 	public class ResolutionException : Exception {
@@ -62,7 +62,7 @@ namespace Mono.Cecil {
 			this.member = member;
 		}
 
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 		protected ResolutionException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)

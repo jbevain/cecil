@@ -165,7 +165,7 @@ namespace Mono.Cecil.Cil {
 
 		static SR.AssemblyName GetPlatformSymbolAssemblyName ()
 		{
-			var cecil_name = typeof (SymbolProvider).Assembly.GetName ();
+			var cecil_name = typeof (SymbolProvider).GetAssembly ().GetName ();
 
 			var name = new SR.AssemblyName {
 				Name = "Mono.Cecil." + symbol_kind,

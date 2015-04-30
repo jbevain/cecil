@@ -15,7 +15,7 @@ using System.Security.Cryptography;
 
 #if !READ_ONLY
 
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 using System.Runtime.Serialization;
 using Mono.Security.Cryptography;
 #endif
@@ -30,7 +30,7 @@ namespace Mono.Cecil {
 
 	static class CryptoService {
 
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 		public static void StrongName (Stream stream, ImageWriter writer, StrongNameKeyPair key_pair)
 		{
 			int strong_name_pointer;
@@ -92,7 +92,7 @@ namespace Mono.Cecil {
 
 			return sha1.Hash;
 		}
-#endif
+
 		static void CopyStreamChunk (Stream stream, Stream dest_stream, byte [] buffer, int length)
 		{
 			while (length > 0) {
@@ -101,12 +101,16 @@ namespace Mono.Cecil {
 				length -= read;
 			}
 		}
+#endif
 
 		public static byte [] ComputeHash (string file)
 		{
 			if (!File.Exists (file))
 				return Empty<byte>.Array;
 
+#if NET_CORE
+			return Empty<byte>.Array;
+#else
 			const int buffer_size = 8192;
 
 			var sha1 = new SHA1Managed ();
@@ -120,10 +124,11 @@ namespace Mono.Cecil {
 			}
 
 			return sha1.Hash;
+#endif
 		}
 	}
 
-#if !SILVERLIGHT && !CF
+#if !SILVERLIGHT && !CF && !NET_CORE
 	static partial class Mixin {
 
 		public static RSA CreateRSA (this StrongNameKeyPair key_pair)
