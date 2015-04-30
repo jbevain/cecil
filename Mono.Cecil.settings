@@ -40,7 +40,7 @@
     <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_4_5')) ">
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;NET_4_5;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('silverlight')) ">
