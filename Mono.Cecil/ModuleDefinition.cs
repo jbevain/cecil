@@ -1107,7 +1107,7 @@ namespace Mono.Cecil {
 			return self != null && self.HasImage;
 		}
 
-		public static bool IsCorlib (this ModuleDefinition module)
+		public static bool IsCoreLibrary (this ModuleDefinition module)
 		{
 			if (module.Assembly == null)
 				return false;

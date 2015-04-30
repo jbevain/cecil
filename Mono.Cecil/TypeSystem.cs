@@ -166,7 +166,7 @@ namespace Mono.Cecil {
 
 		internal static TypeSystem CreateTypeSystem (ModuleDefinition module)
 		{
-			if (module.IsCorlib ())
+			if (module.IsCoreLibrary ())
 				return new CoreTypeSystem (module);
 
 			return new CommonTypeSystem (module);
@@ -197,7 +197,12 @@ namespace Mono.Cecil {
 			}
 		}
 
+		[Obsolete ("Use CoreLibrary")]
 		public IMetadataScope Corlib {
+			get { return CoreLibrary; }
+		}
+
+		public IMetadataScope CoreLibrary {
 			get {
 				var common = this as CommonTypeSystem;
 				if (common == null)
