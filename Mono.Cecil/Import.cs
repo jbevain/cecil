@@ -1,29 +1,11 @@
 //
-// Import.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -35,10 +17,30 @@ using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
 
-	enum ImportGenericKind {
-		Definition,
-		Open,
+#if !READ_ONLY
+
+	public interface IMetadataImporterProvider {
+		IMetadataImporter GetMetadataImporter (ModuleDefinition module);
 	}
+
+	public interface IMetadataImporter {
+		TypeReference ImportReference (TypeReference type, IGenericParameterProvider context);
+		FieldReference ImportReference (FieldReference field, IGenericParameterProvider context);
+		MethodReference ImportReference (MethodReference method, IGenericParameterProvider context);
+	}
+
+#if !CF
+
+	public interface IReflectionImporterProvider {
+		IReflectionImporter GetReflectionImporter (ModuleDefinition module);
+	}
+
+	public interface IReflectionImporter {
+		TypeReference ImportReference (Type type, IGenericParameterProvider context);
+		FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context);
+		MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context);
+	}
+#endif
 
 	struct ImportGenericContext {
 
@@ -48,6 +50,9 @@ namespace Mono.Cecil {
 
 		public ImportGenericContext (IGenericParameterProvider provider)
 		{
+			if (provider == null)
+				throw new ArgumentNullException ("provider");
+
 			stack = null;
 
 			Push (provider);
@@ -108,18 +113,29 @@ namespace Mono.Cecil {
 
 			throw new InvalidOperationException ();
 		}
+
+		public static ImportGenericContext For (IGenericParameterProvider context)
+		{
+			return context != null ? new ImportGenericContext (context) : default (ImportGenericContext);
+		}
 	}
 
-	class MetadataImporter {
+
+#if !CF
+	public class ReflectionImporter : IReflectionImporter {
 
 		readonly ModuleDefinition module;
 
-		public MetadataImporter (ModuleDefinition module)
+		public ReflectionImporter (ModuleDefinition module)
 		{
 			this.module = module;
 		}
 
-#if !CF
+		enum ImportGenericKind {
+			Definition,
+			Open,
+		}
+
 		static readonly Dictionary<Type, ElementType> type_etype_mapping = new Dictionary<Type, ElementType> (18) {
 			{ typeof (void), ElementType.Void },
 			{ typeof (bool), ElementType.Boolean },
@@ -141,12 +157,12 @@ namespace Mono.Cecil {
 			{ typeof (object), ElementType.Object },
 		};
 
-		public TypeReference ImportType (Type type, ImportGenericContext context)
+		TypeReference ImportType (Type type, ImportGenericContext context)
 		{
 			return ImportType (type, context, ImportGenericKind.Open);
 		}
 
-		public TypeReference ImportType (Type type, ImportGenericContext context, ImportGenericKind import_kind)
+		TypeReference ImportType (Type type, ImportGenericContext context, ImportGenericKind import_kind)
 		{
 			if (IsTypeSpecification (type) || ImportOpenGenericType (type, import_kind))
 				return ImportTypeSpecification (type, context);
@@ -294,7 +310,7 @@ namespace Mono.Cecil {
 #else
 			var name = AssemblyNameReference.Parse (assembly.FullName);
 
-			if (TryGetAssemblyNameReference (name, out scope))
+			if (module.TryGetAssemblyNameReference (name, out scope))
 				return scope;
 
 			module.AssemblyReferences.Add (name);
@@ -322,7 +338,7 @@ namespace Mono.Cecil {
 		}
 #endif
 
-		public FieldReference ImportField (SR.FieldInfo field, ImportGenericContext context)
+		FieldReference ImportField (SR.FieldInfo field, ImportGenericContext context)
 		{
 			var declaring_type = ImportType (field.DeclaringType, context);
 
@@ -353,7 +369,7 @@ namespace Mono.Cecil {
 #endif
 		}
 
-		public MethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)
+		MethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)
 		{
 			if (IsMethodSpecification (method) || ImportOpenGenericMethod (method, import_kind))
 				return ImportMethodSpecification (method, context);
@@ -437,9 +453,43 @@ namespace Mono.Cecil {
 		{
 			return (method.CallingConvention & conventions) != 0;
 		}
+
+		public virtual TypeReference ImportReference (Type type, IGenericParameterProvider context)
+		{
+			Mixin.CheckType (type);
+			return ImportType (
+				type,
+				ImportGenericContext.For (context),
+				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
+		}
+
+		public virtual FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context)
+		{
+			Mixin.CheckField (field);
+			return ImportField (field, ImportGenericContext.For (context));
+		}
+
+		public virtual MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context)
+		{
+			Mixin.CheckMethod (method);
+			return ImportMethod (method,
+				ImportGenericContext.For (context),
+				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
+		}
+	}
+
 #endif
 
-		public TypeReference ImportType (TypeReference type, ImportGenericContext context)
+	public class MetadataImporter : IMetadataImporter {
+
+		readonly ModuleDefinition module;
+
+		public MetadataImporter (ModuleDefinition module)
+		{
+			this.module = module;
+		}
+
+		TypeReference ImportType (TypeReference type, ImportGenericContext context)
 		{
 			if (type.IsTypeSpecification ())
 				return ImportTypeSpecification (type, context);
@@ -480,12 +530,13 @@ namespace Mono.Cecil {
 		AssemblyNameReference ImportAssemblyName (AssemblyNameReference name)
 		{
 			AssemblyNameReference reference;
-			if (TryGetAssemblyNameReference (name, out reference))
+			if (module.TryGetAssemblyNameReference (name, out reference))
 				return reference;
 
 			reference = new AssemblyNameReference (name.Name, name.Version) {
 				Culture = name.Culture,
 				HashAlgorithm = name.HashAlgorithm,
+				IsRetargetable = name.IsRetargetable
 			};
 
 			var pk_token = !name.PublicKeyToken.IsNullOrEmpty ()
@@ -500,23 +551,6 @@ namespace Mono.Cecil {
 			module.AssemblyReferences.Add (reference);
 
 			return reference;
-		}
-
-		bool TryGetAssemblyNameReference (AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)
-		{
-			var references = module.AssemblyReferences;
-
-			for (int i = 0; i < references.Count; i++) {
-				var reference = references [i];
-				if (name_reference.FullName != reference.FullName) // TODO compare field by field
-					continue;
-
-				assembly_reference = reference;
-				return true;
-			}
-
-			assembly_reference = null;
-			return false;
 		}
 
 		static void ImportGenericParameters (IGenericParameterProvider imported, IGenericParameterProvider original)
@@ -588,9 +622,13 @@ namespace Mono.Cecil {
 				return imported_instance;
 			case ElementType.Var:
 				var var_parameter = (GenericParameter) type;
-				return context.TypeParameter (type.DeclaringType.FullName, var_parameter.Position);
+				if (var_parameter.DeclaringType == null)
+					throw new InvalidOperationException ();
+				return context.TypeParameter (var_parameter.DeclaringType.FullName, var_parameter.Position);
 			case ElementType.MVar:
 				var mvar_parameter = (GenericParameter) type;
+				if (mvar_parameter.DeclaringMethod == null)
+					throw new InvalidOperationException ();
 				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
 			case ElementType.FnPtr:
 				var funcPtr = (FunctionPointerType)type;
@@ -610,16 +648,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException (type.etype.ToString ());
 		}
 
-		private static TypeReference GetGenericProviderCandidate(IGenericParameterProvider context)
-		{
-			if (context is TypeReference)
-				return ((TypeReference)context).GetElementType();
-			else if (context is MethodReference)
-				return ((MethodReference)context).DeclaringType.GetElementType();
-			throw new InvalidOperationException();
-		}
-
-		public FieldReference ImportField (FieldReference field, ImportGenericContext context)
+		FieldReference ImportField (FieldReference field, ImportGenericContext context)
 		{
 			var declaring_type = ImportType (field.DeclaringType, context);
 
@@ -635,7 +664,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public MethodReference ImportMethod (MethodReference method, ImportGenericContext context)
+		MethodReference ImportMethod (MethodReference method, ImportGenericContext context)
 		{
 			if (method.IsGenericInstance)
 				return ImportMethodSpecification (method, context);
@@ -690,5 +719,45 @@ namespace Mono.Cecil {
 
 			return imported_instance;
 		}
+
+		public virtual TypeReference ImportReference (TypeReference type, IGenericParameterProvider context)
+		{
+			Mixin.CheckType (type);
+			return ImportType (type, ImportGenericContext.For (context));
+		}
+
+		public virtual FieldReference ImportReference (FieldReference field, IGenericParameterProvider context)
+		{
+			Mixin.CheckField (field);
+			return ImportField (field, ImportGenericContext.For (context));
+		}
+
+		public virtual MethodReference ImportReference (MethodReference method, IGenericParameterProvider context)
+		{
+			Mixin.CheckMethod (method);
+			return ImportMethod (method, ImportGenericContext.For (context));
+		}
 	}
+
+	static partial class Mixin {
+
+		public static bool TryGetAssemblyNameReference (this ModuleDefinition module, AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)
+		{
+			var references = module.AssemblyReferences;
+
+			for (int i = 0; i < references.Count; i++) {
+				var reference = references [i];
+				if (name_reference.FullName != reference.FullName) // TODO compare field by field
+					continue;
+
+				assembly_reference = reference;
+				return true;
+			}
+
+			assembly_reference = null;
+			return false;
+		}
+	}
+
+#endif
 }

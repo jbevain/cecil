@@ -1,29 +1,11 @@
 //
-// AssemblyReader.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -78,15 +60,27 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters)
 		{
-			var module = ReadModule (image, parameters);
+			var reader = CreateModuleReader (image, parameters.ReadingMode);
+			var module = reader.module;
+
+			if (parameters.assembly_resolver != null)
+				module.assembly_resolver = parameters.assembly_resolver;
+
+			if (parameters.metadata_resolver != null)
+				module.metadata_resolver = parameters.metadata_resolver;
+
+#if !READ_ONLY
+			if (parameters.metadata_importer_provider != null)
+				module.metadata_importer = parameters.metadata_importer_provider.GetMetadataImporter (module);
+#if !CF
+			if (parameters.reflection_importer_provider != null)
+				module.reflection_importer = parameters.reflection_importer_provider.GetReflectionImporter (module);
+#endif
+#endif
+
+			reader.ReadModule ();
 
 			ReadSymbols (module, parameters);
-
-			if (parameters.AssemblyResolver != null)
-				module.assembly_resolver = parameters.AssemblyResolver;
-
-			if (parameters.MetadataResolver != null)
-				module.metadata_resolver = parameters.MetadataResolver;
 
 			return module;
 		}
@@ -107,13 +101,6 @@ namespace Mono.Cecil {
 
 				module.ReadSymbols (reader);
 			}
-		}
-
-		static ModuleDefinition ReadModule (Image image, ReaderParameters parameters)
-		{
-			var reader = CreateModuleReader (image, parameters.ReadingMode);
-			reader.ReadModule ();
-			return reader.module;
 		}
 
 		static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
@@ -165,7 +152,7 @@ namespace Mono.Cecil {
 				return;
 
 			if (assembly.HasCustomAttributes)
-				Read (assembly.CustomAttributes);
+				ReadCustomAttributes (assembly);
 			if (assembly.HasSecurityDeclarations)
 				Read (assembly.SecurityDeclarations);
 		}
@@ -218,21 +205,36 @@ namespace Mono.Cecil {
 				if (parameter.HasConstraints)
 					Read (parameter.Constraints);
 
-				if (parameter.HasCustomAttributes)
-					Read (parameter.CustomAttributes);
+				ReadCustomAttributes (parameter);
 			}
 		}
 
 		static void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
 		{
-			if (provider.HasSecurityDeclarations)
-				Read (provider.SecurityDeclarations);
+			if (!provider.HasSecurityDeclarations)
+				return;
+
+			var security_declarations = provider.SecurityDeclarations;
+
+			for (int i = 0; i < security_declarations.Count; i++) {
+				var security_declaration = security_declarations [i];
+
+				Read (security_declaration.SecurityAttributes);
+			}
 		}
 
 		static void ReadCustomAttributes (ICustomAttributeProvider provider)
 		{
-			if (provider.HasCustomAttributes)
-				Read (provider.CustomAttributes);
+			if (!provider.HasCustomAttributes)
+				return;
+
+			var custom_attributes = provider.CustomAttributes;
+
+			for (int i = 0; i < custom_attributes.Count; i++) {
+				var custom_attribute = custom_attributes [i];
+
+				Read (custom_attribute.ConstructorArguments);
+			}
 		}
 
 		static void ReadFields (TypeDefinition type)
@@ -1045,18 +1047,29 @@ namespace Mono.Cecil {
 
 		IMetadataScope GetTypeReferenceScope (MetadataToken scope)
 		{
+			if (scope.TokenType == TokenType.Module)
+				return module;
+
+			IMetadataScope[] scopes;
+
 			switch (scope.TokenType) {
 			case TokenType.AssemblyRef:
 				InitializeAssemblyReferences ();
-				return metadata.AssemblyReferences [(int) scope.RID - 1];
+				scopes = metadata.AssemblyReferences;
+				break;
 			case TokenType.ModuleRef:
 				InitializeModuleReferences ();
-				return metadata.ModuleReferences [(int) scope.RID - 1];
-			case TokenType.Module:
-				return module;
+				scopes = metadata.ModuleReferences;
+				break;
 			default:
 				throw new NotSupportedException ();
 			}
+
+			var index = scope.RID - 1;
+			if (index < 0 || index >= scopes.Length)
+				return null;
+
+			return scopes [index];
 		}
 
 		public IEnumerable<TypeReference> GetTypeReferences ()
@@ -1263,8 +1276,8 @@ namespace Mono.Cecil {
 			case ElementType.CModReqD:
 				return GetFieldTypeSize (((IModifierType) type).ElementType);
 			default:
-				var field_type = type.CheckedResolve ();
-				if (field_type.HasLayoutInfo)
+				var field_type = type.Resolve ();
+				if (field_type != null && field_type.HasLayoutInfo)
 					size = field_type.ClassSize;
 
 				break;
@@ -1611,10 +1624,11 @@ namespace Mono.Cecil {
 			var methods = type.Methods;
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
-				if (method.sem_attrs.HasValue)
+				if (method.sem_attrs_ready)
 					continue;
 
 				method.sem_attrs = ReadMethodSemantics (method);
+				method.sem_attrs_ready = true;
 			}
 		}
 
@@ -2934,8 +2948,11 @@ namespace Mono.Cecil {
 
 		public void ReadCustomAttributeNamedArguments (ushort count, ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
 		{
-			for (int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++) {
+				if (!CanReadMore ())
+					return;
 				ReadCustomAttributeNamedArgument (ref fields, ref properties);
+			}
 		}
 
 		void ReadCustomAttributeNamedArgument (ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
@@ -3099,29 +3116,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		string UnescapeTypeName (string name)
-		{
-			StringBuilder sb = new StringBuilder (name.Length);
-			for (int i = 0; i < name.Length; i++) {
-				char c = name [i];
-				if (name [i] == '\\') {
-					if ((i < name.Length - 1) && (name [i + 1] == '\\')) {
-						sb.Append (c);
-						i++;
-					}
-				} else {
-					sb.Append (c);
-				}
-			}
-			return sb.ToString ();
-		}
-
 		public TypeReference ReadTypeReference ()
 		{
-			string s = ReadUTF8String ();
-			if (s.IndexOf ('\\') != -1)
-				s = UnescapeTypeName (s);
-			return TypeParser.ParseType (reader.module, s);
+			return TypeParser.ParseType (reader.module, ReadUTF8String ());
 		}
 
 		object ReadCustomAttributeEnum (TypeReference enum_type)

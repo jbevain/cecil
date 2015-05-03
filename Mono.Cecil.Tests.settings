@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BuildDirectory>$(MSBuildProjectDirectory)</BuildDirectory>
+  </PropertyGroup>
+  <Import Project="Mono.Cecil.settings" />
+  <ItemGroup>
+    <Reference Include="nunit.core">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(MSBuildThisFileDirectory)\Test\libs\nunit-2.6.2\nunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.core.interfaces">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(MSBuildThisFileDirectory)\Test\libs\nunit-2.6.2\nunit.core.interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(MSBuildThisFileDirectory)\Test\libs\nunit-2.6.2\nunit.framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

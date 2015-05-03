@@ -12,13 +12,14 @@ namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class PdbTests : BaseTestFixture {
 
-		[TestModule ("test.exe", SymbolReaderProvider = typeof (PdbReaderProvider), SymbolWriterProvider = typeof (PdbWriterProvider))]
-		public void Main (ModuleDefinition module)
+		[Test]
+		public void Main ()
 		{
-			var type = module.GetType ("Program");
-			var main = type.GetMethod ("Main");
+			TestModule ("test.exe", module => {
+				var type = module.GetType ("Program");
+				var main = type.GetMethod ("Main");
 
-			AssertCode (@"
+				AssertCode (@"
 	.locals init (System.Int32 i, System.Int32 CS$1$0000, System.Boolean CS$4$0001)
 	.line 6,6:2,3 'c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs'
 	IL_0000: nop
@@ -56,70 +57,79 @@ namespace Mono.Cecil.Tests {
 	IL_0020: ldloc.1
 	IL_0021: ret
 ", main);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
-		[TestModule ("test.exe", SymbolReaderProvider = typeof (PdbReaderProvider), SymbolWriterProvider = typeof (PdbWriterProvider))]
-		public void Document (ModuleDefinition module)
+		[Test]
+		public void Document ()
 		{
-			var type = module.GetType ("Program");
-			var method = type.GetMethod ("Main");
+			TestModule ("test.exe", module => {
+				var type = module.GetType ("Program");
+				var method = type.GetMethod ("Main");
 
-			var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
-			var document = sequence_point.Document;
+				var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+				var document = sequence_point.Document;
 
-			Assert.IsNotNull (document);
+				Assert.IsNotNull (document);
 
-			Assert.AreEqual (@"c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs", document.Url);
-			Assert.AreEqual (DocumentType.Text, document.Type);
-			Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
-			Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
-			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+				Assert.AreEqual (@"c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs", document.Url);
+				Assert.AreEqual (DocumentType.Text, document.Type);
+				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+				Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
+				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
-		[TestModule ("VBConsApp.exe", SymbolReaderProvider = typeof (PdbReaderProvider), SymbolWriterProvider = typeof (PdbWriterProvider))]
-		public void BasicDocument (ModuleDefinition module)
+		[Test]
+		public void BasicDocument ()
 		{
-			var type = module.GetType ("VBConsApp.Program");
-			var method = type.GetMethod ("Main");
+			TestModule ("VBConsApp.exe", module => {
+				var type = module.GetType ("VBConsApp.Program");
+				var method = type.GetMethod ("Main");
 
-			var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
-			var document = sequence_point.Document;
+				var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+				var document = sequence_point.Document;
 
-			Assert.IsNotNull (document);
+				Assert.IsNotNull (document);
 
-			Assert.AreEqual (@"c:\tmp\VBConsApp\Program.vb", document.Url);
-			Assert.AreEqual (DocumentType.Text, document.Type);
-			Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
-			Assert.AreEqual (DocumentLanguage.Basic, document.Language);
-			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+				Assert.AreEqual (@"c:\tmp\VBConsApp\Program.vb", document.Url);
+				Assert.AreEqual (DocumentType.Text, document.Type);
+				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+				Assert.AreEqual (DocumentLanguage.Basic, document.Language);
+				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
-		[TestModule ("fsapp.exe", SymbolReaderProvider = typeof (PdbReaderProvider), SymbolWriterProvider = typeof (PdbWriterProvider))]
-		public void FSharpDocument (ModuleDefinition module)
+		[Test]
+		public void FSharpDocument ()
 		{
-			var type = module.GetType ("Program");
-			var method = type.GetMethod ("fact");
+			TestModule ("fsapp.exe", module => {
+				var type = module.GetType ("Program");
+				var method = type.GetMethod ("fact");
 
-			var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
-			var document = sequence_point.Document;
+				var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+				var document = sequence_point.Document;
 
-			Assert.IsNotNull (document);
+				Assert.IsNotNull (document);
 
-			Assert.AreEqual (@"c:\tmp\fsapp\Program.fs", document.Url);
-			Assert.AreEqual (DocumentType.Text, document.Type);
-			Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
-			Assert.AreEqual (DocumentLanguage.FSharp, document.Language);
-			Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+				Assert.AreEqual (@"c:\tmp\fsapp\Program.fs", document.Url);
+				Assert.AreEqual (DocumentType.Text, document.Type);
+				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+				Assert.AreEqual (DocumentLanguage.FSharp, document.Language);
+				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
 		public void CreateMethodFromScratch ()
 		{
+			IgnoreOnMono ();
+
 			var module = ModuleDefinition.CreateModule ("Pan", ModuleKind.Dll);
-			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.Import (typeof (object)));
+			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.ImportReference (typeof (object)));
 			module.Types.Add (type);
 
-			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.Import (typeof (string)));
+			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.ImportReference (typeof (string)));
 			type.Methods.Add (method);
 
 			var body = method.Body;
@@ -127,7 +137,7 @@ namespace Mono.Cecil.Tests {
 			body.InitLocals = true;
 
 			var il = body.GetILProcessor ();
-			var temp = new VariableDefinition ("temp", module.Import (typeof (string)));
+			var temp = new VariableDefinition ("temp", module.ImportReference (typeof (string)));
 			body.Variables.Add (temp);
 
 			il.Emit (OpCodes.Nop);
@@ -161,8 +171,6 @@ namespace Mono.Cecil.Tests {
 		{
 			Assert.IsTrue (method.HasBody);
 			Assert.IsNotNull (method.Body);
-
-			System.Console.WriteLine (Formatter.FormatMethodBody (method));
 
 			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
 		}

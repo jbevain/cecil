@@ -1,29 +1,11 @@
 //
-// CustomAttribute.cs
-//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
-// Copyright (c) 2008 - 2011 Jb Evain
+// Copyright (c) 2008 - 2015 Jb Evain
+// Copyright (c) 2008 - 2011 Novell, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining
-// a copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to
-// the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// Licensed under the MIT/X11 license.
 //
 
 using System;
@@ -191,7 +173,7 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				throw new NotSupportedException ();
 
-			return blob = Module.Read (this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature));
+			return Module.Read (ref blob, this, (attribute, reader) => reader.ReadCustomAttributeBlob (attribute.signature));
 		}
 
 		void Resolve ()
@@ -199,23 +181,22 @@ namespace Mono.Cecil {
 			if (resolved || !HasImage)
 				return;
 
-			try {
-				Module.Read (this, (attribute, reader) => {
+			Module.Read (this, (attribute, reader) => {
+				try {
 					reader.ReadCustomAttributeSignature (attribute);
-					return this;
-				});
+					resolved = true;
+				} catch (ResolutionException) {
+					if (arguments != null)
+						arguments.Clear ();
+					if (fields != null)
+						fields.Clear ();
+					if (properties != null)
+						properties.Clear ();
 
-				resolved = true;
-			} catch (ResolutionException) {
-				if (arguments != null)
-					arguments.Clear ();
-				if (fields != null)
-					fields.Clear ();
-				if (properties != null)
-					properties.Clear ();
-
-				resolved = false;
-			}
+					resolved = false;
+				}
+				return this;
+			});
 		}
 	}
 
