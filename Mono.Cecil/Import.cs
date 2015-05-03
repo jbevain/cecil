@@ -71,14 +71,14 @@ namespace Mono.Cecil {
 			stack.RemoveAt (stack.Count - 1);
 		}
 
-		public TypeReference MethodParameter (string method, int position)
+		public TypeReference MethodParameter (string declTypeFullName, string method, int position)
 		{
 			for (int i = stack.Count - 1; i >= 0; i--) {
 				var candidate = stack [i] as MethodReference;
 				if (candidate == null)
 					continue;
 
-				if (method != candidate.Name)
+				if (method != candidate.Name || declTypeFullName != candidate.DeclaringType.FullName)
 					continue;
 
 				return candidate.GenericParameters [position];
@@ -233,7 +233,7 @@ namespace Mono.Cecil {
 
 			if (type.DeclaringMethod != null)
 			{
-				return context.MethodParameter (type.DeclaringMethod.Name, type.GenericParameterPosition);
+				return context.MethodParameter (type.DeclaringType.FullName, type.DeclaringMethod.Name, type.GenericParameterPosition);
 			}
 			if (type.DeclaringType != null)
 			{
@@ -629,7 +629,7 @@ namespace Mono.Cecil {
 				var mvar_parameter = (GenericParameter) type;
 				if (mvar_parameter.DeclaringMethod == null)
 					throw new InvalidOperationException ();
-				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
+				return context.MethodParameter (((MethodReference)mvar_parameter.Owner).DeclaringType.FullName, mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
 			case ElementType.FnPtr:
 				var funcPtr = (FunctionPointerType)type;
 				var imported = new FunctionPointerType() {
