@@ -366,7 +366,6 @@ namespace Mono.Cecil {
 		readonly internal MetadataSystem metadata;
 
 		internal IGenericContext context;
-		internal SignatureReader signature;
 		internal CodeReader code;
 
 		uint Position {
@@ -381,7 +380,6 @@ namespace Mono.Cecil {
 			this.module = module;
 			this.metadata = module.MetadataSystem;
 			this.code = new CodeReader (image.MetadataSection, this);
-			this.signature = new SignatureReader (this);
 		}
 
 		int GetCodedIndexSize (CodedIndex index)
@@ -1103,8 +1101,7 @@ namespace Mono.Cecil {
 
 		SignatureReader ReadSignature (uint signature)
 		{
-			this.signature.MoveToSignature (signature);
-			return this.signature;
+			return new SignatureReader (signature, this);
 		}
 
 		public bool HasInterfaces (TypeDefinition type)
@@ -2690,23 +2687,26 @@ namespace Mono.Cecil {
 	sealed class SignatureReader : ByteBuffer {
 
 		readonly MetadataReader reader;
-		uint start, sig_length;
+		readonly uint start, sig_length;
 
 		TypeSystem TypeSystem {
 			get { return reader.module.TypeSystem; }
 		}
 
-		public SignatureReader (MetadataReader reader)
+		public SignatureReader (uint blob, MetadataReader reader)
 			: base (reader.buffer)
 		{
 			this.reader = reader;
+
+			MoveToBlob (blob);
+
+			this.sig_length = ReadCompressedUInt32 ();
+			this.start = (uint) position;
 		}
 
-		public void MoveToSignature (uint blob)
+		void MoveToBlob (uint blob)
 		{
 			position = (int) (reader.image.BlobHeap.Offset + blob);
-			this.sig_length = ReadCompressedUInt32();
-			this.start = (uint) position;
 		}
 
 		MetadataToken ReadTypeTokenSignature ()
