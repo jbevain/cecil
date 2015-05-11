@@ -45,7 +45,6 @@ namespace Mono {
 #if NET_CORE
 		private static readonly Dictionary<Type, TypeCode> TypeCodeMap = new Dictionary<Type, TypeCode>
 		{
-			{ typeof (object), TypeCode.Object },
 			{ typeof (bool), TypeCode.Boolean },
 			{ typeof (char), TypeCode.Char },
 			{ typeof (sbyte), TypeCode.SByte },
@@ -67,9 +66,12 @@ namespace Mono {
 		public static TypeCode GetTypeCode (this Type type)
 		{
 #if NET_CORE
+			if (type == null)
+				return TypeCode.Empty;
+
 			TypeCode code;
 			if (!TypeCodeMap.TryGetValue (type, out code))
-				throw new NotSupportedException ();
+				return TypeCode.Object;
 
 			return code;
 #else
