@@ -149,7 +149,7 @@ namespace Mono.Cecil {
 				builder.Append (name);
 				builder.Append (sep);
 				builder.Append ("Version=");
-				builder.Append (Version.ToString (fieldCount: 4));
+				builder.Append (version.ToString (fieldCount: 4));
 				builder.Append (sep);
 				builder.Append ("Culture=");
 				builder.Append (string.IsNullOrEmpty (culture) ? "neutral" : culture);
@@ -229,6 +229,8 @@ namespace Mono.Cecil {
 
 		internal AssemblyNameReference ()
 		{
+			this.version = Mixin.ZeroVersion;
+			this.token = new MetadataToken (TokenType.AssemblyRef);
 		}
 
 		public AssemblyNameReference (string name, Version version)
