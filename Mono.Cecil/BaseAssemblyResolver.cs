@@ -134,7 +134,7 @@ namespace Mono.Cecil {
 #if !SILVERLIGHT && !CF
 			if (name.IsRetargetable) {
 				// if the reference is retargetable, zero it
-				name = new AssemblyNameReference (name.Name, new Version (0, 0, 0, 0)) {
+				name = new AssemblyNameReference (name.Name, Mixin.ZeroVersion) {
 					PublicKeyToken = Empty<byte>.Array,
 				};
 			}
@@ -187,7 +187,7 @@ namespace Mono.Cecil {
 
 		static bool IsZero (Version version)
 		{
-			return version == null || (version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0);
+			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
 #if !SILVERLIGHT && !CF
