@@ -128,6 +128,9 @@ namespace Mono.Cecil {
 
 		public ReflectionImporter (ModuleDefinition module)
 		{
+			if (module == null)
+				throw new ArgumentNullException ("module");
+
 			this.module = module;
 		}
 
@@ -484,6 +487,9 @@ namespace Mono.Cecil {
 
 		public MetadataImporter (ModuleDefinition module)
 		{
+			if (module == null)
+				throw new ArgumentNullException ("module");
+
 			this.module = module;
 		}
 
@@ -578,6 +584,23 @@ namespace Mono.Cecil {
 			case ElementType.Sentinel:
 				var sentinel = (SentinelType) type;
 				return new SentinelType (ImportType (sentinel.ElementType, context));
+			case ElementType.FnPtr:
+				var fnptr = (FunctionPointerType) type;
+				var imported_fnptr = new FunctionPointerType () {
+					HasThis = fnptr.HasThis,
+					ExplicitThis = fnptr.ExplicitThis,
+					CallingConvention = fnptr.CallingConvention,
+					ReturnType = ImportType (fnptr.ReturnType, context),
+				};
+
+				if (!fnptr.HasParameters)
+					return imported_fnptr;
+
+				for (int i = 0; i < fnptr.Parameters.Count; i++)
+					imported_fnptr.Parameters.Add (new ParameterDefinition (
+						ImportType (fnptr.Parameters [i].ParameterType, context)));
+
+				return imported_fnptr;
 			case ElementType.CModOpt:
 				var modopt = (OptionalModifierType) type;
 				return new OptionalModifierType (
