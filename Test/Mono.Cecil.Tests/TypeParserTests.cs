@@ -149,7 +149,7 @@ namespace Mono.Cecil.Tests {
 
 			var type = TypeParser.ParseType (module, fullname);
 
-			Assert.AreEqual ("Bingo.Foo`1+Bar`1+Baz`1, Bingo, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
+			Assert.AreEqual ("Bingo.Foo`1+Bar`1+Baz`1, Bingo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
 
 			Assert.IsNotNull (type);
 			Assert.AreEqual ("Bingo", type.Scope.Name);
@@ -189,7 +189,7 @@ namespace Mono.Cecil.Tests {
 
 			var type = TypeParser.ParseType (module, fullname);
 
-			Assert.AreEqual ("Bingo.Gazonk[], Bingo, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
+			Assert.AreEqual ("Bingo.Gazonk[], Bingo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
 
 			var array = type as ArrayType;
 			Assert.IsNotNull (array);
