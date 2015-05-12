@@ -128,8 +128,7 @@ namespace Mono.Cecil {
 
 		public ReflectionImporter (ModuleDefinition module)
 		{
-			if (module == null)
-				throw new ArgumentNullException ("module");
+			Mixin.CheckModule (module);
 
 			this.module = module;
 		}
@@ -487,8 +486,7 @@ namespace Mono.Cecil {
 
 		public MetadataImporter (ModuleDefinition module)
 		{
-			if (module == null)
-				throw new ArgumentNullException ("module");
+			Mixin.CheckModule (module);
 
 			this.module = module;
 		}
@@ -748,6 +746,12 @@ namespace Mono.Cecil {
 	}
 
 	static partial class Mixin {
+
+		public static void CheckModule (ModuleDefinition module)
+		{
+			if (module == null)
+				throw new ArgumentNullException ("module");
+		}
 
 		public static bool TryGetAssemblyNameReference (this ModuleDefinition module, AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)
 		{
