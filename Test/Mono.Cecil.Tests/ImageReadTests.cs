@@ -159,9 +159,12 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MetroAssembly ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			TestModule ("metro.exe", module => {
 				Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
-			}, verify: false, readOnly: Platform.OnMono);
+			}, verify: false);
 		}
 	}
 }
