@@ -95,7 +95,7 @@
   <PropertyGroup>
     <CecilOverrides Condition="'$(CecilOverrides)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Mono.Cecil.overrides))\Mono.Cecil.overrides</CecilOverrides>
   </PropertyGroup>  
-  <Import Project="$(CecilOverrides)" Condition="Exists($(CecilOverrides))" />
+  <Import Project="'$(CecilOverrides)'" Condition="Exists('$(CecilOverrides)')" />
   
   <!-- This is an example of a custom override file -->
   <!--
