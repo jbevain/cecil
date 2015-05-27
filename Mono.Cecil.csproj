@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="Mono.Cecil.settings" />
   <PropertyGroup>
     <ProjectGuid>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</ProjectGuid>
     <RootNamespace>Mono.Cecil</RootNamespace>
@@ -139,5 +138,6 @@
     <Compile Include="Mono\Empty.cs" />
     <Compile Include="Mono\Funcs.cs" />
   </ItemGroup>
+  <Import Project="Mono.Cecil.settings" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
