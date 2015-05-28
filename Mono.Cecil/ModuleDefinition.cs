@@ -1107,12 +1107,20 @@ namespace Mono.Cecil {
 			return self != null && self.HasImage;
 		}
 
-		public static bool IsCorlib (this ModuleDefinition module)
+		public static bool IsCoreLibrary (this ModuleDefinition module)
 		{
 			if (module.Assembly == null)
 				return false;
 
-			return module.Assembly.Name.Name == "mscorlib";
+			var assembly_name = module.Assembly.Name.Name;
+
+			if (assembly_name != "mscorlib" && assembly_name != "System.Runtime")
+				return false;
+
+			if (module.HasImage && !module.MetadataSystem.HasSystemObject)
+				return false;
+
+			return true;
 		}
 
 		public static string GetFullyQualifiedName (this Stream self)

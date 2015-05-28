@@ -12,7 +12,7 @@ namespace Mono.Cecil.Tests {
 		public void SimpleStringReference ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.String";
 
@@ -31,7 +31,7 @@ namespace Mono.Cecil.Tests {
 		public void SimpleInt32Reference ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.Int32";
 
@@ -66,7 +66,7 @@ namespace Mono.Cecil.Tests {
 		public void ByRefTypeReference ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.String&";
 
@@ -105,7 +105,7 @@ namespace Mono.Cecil.Tests {
 		public void OpenGenericType ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.Collections.Generic.Dictionary`2";
 
