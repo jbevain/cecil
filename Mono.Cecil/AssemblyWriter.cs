@@ -993,10 +993,12 @@ namespace Mono.Cecil {
 		uint AddLinkedResource (LinkedResource resource)
 		{
 			var table = GetTable<FileTable> (Table.File);
+			var hash = resource.Hash;
 
-			var hash = resource.Hash.IsNullOrEmpty ()
-				? CryptoService.ComputeHash (resource.File)
-				: resource.Hash;
+#if !PCL
+			if (hash.IsNullOrEmpty ())
+				hash = CryptoService.ComputeHash (resource.File);
+#endif
 
 			return (uint) table.AddRow (new FileRow (
 				FileAttributes.ContainsNoMetaData,
