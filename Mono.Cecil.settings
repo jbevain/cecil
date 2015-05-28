@@ -11,7 +11,6 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\mono.snk</AssemblyOriginatorKeyFile>
     <OutputType>Library</OutputType>
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
-    <IsPCLBuild>False</IsPCLBuild>
     <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
@@ -29,9 +28,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-  </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('net_2_0')) ">
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_3_5')) ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -53,13 +49,11 @@
     <MSBuildCSharpTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</MSBuildCSharpTargets>
   </PropertyGroup>
   <!-- Shared References -->
-  <ItemGroup Condition= " !$(IsPCLBuild) ">
-    <Reference Include="System.Core" Condition=" '$(TargetFrameworkVersion)' != 'v2.0' " />
+  <ItemGroup>
+    <Reference Include="System.Core" />
     <Reference Include="System" />
   </ItemGroup>
   <!-- The following keeps Visual Studio happy; let's keep Visual Studio happy -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_2_0_Debug' ">
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug' ">

@@ -15,7 +15,6 @@
     <tags>assembly assemblies module modules il cil msil bytecode reflection injection cecil mono aop</tags>
   </metadata>
   <files>
-    <file src="bin\net_2_0_Release\*.dll" target="lib/net20" />
     <file src="bin\net_3_5_Release\*.dll" target="lib/net35" />
     <file src="bin\net_4_0_Release\*.dll" target="lib/net40" />
     <file src="bin\net_4_5_Release\*.dll" target="lib/net45" />
