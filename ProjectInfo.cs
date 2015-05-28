@@ -18,6 +18,4 @@ using System.Runtime.InteropServices;
 #endif
 
 [assembly: AssemblyVersion ("0.9.6.0")]
-#if !CF
 [assembly: AssemblyFileVersion ("0.9.6.0")]
-#endif

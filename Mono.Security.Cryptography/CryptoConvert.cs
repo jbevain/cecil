@@ -27,7 +27,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if !(SILVERLIGHT || READ_ONLY)
+#if !READ_ONLY
+
+#if !PCL
 
 using System;
 using System.Security.Cryptography;
@@ -246,3 +248,6 @@ namespace Mono.Security.Cryptography {
 }
 
 #endif
+
+#endif
+

@@ -35,14 +35,7 @@ namespace Mono.Cecil {
 
 		public static T [] Resize<T> (this T [] self, int length)
 		{
-#if !CF
 			Array.Resize (ref self, length);
-#else
-			var copy = new T [length];
-			Array.Copy (self, copy, self.Length);
-			self = copy;
-#endif
-
 			return self;
 		}
 	}

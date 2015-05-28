@@ -31,7 +31,7 @@ namespace Mono.Cecil {
 		MethodReference ImportReference (MethodReference method, IGenericParameterProvider context);
 	}
 
-#if !CF
+#if !PCL
 
 	public interface IReflectionImporterProvider {
 		IReflectionImporter GetReflectionImporter (ModuleDefinition module);
@@ -42,6 +42,7 @@ namespace Mono.Cecil {
 		FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context);
 		MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context);
 	}
+
 #endif
 
 	struct ImportGenericContext {
@@ -123,7 +124,7 @@ namespace Mono.Cecil {
 	}
 
 
-#if !CF
+#if !PCL
 	public class ReflectionImporter : IReflectionImporter {
 
 		readonly ModuleDefinition module;
@@ -203,11 +204,7 @@ namespace Mono.Cecil {
 
 		static bool IsNestedType (Type type)
 		{
-#if !SILVERLIGHT
 			return type.IsNested;
-#else
-			return type.DeclaringType != null;
-#endif
 		}
 
 		TypeReference ImportTypeSpecification (Type type, ImportGenericContext context)
@@ -294,7 +291,7 @@ namespace Mono.Cecil {
 		AssemblyNameReference ImportScope (SR.Assembly assembly)
 		{
 			AssemblyNameReference scope;
-#if !SILVERLIGHT
+
 			var name = assembly.GetName ();
 
 			if (TryGetAssemblyNameReference (name, out scope))
@@ -309,19 +306,8 @@ namespace Mono.Cecil {
 			module.AssemblyReferences.Add (scope);
 
 			return scope;
-#else
-			var name = AssemblyNameReference.Parse (assembly.FullName);
-
-			if (module.TryGetAssemblyNameReference (name, out scope))
-				return scope;
-
-			module.AssemblyReferences.Add (name);
-
-			return name;
-#endif
 		}
 
-#if !SILVERLIGHT
 		bool TryGetAssemblyNameReference (SR.AssemblyName name, out AssemblyNameReference assembly_reference)
 		{
 			var references = module.AssemblyReferences;
@@ -338,7 +324,6 @@ namespace Mono.Cecil {
 			assembly_reference = null;
 			return false;
 		}
-#endif
 
 		FieldReference ImportField (SR.FieldInfo field, ImportGenericContext context)
 		{
@@ -361,14 +346,7 @@ namespace Mono.Cecil {
 
 		static SR.FieldInfo ResolveFieldDefinition (SR.FieldInfo field)
 		{
-#if !SILVERLIGHT
 			return field.Module.ResolveField (field.MetadataToken);
-#else
-			return field.DeclaringType.GetGenericTypeDefinition ().GetField (field.Name,
-				SR.BindingFlags.Public
-				| SR.BindingFlags.NonPublic
-				| (field.IsStatic ? SR.BindingFlags.Static : SR.BindingFlags.Instance));
-#endif
 		}
 
 		MethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)
