@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Mdb</RootNamespace>
     <AssemblyName>Mono.Cecil.Mdb</AssemblyName>
     <DefineConstants>$(DefineConstants);CECIL</DefineConstants>
   </PropertyGroup>
@@ -30,5 +29,4 @@
     <Compile Include="Mono.CompilerServices.SymbolWriter\SymbolWriterImpl.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.settings" />
-  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

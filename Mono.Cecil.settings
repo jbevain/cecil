@@ -8,6 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\mono.snk</AssemblyOriginatorKeyFile>
     <OutputType>Library</OutputType>
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
@@ -106,4 +107,5 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo ("MyCompany.Cecil.Rocks, PublicKey=...")]
 [assembly: InternalsVisibleTo ("MyCompany.Cecil.Tests, PublicKey=...")]	
   -->
+  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

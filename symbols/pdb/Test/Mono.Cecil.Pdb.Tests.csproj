@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Pdb.Tests</RootNamespace>
     <AssemblyName>Mono.Cecil.Pdb.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
@@ -31,5 +30,4 @@
     <Content Include="Resources\assemblies\VBConsApp.pdb" />
   </ItemGroup>
   <Import Project="..\..\..\Mono.Cecil.Tests.settings" />
-  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>
