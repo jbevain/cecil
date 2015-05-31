@@ -509,6 +509,7 @@ namespace Mono.Cecil {
 
 			if (type.IsNested)
 				reference.DeclaringType = ImportType (type.DeclaringType, context);
+			reference.fullname = type.fullname;
 
 			if (type.HasGenericParameters)
 				ImportGenericParameters (reference, type);

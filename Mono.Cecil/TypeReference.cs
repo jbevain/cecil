@@ -58,7 +58,7 @@ namespace Mono.Cecil {
 
 		internal ElementType etype = ElementType.None;
 
-		string fullname;
+		internal string fullname;
 
 		protected Collection<GenericParameter> generic_parameters;
 
@@ -162,7 +162,7 @@ namespace Mono.Cecil {
 				if (IsNested)
 					fullname = DeclaringType.FullName + "/" + fullname;
 
-				return fullname;
+				return fullname = string.Intern(fullname);
 			}
 		}
 
