@@ -774,7 +774,7 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
-				if (name_reference.FullName != reference.FullName) // TODO compare field by field
+				if (!Equals(name_reference, reference))
 					continue;
 
 				assembly_reference = reference;
@@ -783,6 +783,32 @@ namespace Mono.Cecil {
 
 			assembly_reference = null;
 			return false;
+		}
+
+		private static bool Equals(byte[] a, byte[] b)
+		{
+			if (a == b) return true;
+			if (a.Length != b.Length) return false;
+			for (int i = 0; i < a.Length; i++)
+				if (a[i] != b[i]) return false;
+			return true;
+		}
+
+		private static bool Equals<T>(T a, T b) where T : class, IEquatable<T>
+		{
+			if (a == b) return true;
+			if (a == null) return false;
+			return a.Equals(b);
+		}
+
+		private static bool Equals(AssemblyNameReference a, AssemblyNameReference b)
+		{
+			if (a == b) return true;
+			if (a.Name != b.Name) return false;
+			if (!Equals(a.Version, b.Version)) return false;
+			if (a.Culture != b.Culture) return false;
+			if (!Equals(a.PublicKeyToken, b.PublicKeyToken)) return false;
+			return true;
 		}
 	}
 
