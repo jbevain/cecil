@@ -711,9 +711,8 @@ namespace Mono.Cecil {
 				if (!method.HasParameters)
 					return reference;
 
-				var reference_parameters = reference.Parameters;
-
 				var parameters = method.Parameters;
+				var reference_parameters = reference.parameters = new ParameterDefinitionCollection (reference, parameters.Count);
 				for (int i = 0; i < parameters.Count; i++)
 					reference_parameters.Add (
 						new ParameterDefinition (ImportType (parameters [i].ParameterType, context)));
