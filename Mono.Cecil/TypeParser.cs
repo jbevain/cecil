@@ -368,7 +368,7 @@ namespace Mono.Cecil {
 		static IMetadataScope GetMetadataScope (ModuleDefinition module, Type type_info)
 		{
 			if (string.IsNullOrEmpty (type_info.assembly))
-				return module.TypeSystem.Corlib;
+				return module.TypeSystem.CoreLibrary;
 
 			return MatchReference (module, AssemblyNameReference.Parse (type_info.assembly));
 		}

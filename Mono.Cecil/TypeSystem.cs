@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 
 		sealed class CommonTypeSystem : TypeSystem {
 
-			AssemblyNameReference corlib;
+			AssemblyNameReference core_library;
 
 			public CommonTypeSystem (ModuleDefinition module)
 				: base (module)
@@ -90,30 +90,43 @@ namespace Mono.Cecil {
 				return CreateTypeReference (@namespace, name);
 			}
 
-			public AssemblyNameReference GetCorlibReference ()
+			public AssemblyNameReference GetCoreLibraryReference ()
 			{
-				if (corlib != null)
-					return corlib;
+				if (core_library != null)
+					return core_library;
 
 				const string mscorlib = "mscorlib";
+				const string system_runtime = "System.Runtime";
 
-				var references = module.AssemblyReferences;
+				if (TryLookupReference (mscorlib, out core_library))
+					return core_library;
 
-				for (int i = 0; i < references.Count; i++) {
-					var reference = references [i];
-					if (reference.Name == mscorlib)
-						return corlib = reference;
-				}
+				if (TryLookupReference (system_runtime, out core_library))
+					return core_library;
 
-				corlib = new AssemblyNameReference {
+				core_library = new AssemblyNameReference {
 					Name = mscorlib,
 					Version = GetCorlibVersion (),
 					PublicKeyToken = new byte [] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 },
 				};
 
-				references.Add (corlib);
+				module.AssemblyReferences.Add (core_library);
 
-				return corlib;
+				return core_library;
+			}
+
+			bool TryLookupReference (string name, out AssemblyNameReference reference)
+			{
+				var references = module.AssemblyReferences;
+
+				for (int i = 0; i < references.Count; i++) {
+					reference = references [i];
+					if (reference.Name == name)
+						return true;
+				}
+
+				reference = null;
+				return false;
 			}
 
 			Version GetCorlibVersion ()
@@ -133,7 +146,7 @@ namespace Mono.Cecil {
 
 			TypeReference CreateTypeReference (string @namespace, string name)
 			{
-				return new TypeReference (@namespace, name, module, GetCorlibReference ());
+				return new TypeReference (@namespace, name, module, GetCoreLibraryReference ());
 			}
 		}
 
@@ -165,7 +178,7 @@ namespace Mono.Cecil {
 
 		internal static TypeSystem CreateTypeSystem (ModuleDefinition module)
 		{
-			if (module.IsCorlib ())
+			if (module.IsCoreLibrary ())
 				return new CoreTypeSystem (module);
 
 			return new CommonTypeSystem (module);
@@ -196,13 +209,18 @@ namespace Mono.Cecil {
 			}
 		}
 
+		[Obsolete ("Use CoreLibrary")]
 		public IMetadataScope Corlib {
+			get { return CoreLibrary; }
+		}
+
+		public IMetadataScope CoreLibrary {
 			get {
 				var common = this as CommonTypeSystem;
 				if (common == null)
 					return module;
 
-				return common.GetCorlibReference ();
+				return common.GetCoreLibraryReference ();
 			}
 		}
 
