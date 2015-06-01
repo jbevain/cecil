@@ -18,7 +18,7 @@ namespace Mono.Cecil.Tests {
 				Assert.IsNotNull (name);
 
 				Assert.AreEqual ("hello", name.Name);
-				Assert.AreEqual ("neutral", name.Culture);
+				Assert.AreEqual ("", name.Culture);
 				Assert.AreEqual (new Version (0, 0, 0, 0), name.Version);
 				Assert.AreEqual (AssemblyHashAlgorithm.SHA1, name.HashAlgorithm);
 			});

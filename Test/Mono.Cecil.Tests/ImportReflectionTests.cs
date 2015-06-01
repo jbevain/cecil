@@ -121,6 +121,18 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("FooBar", concat ("Foo", "Bar"));
 		}
 
+		[Test]
+		public void GeneratedAssemblyCulture ()
+		{
+			var id = Compile<Func<int, int>> ((module, body) => {
+				var il = body.GetILProcessor ();
+				il.Emit (OpCodes.Ldarg_0);
+				il.Emit (OpCodes.Ret);
+			});
+
+			Assert.AreEqual ("", id.Method.DeclaringType.Assembly.GetName ().CultureName);
+		}
+
 		public class Generic<T> {
 			public T Field;
 

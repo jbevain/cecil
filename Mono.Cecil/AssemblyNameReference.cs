@@ -39,7 +39,7 @@ namespace Mono.Cecil {
 		}
 
 		public string Culture {
-			get { return string.IsNullOrEmpty (culture) ? "neutral" : culture; }
+			get { return culture; }
 			set {
 				culture = value;
 				full_name = null;
@@ -152,7 +152,7 @@ namespace Mono.Cecil {
 				builder.Append (version.ToString (fieldCount: 4));
 				builder.Append (sep);
 				builder.Append ("Culture=");
-				builder.Append (Culture);
+				builder.Append (string.IsNullOrEmpty (culture) ? "neutral" : culture);
 				builder.Append (sep);
 				builder.Append ("PublicKeyToken=");
 
@@ -194,7 +194,7 @@ namespace Mono.Cecil {
 					name.Version = new Version (parts [1]);
 					break;
 				case "culture":
-					name.Culture = parts [1];
+					name.Culture = parts [1] == "neutral" ? "" : parts [1];
 					break;
 				case "publickeytoken":
 					var pk_token = parts [1];
