@@ -130,7 +130,7 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ret);
 			});
 
-			Assert.AreEqual ("", id.Method.DeclaringType.Assembly.GetName ().CultureName);
+			Assert.AreEqual ("", id.Method.DeclaringType.Assembly.GetName ().CultureInfo.Name);
 		}
 
 		public class Generic<T> {
