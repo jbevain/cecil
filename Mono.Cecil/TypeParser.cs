@@ -370,20 +370,12 @@ namespace Mono.Cecil {
 			if (string.IsNullOrEmpty (type_info.assembly))
 				return module.TypeSystem.CoreLibrary;
 
-			return MatchReference (module, AssemblyNameReference.Parse (type_info.assembly));
-		}
+			AssemblyNameReference match;
+			var reference = AssemblyNameReference.Parse (type_info.assembly);
 
-		static AssemblyNameReference MatchReference (ModuleDefinition module, AssemblyNameReference pattern)
-		{
-			var references = module.AssemblyReferences;
-
-			for (int i = 0; i < references.Count; i++) {
-				var reference = references [i];
-				if (reference.FullName == pattern.FullName)
-					return reference;
-			}
-
-			return pattern;
+			return module.TryGetAssemblyNameReference (reference, out match)
+				? match
+				: reference;
 		}
 
 		static bool TryGetDefinition (ModuleDefinition module, Type type_info, out TypeReference type)

@@ -43,8 +43,9 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (2, interfaces.Count);
 
-				Assert.AreEqual ("IBar", interfaces [0].FullName);
-				Assert.AreEqual ("IFoo", interfaces [1].FullName);
+				// Mono's ilasm and .NET's are ordering interfaces differently
+				Assert.IsNotNull (interfaces.Single (i => i.FullName == "IBar"));
+				Assert.IsNotNull (interfaces.Single (i => i.FullName == "IFoo"));
 			});
 		}
 

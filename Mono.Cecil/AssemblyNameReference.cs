@@ -194,7 +194,7 @@ namespace Mono.Cecil {
 					name.Version = new Version (parts [1]);
 					break;
 				case "culture":
-					name.Culture = parts [1];
+					name.Culture = parts [1] == "neutral" ? "" : parts [1];
 					break;
 				case "publickeytoken":
 					var pk_token = parts [1];
