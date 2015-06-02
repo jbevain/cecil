@@ -18,5 +18,6 @@ To discuss Cecil, the best place is the [mono-cecil](https://groups.google.com/g
 
 Cecil is a project under the benevolent umbrella of the [.NET Foundation](http://www.dotnetfoundation.org/).
 
-[![Build status](https://ci.appveyor.com/api/projects/status/fmhutmhidy1fahl4?svg=true)](https://ci.appveyor.com/project/jbevain/cecil)
+[![.NET build status](https://ci.appveyor.com/api/projects/status/fmhutmhidy1fahl4?svg=true)](https://ci.appveyor.com/project/jbevain/cecil)
+[![Mono build status](https://travis-ci.org/jbevain/cecil.svg?branch=master)](https://travis-ci.org/jbevain/cecil)
 [![Join the chat at https://gitter.im/jbevain/cecil](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jbevain/cecil?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
