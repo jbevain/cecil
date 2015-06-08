@@ -49,7 +49,7 @@ namespace Mono.Cecil {
 		public Version Version {
 			get { return version; }
 			set {
-				version = value ?? Mixin.ZeroVersion;
+				version = Mixin.CheckVersion (value);
 				full_name = null;
 			}
 		}
@@ -239,7 +239,7 @@ namespace Mono.Cecil {
 				throw new ArgumentNullException ("name");
 
 			this.name = name;
-			this.version = version ?? Mixin.ZeroVersion;
+			this.version = Mixin.CheckVersion (version);
 			this.hash_algorithm = AssemblyHashAlgorithm.None;
 			this.token = new MetadataToken (TokenType.AssemblyRef);
 		}
@@ -253,5 +253,19 @@ namespace Mono.Cecil {
 	partial class Mixin {
 
 		public static Version ZeroVersion = new Version (0, 0, 0 ,0);
+
+		public static Version CheckVersion (Version version)
+		{
+			if (version == null)
+				return ZeroVersion;
+
+			if (version.Build == -1)
+				return new Version (version.Major, version.Minor, 0, 0);
+
+			if (version.Revision == -1)
+				return new Version (version.Major, version.Minor, version.Build, 0);
+
+			return version;
+		}
 	}
 }
