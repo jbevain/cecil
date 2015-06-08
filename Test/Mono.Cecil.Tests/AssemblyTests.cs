@@ -45,5 +45,15 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("0.0.0.0", name.Version.ToString (fieldCount: 4));
 			Assert.AreEqual ("Foo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", name.FullName);
 		}
+
+		[Test]
+		public void NoBuildOrMajor ()
+		{
+			var name = new AssemblyNameReference ("Foo", new Version (0, 0));
+			Assert.AreEqual ("Foo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", name.FullName);
+
+			name = new AssemblyNameReference ("Foo", new Version (0, 0, 0));
+			Assert.AreEqual ("Foo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", name.FullName);
+		}
 	}
 }

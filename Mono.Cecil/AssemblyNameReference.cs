@@ -149,7 +149,11 @@ namespace Mono.Cecil {
 				builder.Append (name);
 				builder.Append (sep);
 				builder.Append ("Version=");
-				builder.Append (version.ToString (fieldCount: 4));
+				builder.Append (version.ToString ());
+				if (version.Build == -1)
+					builder.Append (".0");
+				if (version.Revision == -1)
+					builder.Append (".0");
 				builder.Append (sep);
 				builder.Append ("Culture=");
 				builder.Append (string.IsNullOrEmpty (culture) ? "neutral" : culture);
