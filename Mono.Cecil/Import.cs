@@ -498,20 +498,21 @@ namespace Mono.Cecil {
 		{
 			string fullname;
 			string assembly;
+            bool isValueType;
 
 			public static TypeRefKey From(TypeReference r)
 			{
-				return new TypeRefKey { fullname = r.FullName, assembly = r.Module.FullyQualifiedName };
+				return new TypeRefKey { fullname = r.FullName, assembly = r.Scope.ToString(), isValueType = r.IsValueType };
 			}
 
 			public override int GetHashCode()
 			{
-				return fullname.GetHashCode() + assembly.GetHashCode();
+				return fullname.GetHashCode() + assembly.GetHashCode() + (isValueType ? 1 : 0);
 			}
 
 			public bool Equals(TypeRefKey other)
 			{
-				return other.fullname == fullname && other.assembly == assembly;
+				return other.fullname == fullname && other.assembly == assembly && other.isValueType == isValueType;
 			}
 		}
 
