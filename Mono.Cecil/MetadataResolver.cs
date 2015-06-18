@@ -246,8 +246,11 @@ namespace Mono.Cecil {
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 
-				if (method.Name != reference.Name)
+				if (method.HasParameters != reference.HasParameters)
 					continue;
+
+				if (!method.HasParameters && !reference.HasParameters)
+					return method;
 
 				if (method.HasGenericParameters != reference.HasGenericParameters)
 					continue;
@@ -255,14 +258,11 @@ namespace Mono.Cecil {
 				if (method.HasGenericParameters && method.GenericParameters.Count != reference.GenericParameters.Count)
 					continue;
 
+				if (method.Name != reference.Name)
+					continue;
+
 				if (!AreSame (method.ReturnType, reference.ReturnType))
 					continue;
-
-				if (method.HasParameters != reference.HasParameters)
-					continue;
-
-				if (!method.HasParameters && !reference.HasParameters)
-					return method;
 
 				if (!AreSame (method.Parameters, reference.Parameters))
 					continue;
