@@ -24,12 +24,12 @@ namespace Mono.Cecil {
 
 		public override string Name {
 			get { return element_type.Name; }
-			set { throw new InvalidOperationException (); }
+			set { element_type.Name = value; }
 		}
 
 		public override string Namespace {
 			get { return element_type.Namespace; }
-			set { throw new InvalidOperationException (); }
+			set { element_type.Namespace = value; }
 		}
 
 		public override IMetadataScope Scope {
