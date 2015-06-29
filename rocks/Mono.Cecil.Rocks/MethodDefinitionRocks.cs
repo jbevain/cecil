@@ -26,13 +26,14 @@ namespace Mono.Cecil.Rocks {
 			if (self.IsNewSlot)
 				return self;
 
-			var base_type = ResolveBaseType (self.DeclaringType);
+			var base_type = self.DeclaringType.BaseType;
 			while (base_type != null) {
 				var @base = GetMatchingMethod (base_type, self);
 				if (@base != null)
 					return @base;
 
-				base_type = ResolveBaseType (base_type);
+				var resolved = base_type.Resolve();
+				base_type = resolved != null ? resolved.BaseType : null;
 			}
 
 			return self;
@@ -64,9 +65,13 @@ namespace Mono.Cecil.Rocks {
 			return base_type.Resolve ();
 		}
 
-		static MethodDefinition GetMatchingMethod (TypeDefinition type, MethodDefinition method)
+		static MethodDefinition GetMatchingMethod (TypeReference type, MethodDefinition method)
 		{
-			return MetadataResolver.GetMethod (type.Methods, method);
+			var resolved = type.Resolve();
+			if (resolved == null) return null;
+
+			var genInst = type as GenericInstanceType;
+			return MetadataResolver.GetMethod (resolved.Methods, genInst != null ? genInst.GenericArguments : null, method);
 		}
 	}
 }
