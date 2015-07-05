@@ -209,7 +209,7 @@ namespace Mono.Cecil.Cil {
 
 		public static Instruction Create (OpCode opcode, sbyte value)
 		{
-			if (opcode.OperandType != OperandType.ShortInlineI &&
+			if (opcode.OperandType != OperandType.ShortInlineI ||
 				opcode != OpCodes.Ldc_I4_S)
 				throw new ArgumentException ("opcode");
 
@@ -219,7 +219,7 @@ namespace Mono.Cecil.Cil {
 		public static Instruction Create (OpCode opcode, byte value)
 		{
 			if (opcode.OperandType != OperandType.ShortInlineI ||
-				opcode == OpCodes.Ldc_I4_S)
+				opcode != OpCodes.Ldc_I4_S)
 				throw new ArgumentException ("opcode");
 
 			return new Instruction (opcode, value);
