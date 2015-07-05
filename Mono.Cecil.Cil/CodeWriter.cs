@@ -209,7 +209,7 @@ namespace Mono.Cecil.Cil {
 				WriteMetadataToken (GetStandAloneSignature ((CallSite) operand));
 				break;
 			case OperandType.ShortInlineI:
-				if (opcode == OpCodes.Ldc_I4_S)
+				if (operand.GetType() == typeof(sbyte))
 					WriteSByte ((sbyte) operand);
 				else
 					WriteByte ((byte) operand);
