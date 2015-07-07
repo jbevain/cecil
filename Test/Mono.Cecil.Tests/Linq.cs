@@ -41,6 +41,11 @@ namespace System.Linq {
 				return enumerator.Current;
 			}
 		}
+
+		public static T First<T> (this IEnumerable<T> self, Func<T, bool> predicate)
+		{
+			return self.Where (t => predicate (t)).First ();
+		}
 	}
 }
 

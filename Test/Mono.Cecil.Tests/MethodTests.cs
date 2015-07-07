@@ -155,18 +155,22 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (bar.IsVarArg ());
 				Assert.IsFalse (baz.IsVarArg ());
 
-				Assert.IsTrue(foo.IsVarArg ());
+				Assert.IsTrue (foo.IsVarArg ());
 
-				var bar_reference = (MethodReference) baz.Body.Instructions.Where (i => i.Offset == 0x000a).First ().Operand;
-
-				Assert.IsTrue (bar_reference.IsVarArg ());
-				Assert.AreEqual (0, bar_reference.GetSentinelPosition ());
-
-				var foo_reference = (MethodReference) baz.Body.Instructions.Where (i => i.Offset == 0x0023).First ().Operand;
+				var foo_reference = (MethodReference) baz.Body.Instructions.First (i => i.Offset == 0x000a).Operand;
 
 				Assert.IsTrue (foo_reference.IsVarArg ());
+				Assert.AreEqual (0, foo_reference.GetSentinelPosition ());
 
-				Assert.AreEqual (1, foo_reference.GetSentinelPosition ());
+				Assert.AreEqual (foo, foo_reference.Resolve ());
+
+				var bar_reference = (MethodReference) baz.Body.Instructions.First (i => i.Offset == 0x0023).Operand;
+
+				Assert.IsTrue (bar_reference.IsVarArg ());
+
+				Assert.AreEqual (1, bar_reference.GetSentinelPosition ());
+
+				Assert.AreEqual (bar, bar_reference.Resolve ());
 			});
 		}
 
