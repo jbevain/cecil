@@ -34,8 +34,6 @@ namespace Mono.Cecil {
 		internal TypeDefinition [] Types;
 		internal TypeReference [] TypeReferences;
 
-		internal bool HasSystemObject;
-
 		internal FieldDefinition [] Fields;
 		internal MethodDefinition [] Methods;
 		internal MemberReference [] MemberReferences;
