@@ -19,7 +19,6 @@
     <Compile Include="Mono.Cecil.Tests\SecurityDeclarationTests.cs" />
     <Compile Include="Mono.Cecil.Tests\ParameterTests.cs" />
     <Compile Include="Mono.Cecil.Tests\Extensions.cs" />
-    <Compile Include="Mono.Cecil.Tests\Linq.cs" />
     <Compile Include="Mono.Cecil.Tests\ResolveTests.cs" />
     <Compile Include="Mono.Cecil.Tests\CustomAttributesTests.cs" />
     <Compile Include="Mono.Cecil.Tests\Formatter.cs" />

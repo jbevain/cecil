@@ -11,6 +11,7 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\mono.snk</AssemblyOriginatorKeyFile>
     <OutputType>Library</OutputType>
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
+    <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,9 +29,6 @@
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('net_2_0')) ">
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
-  </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_3_5')) ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);NET_3_5;</DefineConstants>
@@ -43,36 +41,26 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;NET_4_5;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('silverlight')) ">
-    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('pcl')) ">
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>Profile344</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;SILVERLIGHT</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('winphone')) ">
-    <TargetFrameworkProfile>WindowsPhone</TargetFrameworkProfile>
-    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;SILVERLIGHT;CF</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;PCL;</DefineConstants>
+    <MSBuildCSharpTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</MSBuildCSharpTargets>
   </PropertyGroup>
   <!-- Shared References -->
-  <ItemGroup Condition=" '$(TargetFrameworkVersion)' != 'v2.0' ">
-    <Reference Include="System.Core" />
-  </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Core" />
     <Reference Include="System" />
   </ItemGroup>
   <!-- The following keeps Visual Studio happy; let's keep Visual Studio happy -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_2_0_Debug' ">
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_5_Debug' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'silverlight_Debug' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'winphone_Debug' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'pcl_Debug' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_2_0_Release' ">
   </PropertyGroup>
@@ -82,11 +70,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_5_Release' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'silverlight_Release' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'pcl_Release' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'winphone_Release' ">
-  </PropertyGroup>
-
   <!-- This optional import allows products that distribute Cecil to tweak settings that will affect its 
        build, without having to fork the project unnecessarily. The Mono.Cecil.overrides file is a plain 
        MSBuild file with additional properties, and can exist anywhere upwards from the current Cecil repo 

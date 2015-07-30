@@ -72,7 +72,7 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 			if (parameters.metadata_importer_provider != null)
 				module.metadata_importer = parameters.metadata_importer_provider.GetMetadataImporter (module);
-#if !CF
+#if !PCL
 			if (parameters.reflection_importer_provider != null)
 				module.reflection_importer = parameters.reflection_importer_provider.GetReflectionImporter (module);
 #endif
@@ -89,8 +89,10 @@ namespace Mono.Cecil {
 		{
 			var symbol_reader_provider = parameters.SymbolReaderProvider;
 
+#if !PCL
 			if (symbol_reader_provider == null && parameters.ReadSymbols)
 				symbol_reader_provider = SymbolProvider.GetPlatformReaderProvider ();
+#endif
 
 			if (symbol_reader_provider != null) {
 				module.SymbolReaderProvider = symbol_reader_provider;
@@ -551,6 +553,7 @@ namespace Mono.Cecil {
 				if (attributes != FileAttributes.ContainsMetaData)
 					continue;
 
+#if !PCL
 				var parameters = new ReaderParameters {
 					ReadingMode = module.ReadingMode,
 					SymbolReaderProvider = module.SymbolReaderProvider,
@@ -559,11 +562,15 @@ namespace Mono.Cecil {
 
 				modules.Add (ModuleDefinition.ReadModule (
 					GetModuleFileName (name), parameters));
+#else
+				throw new NotSupportedException ();
+#endif
 			}
 
 			return modules;
 		}
 
+#if !PCL
 		string GetModuleFileName (string name)
 		{
 			if (module.FullyQualifiedName == null)
@@ -572,6 +579,7 @@ namespace Mono.Cecil {
 			var path = Path.GetDirectoryName (module.FullyQualifiedName);
 			return Path.Combine (path, name);
 		}
+#endif
 
 		void InitializeModuleReferences ()
 		{

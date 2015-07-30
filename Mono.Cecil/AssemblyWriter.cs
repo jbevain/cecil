@@ -74,11 +74,13 @@ namespace Mono.Cecil {
 			var name = module.assembly != null ? module.assembly.Name : null;
 			var fq_name = stream.GetFullyQualifiedName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
+#if !PCL
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
+#endif
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider);
 
-#if !SILVERLIGHT && !CF
+#if !PCL
 			if (parameters.StrongNameKeyPair != null && name != null) {
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
@@ -96,7 +98,7 @@ namespace Mono.Cecil {
 
 			writer.WriteImage ();
 
-#if !SILVERLIGHT && !CF
+#if !PCL
 			if (parameters.StrongNameKeyPair != null)
 				CryptoService.StrongName (stream, writer, parameters.StrongNameKeyPair);
 #endif
@@ -878,6 +880,9 @@ namespace Mono.Cecil {
 				if (module.IsMain)
 					continue;
 
+#if PCL
+				throw new NotSupportedException ();
+#else
 				var parameters = new WriterParameters {
 					SymbolWriterProvider = symbol_writer_provider,
 				};
@@ -891,9 +896,11 @@ namespace Mono.Cecil {
 					FileAttributes.ContainsMetaData,
 					GetStringIndex (module.Name),
 					GetBlobIndex (hash)));
+#endif
 			}
 		}
 
+#if !PCL
 		string GetModuleFileName (string name)
 		{
 			if (string.IsNullOrEmpty (name))
@@ -902,6 +909,7 @@ namespace Mono.Cecil {
 			var path = Path.GetDirectoryName (fq_name);
 			return Path.Combine (path, name);
 		}
+#endif
 
 		void AddAssemblyReferences ()
 		{
@@ -985,10 +993,12 @@ namespace Mono.Cecil {
 		uint AddLinkedResource (LinkedResource resource)
 		{
 			var table = GetTable<FileTable> (Table.File);
+			var hash = resource.Hash;
 
-			var hash = resource.Hash.IsNullOrEmpty ()
-				? CryptoService.ComputeHash (resource.File)
-				: resource.Hash;
+#if !PCL
+			if (hash.IsNullOrEmpty ())
+				hash = CryptoService.ComputeHash (resource.File);
+#endif
 
 			return (uint) table.AddRow (new FileRow (
 				FileAttributes.ContainsNoMetaData,
