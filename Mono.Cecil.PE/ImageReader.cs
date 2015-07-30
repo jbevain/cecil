@@ -343,6 +343,9 @@ namespace Mono.Cecil.PE {
 
 			if (image.TableHeap != null)
 				ReadTableHeap ();
+
+			if (image.PdbHeap != null)
+				ReadPdbHeap ();
 		}
 
 		void ReadMetadataStream (Section section)
@@ -370,6 +373,9 @@ namespace Mono.Cecil.PE {
 				break;
 			case "#US":
 				image.UserStringHeap = new UserStringHeap (section, start, size);
+				break;
+			case "#Pdb":
+				image.PdbHeap = new PdbHeap (section, start, size);
 				break;
 			}
 		}
@@ -399,7 +405,7 @@ namespace Mono.Cecil.PE {
 			// Sorted			8
 			heap.Sorted = ReadInt64 ();
 
-			for (int i = 0; i < TableHeap.TableCount; i++) {
+			for (int i = 0; i < Mixin.TableCount; i++) {
 				if (!heap.HasTable ((Table) i))
 					continue;
 
@@ -436,12 +442,13 @@ namespace Mono.Cecil.PE {
 			uint offset = (uint) BaseStream.Position - image.MetadataSection.PointerToRawData; // header
 
 			int stridx_size = image.StringHeap.IndexSize;
+			int guididx_size = image.GuidHeap.IndexSize;
 			int blobidx_size = image.BlobHeap != null ? image.BlobHeap.IndexSize : 2;
 
 			var heap = image.TableHeap;
 			var tables = heap.Tables;
 
-			for (int i = 0; i < TableHeap.TableCount; i++) {
+			for (int i = 0; i < Mixin.TableCount; i++) {
 				var table = (Table) i;
 				if (!heap.HasTable (table))
 					continue;
@@ -451,7 +458,7 @@ namespace Mono.Cecil.PE {
 				case Table.Module:
 					size = 2	// Generation
 						+ stridx_size	// Name
-						+ (image.GuidHeap.IndexSize * 3);	// Mvid, EncId, EncBaseId
+						+ (guididx_size * 3);	// Mvid, EncId, EncBaseId
 					break;
 				case Table.TypeRef:
 					size = GetCodedIndexSize (CodedIndex.ResolutionScope)	// ResolutionScope
@@ -639,6 +646,45 @@ namespace Mono.Cecil.PE {
 					size = GetTableIndexSize (Table.GenericParam)	// Owner
 						+ GetCodedIndexSize (CodedIndex.TypeDefOrRef);	// Constraint
 					break;
+				case Table.Document:
+					size = blobidx_size	// Name
+						+ guididx_size	// HashAlgorithm
+						+ blobidx_size	// Hash
+						+ guididx_size;	// Language
+					break;
+				case Table.MethodDebugInformation:
+					size = GetTableIndexSize (Table.Document)  // Document
+						+ blobidx_size;	// SequencePoints
+					break;
+				case Table.LocalScope:
+					size = GetTableIndexSize (Table.Method)	// Method
+						+ GetTableIndexSize (Table.ImportScope)	// ImportScope
+						+ GetTableIndexSize (Table.LocalVariable)	// VariableList
+						+ GetTableIndexSize (Table.LocalConstant)	// ConstantList
+						+ 4 * 2;	// StartOffset, Length
+					break;
+				case Table.LocalVariable:
+					size = 2	// Attributes
+						+ 2		// Index
+						+ stridx_size;	// Name
+					break;
+				case Table.LocalConstant:
+					size = stridx_size	// Name
+						+ blobidx_size;	// Signature
+					break;
+				case Table.ImportScope:
+					size = GetTableIndexSize (Table.ImportScope)	// Parent
+						+ blobidx_size;
+					break;
+				case Table.StateMachineMethod:
+					size = GetTableIndexSize (Table.Method) // MoveNextMethod
+						+ GetTableIndexSize (Table.Method);	// KickOffMethod
+					break;
+				case Table.CustomDebugInformation:
+					size = GetCodedIndexSize (CodedIndex.HasCustomDebugInformation) // Parent
+						+ guididx_size	// Kind
+						+ blobidx_size;	// Value
+					break;
 				default:
 					throw new NotSupportedException ();
 				}
@@ -650,11 +696,57 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static Image ReadImageFrom (Stream stream)
+		void ReadPdbHeap ()
+		{
+			var heap = image.PdbHeap;
+
+			uint start = heap.Section.PointerToRawData;
+
+			MoveTo (heap.Offset + start);
+
+			heap.Id = ReadBytes (20);
+			heap.EntryPoint = ReadUInt32 ();
+			heap.TypeSystemTables = ReadInt64 ();
+			heap.TypeSystemTableRows = new uint [Mixin.TableCount];
+
+			for (int i = 0; i < Mixin.TableCount; i++) {
+				var table = (Table) i;
+				if (!heap.HasTable (table))
+					continue;
+
+				heap.TypeSystemTableRows [i] = ReadUInt32 ();
+			}
+		}
+
+		public static Image ReadImage (Stream stream)
 		{
 			try {
 				var reader = new ImageReader (stream);
 				reader.ReadImage ();
+				return reader.image;
+			} catch (EndOfStreamException e) {
+				throw new BadImageFormatException (stream.GetFullyQualifiedName (), e);
+			}
+		}
+
+		public static Image ReadPortablePdb (Stream stream)
+		{
+			try {
+				var reader = new ImageReader (stream);
+				var length = (uint) stream.Length;
+
+				reader.image.Sections = new[] {
+					new Section {
+						PointerToRawData = 0,
+						SizeOfRawData = length,
+						VirtualAddress = 0,
+						VirtualSize = length,
+						Data = stream.ReadAll (),
+					}
+				};
+
+				reader.metadata = new DataDirectory (0, length);
+				reader.ReadMetadata ();
 				return reader.image;
 			} catch (EndOfStreamException e) {
 				throw new BadImageFormatException (stream.GetFullyQualifiedName (), e);

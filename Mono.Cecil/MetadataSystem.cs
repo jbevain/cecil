@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 
+using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
@@ -55,6 +56,12 @@ namespace Mono.Cecil {
 		internal Dictionary<uint, Row<PInvokeAttributes, uint, uint>> PInvokes;
 		internal Dictionary<MetadataToken, Range []> GenericParameters;
 		internal Dictionary<uint, MetadataToken []> GenericConstraints;
+
+		internal Document [] Documents;
+		internal Dictionary<uint, Row<uint, Range, Range, uint, uint, uint> []> LocalScopes;
+		internal ImportDebugInformation [] ImportScopes;
+		internal Dictionary<uint, uint> StateMachineMethods;
+		internal Dictionary<MetadataToken, Row<Guid, uint, uint> []> CustomDebugInformations;
 
 		static Dictionary<string, Row<ElementType, bool>> primitive_value_types;
 
@@ -142,6 +149,19 @@ namespace Mono.Cecil {
 			if (PInvokes != null) PInvokes.Clear ();
 			if (GenericParameters != null) GenericParameters.Clear ();
 			if (GenericConstraints != null) GenericConstraints.Clear ();
+
+			Documents = new Document [0];
+			ImportScopes = new ImportDebugInformation [0];
+			if (LocalScopes != null) LocalScopes.Clear ();
+			if (StateMachineMethods != null) StateMachineMethods.Clear ();
+		}
+
+		public AssemblyNameReference GetAssemblyNameReference (uint rid)
+		{
+			if (rid < 1 || rid > AssemblyReferences.Length)
+				return null;
+
+			return AssemblyReferences [rid - 1];
 		}
 
 		public TypeDefinition GetTypeDefinition (uint rid)
@@ -342,6 +362,37 @@ namespace Mono.Cecil {
 		public void RemoveOverrideMapping (MethodDefinition method)
 		{
 			Overrides.Remove (method.token.RID);
+		}
+
+		public Document GetDocument (uint rid)
+		{
+			if (rid < 1 || rid > Documents.Length)
+				return null;
+
+			return Documents [rid - 1];
+		}
+
+		public bool TryGetLocalScopes (MethodDefinition method, out Row<uint, Range, Range, uint, uint, uint> [] scopes)
+		{
+			return LocalScopes.TryGetValue (method.MetadataToken.RID, out scopes);
+		}
+
+		public void SetLocalScopes (uint method_rid, Row<uint, Range, Range, uint, uint, uint> [] records)
+		{
+			LocalScopes [method_rid] = records;
+		}
+
+		public ImportDebugInformation GetImportScope (uint rid)
+		{
+			if (rid < 1 || rid > ImportScopes.Length)
+				return null;
+
+			return ImportScopes [rid - 1];
+		}
+
+		public bool TryGetStateMachineKickOffMethod (MethodDefinition method, out uint rid)
+		{
+			return StateMachineMethods.TryGetValue (method.MetadataToken.RID, out rid);
 		}
 
 		public TypeDefinition GetFieldDeclaringType (uint field_rid)

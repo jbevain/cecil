@@ -225,7 +225,7 @@ namespace Mono.Cecil {
 		internal IMetadataResolver metadata_resolver;
 		internal TypeSystem type_system;
 
-		readonly MetadataReader reader;
+		internal readonly MetadataReader reader;
 		readonly string fq_name;
 
 		internal string runtime_version;
@@ -1053,8 +1053,8 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 			Mixin.CheckParameters (parameters);
 
-			return ModuleReader.CreateModuleFrom (
-				ImageReader.ReadImageFrom (stream),
+			return ModuleReader.CreateModule (
+				ImageReader.ReadImage (stream),
 				parameters);
 		}
 
@@ -1191,6 +1191,22 @@ namespace Mono.Cecil {
 			default:
 				return "v4.0.30319";
 			}
+		}
+
+		public static byte [] ReadAll (this Stream self)
+		{
+			int read;
+			var memory = new MemoryStream ((int) self.Length);
+			var buffer = new byte [1024];
+
+			while ((read = self.Read (buffer, 0, buffer.Length)) != 0)
+				memory.Write (buffer, 0, read);
+
+			return memory.GetBuffer ();
+		}
+
+		public static void Read (object o)
+		{
 		}
 	}
 }

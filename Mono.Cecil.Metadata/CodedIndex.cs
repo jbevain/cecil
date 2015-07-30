@@ -23,6 +23,7 @@ namespace Mono.Cecil.Metadata {
 		Implementation,
 		CustomAttributeType,
 		ResolutionScope,
-		TypeOrMethodDef
+		TypeOrMethodDef,
+		HasCustomDebugInformation,
 	}
 }

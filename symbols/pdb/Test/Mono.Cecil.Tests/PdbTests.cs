@@ -61,13 +61,40 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void DebuggerHiddenVariable ()
+		{
+			TestModule ("test.exe", module => {
+				var type = module.GetType ("Program");
+				var method = type.GetMethod ("Main");
+
+				var scope = method.DebugInformation.Scope;
+
+				Assert.IsTrue (scope.HasVariables);
+				var variables = scope.Variables;
+
+				Assert.AreEqual ("CS$1$0000", variables [0].Name);
+				Assert.IsTrue (variables [0].IsDebuggerHidden);
+				Assert.AreEqual ("CS$4$0001", variables [1].Name);
+				Assert.IsTrue (variables [1].IsDebuggerHidden);
+
+				Assert.AreEqual (1, scope.Scopes.Count);
+				scope = scope.Scopes [0];
+				variables = scope.Variables;
+
+				Assert.AreEqual ("i", variables [0].Name);
+				Assert.IsFalse (variables [0].IsDebuggerHidden);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+		}
+
+
+		[Test]
 		public void Document ()
 		{
 			TestModule ("test.exe", module => {
 				var type = module.GetType ("Program");
 				var method = type.GetMethod ("Main");
 
-				var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+				var sequence_point = method.DebugInformation.SequencePoints.First (sp => sp != null);
 				var document = sequence_point.Document;
 
 				Assert.IsNotNull (document);
@@ -87,7 +114,7 @@ namespace Mono.Cecil.Tests {
 				var type = module.GetType ("VBConsApp.Program");
 				var method = type.GetMethod ("Main");
 
-				var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+				var sequence_point = method.DebugInformation.SequencePoints.First (sp => sp != null);
 				var document = sequence_point.Document;
 
 				Assert.IsNotNull (document);
@@ -107,7 +134,7 @@ namespace Mono.Cecil.Tests {
 				var type = module.GetType ("Program");
 				var method = type.GetMethod ("fact");
 
-				var sequence_point = method.Body.Instructions.Where (i => i.SequencePoint != null).First ().SequencePoint;
+				var sequence_point = method.DebugInformation.SequencePoints.First (sp => sp != null);
 				var document = sequence_point.Document;
 
 				Assert.IsNotNull (document);
@@ -137,7 +164,7 @@ namespace Mono.Cecil.Tests {
 			body.InitLocals = true;
 
 			var il = body.GetILProcessor ();
-			var temp = new VariableDefinition ("temp", module.ImportReference (typeof (string)));
+			var temp = new VariableDefinition (module.ImportReference (typeof (string)));
 			body.Variables.Add (temp);
 
 			il.Emit (OpCodes.Nop);
@@ -146,11 +173,17 @@ namespace Mono.Cecil.Tests {
 			il.Emit (OpCodes.Ldloc, temp);
 			il.Emit (OpCodes.Ret);
 
-			body.Instructions [0].SequencePoint = new SequencePoint (new Document (@"C:\test.cs")) {
+			var sequence_point = new SequencePoint (body.Instructions [0], new Document (@"C:\test.cs")) {
 				StartLine = 0,
 				StartColumn = 0,
 				EndLine = 0,
 				EndColumn = 4,
+			};
+
+			method.DebugInformation.SequencePoints.Add (sequence_point);
+
+			method.DebugInformation.Scope = new ScopeDebugInformation  (body.Instructions [0], null) {
+				Variables = { new VariableDebugInformation (temp, "temp") }
 			};
 
 			var file = Path.Combine (Path.GetTempPath (), "Pan.dll");
@@ -164,20 +197,7 @@ namespace Mono.Cecil.Tests {
 
 			method = module.GetType ("Pin.Pon").GetMethod ("Pang");
 
-			Assert.AreEqual ("temp", method.Body.Variables [0].Name);
-		}
-
-		static void AssertCode (string expected, MethodDefinition method)
-		{
-			Assert.IsTrue (method.HasBody);
-			Assert.IsNotNull (method.Body);
-
-			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
-		}
-
-		static string Normalize (string str)
-		{
-			return str.Trim ().Replace ("\r\n", "\n");
+			Assert.AreEqual ("temp", method.DebugInformation.Scope.Variables [0].Name);
 		}
 	}
 }

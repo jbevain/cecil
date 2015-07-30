@@ -54,7 +54,7 @@ namespace Mono.Cecil.Tests {
 		internal Image GetResourceImage (string name)
 		{
 			using (var fs = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read))
-				return ImageReader.ReadImageFrom (fs);
+				return ImageReader.ReadImage (fs);
 		}
 
 		public ModuleDefinition GetCurrentModule ()
@@ -79,6 +79,19 @@ namespace Mono.Cecil.Tests {
 			return Path.Combine (path, "Resources");
 		}
 
+		public static void AssertCode (string expected, MethodDefinition method)
+		{
+			Assert.IsTrue (method.HasBody);
+			Assert.IsNotNull (method.Body);
+
+			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
+		}
+
+		static string Normalize (string str)
+		{
+			return str.Trim ().Replace ("\r\n", "\n");
+		}
+
 		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null)
 		{
 			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver));
@@ -94,7 +107,7 @@ namespace Mono.Cecil.Tests {
 			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver));
 		}
 
-		private static void Run (TestCase testCase)
+		static void Run (TestCase testCase)
 		{
 			var runner = new TestRunner (testCase, TestCaseType.ReadDeferred);
 			runner.RunTest ();
@@ -106,10 +119,10 @@ namespace Mono.Cecil.Tests {
 				return;
 
 			runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred);
-			runner.RunTest();
+			runner.RunTest ();
 
 			runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate);
-			runner.RunTest();
+			runner.RunTest ();
 		}
 	}
 
@@ -284,7 +297,7 @@ namespace Mono.Cecil.Tests {
 			if (module == null)
 				return;
 
-			test_case.Test(module);
+			test_case.Test (module);
 		}
 	}
 

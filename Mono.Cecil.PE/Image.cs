@@ -42,8 +42,9 @@ namespace Mono.Cecil.PE {
 		public UserStringHeap UserStringHeap;
 		public GuidHeap GuidHeap;
 		public TableHeap TableHeap;
+		public PdbHeap PdbHeap;
 
-		readonly int [] coded_index_sizes = new int [13];
+		readonly int [] coded_index_sizes = new int [14];
 
 		readonly Func<Table, int> counter;
 
@@ -143,6 +144,17 @@ namespace Mono.Cecil.PE {
 			Buffer.BlockCopy (buffer.buffer, buffer.position, header, 0, header.Length);
 
 			return directory;
+		}
+
+		public bool HasDebugTables ()
+		{
+			return HasTable (Table.Document)
+				|| HasTable (Table.MethodDebugInformation)
+				|| HasTable (Table.LocalScope)
+				|| HasTable (Table.LocalVariable)
+				|| HasTable (Table.LocalConstant)
+				|| HasTable (Table.StateMachineMethod)
+				|| HasTable (Table.CustomDebugInformation);
 		}
 	}
 }

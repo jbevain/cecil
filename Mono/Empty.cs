@@ -38,5 +38,17 @@ namespace Mono.Cecil {
 			Array.Resize (ref self, length);
 			return self;
 		}
+
+		public static T [] Add<T> (this T [] self, T item)
+		{
+			if (self == null) {
+				self = new [] { item };
+				return self;
+			}
+
+			self = self.Resize (self.Length + 1);
+			self [self.Length - 1] = item;
+			return self;
+		}
 	}
 }

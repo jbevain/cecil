@@ -144,13 +144,7 @@ namespace Mono.Cecil {
 
 		static void Add<T> (ref T [] array, T item)
 		{
-			if (array == null) {
-				array = new [] { item };
-				return;
-			}
-
-			array = array.Resize (array.Length + 1);
-			array [array.Length - 1] = item;
+			array = array.Add (item);
 		}
 
 		int [] ParseSpecs ()

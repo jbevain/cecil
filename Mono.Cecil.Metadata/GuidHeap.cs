@@ -23,19 +23,16 @@ namespace Mono.Cecil.Metadata {
 
 		public Guid Read (uint index)
 		{
-			if (index == 0)
-				return new Guid ();
-
 			const int guid_size = 16;
+
+			if (index == 0 || ((index - 1) + guid_size) > Size)
+				return new Guid ();
 
 			var buffer = new byte [guid_size];
 
-			index--;
-
-			Buffer.BlockCopy (Section.Data, (int) (Offset + index), buffer, 0, guid_size);
+			Buffer.BlockCopy (Section.Data, (int) (Offset + ((index - 1) * guid_size)), buffer, 0, guid_size);
 
 			return new Guid (buffer);
-
 		}
 	}
 }

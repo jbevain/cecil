@@ -40,5 +40,19 @@ namespace Mono.Cecil.Metadata {
 
 			return buffer;
 		}
+
+		public void GetView (uint signature, out byte [] buffer, out int index, out int length)
+		{
+			if (signature == 0 || signature > Size - 1) {
+				buffer = null;
+				index = length = 0;
+				return;
+			}
+
+			buffer = Section.Data;
+
+			index = (int) (signature + Offset);
+			length = (int) buffer.ReadCompressedUInt32 (ref index);
+		}
 	}
 }

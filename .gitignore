@@ -10,3 +10,4 @@ obj
 **/test-results/*
 *Resharper*
 Mono.Cecil.sln.ide*
+TestResults

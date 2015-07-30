@@ -59,7 +59,7 @@ namespace Mono.Cecil.Pdb
 
 		public void DefineLocalVariable2 (
 			string name,
-			FieldAttributes attributes,
+			VariableAttributes attributes,
 			SymbolToken sigToken,
 			SymAddressKind addrKind,
 			int addr1,

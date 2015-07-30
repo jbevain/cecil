@@ -12,14 +12,8 @@ namespace Mono.Cecil.Cil {
 
 	public abstract class VariableReference {
 
-		string name;
 		internal int index = -1;
 		protected TypeReference variable_type;
-
-		public string Name {
-			get { return name; }
-			set { name = value; }
-		}
 
 		public TypeReference VariableType {
 			get { return variable_type; }
@@ -31,13 +25,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		internal VariableReference (TypeReference variable_type)
-			: this (string.Empty, variable_type)
 		{
-		}
-
-		internal VariableReference (string name, TypeReference variable_type)
-		{
-			this.name = name;
 			this.variable_type = variable_type;
 		}
 
@@ -45,9 +33,6 @@ namespace Mono.Cecil.Cil {
 
 		public override string ToString ()
 		{
-			if (!string.IsNullOrEmpty (name))
-				return name;
-
 			if (index >= 0)
 				return "V_" + index;
 

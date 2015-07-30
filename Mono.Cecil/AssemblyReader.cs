@@ -35,6 +35,7 @@ namespace Mono.Cecil {
 		}
 
 		protected abstract void ReadModule ();
+		public abstract void ReadSymbols (ModuleDefinition module);
 
 		protected void ReadModuleManifest (MetadataReader reader)
 		{
@@ -58,7 +59,7 @@ namespace Mono.Cecil {
 			assembly.main_module = module;
 		}
 
-		public static ModuleDefinition CreateModuleFrom (Image image, ReaderParameters parameters)
+		public static ModuleDefinition CreateModule (Image image, ReaderParameters parameters)
 		{
 			var reader = CreateModuleReader (image, parameters.ReadingMode);
 			var module = reader.module;
@@ -82,6 +83,8 @@ namespace Mono.Cecil {
 
 			ReadSymbols (module, parameters);
 
+			reader.ReadSymbols (module);
+
 			return module;
 		}
 
@@ -103,6 +106,9 @@ namespace Mono.Cecil {
 
 				module.ReadSymbols (reader);
 			}
+
+			if (module.Image.HasDebugTables ())
+				module.ReadSymbols (new PortablePdbReader (module.Image, module));
 		}
 
 		static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
@@ -120,7 +126,7 @@ namespace Mono.Cecil {
 
 	sealed class ImmediateModuleReader : ModuleReader {
 
-		bool resolve;
+		bool resolve_attributes;
 
 		public ImmediateModuleReader (Image image)
 			: base (image, ReadingMode.Immediate)
@@ -131,25 +137,25 @@ namespace Mono.Cecil {
 		{
 			this.module.Read (this.module, (module, reader) => {
 				ReadModuleManifest (reader);
-				ReadModule (module, resolve: true);
+				ReadModule (module, resolve_attributes: true);
 				return module;
 			});
 		}
 
-		public void ReadModule (ModuleDefinition module, bool resolve)
+		public void ReadModule (ModuleDefinition module, bool resolve_attributes)
 		{
-			this.resolve = resolve;
+			this.resolve_attributes = resolve_attributes;
 
 			if (module.HasAssemblyReferences)
-				Read (module.AssemblyReferences);
+				Mixin.Read (module.AssemblyReferences);
 			if (module.HasResources)
-				Read (module.Resources);
+				Mixin.Read (module.Resources);
 			if (module.HasModuleReferences)
-				Read (module.ModuleReferences);
+				Mixin.Read (module.ModuleReferences);
 			if (module.HasTypes)
 				ReadTypes (module.Types);
 			if (module.HasExportedTypes)
-				Read (module.ExportedTypes);
+				Mixin.Read (module.ExportedTypes);
 
 			ReadCustomAttributes (module);
 
@@ -172,13 +178,13 @@ namespace Mono.Cecil {
 			ReadGenericParameters (type);
 
 			if (type.HasInterfaces)
-				Read (type.Interfaces);
+				Mixin.Read (type.Interfaces);
 
 			if (type.HasNestedTypes)
 				ReadTypes (type.NestedTypes);
 
 			if (type.HasLayoutInfo)
-				Read (type.ClassSize);
+				Mixin.Read (type.ClassSize);
 
 			if (type.HasFields)
 				ReadFields (type);
@@ -207,7 +213,7 @@ namespace Mono.Cecil {
 				var parameter = parameters [i];
 
 				if (parameter.HasConstraints)
-					Read (parameter.Constraints);
+					Mixin.Read (parameter.Constraints);
 
 				ReadCustomAttributes (parameter);
 			}
@@ -220,13 +226,13 @@ namespace Mono.Cecil {
 
 			var security_declarations = provider.SecurityDeclarations;
 
-			if (!resolve)
+			if (!resolve_attributes)
 				return;
 
 			for (int i = 0; i < security_declarations.Count; i++) {
 				var security_declaration = security_declarations [i];
 
-				Read (security_declaration.SecurityAttributes);
+				Mixin.Read (security_declaration.SecurityAttributes);
 			}
 		}
 
@@ -237,13 +243,13 @@ namespace Mono.Cecil {
 
 			var custom_attributes = provider.CustomAttributes;
 
-			if (!resolve)
+			if (!resolve_attributes)
 				return;
 
 			for (int i = 0; i < custom_attributes.Count; i++) {
 				var custom_attribute = custom_attributes [i];
 
-				Read (custom_attribute.ConstructorArguments);
+				Mixin.Read (custom_attribute.ConstructorArguments);
 			}
 		}
 
@@ -255,16 +261,16 @@ namespace Mono.Cecil {
 				var field = fields [i];
 
 				if (field.HasConstant)
-					Read (field.Constant);
+					Mixin.Read (field.Constant);
 
 				if (field.HasLayoutInfo)
-					Read (field.Offset);
+					Mixin.Read (field.Offset);
 
 				if (field.RVA > 0)
-					Read (field.InitialValue);
+					Mixin.Read (field.InitialValue);
 
 				if (field.HasMarshalInfo)
-					Read (field.MarshalInfo);
+					Mixin.Read (field.MarshalInfo);
 
 				ReadCustomAttributes (field);
 			}
@@ -283,20 +289,20 @@ namespace Mono.Cecil {
 					ReadParameters (method);
 
 				if (method.HasOverrides)
-					Read (method.Overrides);
+					Mixin.Read (method.Overrides);
 
 				if (method.IsPInvokeImpl)
-					Read (method.PInvokeInfo);
+					Mixin.Read (method.PInvokeInfo);
 
 				ReadSecurityDeclarations (method);
 				ReadCustomAttributes (method);
 
 				var return_type = method.MethodReturnType;
 				if (return_type.HasConstant)
-					Read (return_type.Constant);
+					Mixin.Read (return_type.Constant);
 
 				if (return_type.HasMarshalInfo)
-					Read (return_type.MarshalInfo);
+					Mixin.Read (return_type.MarshalInfo);
 
 				ReadCustomAttributes (return_type);
 			}
@@ -310,10 +316,10 @@ namespace Mono.Cecil {
 				var parameter = parameters [i];
 
 				if (parameter.HasConstant)
-					Read (parameter.Constant);
+					Mixin.Read (parameter.Constant);
 
 				if (parameter.HasMarshalInfo)
-					Read (parameter.MarshalInfo);
+					Mixin.Read (parameter.MarshalInfo);
 
 				ReadCustomAttributes (parameter);
 			}
@@ -326,10 +332,10 @@ namespace Mono.Cecil {
 			for (int i = 0; i < properties.Count; i++) {
 				var property = properties [i];
 
-				Read (property.GetMethod);
+				Mixin.Read (property.GetMethod);
 
 				if (property.HasConstant)
-					Read (property.Constant);
+					Mixin.Read (property.Constant);
 
 				ReadCustomAttributes (property);
 			}
@@ -342,14 +348,42 @@ namespace Mono.Cecil {
 			for (int i = 0; i < events.Count; i++) {
 				var @event = events [i];
 
-				Read (@event.AddMethod);
+				Mixin.Read (@event.AddMethod);
 
 				ReadCustomAttributes (@event);
 			}
 		}
 
-		static void Read (object collection)
+		public override void ReadSymbols (ModuleDefinition module)
 		{
+			if (module.symbol_reader == null)
+				return;
+
+			ReadTypesSymbols (module.Types, module.symbol_reader);
+		}
+
+		void ReadTypesSymbols (Collection<TypeDefinition> types, ISymbolReader symbol_reader)
+		{
+			for (int i = 0; i < types.Count; i++) {
+				var type = types [i];
+
+				if (type.HasNestedTypes)
+					ReadTypesSymbols (type.NestedTypes, symbol_reader);
+
+				if (type.HasMethods)
+					ReadMethodsSymbols (type, symbol_reader);
+			}
+		}
+
+		void ReadMethodsSymbols (TypeDefinition type, ISymbolReader symbol_reader)
+		{
+			var methods = type.Methods;
+			for (int i = 0; i < methods.Count; i++) {
+				var method = methods [i];
+
+				if (method.HasBody && method.debug_info == null)
+					method.debug_info = symbol_reader.Read (method);
+			}
 		}
 	}
 
@@ -367,6 +401,10 @@ namespace Mono.Cecil {
 				return module;
 			});
 		}
+
+		public override void ReadSymbols (ModuleDefinition module)
+		{
+		}
 	}
 
 	sealed class MetadataReader : ByteBuffer {
@@ -377,6 +415,8 @@ namespace Mono.Cecil {
 
 		internal IGenericContext context;
 		internal CodeReader code;
+
+		readonly MetadataReader metadata_reader;
 
 		uint Position {
 			get { return (uint) base.position; }
@@ -390,6 +430,16 @@ namespace Mono.Cecil {
 			this.module = module;
 			this.metadata = module.MetadataSystem;
 			this.code = new CodeReader (image.MetadataSection, this);
+		}
+
+		public MetadataReader (Image image, ModuleDefinition module, MetadataReader metadata_reader)
+			: base (image.MetadataSection.Data)
+		{
+			this.image = image;
+			this.module = module;
+			this.metadata = module.MetadataSystem;
+			this.code = new CodeReader (image.MetadataSection, this);
+			this.metadata_reader = metadata_reader;
 		}
 
 		int GetCodedIndexSize (CodedIndex index)
@@ -431,6 +481,18 @@ namespace Mono.Cecil {
 			return ReadByIndexSize (blob_heap != null ? blob_heap.IndexSize : 2);
 		}
 
+		void GetBlobView (uint signature, out byte [] blob, out int index, out int count)
+		{
+			var blob_heap = image.BlobHeap;
+			if (blob_heap == null) {
+				blob = null;
+				index = count = 0;
+				return;
+			}
+
+			blob_heap.GetView (signature, out blob, out index, out count);
+		}
+
 		string ReadString ()
 		{
 			return image.StringHeap.Read (ReadByIndexSize (image.StringHeap.IndexSize));
@@ -439,6 +501,11 @@ namespace Mono.Cecil {
 		uint ReadStringIndex ()
 		{
 			return ReadByIndexSize (image.StringHeap.IndexSize);
+		}
+
+		Guid ReadGuid ()
+		{
+			return image.GuidHeap.Read (ReadByIndexSize (image.GuidHeap.IndexSize));
 		}
 
 		uint ReadTableIndex (Table table)
@@ -497,7 +564,7 @@ namespace Mono.Cecil {
 			Advance (2); // Generation
 
 			module.Name = ReadString ();
-			module.Mvid = image.GuidHeap.Read (ReadByIndexSize (image.GuidHeap.IndexSize));
+			module.Mvid = ReadGuid ();
 
 			return module;
 		}
@@ -737,8 +804,8 @@ namespace Mono.Cecil {
 			for (int i = 0; i < types.Length; i++) {
 				var type = types [i];
 
-				InitializeCollection (type.Fields);
-				InitializeCollection (type.Methods);
+				Mixin.Read (type.Fields);
+				Mixin.Read (type.Methods);
 			}
 		}
 
@@ -1917,9 +1984,7 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			slots = slots.Resize (slots.Length + 1);
-			slots [slots.Length - 1] = range;
-			ranges [owner] = slots;
+			ranges [owner] = slots.Add(range);
 		}
 
 		public bool HasGenericConstraints (GenericParameter generic_parameter)
@@ -2086,6 +2151,9 @@ namespace Mono.Cecil {
 			if (rid == 0)
 				return null;
 
+			if (metadata_reader != null)
+				return metadata_reader.LookupToken (token);
+
 			IMetadataTokenProvider element;
 			var position = this.position;
 			var context = this.context;
@@ -2139,7 +2207,7 @@ namespace Mono.Cecil {
 			if (type == null)
 				return null;
 
-			InitializeCollection (type.Fields);
+			Mixin.Read (type.Fields);
 
 			return metadata.GetFieldDefinition (rid);
 		}
@@ -2161,7 +2229,7 @@ namespace Mono.Cecil {
 			if (type == null)
 				return null;
 
-			InitializeCollection (type.Methods);
+			Mixin.Read (type.Methods);
 
 			return metadata.GetMethodDefinition (rid);
 		}
@@ -2341,24 +2409,35 @@ namespace Mono.Cecil {
 
 			metadata.Constants.Remove (owner.MetadataToken);
 
-			switch (row.Col1) {
+			return ReadConstantValue (row.Col1, row.Col2);
+		}
+
+		object ReadConstantValue (ElementType etype, uint signature)
+		{
+			switch (etype) {
 			case ElementType.Class:
 			case ElementType.Object:
 				return null;
 			case ElementType.String:
-				return ReadConstantString (ReadBlob (row.Col2));
+				return ReadConstantString (signature);
 			default:
-				return ReadConstantPrimitive (row.Col1, row.Col2);
+				return ReadConstantPrimitive (etype, signature);
 			}
 		}
 
-		static string ReadConstantString (byte [] blob)
+		string ReadConstantString (uint signature)
 		{
-			var length = blob.Length;
-			if ((length & 1) == 1)
-				length--;
+			byte [] blob;
+			int index, count;
 
-			return Encoding.Unicode.GetString (blob, 0, length);
+			GetBlobView (signature, out blob, out index, out count);
+			if (count == 0)
+				return string.Empty;
+
+			if ((count & 1) == 1)
+				count--;
+
+			return Encoding.Unicode.GetString (blob, index, count);
 		}
 
 		object ReadConstantPrimitive (ElementType type, uint signature)
@@ -2591,7 +2670,6 @@ namespace Mono.Cecil {
 
 		void ReadXmlSecurityDeclaration (uint signature, SecurityDeclaration declaration)
 		{
-			var blob = ReadBlob (signature);
 			var attributes = new Collection<SecurityAttribute> (1);
 
 			var attribute = new SecurityAttribute (
@@ -2603,7 +2681,7 @@ namespace Mono.Cecil {
 					"XML",
 					new CustomAttributeArgument (
 						module.TypeSystem.String,
-						Encoding.Unicode.GetString (blob, 0, blob.Length))));
+						ReadUnicodeStringBlob (signature))));
 
 			attributes.Add (attribute);
 
@@ -2660,7 +2738,7 @@ namespace Mono.Cecil {
 			switch (token.TokenType) {
 			case TokenType.AssemblyRef:
 				InitializeAssemblyReferences ();
-				scope = metadata.AssemblyReferences [(int) token.RID - 1];
+				scope = metadata.GetAssemblyNameReference (token.RID);
 				break;
 			case TokenType.File:
 				InitializeModuleReferences ();
@@ -2695,15 +2773,386 @@ namespace Mono.Cecil {
 			return reference;
 		}
 
-		static void InitializeCollection (object o)
+		void InitializeDocuments ()
 		{
+			if (metadata.Documents != null)
+				return;
+
+			int length = MoveTo (Table.Document);
+
+			var documents = metadata.Documents = new Document [length];
+
+			for (uint i = 1; i <= length; i++) {
+				var name_index = ReadBlobIndex ();
+				var hash_algorithm = ReadGuid ();
+				var hash = ReadBlob ();
+				var language = ReadGuid ();
+
+				var signature = ReadSignature (name_index);
+				var name = signature.ReadDocumentName ();
+
+				documents [i - 1] = new Document (name) {
+					HashAlgorithm = hash_algorithm.ToHashAlgorithm (),
+					Hash = hash,
+					Language = language.ToLanguage (),
+					token = new MetadataToken (TokenType.Document, i),
+				};
+			}
+		}
+
+		public Collection<SequencePoint> ReadSequencePoints (MethodDefinition method)
+		{
+			InitializeDocuments ();
+
+			if (!MoveTo (Table.MethodDebugInformation, method.MetadataToken.RID))
+				return new Collection<SequencePoint> ();
+
+			var document = metadata.GetDocument (ReadTableIndex (Table.Document));
+			var reader = ReadSignature (ReadBlobIndex ());
+
+			return reader.ReadSequencePoints (document);
+		}
+
+		void InitializeLocalScopes ()
+		{
+			if (metadata.LocalScopes != null)
+				return;
+
+			InitializeMethods ();
+
+			int length = MoveTo (Table.LocalScope);
+
+			metadata.LocalScopes = new Dictionary<uint, Row<uint, Range, Range, uint, uint, uint> []> ();
+
+			for (uint i = 1; i <= length; i++) {
+				var method = ReadTableIndex (Table.Method);
+				var import = ReadTableIndex (Table.ImportScope);
+				var variables = ReadListRange (i, Table.LocalScope, Table.LocalVariable);
+				var constants = ReadListRange (i, Table.LocalScope, Table.LocalConstant);
+				var scope_start = ReadUInt32 ();
+				var scope_length = ReadUInt32 ();
+
+				metadata.SetLocalScopes (method, AddMapping (metadata.LocalScopes, method, new Row<uint, Range, Range, uint, uint, uint> (import, variables, constants, scope_start, scope_length, i)));
+			}
+		}
+
+		public ScopeDebugInformation ReadScope (MethodDefinition method)
+		{
+			InitializeLocalScopes ();
+			InitializeImportScopes ();
+
+			Row<uint, Range, Range, uint, uint, uint> [] records;
+			if (!metadata.TryGetLocalScopes (method, out records))
+				return null;
+
+			var method_scope = null as ScopeDebugInformation;
+
+			for (int i = 0; i < records.Length; i++) {
+				var scope = ReadLocalScope (records [i]);
+
+				if (i == 0) {
+					method_scope = scope;
+					continue;
+				}
+
+				if (!AddScope (method_scope.scopes, scope))
+					method_scope.Scopes.Add (scope);
+			}
+
+			return method_scope;
+		}
+
+		static bool AddScope (Collection<ScopeDebugInformation> scopes, ScopeDebugInformation scope)
+		{
+			if (scopes.IsNullOrEmpty ())
+				return false;
+
+			foreach (var sub_scope in scopes) {
+				if (sub_scope.HasScopes && AddScope (sub_scope.Scopes, scope))
+					return true;
+
+				if (scope.Start.Offset >= sub_scope.Start.Offset && scope.End.Offset <= sub_scope.End.Offset) {
+					sub_scope.Scopes.Add (scope);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		ScopeDebugInformation ReadLocalScope (Row<uint, Range, Range, uint, uint, uint> record)
+		{
+			var scope = new ScopeDebugInformation
+			{
+				start = new InstructionOffset ((int) record.Col4),
+				end = new InstructionOffset ((int) (record.Col4 + record.Col5)),
+				token = new MetadataToken (TokenType.LocalScope, record.Col6),
+			};
+
+			if (record.Col1 > 0)
+				scope.import = metadata.GetImportScope (record.Col1);
+
+			if (record.Col2.Length > 0) {
+				scope.variables = new Collection<VariableDebugInformation> ((int) record.Col2.Length);
+				for (uint i = 0; i < record.Col2.Length; i++)
+					scope.variables.Add (ReadLocalVariable (record.Col2.Start + i));
+			}
+
+			if (record.Col3.Length > 0) {
+				scope.constants = new Collection<ConstantDebugInformation> ((int) record.Col3.Length);
+				for (uint i = 0; i < record.Col3.Length; i++)
+					scope.constants.Add (ReadLocalConstant (record.Col3.Start + i));
+			}
+
+			return scope;
+		}
+
+		VariableDebugInformation ReadLocalVariable (uint rid)
+		{
+			if (!MoveTo (Table.LocalVariable, rid))
+				return null;
+
+			var attributes = (VariableAttributes) ReadUInt16 ();
+			var index = ReadUInt16 ();
+			var name = ReadString ();
+
+			var variable = new VariableDebugInformation (index, name) { Attributes = attributes, token = new MetadataToken (TokenType.LocalVariable, rid) };
+			variable.custom_infos = GetCustomDebugInformation (variable);
+			return variable;
+		}
+
+		ConstantDebugInformation ReadLocalConstant (uint rid)
+		{
+			if (!MoveTo (Table.LocalConstant, rid))
+				return null;
+
+			var name = ReadString ();
+			var signature = ReadSignature (ReadBlobIndex ());
+			var type = signature.ReadTypeSignature ();
+
+			object value;
+			if (type.etype == ElementType.String) {
+				if (signature.buffer [signature.position] != 0xff)
+					value = Encoding.Unicode.GetString (signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start))));
+				else
+					value = null;
+			} else if (type.etype == ElementType.Object) {
+				value = null;
+			} else if (type.IsTypeOf ("System", "Decimal")) {
+				var b = signature.ReadByte ();
+				value = new decimal (signature.ReadInt32 (), signature.ReadInt32 (), signature.ReadInt32 (), (b & 0x80) != 0, (byte) (b & 0x7f));
+			} else if (type.IsTypeOf ("System", "DateTime")) {
+				value = new DateTime (signature.ReadInt64());
+			} else
+				value = signature.ReadConstantSignature (type.etype);
+
+			var constant = new ConstantDebugInformation (name, type, value) { token = new MetadataToken (TokenType.LocalConstant, rid) };
+			constant.custom_infos = GetCustomDebugInformation (constant);
+			return constant;
+		}
+
+		void InitializeImportScopes ()
+		{
+			if (metadata.ImportScopes != null)
+				return;
+
+			var length = MoveTo (Table.ImportScope);
+
+			metadata.ImportScopes = new ImportDebugInformation [length];
+
+			for (int i = 1; i <= length; i++) {
+				ReadTableIndex (Table.ImportScope);
+
+				var import = new ImportDebugInformation ();
+				import.token = new MetadataToken (TokenType.ImportScope, i);
+
+				var signature = ReadSignature (ReadBlobIndex ());
+				while (signature.CanReadMore ())
+					import.Targets.Add (ReadImportTarget (signature));
+
+				metadata.ImportScopes [i - 1] = import;
+			}
+
+			MoveTo (Table.ImportScope);
+
+			for (int i = 0; i < length; i++) {
+				var parent = ReadTableIndex (Table.ImportScope);
+
+				ReadBlobIndex ();
+
+				if (parent != 0)
+					metadata.ImportScopes [i].Parent = metadata.GetImportScope (parent);
+			}
+		}
+
+		public string ReadUTF8StringBlob (uint signature)
+		{
+			return ReadStringBlob (signature, Encoding.UTF8);
+		}
+
+		string ReadUnicodeStringBlob (uint signature)
+		{
+			return ReadStringBlob (signature, Encoding.Unicode);
+		}
+
+		string ReadStringBlob (uint signature, Encoding encoding)
+		{
+			byte [] blob;
+			int index, count;
+
+
+			GetBlobView (signature, out blob, out index, out count);
+			if (count == 0)
+				return string.Empty;
+
+			return encoding.GetString (blob, index, count);
+		}
+
+		ImportTarget ReadImportTarget (SignatureReader signature)
+		{
+			AssemblyNameReference reference = null;
+			string @namespace = null;
+			string alias = null;
+			TypeReference type = null;
+
+			var kind = (ImportTargetKind) signature.ReadCompressedUInt32 ();
+			switch (kind) {
+			case ImportTargetKind.ImportNamespace:
+				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.ImportNamespaceInAssembly:
+				reference = metadata.GetAssemblyNameReference (signature.ReadCompressedUInt32 ());
+				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.ImportType:
+				type = signature.ReadTypeToken ();
+				break;
+			case ImportTargetKind.ImportXmlNamespaceWithAlias:
+				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.ImportAlias:
+				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.DefineAssemblyAlias:
+				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				reference = metadata.GetAssemblyNameReference (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.DefineNamespaceAlias:
+				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.DefineNamespaceInAssemblyAlias:
+				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				reference = metadata.GetAssemblyNameReference (signature.ReadCompressedUInt32 ());
+				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				break;
+			case ImportTargetKind.DefineTypeAlias:
+				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
+				type = signature.ReadTypeToken ();
+				break;
+			}
+
+			return new ImportTarget (kind) {
+				alias = alias,
+				type = type,
+				@namespace = @namespace,
+				reference = reference,
+			};
+		}
+
+		void InitializeStateMachineMethods ()
+		{
+			if (metadata.StateMachineMethods != null)
+				return;
+
+			var length = MoveTo (Table.StateMachineMethod);
+
+			metadata.StateMachineMethods = new Dictionary<uint, uint> (length);
+
+			for (int i = 0; i < length; i++)
+				metadata.StateMachineMethods.Add (ReadTableIndex (Table.Method), ReadTableIndex (Table.Method));
+		}
+
+		public MethodDefinition ReadStateMachineKickoffMethod (MethodDefinition method)
+		{
+			InitializeStateMachineMethods ();
+
+			uint rid;
+			if (!metadata.TryGetStateMachineKickOffMethod (method, out rid))
+				return null;
+
+			return GetMethodDefinition (rid);
+		}
+
+		void InitializeCustomDebugInformations ()
+		{
+			if (metadata.CustomDebugInformations != null)
+				return;
+
+			var length = MoveTo (Table.CustomDebugInformation);
+
+			metadata.CustomDebugInformations = new Dictionary<MetadataToken, Row<Guid, uint, uint> []> ();
+
+			for (uint i = 1; i <= length; i++) {
+				var token = ReadMetadataToken (CodedIndex.HasCustomDebugInformation);
+				var info = new Row<Guid, uint, uint> (ReadGuid (), ReadBlobIndex (), i);
+
+				Row<Guid, uint, uint> [] infos;
+				metadata.CustomDebugInformations.TryGetValue (token, out infos);
+				metadata.CustomDebugInformations [token] = infos.Add (info);
+			}
+		}
+
+		public Collection<CustomDebugInformation> GetCustomDebugInformation (ICustomDebugInformationProvider provider)
+		{
+			InitializeCustomDebugInformations ();
+
+			Row<Guid, uint, uint> [] rows;
+			if (!metadata.CustomDebugInformations.TryGetValue (provider.MetadataToken, out rows))
+				return null;
+
+			var infos = new Collection<CustomDebugInformation> (rows.Length);
+
+			for (int i = 0; i < rows.Length; i++) {
+				if (rows [i].Col1 == StateMachineScopeDebugInformation.KindIdentifier) {
+					var signature = ReadSignature (rows [i].Col2);
+					infos.Add (new StateMachineScopeDebugInformation (signature.ReadInt32 (), signature.ReadInt32 ()));
+				} else if (rows [i].Col1 == AsyncMethodBodyDebugInformation.KindIdentifier) {
+					var signature = ReadSignature (rows [i].Col2);
+
+					var catch_offset = signature.ReadInt32 () - 1;
+					var yields = new Collection<InstructionOffset> ();
+					var resumes = new Collection<InstructionOffset> ();
+					uint move_next_rid = 0;
+
+					while (signature.CanReadMore ()) {
+						yields.Add (new InstructionOffset (signature.ReadInt32 ()));
+						resumes.Add (new InstructionOffset (signature.ReadInt32 ()));
+						move_next_rid = signature.ReadCompressedUInt32 ();
+					}
+
+					var async_body = new AsyncMethodBodyDebugInformation (catch_offset);
+					async_body.yields = yields;
+					async_body.resumes = resumes;
+					async_body.move_next = GetMethodDefinition (move_next_rid);
+
+					infos.Add (async_body);
+				} else {
+					infos.Add (new BinaryCustomDebugInformation (rows [i].Col1, ReadBlob (rows [i].Col2)));
+				}
+
+				infos [i].token = new MetadataToken (TokenType.CustomDebugInformation, rows [i].Col3);
+			}
+
+			return infos;
 		}
 	}
 
 	sealed class SignatureReader : ByteBuffer {
 
 		readonly MetadataReader reader;
-		readonly uint start, sig_length;
+		readonly internal uint start, sig_length;
 
 		TypeSystem TypeSystem {
 			get { return reader.module.TypeSystem; }
@@ -2825,6 +3274,11 @@ namespace Mono.Cecil {
 		public TypeReference ReadTypeSignature ()
 		{
 			return ReadTypeSignature ((ElementType) ReadByte ());
+		}
+
+		public TypeReference ReadTypeToken ()
+		{
+			return GetTypeDefOrRef (ReadTypeTokenSignature ());
 		}
 
 		TypeReference ReadTypeSignature (ElementType etype)
@@ -3236,6 +3690,78 @@ namespace Mono.Cecil {
 
 			position += length;
 			return @string;
+		}
+
+		public string ReadDocumentName ()
+		{
+			var separator = (char) buffer [position];
+			position++;
+
+			var builder = new StringBuilder ();
+			for (int i = 0; CanReadMore (); i++) {
+				if (i > 0 && separator != 0)
+					builder.Append (separator);
+
+				builder.Append (reader.ReadUTF8StringBlob (ReadCompressedUInt32 ()));
+			}
+
+			return builder.ToString ();
+		}
+
+		public Collection<SequencePoint> ReadSequencePoints (Document document)
+		{
+			var sequence_points = new Collection<SequencePoint> ();
+
+			ReadCompressedUInt32 (); // local_sig_token
+
+			if (document == null)
+				document = reader.metadata.GetDocument (ReadCompressedUInt32 ());
+
+			var offset = 0;
+			var start_line = 0;
+			var start_column = 0;
+			var first_non_hidden = true;
+
+			for (var i = 0; CanReadMore (); i++) {
+				var delta_il = (int) ReadCompressedUInt32 ();
+				if (i > 0 && delta_il == 0) {
+					document = reader.metadata.GetDocument (ReadCompressedUInt32 ());
+					continue;
+				}
+
+				offset += delta_il;
+
+				var delta_lines = (int) ReadCompressedUInt32 ();
+				var delta_columns = delta_lines == 0
+					? (int) ReadCompressedUInt32 ()
+					: ReadCompressedInt32 ();
+
+				if (delta_lines == 0 && delta_columns == 0) {
+					sequence_points.Add (new SequencePoint (offset, document) {
+						StartLine = 0xfeefee,
+						StartColumn = 0xfeefee,
+					});
+					continue;
+				}
+
+				if (first_non_hidden) {
+					start_line = (int) ReadCompressedUInt32 ();
+					start_column = (int) ReadCompressedUInt32 ();
+				} else {
+					start_line += ReadCompressedInt32 ();
+					start_column += ReadCompressedInt32 ();
+				}
+
+				sequence_points.Add (new SequencePoint (offset, document) {
+					StartLine = start_line,
+					StartColumn = start_column,
+					EndLine = start_line + delta_lines,
+					EndColumn = start_column + delta_columns,
+				});
+				first_non_hidden = false;
+			}
+
+			return sequence_points;
 		}
 
 		public bool CanReadMore ()
