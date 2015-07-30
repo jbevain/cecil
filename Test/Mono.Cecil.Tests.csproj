@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Tests</RootNamespace>
     <AssemblyName>Mono.Cecil.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
@@ -84,5 +83,4 @@
     <Content Include="Resources\assemblies\varargs.exe" />
   </ItemGroup>
   <Import Project="..\Mono.Cecil.Tests.settings" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

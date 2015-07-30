@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</ProjectGuid>
-    <RootNamespace>Mono.Cecil</RootNamespace>
     <AssemblyName>Mono.Cecil</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
@@ -134,5 +133,4 @@
     <Compile Include="System.Security.Cryptography\SHA1Managed.cs" />
   </ItemGroup>
   <Import Project="Mono.Cecil.settings" />
-  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

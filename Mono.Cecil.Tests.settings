@@ -3,7 +3,6 @@
   <PropertyGroup>
     <BuildDirectory>$(MSBuildProjectDirectory)</BuildDirectory>
   </PropertyGroup>
-  <Import Project="Mono.Cecil.settings" />
   <ItemGroup>
     <Reference Include="nunit.core">
       <SpecificVersion>False</SpecificVersion>
@@ -18,4 +17,5 @@
       <HintPath>$(MSBuildThisFileDirectory)\Test\libs\nunit-2.6.2\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <Import Project="Mono.Cecil.settings" />
 </Project>

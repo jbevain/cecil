@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{C6CFD7E1-B855-44DC-B4CE-9CD72984AF52}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Rocks.Tests</RootNamespace>
     <AssemblyName>Mono.Cecil.Rocks.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
@@ -32,5 +31,4 @@
     <Content Include="Resources\assemblies\decsec-xml.dll" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.Tests.settings" />
-  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>
