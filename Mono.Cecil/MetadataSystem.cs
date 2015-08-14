@@ -125,23 +125,23 @@ namespace Mono.Cecil {
 
 		public void Clear ()
 		{
-			if (NestedTypes != null) NestedTypes.Clear ();
-			if (ReverseNestedTypes != null) ReverseNestedTypes.Clear ();
-			if (Interfaces != null) Interfaces.Clear ();
-			if (ClassLayouts != null) ClassLayouts.Clear ();
-			if (FieldLayouts != null) FieldLayouts.Clear ();
-			if (FieldRVAs != null) FieldRVAs.Clear ();
-			if (FieldMarshals != null) FieldMarshals.Clear ();
-			if (Constants != null) Constants.Clear ();
-			if (Overrides != null) Overrides.Clear ();
-			if (CustomAttributes != null) CustomAttributes.Clear ();
-			if (SecurityDeclarations != null) SecurityDeclarations.Clear ();
-			if (Events != null) Events.Clear ();
-			if (Properties != null) Properties.Clear ();
-			if (Semantics != null) Semantics.Clear ();
-			if (PInvokes != null) PInvokes.Clear ();
-			if (GenericParameters != null) GenericParameters.Clear ();
-			if (GenericConstraints != null) GenericConstraints.Clear ();
+			if (NestedTypes != null) NestedTypes = new Dictionary<uint, uint[]> ();
+			if (ReverseNestedTypes != null) ReverseNestedTypes = new Dictionary<uint, uint> ();
+			if (Interfaces != null) Interfaces = new Dictionary<uint, MetadataToken[]> ();
+			if (ClassLayouts != null) ClassLayouts = new Dictionary<uint, Row<ushort, uint>> ();
+			if (FieldLayouts != null) FieldLayouts = new Dictionary<uint, uint> ();
+			if (FieldRVAs != null) FieldRVAs = new Dictionary<uint, uint> ();
+			if (FieldMarshals != null) FieldMarshals = new Dictionary<MetadataToken, uint> ();
+			if (Constants != null) Constants = new Dictionary<MetadataToken, Row<ElementType, uint>> ();
+			if (Overrides != null) Overrides = new Dictionary<uint, MetadataToken[]> ();
+			if (CustomAttributes != null) CustomAttributes = new Dictionary<MetadataToken, Range[]> ();
+			if (SecurityDeclarations != null) SecurityDeclarations = new Dictionary<MetadataToken, Range[]> ();
+			if (Events != null) Events = new Dictionary<uint, Range> ();
+			if (Properties != null) Properties = new Dictionary<uint, Range> ();
+			if (Semantics != null) Semantics = new Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> ();
+			if (PInvokes != null) PInvokes = new Dictionary<uint, Row<PInvokeAttributes, uint, uint>> ();
+			if (GenericParameters != null) GenericParameters = new Dictionary<MetadataToken, Range[]> ();
+			if (GenericConstraints != null) GenericConstraints = new Dictionary<uint, MetadataToken[]> ();
 		}
 
 		public TypeDefinition GetTypeDefinition (uint rid)
