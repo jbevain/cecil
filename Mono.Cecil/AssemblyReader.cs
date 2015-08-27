@@ -120,6 +120,8 @@ namespace Mono.Cecil {
 
 	sealed class ImmediateModuleReader : ModuleReader {
 
+		private bool resolve;
+
 		public ImmediateModuleReader (Image image)
 			: base (image, ReadingMode.Immediate)
 		{
@@ -129,13 +131,15 @@ namespace Mono.Cecil {
 		{
 			this.module.Read (this.module, (module, reader) => {
 				ReadModuleManifest (reader);
-				ReadModule (module);
+				ReadModule (module, resolve: true);
 				return module;
 			});
 		}
 
-		public static void ReadModule (ModuleDefinition module)
+		public void ReadModule (ModuleDefinition module, bool resolve)
 		{
+			this.resolve = resolve;
+
 			if (module.HasAssemblyReferences)
 				Read (module.AssemblyReferences);
 			if (module.HasResources)
@@ -146,26 +150,24 @@ namespace Mono.Cecil {
 				ReadTypes (module.Types);
 			if (module.HasExportedTypes)
 				Read (module.ExportedTypes);
-			if (module.HasCustomAttributes)
-				Read (module.CustomAttributes);
+
+			ReadCustomAttributes (module);
 
 			var assembly = module.Assembly;
 			if (assembly == null)
 				return;
 
-			if (assembly.HasCustomAttributes)
-				ReadCustomAttributes (assembly);
-			if (assembly.HasSecurityDeclarations)
-				Read (assembly.SecurityDeclarations);
+			ReadCustomAttributes (assembly);
+			ReadSecurityDeclarations (assembly);
 		}
 
-		static void ReadTypes (Collection<TypeDefinition> types)
+		void ReadTypes (Collection<TypeDefinition> types)
 		{
 			for (int i = 0; i < types.Count; i++)
 				ReadType (types [i]);
 		}
 
-		static void ReadType (TypeDefinition type)
+		void ReadType (TypeDefinition type)
 		{
 			ReadGenericParameters (type);
 
@@ -194,7 +196,7 @@ namespace Mono.Cecil {
 			ReadCustomAttributes (type);
 		}
 
-		static void ReadGenericParameters (IGenericParameterProvider provider)
+		void ReadGenericParameters (IGenericParameterProvider provider)
 		{
 			if (!provider.HasGenericParameters)
 				return;
@@ -211,12 +213,15 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
+		void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
 		{
 			if (!provider.HasSecurityDeclarations)
 				return;
 
 			var security_declarations = provider.SecurityDeclarations;
+
+			if (!resolve)
+				return;
 
 			for (int i = 0; i < security_declarations.Count; i++) {
 				var security_declaration = security_declarations [i];
@@ -225,12 +230,15 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadCustomAttributes (ICustomAttributeProvider provider)
+		void ReadCustomAttributes (ICustomAttributeProvider provider)
 		{
 			if (!provider.HasCustomAttributes)
 				return;
 
 			var custom_attributes = provider.CustomAttributes;
+
+			if (!resolve)
+				return;
 
 			for (int i = 0; i < custom_attributes.Count; i++) {
 				var custom_attribute = custom_attributes [i];
@@ -239,7 +247,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadFields (TypeDefinition type)
+		void ReadFields (TypeDefinition type)
 		{
 			var fields = type.Fields;
 
@@ -262,7 +270,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadMethods (TypeDefinition type)
+		void ReadMethods (TypeDefinition type)
 		{
 			var methods = type.Methods;
 
@@ -294,7 +302,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadParameters (MethodDefinition method)
+		void ReadParameters (MethodDefinition method)
 		{
 			var parameters = method.Parameters;
 
@@ -311,7 +319,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadProperties (TypeDefinition type)
+		void ReadProperties (TypeDefinition type)
 		{
 			var properties = type.Properties;
 
@@ -327,7 +335,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static void ReadEvents (TypeDefinition type)
+		void ReadEvents (TypeDefinition type)
 		{
 			var events = type.Events;
 

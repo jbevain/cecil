@@ -66,8 +66,10 @@ namespace Mono.Cecil {
 			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
 				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
 
-			if (module.HasImage && module.ReadingMode == ReadingMode.Deferred)
-				ImmediateModuleReader.ReadModule (module);
+			if (module.HasImage && module.ReadingMode == ReadingMode.Deferred) {
+				var immediate_reader = new ImmediateModuleReader (module.Image);
+				immediate_reader.ReadModule (module, resolve: false);
+			}
 
 			module.MetadataSystem.Clear ();
 
