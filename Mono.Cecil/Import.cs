@@ -74,14 +74,14 @@ namespace Mono.Cecil {
 			stack.RemoveAt (stack.Count - 1);
 		}
 
-		public TypeReference MethodParameter (string declTypeFullName, string method, int position)
+		public TypeReference MethodParameter (string method, int position)
 		{
 			for (int i = stack.Count - 1; i >= 0; i--) {
 				var candidate = stack [i] as MethodReference;
 				if (candidate == null)
 					continue;
 
-				if (method != candidate.Name || declTypeFullName != candidate.DeclaringType.FullName)
+				if (method != candidate.Name)
 					continue;
 
 				return candidate.GenericParameters [position];
@@ -233,13 +233,11 @@ namespace Mono.Cecil {
 				throw new InvalidOperationException ();
 
 			if (type.DeclaringMethod != null)
-			{
-				return context.MethodParameter (type.DeclaringType.FullName, type.DeclaringMethod.Name, type.GenericParameterPosition);
-			}
+				return context.MethodParameter (type.DeclaringMethod.Name, type.GenericParameterPosition);
+
 			if (type.DeclaringType != null)
-			{
 				return  context.TypeParameter (NormalizedFullName (type.DeclaringType), type.GenericParameterPosition);
-			}
+
 			throw new InvalidOperationException();
 		}
 
@@ -464,7 +462,6 @@ namespace Mono.Cecil {
 
 	public class MetadataImporter : IMetadataImporter {
 
-		readonly Dictionary<TypeRefKey, TypeReference> cache = new Dictionary<TypeRefKey, TypeReference>();
 		readonly ModuleDefinition module;
 
 		public MetadataImporter (ModuleDefinition module)
@@ -474,48 +471,12 @@ namespace Mono.Cecil {
 			this.module = module;
 		}
 
-		struct TypeRefKey : IEquatable<TypeRefKey>
-		{
-			string fullname;
-			string assembly;
-            bool isValueType;
-
-			public static TypeRefKey From(TypeReference r)
-			{
-				return new TypeRefKey { fullname = r.FullName, assembly = r.Scope.ToString(), isValueType = r.IsValueType };
-			}
-
-			public override int GetHashCode()
-			{
-				return fullname.GetHashCode() + assembly.GetHashCode() + (isValueType ? 1 : 0);
-			}
-
-			public bool Equals(TypeRefKey other)
-			{
-				return other.fullname == fullname && other.assembly == assembly && other.isValueType == isValueType;
-			}
-		}
-
 		TypeReference ImportType (TypeReference type, ImportGenericContext context)
 		{
 			if (type.IsTypeSpecification ())
 				return ImportTypeSpecification (type, context);
 
-			var reference = default(TypeReference);
-			var key = TypeRefKey.From(type);
-			if (cache.TryGetValue(key, out reference))
-			{
-				// Cecil only fills TypeRef GenericParameters if used ( bug ?)
-				// Now that we cache them, we need to make sure the cached version has all of the needed ones
-				if (type.HasGenericParameters && reference.GenericParameters.Count != type.GenericParameters.Count)
-				{
-					for (int i = reference.GenericParameters.Count - 1; i < type.GenericParameters.Count; i++)
-						reference.GenericParameters.Add(new GenericParameter(reference));
-				}
-				return reference;
-			}
-
-			reference = new TypeReference (
+			var reference = new TypeReference (
 				type.Namespace,
 				type.Name,
 				module,
@@ -529,8 +490,6 @@ namespace Mono.Cecil {
 
 			if (type.HasGenericParameters)
 				ImportGenericParameters (reference, type);
-
-			cache.Add(key, reference);
 
 			return reference;
 		}
@@ -669,7 +628,7 @@ namespace Mono.Cecil {
 				var mvar_parameter = (GenericParameter) type;
 				if (mvar_parameter.DeclaringMethod == null)
 					throw new InvalidOperationException ();
-				return context.MethodParameter (((MethodReference)mvar_parameter.Owner).DeclaringType.FullName, mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
+				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
 			}
 
 			throw new NotSupportedException (type.etype.ToString ());
