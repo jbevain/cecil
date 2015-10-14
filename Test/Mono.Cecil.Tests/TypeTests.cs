@@ -251,5 +251,14 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (1, fptr.Parameters [1].Sequence);
 			}, verify: false);
 		}
+
+		[Test]
+		public void DeferredCorlibTypeDef ()
+		{
+			var module = ModuleDefinition.ReadModule (typeof (object).Assembly.Location, new ReaderParameters (ReadingMode.Deferred));
+			var object_type = module.TypeSystem.Object;
+
+			Assert.IsInstanceOf<TypeDefinition> (object_type);
+		}
 	}
 }

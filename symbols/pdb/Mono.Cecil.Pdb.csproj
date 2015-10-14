@@ -50,5 +50,5 @@
     <Compile Include="Mono.Cecil.Pdb\SymWriter.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.settings" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

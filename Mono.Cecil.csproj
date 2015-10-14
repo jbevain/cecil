@@ -5,9 +5,6 @@
     <RootNamespace>Mono.Cecil</RootNamespace>
     <AssemblyName>Mono.Cecil</AssemblyName>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFrameworkVersion)' != 'v2.0' ">
-    <Reference Include="System.Core" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Mono.Cecil.Cil\Code.cs" />
     <Compile Include="Mono.Cecil.Cil\CodeWriter.cs" />
@@ -136,11 +133,9 @@
     <Compile Include="Mono.Security.Cryptography\CryptoConvert.cs" />
     <Compile Include="Mono.Security.Cryptography\CryptoService.cs" />
     <Compile Include="ProjectInfo.cs" />
-    <Compile Include="System.Runtime.CompilerServices\ExtensionAttribute.cs" />
-    <Compile Include="Mono\Actions.cs" />
     <Compile Include="Mono\Empty.cs" />
-    <Compile Include="Mono\Funcs.cs" />
+    <Compile Include="System.Security.Cryptography\SHA1Managed.cs" />
   </ItemGroup>
   <Import Project="Mono.Cecil.settings" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

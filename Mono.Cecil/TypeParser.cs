@@ -87,17 +87,7 @@ namespace Mono.Cecil {
 
 		static bool ParseInt32 (string value, out int result)
 		{
-#if CF
-			try {
-				result = int.Parse (value);
-				return true;
-			} catch {
-				result = 0;
-				return false;
-			}
-#else
 			return int.TryParse (value, out result);
-#endif
 		}
 
 		static void TryAddArity (string name, ref int arity)
@@ -390,8 +380,13 @@ namespace Mono.Cecil {
 
 			var nested_names = type_info.nested_names;
 			if (!nested_names.IsNullOrEmpty ()) {
-				for (int i = 0; i < nested_names.Length; i++)
-					typedef = typedef.GetNestedType (nested_names [i]);
+				for (int i = 0; i < nested_names.Length; i++) {
+					var nested_type = typedef.GetNestedType (nested_names [i]);
+					if (nested_type == null)
+						return false;
+
+					typedef = nested_type;
+				}
 			}
 
 			type = typedef;

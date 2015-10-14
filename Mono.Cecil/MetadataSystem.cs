@@ -34,8 +34,6 @@ namespace Mono.Cecil {
 		internal TypeDefinition [] Types;
 		internal TypeReference [] TypeReferences;
 
-		internal bool HasSystemObject;
-
 		internal FieldDefinition [] Fields;
 		internal MethodDefinition [] Methods;
 		internal MemberReference [] MemberReferences;
@@ -233,7 +231,7 @@ namespace Mono.Cecil {
 
 		public void SetReverseNestedTypeMapping (uint nested, uint declaring)
 		{
-			ReverseNestedTypes.Add (nested, declaring);
+			ReverseNestedTypes [nested] = declaring;
 		}
 
 		public void RemoveReverseNestedTypeMapping (TypeDefinition type)

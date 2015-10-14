@@ -31,6 +31,9 @@ namespace Mono.Cecil.Metadata {
 			int position = (int) (index + Offset);
 			int length = (int) data.ReadCompressedUInt32 (ref position);
 
+			if (length > data.Length - position)
+				return Empty<byte>.Array;
+
 			var buffer = new byte [length];
 
 			Buffer.BlockCopy (data, position, buffer, 0, length);

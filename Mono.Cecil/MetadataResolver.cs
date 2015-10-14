@@ -28,7 +28,7 @@ namespace Mono.Cecil {
 		MethodDefinition Resolve (MethodReference method);
 	}
 
-#if !SILVERLIGHT && !CF
+#if !PCL
 	[Serializable]
 #endif
 	public class ResolutionException : Exception {
@@ -62,7 +62,7 @@ namespace Mono.Cecil {
 			this.member = member;
 		}
 
-#if !SILVERLIGHT && !CF
+#if !PCL
 		protected ResolutionException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
@@ -246,37 +246,37 @@ namespace Mono.Cecil {
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 
-				if (AreSame(method, reference))
+				if (method.Name != reference.Name)
+					continue;
+
+				if (method.HasGenericParameters != reference.HasGenericParameters)
+					continue;
+
+				if (method.HasGenericParameters && method.GenericParameters.Count != reference.GenericParameters.Count)
+					continue;
+
+				if (!AreSame (method.ReturnType, reference.ReturnType))
+					continue;
+
+				if (method.IsVarArg () != reference.IsVarArg ())
+					continue;
+
+				if (method.IsVarArg () && IsVarArgCallTo (method, reference))
 					return method;
+
+				if (method.HasParameters != reference.HasParameters)
+					continue;
+
+				if (!method.HasParameters && !reference.HasParameters)
+					return method;
+
+				if (!AreSame (method.Parameters, reference.Parameters))
+					continue;
+
+				return method;
 			}
 
 			return null;
-		}
-
-		internal static bool AreSame (MethodReference a, MethodReference b)
-		{
-			if (a.Name != b.Name)
-				return false;
-
-			if (a.HasGenericParameters != b.HasGenericParameters)
-				return false;
-
-			if (a.HasGenericParameters && a.GenericParameters.Count != b.GenericParameters.Count)
-				return false;
-
-			if (!AreSame(a.ReturnType, b.ReturnType))
-				return false;
-
-			if (a.HasParameters != b.HasParameters)
-				return false;
-
-			if (!a.HasParameters && !b.HasParameters)
-				return true;
-
-			if (!AreSame(a.Parameters, b.Parameters))
-				return false;
-
-			return true;
 		}
 
 		static bool AreSame (Collection<ParameterDefinition> a, Collection<ParameterDefinition> b)
@@ -291,6 +291,21 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < count; i++)
 				if (!AreSame (a [i].ParameterType, b [i].ParameterType))
+					return false;
+
+			return true;
+		}
+
+		private static bool IsVarArgCallTo (MethodDefinition method, MethodReference reference)
+		{
+			if (method.Parameters.Count >= reference.Parameters.Count)
+				return false;
+
+			if (reference.GetSentinelPosition () != method.Parameters.Count)
+				return false;
+
+			for (int i = 0; i < method.Parameters.Count; i++)
+				if (!AreSame (method.Parameters [i].ParameterType, reference.Parameters [i].ParameterType))
 					return false;
 
 			return true;

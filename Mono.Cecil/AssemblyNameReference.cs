@@ -109,29 +109,27 @@ namespace Mono.Cecil {
 
 		byte [] HashPublicKey ()
 		{
+#if !PCL
 			HashAlgorithm algorithm;
 
 			switch (hash_algorithm) {
 			case AssemblyHashAlgorithm.Reserved:
-#if SILVERLIGHT
-				throw new NotSupportedException ();
-#else
 				algorithm = MD5.Create ();
 				break;
-#endif
 			default:
 				// None default to SHA1
-#if SILVERLIGHT
-				algorithm = new SHA1Managed ();
-				break;
-#else
 				algorithm = SHA1.Create ();
 				break;
-#endif
 			}
 
 			using (algorithm)
 				return algorithm.ComputeHash (public_key);
+#else
+			if (hash_algorithm != AssemblyHashAlgorithm.SHA1)
+				throw new NotSupportedException ();
+
+			return new SHA1Managed ().ComputeHash (public_key);
+#endif
 		}
 
 		public virtual MetadataScopeType MetadataScopeType {
