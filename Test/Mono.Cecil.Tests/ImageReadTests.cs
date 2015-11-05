@@ -166,5 +166,17 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
 			}, verify: false);
 		}
+
+		[Test]
+		public void WindowsRuntimeComponentAssembly ()
+		{
+			var resolver = WindowsRuntimeAssemblyResolver.CreateInstance ();
+			if (resolver == null)
+				return;
+
+			TestModule("winrtcomp.winmd", module => {
+				Assert.IsTrue (module.Assembly.Name.IsWindowsRuntime);
+			}, verify: false, assemblyResolver: resolver);
+		}
 	}
 }

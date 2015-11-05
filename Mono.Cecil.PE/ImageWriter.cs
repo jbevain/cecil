@@ -528,9 +528,14 @@ namespace Mono.Cecil.PE {
 			offset += length;
 		}
 
+		static int GetZeroTerminatedStringLength (string @string)
+		{
+			return (@string.Length + 1 + 3) & ~3;
+		}
+
 		static byte [] GetZeroTerminatedString (string @string)
 		{
-			return GetString (@string, (@string.Length + 1 + 3) & ~3);
+			return GetString (@string, GetZeroTerminatedStringLength (@string));
 		}
 
 		static byte [] GetSimpleString (string @string)
@@ -676,7 +681,7 @@ namespace Mono.Cecil.PE {
 				metadata.table_heap.FixupData (map.GetRVA (TextSegment.Data));
 			map.AddMap (TextSegment.StrongNameSignature, GetStrongNameLength (), 4);
 
-			map.AddMap (TextSegment.MetadataHeader, GetMetadataHeaderLength ());
+			map.AddMap (TextSegment.MetadataHeader, GetMetadataHeaderLength (module.RuntimeVersion));
 			map.AddMap (TextSegment.TableHeap, metadata.table_heap.length, 4);
 			map.AddMap (TextSegment.StringHeap, metadata.string_heap.length, 4);
 			map.AddMap (TextSegment.UserStringHeap, metadata.user_string_heap.IsEmpty ? 0 : metadata.user_string_heap.length, 4);
@@ -728,11 +733,11 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		int GetMetadataHeaderLength ()
+		int GetMetadataHeaderLength (string runtimeVersion)
 		{
 			return
 				// MetadataHeader
-				40
+				20 + GetZeroTerminatedStringLength (runtimeVersion)
 				// #~ header
 				+ 12
 				// #Strings header
