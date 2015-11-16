@@ -246,13 +246,18 @@ namespace Mono.Cecil {
 			return this;
 		}
 
-		public virtual TypeDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl()
 		{
 			var module = this.Module;
 			if (module == null)
 				throw new NotSupportedException ();
 
 			return module.Resolve (this);
+		}
+
+		public new TypeDefinition Resolve()
+		{
+			return (TypeDefinition)base.Resolve();
 		}
 	}
 

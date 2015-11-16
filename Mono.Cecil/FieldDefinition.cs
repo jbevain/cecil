@@ -242,7 +242,7 @@ namespace Mono.Cecil {
 			this.attributes = (ushort) attributes;
 		}
 
-		public override FieldDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl ()
 		{
 			return this;
 		}

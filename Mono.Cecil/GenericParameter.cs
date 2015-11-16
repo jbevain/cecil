@@ -210,7 +210,7 @@ namespace Mono.Cecil {
 			throw new ArgumentOutOfRangeException ();
 		}
 
-		public override TypeDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl ()
 		{
 			return null;
 		}

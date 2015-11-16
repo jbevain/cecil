@@ -236,7 +236,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public override PropertyDefinition Resolve ()
+		protected override IMemberDefinition ResolveImpl ()
 		{
 			return this;
 		}

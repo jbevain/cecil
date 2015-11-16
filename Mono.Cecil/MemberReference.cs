@@ -26,6 +26,13 @@ namespace Mono.Cecil {
 			get;
 		}
 
+		protected abstract IMemberDefinition ResolveImpl();
+
+		public IMemberDefinition Resolve()
+		{
+			return ResolveImpl();
+		}
+
 		public virtual TypeReference DeclaringType {
 			get { return declaring_type; }
 			set { declaring_type = value; }
