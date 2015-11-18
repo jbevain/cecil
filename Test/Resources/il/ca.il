@@ -20,7 +20,7 @@
 }
 
 .class public auto ansi beforefieldinit FooType
-	extends [mscorlib]System.Attribute
+	extends [mscorlib]System.Object
 	implements IFoo
 {
 	.interfaceimpl type IFoo
@@ -29,7 +29,7 @@
 	.method public hidebysig specialname rtspecialname instance void .ctor ()
 	{
 		ldarg.0
-		call instance void [mscorlib]System.Attribute::.ctor ()
+		call instance void [mscorlib]System.Object::.ctor ()
 		ret
 	}
 }
