@@ -451,25 +451,29 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void GetInterfaceImplementation ()
 		{
+			IgnoreOnMono();
+
 			TestIL ("ca.il", module => {
 				var type = module.GetType ("FooType");
 				var iface = type.Interfaces.Single (i => i.FullName == "IFoo");
 				var attributes = type.GetInterfaceImplementationCustomAttributes (iface).CustomAttributes;
 				Assert.AreEqual (1, attributes.Count);
 				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
-			}, verify: !Platform.OnMono);
+			});
 		}
 
 		[Test]
 		public void GetTypeReference ()
 		{
+			IgnoreOnMono ();
+
 			TestIL ("ca.il", module => {
 				TypeReference type;
 				Assert.IsTrue (module.TryGetTypeReference ("mscorlib", "System.Collections.ArrayList", out type));
 				var attributes = module.GetTypeReferenceCustomAttributes (type).CustomAttributes;
 				Assert.AreEqual (1, attributes.Count);
 				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
-			}, verify: !Platform.OnMono);
+			});
 		}
 
 		[Test]
