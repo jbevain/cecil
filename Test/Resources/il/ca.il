@@ -33,3 +33,5 @@
 		ret
 	}
 }
+
+.custom ([mscorlib]System.Collections.ArrayList) instance void FooAttribute::.ctor ()

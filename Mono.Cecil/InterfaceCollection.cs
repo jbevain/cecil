@@ -15,18 +15,18 @@ namespace Mono.Cecil {
 	sealed class InterfaceCollection : Collection<TypeReference> {
 
 		readonly TypeDefinition container;
-		readonly Collection<CustomAttributeProvider> custom_attribute_providers;
+		readonly Collection<InterfaceCustomAttributeProvider> custom_attribute_providers;
 
 		public InterfaceCollection (TypeDefinition container)
 		{
 			this.container = container;
-			this.custom_attribute_providers = new Collection<CustomAttributeProvider> ();
+			this.custom_attribute_providers = new Collection<InterfaceCustomAttributeProvider> ();
 		}
 
 		public InterfaceCollection (TypeDefinition container, int capacity)
 		{
 			this.container = container;
-			this.custom_attribute_providers = new Collection<CustomAttributeProvider> (capacity);
+			this.custom_attribute_providers = new Collection<InterfaceCustomAttributeProvider> (capacity);
 		}
 
 		public ICustomAttributeProvider GetCustomAttributes (int index)
@@ -42,7 +42,7 @@ namespace Mono.Cecil {
 
 		protected override void OnAdd (TypeReference item, int index)
 		{
-			custom_attribute_providers.Add (new CustomAttributeProvider (container.Module));
+			custom_attribute_providers.Add (new InterfaceCustomAttributeProvider (container.Module));
 		}
 
 		protected override void OnSet (TypeReference item, int index)
@@ -52,7 +52,7 @@ namespace Mono.Cecil {
 
 		protected override void OnInsert (TypeReference item, int index)
 		{
-			custom_attribute_providers.Insert (index, new CustomAttributeProvider (container.Module));
+			custom_attribute_providers.Insert (index, new InterfaceCustomAttributeProvider (container.Module));
 		}
 
 		protected override void OnRemove (TypeReference item, int index)

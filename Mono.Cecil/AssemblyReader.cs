@@ -159,6 +159,8 @@ namespace Mono.Cecil {
 
 			ReadCustomAttributes (assembly);
 			ReadSecurityDeclarations (assembly);
+
+			ReadTypeReferences (module);
 		}
 
 		void ReadTypes (Collection<TypeDefinition> types)
@@ -194,6 +196,15 @@ namespace Mono.Cecil {
 
 			ReadSecurityDeclarations (type);
 			ReadCustomAttributes (type);
+		}
+
+		void ReadTypeReferences (ModuleDefinition module)
+		{
+			foreach (var type in module.GetTypeReferences ()) {
+				var provider = module.GetTypeReferenceCustomAttributes (type);
+				if (provider.HasCustomAttributes)
+					ReadCustomAttributes (provider);
+			}
 		}
 
 		void ReadGenericParameters (IGenericParameterProvider provider)

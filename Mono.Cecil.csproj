@@ -57,6 +57,7 @@
     <Compile Include="Mono.Cecil\CallSite.cs" />
     <Compile Include="Mono.Cecil\CustomAttributeProvider.cs" />
     <Compile Include="Mono.Cecil\InterfaceCollection.cs" />
+    <Compile Include="Mono.Cecil\InterfaceCustomAttributeProvider.cs" />
     <Compile Include="Mono.Cecil\TypeParser.cs" />
     <Compile Include="Mono.Cecil\Import.cs" />
     <Compile Include="Mono.Collections.Generic\Collection.cs" />

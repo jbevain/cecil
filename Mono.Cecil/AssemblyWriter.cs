@@ -835,6 +835,8 @@ namespace Mono.Cecil {
 
 			BuildTypes ();
 
+			AddTypeReferences ();
+
 			if (assembly != null) {
 				if (assembly.HasCustomAttributes)
 					AddCustomAttributes (assembly);
@@ -1051,6 +1053,16 @@ namespace Mono.Cecil {
 			}
 
 			throw new NotSupportedException ();
+		}
+
+		void AddTypeReferences ()
+		{
+			foreach (var pair in module.typeref_custom_attribute_providers) {
+				if (!pair.Value.HasCustomAttributes)
+					continue;
+				GetTypeRefToken (pair.Key);
+				AddCustomAttributes (pair.Value);
+			}
 		}
 
 		void BuildTypes ()

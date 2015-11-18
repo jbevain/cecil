@@ -15,12 +15,12 @@ namespace Mono.Cecil {
 	class CustomAttributeProvider : ICustomAttributeProvider {
 
 		readonly ModuleDefinition module;
-		MetadataToken token;
+		readonly IMetadataTokenProvider provider;
 		Collection<CustomAttribute> custom_attributes;
 
 		public MetadataToken MetadataToken {
-			get { return token; }
-			set { token = value; }
+			get { return provider.MetadataToken; }
+			set { provider.MetadataToken = value; }
 		}
 
 		public bool HasCustomAttributes {
@@ -36,22 +36,15 @@ namespace Mono.Cecil {
 			get { return custom_attributes ?? this.GetCustomAttributes (ref custom_attributes, module); }
 		}
 
-		public CustomAttributeProvider (ModuleDefinition module)
+		public CustomAttributeProvider (ModuleDefinition module, IMetadataTokenProvider provider)
 		{
 			this.module = module;
-			this.token = new MetadataToken (TokenType.InterfaceImpl);
+			this.provider = provider;
 		}
 
-		public CustomAttributeProvider (ModuleDefinition module, MetadataToken token)
+		public virtual void Clear ()
 		{
-			this.module = module;
-			this.token = token;
-		}
-
-		public void Clear ()
-		{
-			token = new MetadataToken (TokenType.InterfaceImpl);
-			custom_attributes = null;
+			CustomAttributes.Clear ();
 		}
 	}
 }
