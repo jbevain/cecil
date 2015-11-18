@@ -447,6 +447,18 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
 		}
 
+		[Test]
+		public void InterfaceImplementation ()
+		{
+			TestIL ("ca.il", module => {
+				var type = module.GetType ("FooType");
+				var iface = type.Interfaces.Single (i => i.FullName == "IFoo");
+				var attributes = type.GetInterfaceImplementationCustomAttributes (iface).CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
+			}, verify: !Platform.OnMono);
+		}
+
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));

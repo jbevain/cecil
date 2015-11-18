@@ -33,6 +33,7 @@
     <Compile Include="Mono.Cecil.Tests\NestedTypesTests.cs" />
     <Compile Include="Mono.Cecil.Tests\WindowsRuntimeAssemblyResolver.cs" />
     <Content Include="Resources\assemblies\winrtcomp.winmd" />
+    <None Include="Resources\il\ca.il" />
     <None Include="Resources\il\explicitthis.il" />
     <None Include="Resources\cs\CustomAttributes.cs" />
     <None Include="Resources\cs\Generics.cs" />
