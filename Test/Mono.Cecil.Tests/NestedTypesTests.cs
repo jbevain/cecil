@@ -47,17 +47,40 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void NestedTypeWithOwnNamespace ()
+		public void NestedTypeWithOwnNamespace()
 		{
-			TestModule ("bug-185.dll", module => {
-				var foo = module.GetType ("Foo");
-				var foo_child = foo.NestedTypes [0];
+			TestModule("bug-185.dll", module => {
+				var foo = module.GetType("Foo");
+				var foo_child = foo.NestedTypes[0];
 
-				Assert.AreEqual ("<IFoo<System.Byte[]>", foo_child.Namespace);
-				Assert.AreEqual ("Do>d__0", foo_child.Name);
+				Assert.AreEqual("<IFoo<System.Byte[]>", foo_child.Namespace);
+				Assert.AreEqual("Do>d__0", foo_child.Name);
 
-				Assert.AreEqual ("Foo/<IFoo<System.Byte[]>.Do>d__0", foo_child.FullName);
+				Assert.AreEqual("Foo/<IFoo<System.Byte[]>.Do>d__0", foo_child.FullName);
 			});
+		}
+
+		[Test]
+		public void BugFix248Test()
+		{
+			var foo = new TypeDefinition(null, "foo", TypeAttributes.Class);
+			var bar = new TypeDefinition(null, "bar", TypeAttributes.Class);
+			var baz = new TypeDefinition(null, "baz", TypeAttributes.Class);
+
+			foo.NestedTypes.Add(bar);
+			bar.NestedTypes.Add(baz);
+
+			Assert.AreEqual ("foo/bar/baz", baz.FullName);
+
+			foo.Namespace = "fns";
+
+			Assert.AreEqual("fns.foo/bar", bar.FullName);
+			Assert.AreEqual("fns.foo/bar/baz", baz.FullName);
+
+			bar.Namespace = "bns";
+
+			Assert.AreEqual("fns.foo/bns.bar", bar.FullName);
+			Assert.AreEqual("fns.foo/bns.bar/baz", baz.FullName);
 		}
 	}
 }

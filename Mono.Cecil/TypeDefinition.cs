@@ -429,6 +429,19 @@ namespace Mono.Cecil {
 			set { base.DeclaringType = value; }
 		}
 
+		public override string Namespace {
+			get { return base.Namespace; }
+			set
+			{
+				base.Namespace = value;
+				if (HasNestedTypes) {
+					foreach (var nestedtype in NestedTypes) {
+						nestedtype.ResetFullName();
+					}
+				}
+			}
+		}
+
 		public TypeDefinition (string @namespace, string name, TypeAttributes attributes)
 			: base (@namespace, name)
 		{
@@ -445,6 +458,17 @@ namespace Mono.Cecil {
 		public override TypeDefinition Resolve ()
 		{
 			return this;
+		}
+
+		protected override void ResetFullName()
+		{
+			base.ResetFullName ();
+
+			if (HasNestedTypes) {
+				foreach (var nestedtype in NestedTypes) {
+					nestedtype.ResetFullName();
+				}
+			}
 		}
 	}
 
