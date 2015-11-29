@@ -254,7 +254,12 @@ namespace Mono.Cecil {
 
 			return module.Resolve (this);
 		}
-	}
+
+		protected virtual void ResetFullName ()
+		{
+			fullname = null;
+		}
+    }
 
 	static partial class Mixin {
 
