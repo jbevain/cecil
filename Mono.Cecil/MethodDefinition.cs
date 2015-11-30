@@ -8,6 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
+using System;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
@@ -30,14 +31,37 @@ namespace Mono.Cecil {
 
 		internal MethodBody body;
 
+		public override string Name
+		{
+			get { return base.Name; }
+			set {
+				if (Treatment != MethodDefinitionTreatment.None && value != base.Name)
+					throw new InvalidOperationException ("Projected method name can't be changed.");
+				base.Name = value;
+			}
+		}
+
 		public MethodAttributes Attributes {
 			get { return (MethodAttributes) attributes; }
-			set { attributes = (ushort) value; }
+			set {
+				if (Treatment != MethodDefinitionTreatment.None && (ushort) value != attributes)
+					throw new InvalidOperationException ("Projected method attributes can't be changed.");
+				attributes = (ushort) value;
+			}
 		}
 
 		public MethodImplAttributes ImplAttributes {
 			get { return (MethodImplAttributes) impl_attributes; }
-			set { impl_attributes = (ushort) value; }
+			set {
+				if (Treatment != MethodDefinitionTreatment.None && (ushort) value != impl_attributes)
+					throw new InvalidOperationException ("Projected method implementation attributes can't be changed.");
+				impl_attributes = (ushort) value;
+			}
+		}
+
+		internal new MethodDefinitionTreatment Treatment {
+			get { return (MethodDefinitionTreatment) base.treatment; }
+			set { base.treatment = (uint) value; }
 		}
 
 		public MethodSemanticsAttributes SemanticsAttributes {

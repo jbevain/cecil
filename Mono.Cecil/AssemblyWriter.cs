@@ -918,6 +918,9 @@ namespace Mono.Cecil {
 			var references = module.AssemblyReferences;
 			var table = GetTable<AssemblyRefTable> (Table.AssemblyRef);
 
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				module.Projections.RemoveVirtualReferences (references);
+
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
 
@@ -940,6 +943,9 @@ namespace Mono.Cecil {
 
 				reference.token = new MetadataToken (TokenType.AssemblyRef, rid);
 			}
+
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				module.Projections.AddVirtualReferences (references);
 		}
 
 		void AddModuleReferences ()
@@ -1158,13 +1164,20 @@ namespace Mono.Cecil {
 
 		MetadataToken GetTypeRefToken (TypeReference type)
 		{
+			var treatment = type.Treatment;
+			if (treatment != TypeReferenceTreatment.None)
+				type.Module.Projections.RemoveTreatment (type);
+
 			var row = CreateTypeRefRow (type);
 
 			MetadataToken token;
-			if (type_ref_map.TryGetValue (row, out token))
-				return token;
+			if (!type_ref_map.TryGetValue (row, out token))
+				token = AddTypeReference (type, row);
 
-			return AddTypeReference (type, row);
+			if (treatment != TypeReferenceTreatment.None)
+				type.Module.Projections.ApplyTreatment (type, treatment);
+
+			return token;
 		}
 
 		TypeRefRow CreateTypeRefRow (TypeReference type)
@@ -1365,6 +1378,10 @@ namespace Mono.Cecil {
 
 		void AddField (FieldDefinition field)
 		{
+			var treatment = field.Treatment;
+			if (treatment != FieldDefinitionTreatment.None)
+				field.Module.Projections.RemoveTreatment (field);
+
 			field_table.AddRow (new FieldRow (
 				field.Attributes,
 				GetStringIndex (field.Name),
@@ -1384,6 +1401,9 @@ namespace Mono.Cecil {
 
 			if (field.HasMarshalInfo)
 				AddMarshalInfo (field);
+
+			if (treatment != FieldDefinitionTreatment.None)
+				field.Module.Projections.ApplyTreatment (field, treatment);
 		}
 
 		void AddFieldRVA (FieldDefinition field)
@@ -1410,6 +1430,10 @@ namespace Mono.Cecil {
 
 		void AddMethod (MethodDefinition method)
 		{
+			var treatment = method.Treatment;
+			if (treatment != MethodDefinitionTreatment.None)
+				method.Module.Projections.RemoveTreatment (method);
+
 			method_table.AddRow (new MethodRow (
 				method.HasBody ? code.WriteMethodBody (method) : 0,
 				method.ImplAttributes,
@@ -1434,6 +1458,9 @@ namespace Mono.Cecil {
 
 			if (method.HasOverrides)
 				AddOverrides (method);
+
+			if (treatment != MethodDefinitionTreatment.None)
+				method.Module.Projections.ApplyTreatment (method, treatment);
 		}
 
 		void AddParameters (MethodDefinition method)
@@ -1716,10 +1743,19 @@ namespace Mono.Cecil {
 			for (int i = 0; i < custom_attributes.Count; i++) {
 				var attribute = custom_attributes [i];
 
-				custom_attribute_table.AddRow (new CustomAttributeRow (
+				var treatment = attribute.treatment;
+				if (treatment != CustomAttributeValueTreatment.None)
+					attribute.Module.Projections.RemoveTreatment (attribute);
+
+				var rid = custom_attribute_table.AddRow (new CustomAttributeRow (
 					MakeCodedRID (owner, CodedIndex.HasCustomAttribute),
 					MakeCodedRID (LookupToken (attribute.Constructor), CodedIndex.CustomAttributeType),
 					GetBlobIndex (GetCustomAttributeSignature (attribute))));
+
+				attribute.MetadataToken = new MetadataToken (TokenType.CustomAttribute, rid);
+
+				if (treatment != CustomAttributeValueTreatment.None)
+					attribute.Module.Projections.ApplyTreatment (attribute, treatment);
 			}
 		}
 
@@ -1739,15 +1775,20 @@ namespace Mono.Cecil {
 
 		MetadataToken GetMemberRefToken (MemberReference member)
 		{
+			var treatment = member.Treatment;
+			if (treatment != MemberReferenceTreatment.None)
+				member.Module.Projections.RemoveTreatment (member);
+
 			var row = CreateMemberRefRow (member);
 
 			MetadataToken token;
-			if (member_ref_map.TryGetValue (row, out token))
-				return token;
+			if (!member_ref_map.TryGetValue (row, out token))
+				token = AddMemberReference (member, row);
 
-			AddMemberReference (member, row);
+			if (treatment != MemberReferenceTreatment.None)
+				member.Module.Projections.ApplyTreatment (member, treatment);
 
-			return member.token;
+			return token;
 		}
 
 		MemberRefRow CreateMemberRefRow (MemberReference member)
@@ -1758,10 +1799,13 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetMemberRefSignature (member)));
 		}
 
-		void AddMemberReference (MemberReference member, MemberRefRow row)
+		MetadataToken AddMemberReference (MemberReference member, MemberRefRow row)
 		{
 			member.token = new MetadataToken (TokenType.MemberRef, member_ref_table.AddRow (row));
-			member_ref_map.Add (row, member.token);
+
+			var token = member.token;
+			member_ref_map.Add (row, token);
+			return token;
 		}
 
 		MetadataToken GetMethodSpecToken (MethodSpecification method_spec)

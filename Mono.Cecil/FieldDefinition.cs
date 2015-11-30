@@ -8,6 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
+using System;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -37,6 +38,11 @@ namespace Mono.Cecil {
 			}
 
 			offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
+		}
+
+		internal new FieldDefinitionTreatment Treatment {
+			get { return (FieldDefinitionTreatment) base.treatment; }
+			set { base.treatment = (uint) value; }
 		}
 
 		public bool HasLayoutInfo {
@@ -104,7 +110,11 @@ namespace Mono.Cecil {
 
 		public FieldAttributes Attributes {
 			get { return (FieldAttributes) attributes; }
-			set { attributes = (ushort) value; }
+			set {
+				if (Treatment != FieldDefinitionTreatment.None && (ushort) value != attributes)
+					throw new InvalidOperationException ("Projected field definition attributes can't be changed.");
+				attributes = (ushort) value;
+			}
 		}
 
 		public bool HasConstant {

@@ -65,6 +65,8 @@ namespace Mono.Cecil {
 		public override string Name {
 			get { return base.Name; }
 			set {
+				if (Treatment != TypeReferenceTreatment.None && value != base.Name)
+					throw new InvalidOperationException ("Projected type reference name can't be changed.");
 				base.Name = value;
 				fullname = null;
 			}
@@ -73,6 +75,8 @@ namespace Mono.Cecil {
 		public virtual string Namespace {
 			get { return @namespace; }
 			set {
+				if (Treatment != TypeReferenceTreatment.None && value != @namespace)
+					throw new InvalidOperationException ("Projected type reference namespace can't be changed.");
 				@namespace = value;
 				fullname = null;
 			}
@@ -132,10 +136,14 @@ namespace Mono.Cecil {
 			set {
 				var declaring_type = this.DeclaringType;
 				if (declaring_type != null) {
+					if (Treatment != TypeReferenceTreatment.None && value != declaring_type.Scope)
+						throw new InvalidOperationException ("Projected type scope can't be changed.");
 					declaring_type.Scope = value;
 					return;
 				}
 
+				if (Treatment != TypeReferenceTreatment.None && value != scope)
+					throw new InvalidOperationException ("Projected type scope can't be changed.");
 				scope = value;
 			}
 		}
@@ -147,6 +155,8 @@ namespace Mono.Cecil {
 		public override TypeReference DeclaringType {
 			get { return base.DeclaringType; }
 			set {
+				if (Treatment != TypeReferenceTreatment.None && value != base.DeclaringType)
+					throw new InvalidOperationException ("Projected type declaring type can't be changed.");
 				base.DeclaringType = value;
 				fullname = null;
 			}
@@ -219,6 +229,11 @@ namespace Mono.Cecil {
 					return (MetadataType) etype;
 				}
 			}
+		}
+
+		internal new TypeReferenceTreatment Treatment {
+			get { return (TypeReferenceTreatment) base.treatment; }
+			set { base.treatment = (uint) value; }
 		}
 
 		protected TypeReference (string @namespace, string name)
