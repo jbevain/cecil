@@ -35,7 +35,7 @@ namespace Mono.Cecil {
 		{
 			get { return base.Name; }
 			set {
-				if (Treatment != MethodDefinitionTreatment.None && value != base.Name)
+				if (projection != null && value != base.Name)
 					throw new InvalidOperationException ("Projected method name can't be changed.");
 				base.Name = value;
 			}
@@ -44,7 +44,7 @@ namespace Mono.Cecil {
 		public MethodAttributes Attributes {
 			get { return (MethodAttributes) attributes; }
 			set {
-				if (Treatment != MethodDefinitionTreatment.None && (ushort) value != attributes)
+				if (projection != null && (ushort)value != attributes)
 					throw new InvalidOperationException ("Projected method attributes can't be changed.");
 				attributes = (ushort) value;
 			}
@@ -53,15 +53,10 @@ namespace Mono.Cecil {
 		public MethodImplAttributes ImplAttributes {
 			get { return (MethodImplAttributes) impl_attributes; }
 			set {
-				if (Treatment != MethodDefinitionTreatment.None && (ushort) value != impl_attributes)
+				if (projection != null && (ushort)value != impl_attributes)
 					throw new InvalidOperationException ("Projected method implementation attributes can't be changed.");
 				impl_attributes = (ushort) value;
 			}
-		}
-
-		internal new MethodDefinitionTreatment Treatment {
-			get { return (MethodDefinitionTreatment) base.treatment; }
-			set { base.treatment = (uint) value; }
 		}
 
 		public MethodSemanticsAttributes SemanticsAttributes {

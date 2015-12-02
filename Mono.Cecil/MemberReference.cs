@@ -18,12 +18,12 @@ namespace Mono.Cecil {
 		TypeReference declaring_type;
 
 		internal MetadataToken token;
-		internal uint treatment = 0;
+		internal object projection;
 
 		public virtual string Name {
 			get { return name; }
 			set {
-				if (Treatment != MemberReferenceTreatment.None && value != name)
+				if (projection != null && value != name)
 					throw new InvalidOperationException ("Projected member reference name can't be changed.");
 				name = value;
 			}
@@ -63,11 +63,6 @@ namespace Mono.Cecil {
 
 		public virtual bool ContainsGenericParameter {
 			get { return declaring_type != null && declaring_type.ContainsGenericParameter; }
-		}
-
-		internal MemberReferenceTreatment Treatment {
-			get { return (MemberReferenceTreatment) treatment; }
-			set { treatment = (uint) value; }
 		}
 
 		internal MemberReference ()

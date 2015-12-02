@@ -40,11 +40,6 @@ namespace Mono.Cecil {
 			offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
 		}
 
-		internal new FieldDefinitionTreatment Treatment {
-			get { return (FieldDefinitionTreatment) base.treatment; }
-			set { base.treatment = (uint) value; }
-		}
-
 		public bool HasLayoutInfo {
 			get {
 				if (offset >= 0)
@@ -111,7 +106,7 @@ namespace Mono.Cecil {
 		public FieldAttributes Attributes {
 			get { return (FieldAttributes) attributes; }
 			set {
-				if (Treatment != FieldDefinitionTreatment.None && (ushort) value != attributes)
+				if (projection != null && (ushort) value != attributes)
 					throw new InvalidOperationException ("Projected field definition attributes can't be changed.");
 				attributes = (ushort) value;
 			}

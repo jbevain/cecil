@@ -1164,9 +1164,7 @@ namespace Mono.Cecil {
 
 		MetadataToken GetTypeRefToken (TypeReference type)
 		{
-			var treatment = type.Treatment;
-			if (treatment != TypeReferenceTreatment.None)
-				type.Module.Projections.RemoveTreatment (type);
+			var treatment = WindowsRuntimeProjections.RemoveProjection (type);
 
 			var row = CreateTypeRefRow (type);
 
@@ -1174,8 +1172,7 @@ namespace Mono.Cecil {
 			if (!type_ref_map.TryGetValue (row, out token))
 				token = AddTypeReference (type, row);
 
-			if (treatment != TypeReferenceTreatment.None)
-				type.Module.Projections.ApplyTreatment (type, treatment);
+			WindowsRuntimeProjections.ApplyProjection (type, treatment);
 
 			return token;
 		}
@@ -1232,6 +1229,8 @@ namespace Mono.Cecil {
 
 		void AddType (TypeDefinition type)
 		{
+			var treatment = WindowsRuntimeProjections.RemoveProjection (type);
+
 			type_def_table.AddRow (new TypeDefRow (
 				type.Attributes,
 				GetStringIndex (type.Name),
@@ -1269,6 +1268,8 @@ namespace Mono.Cecil {
 
 			if (type.HasNestedTypes)
 				AddNestedTypes (type);
+
+			WindowsRuntimeProjections.ApplyProjection (type, treatment);
 		}
 
 		void AddGenericParameters (IGenericParameterProvider owner)
@@ -1378,9 +1379,7 @@ namespace Mono.Cecil {
 
 		void AddField (FieldDefinition field)
 		{
-			var treatment = field.Treatment;
-			if (treatment != FieldDefinitionTreatment.None)
-				field.Module.Projections.RemoveTreatment (field);
+			var treatment = WindowsRuntimeProjections.RemoveProjection (field);
 
 			field_table.AddRow (new FieldRow (
 				field.Attributes,
@@ -1402,8 +1401,7 @@ namespace Mono.Cecil {
 			if (field.HasMarshalInfo)
 				AddMarshalInfo (field);
 
-			if (treatment != FieldDefinitionTreatment.None)
-				field.Module.Projections.ApplyTreatment (field, treatment);
+			WindowsRuntimeProjections.ApplyProjection (field, treatment);
 		}
 
 		void AddFieldRVA (FieldDefinition field)
@@ -1430,9 +1428,7 @@ namespace Mono.Cecil {
 
 		void AddMethod (MethodDefinition method)
 		{
-			var treatment = method.Treatment;
-			if (treatment != MethodDefinitionTreatment.None)
-				method.Module.Projections.RemoveTreatment (method);
+			var treatment = WindowsRuntimeProjections.RemoveProjection (method);
 
 			method_table.AddRow (new MethodRow (
 				method.HasBody ? code.WriteMethodBody (method) : 0,
@@ -1459,8 +1455,7 @@ namespace Mono.Cecil {
 			if (method.HasOverrides)
 				AddOverrides (method);
 
-			if (treatment != MethodDefinitionTreatment.None)
-				method.Module.Projections.ApplyTreatment (method, treatment);
+			WindowsRuntimeProjections.ApplyProjection (method, treatment);
 		}
 
 		void AddParameters (MethodDefinition method)
@@ -1743,19 +1738,14 @@ namespace Mono.Cecil {
 			for (int i = 0; i < custom_attributes.Count; i++) {
 				var attribute = custom_attributes [i];
 
-				var treatment = attribute.treatment;
-				if (treatment != CustomAttributeValueTreatment.None)
-					attribute.Module.Projections.RemoveTreatment (attribute);
+				var treatment = WindowsRuntimeProjections.RemoveProjection (attribute);
 
-				var rid = custom_attribute_table.AddRow (new CustomAttributeRow (
+				custom_attribute_table.AddRow (new CustomAttributeRow (
 					MakeCodedRID (owner, CodedIndex.HasCustomAttribute),
 					MakeCodedRID (LookupToken (attribute.Constructor), CodedIndex.CustomAttributeType),
 					GetBlobIndex (GetCustomAttributeSignature (attribute))));
 
-				attribute.MetadataToken = new MetadataToken (TokenType.CustomAttribute, rid);
-
-				if (treatment != CustomAttributeValueTreatment.None)
-					attribute.Module.Projections.ApplyTreatment (attribute, treatment);
+				WindowsRuntimeProjections.ApplyProjection (attribute, treatment);
 			}
 		}
 
@@ -1775,9 +1765,7 @@ namespace Mono.Cecil {
 
 		MetadataToken GetMemberRefToken (MemberReference member)
 		{
-			var treatment = member.Treatment;
-			if (treatment != MemberReferenceTreatment.None)
-				member.Module.Projections.RemoveTreatment (member);
+			var treatment = WindowsRuntimeProjections.RemoveProjection (member);
 
 			var row = CreateMemberRefRow (member);
 
@@ -1785,8 +1773,7 @@ namespace Mono.Cecil {
 			if (!member_ref_map.TryGetValue (row, out token))
 				token = AddMemberReference (member, row);
 
-			if (treatment != MemberReferenceTreatment.None)
-				member.Module.Projections.ApplyTreatment (member, treatment);
+			WindowsRuntimeProjections.ApplyProjection (member, treatment);
 
 			return token;
 		}

@@ -898,7 +898,7 @@ namespace Mono.Cecil {
 				type.DeclaringType = GetNestedTypeDeclaringType (type);
 
 			if (module.MetadataKind != MetadataKind.Ecma335)
-				module.Projections.Project (type);
+				WindowsRuntimeProjections.Project (type);
 
 			return type;
 		}
@@ -1084,7 +1084,7 @@ namespace Mono.Cecil {
 			MetadataSystem.TryProcessPrimitiveTypeReference (type);
 
 			if (type.Module.MetadataKind != MetadataKind.Ecma335)
-				type.Module.Projections.Project (type);
+				WindowsRuntimeProjections.Project (type);
 
 			return type;
 		}
@@ -1235,7 +1235,7 @@ namespace Mono.Cecil {
 			fields.Add (field);
 
 			if (module.MetadataKind != MetadataKind.Ecma335)
-				field.Module.Projections.Project (field);
+				WindowsRuntimeProjections.Project (field);
 		}
 
 		void InitializeFields ()
@@ -1758,7 +1758,7 @@ namespace Mono.Cecil {
 			}
 
 			if (module.MetadataKind != MetadataKind.Ecma335)
-				module.Projections.Project (method);
+				WindowsRuntimeProjections.Project (method);
 		}
 
 		void ReadParameters (MethodDefinition method, Range param_range)
@@ -2271,7 +2271,7 @@ namespace Mono.Cecil {
 			member.token = new MetadataToken (TokenType.MemberRef, rid);
 
 			if (module.MetadataKind != MetadataKind.Ecma335)
-				module.Projections.Project (member);
+				WindowsRuntimeProjections.Project (member);
 
 			return member;
 		}
@@ -2445,7 +2445,7 @@ namespace Mono.Cecil {
 
 			if (module.MetadataKind != MetadataKind.Ecma335)
 				foreach (var custom_attribute in custom_attributes)
-					module.Projections.Project (owner, custom_attribute);
+					WindowsRuntimeProjections.Project (owner, custom_attribute);
 
 			return custom_attributes;
 		}
@@ -2455,7 +2455,7 @@ namespace Mono.Cecil {
 			if (!MoveTo (Table.CustomAttribute, range.Start))
 				return;
 
-			for (RVA i = 0; i < range.Length; i++) {
+			for (var i = 0; i < range.Length; i++) {
 				ReadMetadataToken (CodedIndex.HasCustomAttribute);
 
 				var constructor = (MethodReference) LookupToken (
@@ -2463,7 +2463,7 @@ namespace Mono.Cecil {
 
 				var signature = ReadBlobIndex ();
 
-				custom_attributes.Add (new CustomAttribute (new MetadataToken (TokenType.CustomAttribute, range.Start + i), signature, constructor));
+				custom_attributes.Add (new CustomAttribute (signature, constructor));
 			}
 		}
 

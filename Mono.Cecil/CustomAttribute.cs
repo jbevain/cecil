@@ -68,8 +68,7 @@ namespace Mono.Cecil {
 
 	public sealed class CustomAttribute : ICustomAttribute {
 
-		internal MetadataToken token;
-		internal CustomAttributeValueTreatment treatment = CustomAttributeValueTreatment.None;
+		internal object projection;
 		readonly internal uint signature;
 		internal bool resolved;
 		MethodReference constructor;
@@ -77,11 +76,6 @@ namespace Mono.Cecil {
 		internal Collection<CustomAttributeArgument> arguments;
 		internal Collection<CustomAttributeNamedArgument> fields;
 		internal Collection<CustomAttributeNamedArgument> properties;
-
-		public MetadataToken MetadataToken {
-			get { return token; }
-			set { token = value; }
-		}
 
 		public MethodReference Constructor {
 			get { return constructor; }
@@ -152,28 +146,20 @@ namespace Mono.Cecil {
 			get { return constructor.Module; }
 		}
 
-		private CustomAttribute ()
+		internal CustomAttribute (uint signature, MethodReference constructor)
 		{
-			this.token = new MetadataToken (TokenType.CustomAttribute, 0);
-		}
-
-		internal CustomAttribute (MetadataToken token, uint signature, MethodReference constructor)
-		{
-			this.token = token;
 			this.signature = signature;
 			this.constructor = constructor;
 			this.resolved = false;
 		}
 
 		public CustomAttribute (MethodReference constructor)
-			: this()
 		{
 			this.constructor = constructor;
 			this.resolved = true;
 		}
 
 		public CustomAttribute (MethodReference constructor, byte [] blob)
-			: this()
 		{
 			this.constructor = constructor;
 			this.resolved = false;

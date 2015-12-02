@@ -37,7 +37,7 @@ namespace Mono.Cecil {
 		public TypeAttributes Attributes {
 			get { return (TypeAttributes) attributes; }
 			set {
-				if (Treatment != TypeDefinitionTreatment.None && (ushort) value != attributes)
+				if (projection != null && (ushort) value != attributes)
 					throw new InvalidOperationException ("Projected type definition attributes can't be changed.");
 				attributes = (uint) value;
 			}
@@ -51,7 +51,7 @@ namespace Mono.Cecil {
 		public override string Name {
 			get { return base.Name; }
 			set {
-				if (Treatment != TypeDefinitionTreatment.None && value != base.Name)
+				if (projection != null && value != base.Name)
 					throw new InvalidOperationException ("Projected type definition name can't be changed.");
 				base.Name = value;
 			}
@@ -272,11 +272,6 @@ namespace Mono.Cecil {
 
 		public override Collection<GenericParameter> GenericParameters {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
-		}
-
-		internal new TypeDefinitionTreatment Treatment {
-			get { return (TypeDefinitionTreatment) base.treatment; }
-			set { base.treatment = (uint) value; }
 		}
 
 		#region TypeAttributes

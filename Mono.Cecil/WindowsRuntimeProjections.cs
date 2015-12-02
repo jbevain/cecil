@@ -37,43 +37,73 @@ namespace Mono.Cecil {
 			}
 		}
 
-		struct TypeDefinitionInfo {
+		class TypeDefinitionInfo {
 
 			public readonly TypeAttributes Attributes;
 			public readonly string Name;
+			public readonly TypeDefinitionTreatment Treatment;
 
-			public TypeDefinitionInfo (TypeDefinition type)
+			public TypeDefinitionInfo (TypeDefinition type, TypeDefinitionTreatment treatment)
 			{
 				Attributes = type.Attributes;
 				Name = type.Name;
+				Treatment = treatment;
 			}
 		}
 
-		struct TypeReferenceInfo {
+		class TypeReferenceInfo {
 
 			public readonly string Name;
 			public readonly string Namespace;
 			public readonly IMetadataScope Scope;
+			public readonly TypeReferenceTreatment Treatment;
 
-			public TypeReferenceInfo (TypeReference type)
+			public TypeReferenceInfo (TypeReference type, TypeReferenceTreatment treatment)
 			{
 				Name = type.Name;
 				Namespace = type.Namespace;
 				Scope = type.Scope;
+				Treatment = treatment;
 			}
 		}
 
-		struct MethodDefinitionInfo {
+		class MethodDefinitionInfo {
 
 			public readonly MethodAttributes Attributes;
 			public readonly MethodImplAttributes ImplAttributes;
 			public readonly string Name;
+			public readonly MethodDefinitionTreatment Treatment;
 
-			public MethodDefinitionInfo (MethodDefinition method)
+			public MethodDefinitionInfo (MethodDefinition method, MethodDefinitionTreatment treatment)
 			{
 				Attributes = method.Attributes;
 				ImplAttributes = method.ImplAttributes;
 				Name = method.Name;
+				Treatment = treatment;
+			}
+		}
+
+		class FieldDefinitionInfo {
+
+			public readonly FieldAttributes Attributes;
+			public readonly FieldDefinitionTreatment Treatment;
+
+			public FieldDefinitionInfo (FieldDefinition field, FieldDefinitionTreatment treatment)
+			{
+				Attributes = field.Attributes;
+				Treatment = treatment;
+			}
+		}
+
+		class CustomAttributeValueInfo {
+
+			public readonly AttributeTargets Targets;
+			public readonly CustomAttributeValueTreatment Treatment;
+
+			public CustomAttributeValueInfo (AttributeTargets targets, CustomAttributeValueTreatment treatment)
+			{
+				Targets = targets;
+				Treatment = treatment;
 			}
 		}
 
@@ -163,11 +193,6 @@ namespace Mono.Cecil {
 		readonly ModuleDefinition module;
 		Version corlib_version = new Version (255, 255, 255, 255);
 		AssemblyNameReference[] virtual_references;
-		Dictionary<uint, TypeDefinitionInfo> types;
-		Dictionary<uint, TypeReferenceInfo> type_references;
-		Dictionary<uint, MethodDefinitionInfo> methods;
-		Dictionary<uint, FieldAttributes> fields;
-		Dictionary<uint, AttributeTargets> attributes;
 
 		AssemblyNameReference[] VirtualReferences {
 			get {
@@ -180,52 +205,6 @@ namespace Mono.Cecil {
 			}
 		}
 
-		Dictionary<uint, TypeDefinitionInfo> Types {
-			get
-			{
-				if (types == null)
-					Interlocked.CompareExchange(ref types, new Dictionary<uint, TypeDefinitionInfo> (), null);
-
-				return types;
-			}
-		}
-
-		Dictionary<uint, TypeReferenceInfo> TypeReferences {
-			get {
-				if (type_references == null)
-					Interlocked.CompareExchange (ref type_references, new Dictionary<uint, TypeReferenceInfo> (), null);
-
-				return type_references;
-			}
-		}
-
-		Dictionary<uint, MethodDefinitionInfo> Methods {
-			get {
-				if (methods == null)
-					Interlocked.CompareExchange(ref methods, new Dictionary<uint, MethodDefinitionInfo> (), null);
-
-				return methods;
-			}
-		}
-
-		Dictionary<uint, FieldAttributes> Fields {
-			get {
-				if (fields == null)
-					Interlocked.CompareExchange (ref fields, new Dictionary<uint, FieldAttributes> (), null);
-
-				return fields;
-			}
-		}
-
-		Dictionary<uint, AttributeTargets> Attributes {
-			get {
-				if (attributes == null)
-					Interlocked.CompareExchange (ref attributes, new Dictionary<uint, AttributeTargets> (), null);
-
-				return attributes;
-			}
-		}
-
 		public WindowsRuntimeProjections (ModuleDefinition module)
 		{
 			this.module = module;
@@ -233,7 +212,7 @@ namespace Mono.Cecil {
 
 		#region TypeDefinition
 
-		public void Project (TypeDefinition type)
+		public static void Project (TypeDefinition type)
 		{
 			var treatment = TypeDefinitionTreatment.None;
 			var metadata_kind = type.Module.MetadataKind;
@@ -242,7 +221,7 @@ namespace Mono.Cecil {
 				if (metadata_kind == MetadataKind.WindowsMetadata) {
 					treatment = GetWellKnownTypeDefinitionTreatment (type);
 					if (treatment != TypeDefinitionTreatment.None) {
-						ApplyTreatment (type, treatment);
+						ApplyProjection (type, treatment);
 						return;
 					}
 
@@ -262,8 +241,7 @@ namespace Mono.Cecil {
 			else if (metadata_kind == MetadataKind.ManagedWindowsMetadata && IsClrImplementationType (type))
 				treatment = TypeDefinitionTreatment.UnmangleWindowsRuntimeName;
 
-			if (treatment != TypeDefinitionTreatment.None)
-				ApplyTreatment (type, treatment);
+			ApplyProjection (type, treatment);
 		}
 
 		static TypeDefinitionTreatment GetWellKnownTypeDefinitionTreatment (TypeDefinition type)
@@ -311,9 +289,12 @@ namespace Mono.Cecil {
 			return type.Name.StartsWith ("<CLR>");
 		}
 
-		public void ApplyTreatment (TypeDefinition type, TypeDefinitionTreatment treatment)
+		public static void ApplyProjection (TypeDefinition type, TypeDefinitionTreatment treatment)
 		{
-			Types [type.MetadataToken.RID] = new TypeDefinitionInfo (type);
+			if (treatment == TypeDefinitionTreatment.None)
+				return;
+
+			var info = new TypeDefinitionInfo (type, treatment);
 
 			switch (treatment & TypeDefinitionTreatment.KindMask) {
 			case TypeDefinitionTreatment.NormalType:
@@ -349,25 +330,28 @@ namespace Mono.Cecil {
 			if ((treatment & TypeDefinitionTreatment.Internal) != 0)
 				type.Attributes &= ~TypeAttributes.Public;
 
-			type.Treatment = treatment;
+			type.projection = info;
 		}
 
-		public void RemoveTreatment (TypeDefinition type)
+		public static TypeDefinitionTreatment RemoveProjection (TypeDefinition type)
 		{
-			var info = Types [type.MetadataToken.RID];
-			Types.Remove (type.MetadataToken.RID);
+			if (type.projection == null)
+				return TypeDefinitionTreatment.None;
 
-			type.Treatment = TypeDefinitionTreatment.None;
+			var info = (TypeDefinitionInfo) type.projection;
+			type.projection = null;
 
 			type.Attributes = info.Attributes;
 			type.Name = info.Name;
+
+			return info.Treatment;
 		}
 
 		#endregion
 
 		#region TypeReference
 
-		public void Project (TypeReference type)
+		public static void Project (TypeReference type)
 		{
 			TypeReferenceTreatment treatment;
 
@@ -377,8 +361,7 @@ namespace Mono.Cecil {
 			else
 				treatment = GetSpecialTypeReferenceTreatment (type);
 
-			if (treatment != TypeReferenceTreatment.None)
-				ApplyTreatment (type, treatment);
+			ApplyProjection (type, treatment);
 		}
 
 		static TypeReferenceTreatment GetSpecialTypeReferenceTreatment (TypeReference type)
@@ -407,45 +390,51 @@ namespace Mono.Cecil {
 			return type.Name == "Enum" && type.Namespace == "System";
 		}
 
-		public void ApplyTreatment (TypeReference type, TypeReferenceTreatment treatment)
+		public static void ApplyProjection (TypeReference type, TypeReferenceTreatment treatment)
 		{
-			TypeReferences [type.MetadataToken.RID] = new TypeReferenceInfo (type);
+			if (treatment == TypeReferenceTreatment.None)
+				return;
+
+			var info = new TypeReferenceInfo (type, treatment);
 
 			switch (treatment)
 			{
 				case TypeReferenceTreatment.SystemDelegate:
 				case TypeReferenceTreatment.SystemAttribute:
-					type.Scope = GetAssemblyReference ("System.Runtime");
+					type.Scope = type.Module.Projections.GetAssemblyReference ("System.Runtime");
 					break;
 
 				case TypeReferenceTreatment.UseProjectionInfo:
-					var info = Projections [type.Name];
-					type.Name = info.ClrName;
-					type.Namespace = info.ClrNamespace;
-					type.Scope = GetAssemblyReference (info.ClrAssembly);
+					var projection = Projections [type.Name];
+					type.Name = projection.ClrName;
+					type.Namespace = projection.ClrNamespace;
+					type.Scope = type.Module.Projections.GetAssemblyReference (projection.ClrAssembly);
 					break;
 			}
 
-			type.Treatment = treatment;
+			type.projection = info;
 		}
 
-		public void RemoveTreatment (TypeReference type)
+		public static TypeReferenceTreatment RemoveProjection (TypeReference type)
 		{
-			var info = TypeReferences [type.MetadataToken.RID];
-			TypeReferences.Remove (type.MetadataToken.RID);
+			if (type.projection == null)
+				return TypeReferenceTreatment.None;
 
-			type.Treatment = TypeReferenceTreatment.None;
+			var info = (TypeReferenceInfo) type.projection;
+			type.projection = null;
 
 			type.Name = info.Name;
 			type.Namespace = info.Namespace;
 			type.Scope = info.Scope;
+
+			return info.Treatment;
 		}
 
 		#endregion
 
 		#region MethodDefinition
 
-		public void Project (MethodDefinition method)
+		public static void Project (MethodDefinition method)
 		{
 			var treatment = MethodDefinitionTreatment.None;
 			var other = false;
@@ -517,8 +506,7 @@ namespace Mono.Cecil {
 			if (other)
 				treatment |= GetMethodDefinitionTreatmentFromCustomAttributes(method);
 
-			if (treatment != MethodDefinitionTreatment.None)
-				method.Module.Projections.ApplyTreatment (method, treatment);
+			ApplyProjection (method, treatment);
 		}
 
 		static MethodDefinitionTreatment GetMethodDefinitionTreatmentFromCustomAttributes(MethodDefinition method)
@@ -539,9 +527,12 @@ namespace Mono.Cecil {
 			return treatment;
 		}
 
-		public void ApplyTreatment (MethodDefinition method, MethodDefinitionTreatment treatment)
+		public static void ApplyProjection (MethodDefinition method, MethodDefinitionTreatment treatment)
 		{
-			Methods [method.MetadataToken.RID] = new MethodDefinitionInfo (method);
+			if (treatment == MethodDefinitionTreatment.None)
+				return;
+
+			var info = new MethodDefinitionInfo (method, treatment);
 
 			if ((treatment & MethodDefinitionTreatment.Dispose) != 0)
 				method.Name = "Dispose";
@@ -561,26 +552,29 @@ namespace Mono.Cecil {
 			if ((treatment & MethodDefinitionTreatment.InternalCall) != 0)
 				method.ImplAttributes |= MethodImplAttributes.InternalCall;
 
-			method.Treatment = treatment;
+			method.projection = info;
 		}
 
-		public void RemoveTreatment (MethodDefinition method)
+		public static MethodDefinitionTreatment RemoveProjection (MethodDefinition method)
 		{
-			var info = Methods [method.MetadataToken.RID];
-			Methods.Remove (method.MetadataToken.RID);
+			if (method.projection == null)
+				return MethodDefinitionTreatment.None;
 
-			method.Treatment = MethodDefinitionTreatment.None;
+			var info = (MethodDefinitionInfo) method.projection;
+			method.projection = null;
 
 			method.Attributes = info.Attributes;
 			method.ImplAttributes = info.ImplAttributes;
 			method.Name = info.Name;
+
+			return info.Treatment;
 		}
 
 		#endregion
 
 		#region FieldDefinition
 
-		public void Project (FieldDefinition field)
+		public static void Project (FieldDefinition field)
 		{
 			var treatment = FieldDefinitionTreatment.None;
 			var declaring_type = field.DeclaringType;
@@ -591,44 +585,49 @@ namespace Mono.Cecil {
 					treatment = FieldDefinitionTreatment.Public;
 			}
 
-			if (treatment != FieldDefinitionTreatment.None)
-				ApplyTreatment (field, treatment);
+			ApplyProjection (field, treatment);
 		}
 
-		public void ApplyTreatment (FieldDefinition field, FieldDefinitionTreatment treatment)
+		public static void ApplyProjection (FieldDefinition field, FieldDefinitionTreatment treatment)
 		{
-			Fields [field.MetadataToken.RID] = field.Attributes;
+			if (treatment == FieldDefinitionTreatment.None)
+				return;
+
+			var info = new FieldDefinitionInfo (field, treatment);
 
 			if (treatment == FieldDefinitionTreatment.Public)
 				field.Attributes = (field.Attributes & ~FieldAttributes.FieldAccessMask) | FieldAttributes.Public;
 
-			field.Treatment = treatment;
+			field.projection = info;
 		}
 
-		public void RemoveTreatment (FieldDefinition field)
+		public static FieldDefinitionTreatment RemoveProjection (FieldDefinition field)
 		{
-			var attributes = Fields [field.MetadataToken.RID];
-			Fields.Remove (field.MetadataToken.RID);
+			if (field.projection == null)
+				return FieldDefinitionTreatment.None;
 
-			field.Treatment = FieldDefinitionTreatment.None;
+			var info = (FieldDefinitionInfo) field.projection;
+			field.projection = null;
 
-			field.Attributes = attributes;
+			field.Attributes = info.Attributes;
+
+			return info.Treatment;
 		}
 
 		#endregion
 
 		#region MemberReference
 
-		public void Project (MemberReference member)
+		public static void Project (MemberReference member)
 		{
 			bool disposable;
 			if (!ImplementsRedirectedInterface (member, out disposable) || !disposable)
 				return;
 
-			ApplyTreatment (member, MemberReferenceTreatment.Dispose);
+			ApplyProjection (member, MemberReferenceTreatment.Dispose);
 		}
 
-		bool ImplementsRedirectedInterface (MemberReference member, out bool disposable)
+		static bool ImplementsRedirectedInterface (MemberReference member, out bool disposable)
 		{
 			disposable = false;
 
@@ -653,9 +652,7 @@ namespace Mono.Cecil {
 					return false;
 			}
 
-			var treatment = type.Treatment;
-			if (treatment != TypeReferenceTreatment.None)
-				RemoveTreatment(type);
+			var treatment = RemoveProjection (type);
 
 			var found = false;
 
@@ -665,28 +662,34 @@ namespace Mono.Cecil {
 				found = true;
 			}
 
-			if (treatment != TypeReferenceTreatment.None)
-				ApplyTreatment (type, treatment);
+			ApplyProjection (type, treatment);
 
 			return found;
 		}
 
-		public void ApplyTreatment (MemberReference member, MemberReferenceTreatment treatment)
+		public static void ApplyProjection (MemberReference member, MemberReferenceTreatment treatment)
 		{
+			if (treatment == MemberReferenceTreatment.None)
+				return;
+
 			if (treatment == MemberReferenceTreatment.Dispose)
 				member.Name = "Dispose";
 
-			member.Treatment = treatment;
+			member.projection = treatment;
 		}
 
-		public void RemoveTreatment (MemberReference member)
+		public static MemberReferenceTreatment RemoveProjection (MemberReference member)
 		{
-			var treatment = member.Treatment;
+			if (member.projection == null)
+				return MemberReferenceTreatment.None;
 
-			member.Treatment = MemberReferenceTreatment.None;
+			var treatment = (MemberReferenceTreatment) member.projection;
+			member.projection = null;
 
 			if (treatment == MemberReferenceTreatment.Dispose)
 				member.Name = "Close";
+
+			return treatment;
 		}
 
 		#endregion
@@ -705,7 +708,7 @@ namespace Mono.Cecil {
 			}
 
 			foreach (var reference in virtual_references)
-				references.Add(reference);
+				references.Add (reference);
 		}
 
 		public void RemoveVirtualReferences (Collection<AssemblyNameReference> references)
@@ -777,7 +780,7 @@ namespace Mono.Cecil {
 
 		#region CustomAttribute
 
-		public void Project (ICustomAttributeProvider owner, CustomAttribute attribute)
+		public static void Project (ICustomAttributeProvider owner, CustomAttribute attribute)
 		{
 			if (!IsWindowsAttributeUsageAttribute (owner, attribute))
 				return;
@@ -797,7 +800,7 @@ namespace Mono.Cecil {
 				treatment = multiple ? CustomAttributeValueTreatment.AllowMultiple : CustomAttributeValueTreatment.AllowSingle;
 			}
 
-			ApplyTreatment (attribute, treatment);
+			ApplyProjection (attribute, treatment);
 		}
 
 		static bool IsWindowsAttributeUsageAttribute (ICustomAttributeProvider owner, CustomAttribute attribute)
@@ -829,8 +832,11 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		public void ApplyTreatment (CustomAttribute attribute, CustomAttributeValueTreatment treatment)
+		public static void ApplyProjection (CustomAttribute attribute, CustomAttributeValueTreatment treatment)
 		{
+			if (treatment == CustomAttributeValueTreatment.None)
+				return;
+
 			bool version_or_deprecated;
 			bool multiple;
 
@@ -857,26 +863,29 @@ namespace Mono.Cecil {
 
 			var attribute_targets = (AttributeTargets) attribute.ConstructorArguments [0].Value;
 
-			Attributes [attribute.MetadataToken.RID] = attribute_targets;
+			var info = new CustomAttributeValueInfo (attribute_targets, treatment);
 
 			if (version_or_deprecated)
 				attribute_targets |= AttributeTargets.Constructor | AttributeTargets.Property;
 			attribute.ConstructorArguments [0] = new CustomAttributeArgument (attribute.ConstructorArguments [0].Type, attribute_targets);
 
-			attribute.Properties.Add (new CustomAttributeNamedArgument ("AllowMultiple", new CustomAttributeArgument (module.TypeSystem.Boolean, multiple)));
+			attribute.Properties.Add (new CustomAttributeNamedArgument ("AllowMultiple", new CustomAttributeArgument (attribute.Module.TypeSystem.Boolean, multiple)));
 
-			attribute.treatment = treatment;
+			attribute.projection = info;
 		}
 
-		public void RemoveTreatment (CustomAttribute attribute)
+		public static CustomAttributeValueTreatment RemoveProjection (CustomAttribute attribute)
 		{
-			var attribute_targets = Attributes [attribute.MetadataToken.RID];
-			Attributes.Remove (attribute.MetadataToken.RID);
+			if (attribute.projection == null)
+				return CustomAttributeValueTreatment.None;
 
-			attribute.treatment = CustomAttributeValueTreatment.None;
+			var info = (CustomAttributeValueInfo) attribute.projection;
+			attribute.projection = null;
 
-			attribute.ConstructorArguments [0] = new CustomAttributeArgument (attribute.ConstructorArguments [0].Type, attribute_targets);
+			attribute.ConstructorArguments [0] = new CustomAttributeArgument (attribute.ConstructorArguments [0].Type, info.Targets);
 			attribute.Properties.Clear ();
+
+			return info.Treatment;
 		}
 
 		#endregion
