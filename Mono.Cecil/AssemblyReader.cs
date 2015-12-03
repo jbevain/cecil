@@ -78,10 +78,11 @@ namespace Mono.Cecil {
 #endif
 #endif
 
+			GetMetadataKind(module, parameters);
+
 			reader.ReadModule ();
 
 			ReadSymbols (module, parameters);
-			GetMetadataKind (module, parameters);
 
 			return module;
 		}
