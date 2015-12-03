@@ -1164,7 +1164,7 @@ namespace Mono.Cecil {
 
 		MetadataToken GetTypeRefToken (TypeReference type)
 		{
-			var treatment = WindowsRuntimeProjections.RemoveProjection (type);
+			var projection = WindowsRuntimeProjections.RemoveProjection (type);
 
 			var row = CreateTypeRefRow (type);
 
@@ -1172,7 +1172,7 @@ namespace Mono.Cecil {
 			if (!type_ref_map.TryGetValue (row, out token))
 				token = AddTypeReference (type, row);
 
-			WindowsRuntimeProjections.ApplyProjection (type, treatment);
+			WindowsRuntimeProjections.ApplyProjection (type, projection);
 
 			return token;
 		}
@@ -1379,7 +1379,7 @@ namespace Mono.Cecil {
 
 		void AddField (FieldDefinition field)
 		{
-			var treatment = WindowsRuntimeProjections.RemoveProjection (field);
+			var projection = WindowsRuntimeProjections.RemoveProjection (field);
 
 			field_table.AddRow (new FieldRow (
 				field.Attributes,
@@ -1401,7 +1401,7 @@ namespace Mono.Cecil {
 			if (field.HasMarshalInfo)
 				AddMarshalInfo (field);
 
-			WindowsRuntimeProjections.ApplyProjection (field, treatment);
+			WindowsRuntimeProjections.ApplyProjection (field, projection);
 		}
 
 		void AddFieldRVA (FieldDefinition field)
@@ -1428,7 +1428,7 @@ namespace Mono.Cecil {
 
 		void AddMethod (MethodDefinition method)
 		{
-			var treatment = WindowsRuntimeProjections.RemoveProjection (method);
+			var projection = WindowsRuntimeProjections.RemoveProjection (method);
 
 			method_table.AddRow (new MethodRow (
 				method.HasBody ? code.WriteMethodBody (method) : 0,
@@ -1455,7 +1455,7 @@ namespace Mono.Cecil {
 			if (method.HasOverrides)
 				AddOverrides (method);
 
-			WindowsRuntimeProjections.ApplyProjection (method, treatment);
+			WindowsRuntimeProjections.ApplyProjection (method, projection);
 		}
 
 		void AddParameters (MethodDefinition method)
@@ -1738,14 +1738,14 @@ namespace Mono.Cecil {
 			for (int i = 0; i < custom_attributes.Count; i++) {
 				var attribute = custom_attributes [i];
 
-				var treatment = WindowsRuntimeProjections.RemoveProjection (attribute);
+				var projection = WindowsRuntimeProjections.RemoveProjection (attribute);
 
 				custom_attribute_table.AddRow (new CustomAttributeRow (
 					MakeCodedRID (owner, CodedIndex.HasCustomAttribute),
 					MakeCodedRID (LookupToken (attribute.Constructor), CodedIndex.CustomAttributeType),
 					GetBlobIndex (GetCustomAttributeSignature (attribute))));
 
-				WindowsRuntimeProjections.ApplyProjection (attribute, treatment);
+				WindowsRuntimeProjections.ApplyProjection (attribute, projection);
 			}
 		}
 
@@ -1765,7 +1765,7 @@ namespace Mono.Cecil {
 
 		MetadataToken GetMemberRefToken (MemberReference member)
 		{
-			var treatment = WindowsRuntimeProjections.RemoveProjection (member);
+			var projection = WindowsRuntimeProjections.RemoveProjection (member);
 
 			var row = CreateMemberRefRow (member);
 
@@ -1773,7 +1773,7 @@ namespace Mono.Cecil {
 			if (!member_ref_map.TryGetValue (row, out token))
 				token = AddMemberReference (member, row);
 
-			WindowsRuntimeProjections.ApplyProjection (member, treatment);
+			WindowsRuntimeProjections.ApplyProjection (member, projection);
 
 			return token;
 		}

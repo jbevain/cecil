@@ -37,7 +37,7 @@ namespace Mono.Cecil {
 		public TypeAttributes Attributes {
 			get { return (TypeAttributes) attributes; }
 			set {
-				if (projection != null && (ushort) value != attributes)
+				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
 					throw new InvalidOperationException ("Projected type definition attributes can't be changed.");
 				attributes = (uint) value;
 			}
@@ -51,7 +51,7 @@ namespace Mono.Cecil {
 		public override string Name {
 			get { return base.Name; }
 			set {
-				if (projection != null && value != base.Name)
+				if (IsWindowsRuntimeProjection && value != base.Name)
 					throw new InvalidOperationException ("Projected type definition name can't be changed.");
 				base.Name = value;
 			}
@@ -440,6 +440,11 @@ namespace Mono.Cecil {
 		public new TypeDefinition DeclaringType {
 			get { return (TypeDefinition) base.DeclaringType; }
 			set { base.DeclaringType = value; }
+		}
+
+		internal new TypeDefinitionProjection WindowsRuntimeProjection {
+			get { return (TypeDefinitionProjection) projection; }
+			set { projection = value; }
 		}
 
 		public TypeDefinition (string @namespace, string name, TypeAttributes attributes)

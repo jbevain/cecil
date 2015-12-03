@@ -35,7 +35,7 @@ namespace Mono.Cecil {
 		{
 			get { return base.Name; }
 			set {
-				if (projection != null && value != base.Name)
+				if (IsWindowsRuntimeProjection && value != base.Name)
 					throw new InvalidOperationException ("Projected method name can't be changed.");
 				base.Name = value;
 			}
@@ -44,7 +44,7 @@ namespace Mono.Cecil {
 		public MethodAttributes Attributes {
 			get { return (MethodAttributes) attributes; }
 			set {
-				if (projection != null && (ushort)value != attributes)
+				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
 					throw new InvalidOperationException ("Projected method attributes can't be changed.");
 				attributes = (ushort) value;
 			}
@@ -53,7 +53,7 @@ namespace Mono.Cecil {
 		public MethodImplAttributes ImplAttributes {
 			get { return (MethodImplAttributes) impl_attributes; }
 			set {
-				if (projection != null && (ushort)value != impl_attributes)
+				if (IsWindowsRuntimeProjection && (ushort) value != impl_attributes)
 					throw new InvalidOperationException ("Projected method implementation attributes can't be changed.");
 				impl_attributes = (ushort) value;
 			}
@@ -74,6 +74,11 @@ namespace Mono.Cecil {
 				return sem_attrs;
 			}
 			set { sem_attrs = value; }
+		}
+
+		internal new MethodDefinitionProjection WindowsRuntimeProjection {
+			get { return (MethodDefinitionProjection) projection; }
+			set { projection = value; }
 		}
 
 		internal void ReadSemantics ()

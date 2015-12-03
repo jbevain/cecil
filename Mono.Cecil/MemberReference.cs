@@ -23,7 +23,7 @@ namespace Mono.Cecil {
 		public virtual string Name {
 			get { return name; }
 			set {
-				if (projection != null && value != name)
+				if (IsWindowsRuntimeProjection && value != name)
 					throw new InvalidOperationException ("Projected member reference name can't be changed.");
 				name = value;
 			}
@@ -41,6 +41,15 @@ namespace Mono.Cecil {
 		public MetadataToken MetadataToken {
 			get { return token; }
 			set { token = value; }
+		}
+
+		public bool IsWindowsRuntimeProjection {
+			get { return projection != null; }
+		}
+
+		internal MemberReferenceProjection WindowsRuntimeProjection {
+			get { return (MemberReferenceProjection) projection; }
+			set { projection = value; }
 		}
 
 		internal bool HasImage {

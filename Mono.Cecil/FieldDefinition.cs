@@ -63,6 +63,11 @@ namespace Mono.Cecil {
 			set { offset = value; }
 		}
 
+		internal new FieldDefinitionProjection WindowsRuntimeProjection {
+			get { return (FieldDefinitionProjection) projection; }
+			set { projection = value; }
+		}
+
 		void ResolveRVA ()
 		{
 			if (rva != Mixin.NotResolvedMarker)
@@ -106,7 +111,7 @@ namespace Mono.Cecil {
 		public FieldAttributes Attributes {
 			get { return (FieldAttributes) attributes; }
 			set {
-				if (projection != null && (ushort) value != attributes)
+				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
 					throw new InvalidOperationException ("Projected field definition attributes can't be changed.");
 				attributes = (ushort) value;
 			}

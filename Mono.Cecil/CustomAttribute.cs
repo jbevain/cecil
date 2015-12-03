@@ -68,7 +68,7 @@ namespace Mono.Cecil {
 
 	public sealed class CustomAttribute : ICustomAttribute {
 
-		internal object projection;
+		internal CustomAttributeValueProjection projection;
 		readonly internal uint signature;
 		internal bool resolved;
 		MethodReference constructor;
