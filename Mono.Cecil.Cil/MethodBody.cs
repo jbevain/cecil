@@ -28,6 +28,7 @@ namespace Mono.Cecil.Cil {
 		internal Collection<Instruction> instructions;
 		internal Collection<ExceptionHandler> exceptions;
 		internal Collection<VariableDefinition> variables;
+		MethodSymbols symbols;
 		Scope scope;
 
 		public MethodDefinition Method {
@@ -51,6 +52,11 @@ namespace Mono.Cecil.Cil {
 		public MetadataToken LocalVarToken {
 			get { return local_var_token; }
 			set { local_var_token = value; }
+		}
+
+		public MethodSymbols Symbols {
+			get { return symbols; }
+			set { symbols = value; }
 		}
 
 		public Collection<Instruction> Instructions {

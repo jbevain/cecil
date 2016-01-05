@@ -90,7 +90,7 @@ namespace Mono.Cecil.Cil {
 
 			if (symbol_reader != null) {
 				var instructions = body.Instructions;
-				symbol_reader.Read (body, offset => GetInstruction (instructions, offset));
+				symbol_reader.Read (body, offset => GetInstruction (instructions, offset), new SymbolReaderResolver(reader));
 			}
 		}
 
@@ -251,7 +251,7 @@ namespace Mono.Cecil.Cil {
 			return GetInstruction (body.Instructions, offset);
 		}
 
-		static Instruction GetInstruction (Collection<Instruction> instructions, int offset)
+		internal static Instruction GetInstruction (Collection<Instruction> instructions, int offset)
 		{
 			var size = instructions.size;
 			var items = instructions.items;
@@ -366,7 +366,8 @@ namespace Mono.Cecil.Cil {
 		public ByteBuffer PatchRawMethodBody (MethodDefinition method, CodeWriter writer, out MethodSymbols symbols)
 		{
 			var buffer = new ByteBuffer ();
-			symbols = new MethodSymbols (method.Name);
+			var	symbol_reader = reader.module.symbol_reader;
+			method.Body.Symbols = symbols = symbol_reader != null ? symbol_reader.Create (method.Body) : new MethodSymbols (method.Body);
 
 			this.method = method;
 			reader.context = method;
@@ -393,11 +394,10 @@ namespace Mono.Cecil.Cil {
 				throw new NotSupportedException ();
 			}
 
-			var symbol_reader = reader.module.symbol_reader;
-			if (symbol_reader != null && writer.metadata.write_symbols) {
-				symbols.method_token = GetOriginalToken (writer.metadata, method);
+			if (symbol_reader != null && writer.metadata.write_symbols)	{
+				symbols.original_method_token = GetOriginalToken(writer.metadata, method);
 				symbols.local_var_token = local_var_token;
-				symbol_reader.Read (symbols);
+				symbol_reader.Read (symbols, new SymbolReaderResolver(reader));
 			}
 
 			return buffer;

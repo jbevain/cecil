@@ -17,6 +17,7 @@
     <Compile Include="Mono.Cecil.Cil\OpCode.cs" />
     <Compile Include="Mono.Cecil.Cil\OpCodes.cs" />
     <Compile Include="Mono.Cecil.Cil\SequencePoint.cs" />
+    <Compile Include="Mono.Cecil.Cil\SymbolReaderResolver.cs" />
     <Compile Include="Mono.Cecil.Cil\Symbols.cs" />
     <Compile Include="Mono.Cecil.Cil\VariableDefinition.cs" />
     <Compile Include="Mono.Cecil.Cil\VariableReference.cs" />

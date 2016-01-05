@@ -763,8 +763,9 @@ namespace Mono.Cecil {
 			member_ref_map = new Dictionary<MemberRefRow, MetadataToken> (row_equality_comparer);
 			method_spec_map = new Dictionary<MethodSpecRow, MetadataToken> (row_equality_comparer);
 			generic_parameters = new Collection<GenericParameter> ();
-			if (write_symbols)
+			if (write_symbols) {
 				method_def_map = new Dictionary<MetadataToken, MetadataToken> ();
+			}
 		}
 
 		TextMap CreateTextMap ()
@@ -1110,10 +1111,11 @@ namespace Mono.Cecil {
 				var method = methods [i];
 				var new_token = new MetadataToken (TokenType.Method, method_rid++);
 
-				if (write_symbols && method.token != MetadataToken.Zero)
-					method_def_map.Add (new_token, method.token);
+			    if (write_symbols && method.token != MetadataToken.Zero) {
+			        method_def_map.Add (new_token, method.token);
+			    }
 
-				method.token = new_token;
+			    method.token = new_token;
 			}
 		}
 

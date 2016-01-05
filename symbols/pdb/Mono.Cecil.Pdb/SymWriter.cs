@@ -145,6 +145,14 @@ namespace Mono.Cecil.Pdb
 		{
 			m_writer.UsingNamespace (fullName);
 		}
+
+		public void DefineCustomMetadata (string name, byte[] metadata)
+		{
+			var metadataPinned = GCHandle.Alloc (metadata, GCHandleType.Pinned);
+			var metadataPtr = metadataPinned.AddrOfPinnedObject ();
+			m_writer.SetSymAttribute (0, name, (uint)metadata.Length, metadataPtr);
+			metadataPinned.Free ();
+		}
 	}
 }
 
