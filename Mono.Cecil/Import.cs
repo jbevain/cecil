@@ -8,8 +8,6 @@
 // Licensed under the MIT/X11 license.
 //
 
-#if !READ_ONLY
-
 using System;
 using System.Collections.Generic;
 using Mono.Collections.Generic;
@@ -724,6 +722,8 @@ namespace Mono.Cecil {
 		}
 	}
 
+#endif
+
 	static partial class Mixin {
 
 		public static void CheckModule (ModuleDefinition module)
@@ -787,8 +787,4 @@ namespace Mono.Cecil {
 			return true;
 		}
 	}
-
-#endif
 }
-
-#endif
