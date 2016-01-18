@@ -59,5 +59,33 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("Foo/<IFoo<System.Byte[]>.Do>d__0", foo_child.FullName);
 			});
 		}
+
+		[Test]
+		public void NestedTypeFullName ()
+		{
+			var foo = new TypeDefinition (null, "Foo", TypeAttributes.Class);
+			var bar = new TypeDefinition (null, "Bar", TypeAttributes.Class);
+			var baz = new TypeDefinition (null, "Baz", TypeAttributes.Class);
+
+			foo.NestedTypes.Add (bar);
+			bar.NestedTypes.Add (baz);
+
+			Assert.AreEqual ("Foo/Bar/Baz", baz.FullName);
+
+			foo.Namespace = "Change";
+
+			Assert.AreEqual ("Change.Foo/Bar", bar.FullName);
+			Assert.AreEqual ("Change.Foo/Bar/Baz", baz.FullName);
+
+			bar.Namespace = "AnotherChange";
+
+			Assert.AreEqual ("Change.Foo/AnotherChange.Bar", bar.FullName);
+			Assert.AreEqual ("Change.Foo/AnotherChange.Bar/Baz", baz.FullName);
+
+			foo.Name = "FooFoo";
+
+			Assert.AreEqual ("Change.FooFoo/AnotherChange.Bar", bar.FullName);
+			Assert.AreEqual ("Change.FooFoo/AnotherChange.Bar/Baz", baz.FullName);
+		}
 	}
 }
