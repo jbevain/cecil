@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\Mono.Cecil.Tests.settings" />
   <PropertyGroup>
     <ProjectGuid>{AC71DF9C-99FA-4A63-990A-66C8010355A6}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Mdb.Tests</RootNamespace>
@@ -27,5 +26,6 @@
     <Content Include="Resources\assemblies\hello.exe" />
     <Content Include="Resources\assemblies\hello.exe.mdb" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\..\Mono.Cecil.Tests.settings" />
+  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

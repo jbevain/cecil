@@ -121,6 +121,18 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("FooBar", concat ("Foo", "Bar"));
 		}
 
+		[Test]
+		public void GeneratedAssemblyCulture ()
+		{
+			var id = Compile<Func<int, int>> ((module, body) => {
+				var il = body.GetILProcessor ();
+				il.Emit (OpCodes.Ldarg_0);
+				il.Emit (OpCodes.Ret);
+			});
+
+			Assert.AreEqual ("", id.Method.DeclaringType.Assembly.GetName ().CultureInfo.Name);
+		}
+
 		public class Generic<T> {
 			public T Field;
 
@@ -195,7 +207,7 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
 				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
-				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<string>).GetField ("Field")));
+				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<int>).GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 

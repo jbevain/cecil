@@ -231,7 +231,7 @@ namespace Mono.Cecil {
 
 		public void SetReverseNestedTypeMapping (uint nested, uint declaring)
 		{
-			ReverseNestedTypes.Add (nested, declaring);
+			ReverseNestedTypes [nested] = declaring;
 		}
 
 		public void RemoveReverseNestedTypeMapping (TypeDefinition type)

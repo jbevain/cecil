@@ -1,0 +1,13 @@
+version: 0.9.6.{build}
+configuration: net_4_0_Debug
+build:
+  project: Mono.Cecil.sln
+  verbosity: minimal
+test_script:
+- nunit-console.exe Mono.Cecil.nunit
+notifications:
+- provider: Webhook
+  url: https://webhooks.gitter.im/e/925de8a68a6d8d3ce68e
+  on_build_success: false
+  on_build_failure: false
+  on_build_status_changed: true

@@ -404,11 +404,11 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void EmptyBlob ()
 		{
-			TestIL ("types.il", module => {
+			TestIL ("ca-empty-blob.il", module => {
 				var attribute = module.GetType ("CustomAttribute");
 				Assert.AreEqual (1, attribute.CustomAttributes.Count);
 				Assert.AreEqual (0, attribute.CustomAttributes [0].ConstructorArguments.Count);
-			});
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]

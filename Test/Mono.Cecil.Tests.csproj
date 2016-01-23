@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\Mono.Cecil.Tests.settings" />
   <PropertyGroup>
     <ProjectGuid>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Tests</RootNamespace>
@@ -20,7 +19,6 @@
     <Compile Include="Mono.Cecil.Tests\SecurityDeclarationTests.cs" />
     <Compile Include="Mono.Cecil.Tests\ParameterTests.cs" />
     <Compile Include="Mono.Cecil.Tests\Extensions.cs" />
-    <Compile Include="Mono.Cecil.Tests\Linq.cs" />
     <Compile Include="Mono.Cecil.Tests\ResolveTests.cs" />
     <Compile Include="Mono.Cecil.Tests\CustomAttributesTests.cs" />
     <Compile Include="Mono.Cecil.Tests\Formatter.cs" />
@@ -33,6 +31,8 @@
     <Compile Include="Mono.Cecil.Tests\ImageReadTests.cs" />
     <Compile Include="Mono.Cecil.Tests\ModuleTests.cs" />
     <Compile Include="Mono.Cecil.Tests\NestedTypesTests.cs" />
+    <Compile Include="Mono.Cecil.Tests\WindowsRuntimeAssemblyResolver.cs" />
+    <Content Include="Resources\assemblies\winrtcomp.winmd" />
     <None Include="Resources\il\explicitthis.il" />
     <None Include="Resources\cs\CustomAttributes.cs" />
     <None Include="Resources\cs\Generics.cs" />
@@ -85,5 +85,6 @@
     <Content Include="Resources\assemblies\text_file.txt" />
     <Content Include="Resources\assemblies\varargs.exe" />
   </ItemGroup>
+  <Import Project="..\Mono.Cecil.Tests.settings" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

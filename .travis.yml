@@ -1,0 +1,8 @@
+language: csharp
+solution: Mono.Cecil.sln
+install:
+  - nuget restore Mono.Cecil.sln
+  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
+script:
+  - xbuild /p:Configuration=net_4_0_Debug Mono.Cecil.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe Mono.Cecil.nunit

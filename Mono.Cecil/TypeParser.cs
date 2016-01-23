@@ -87,17 +87,7 @@ namespace Mono.Cecil {
 
 		static bool ParseInt32 (string value, out int result)
 		{
-#if CF
-			try {
-				result = int.Parse (value);
-				return true;
-			} catch {
-				result = 0;
-				return false;
-			}
-#else
 			return int.TryParse (value, out result);
-#endif
 		}
 
 		static void TryAddArity (string name, ref int arity)
@@ -368,22 +358,14 @@ namespace Mono.Cecil {
 		static IMetadataScope GetMetadataScope (ModuleDefinition module, Type type_info)
 		{
 			if (string.IsNullOrEmpty (type_info.assembly))
-				return module.TypeSystem.Corlib;
+				return module.TypeSystem.CoreLibrary;
 
-			return MatchReference (module, AssemblyNameReference.Parse (type_info.assembly));
-		}
+			AssemblyNameReference match;
+			var reference = AssemblyNameReference.Parse (type_info.assembly);
 
-		static AssemblyNameReference MatchReference (ModuleDefinition module, AssemblyNameReference pattern)
-		{
-			var references = module.AssemblyReferences;
-
-			for (int i = 0; i < references.Count; i++) {
-				var reference = references [i];
-				if (reference.FullName == pattern.FullName)
-					return reference;
-			}
-
-			return pattern;
+			return module.TryGetAssemblyNameReference (reference, out match)
+				? match
+				: reference;
 		}
 
 		static bool TryGetDefinition (ModuleDefinition module, Type type_info, out TypeReference type)
@@ -398,8 +380,13 @@ namespace Mono.Cecil {
 
 			var nested_names = type_info.nested_names;
 			if (!nested_names.IsNullOrEmpty ()) {
-				for (int i = 0; i < nested_names.Length; i++)
-					typedef = typedef.GetNestedType (nested_names [i]);
+				for (int i = 0; i < nested_names.Length; i++) {
+					var nested_type = typedef.GetNestedType (nested_names [i]);
+					if (nested_type == null)
+						return false;
+
+					typedef = nested_type;
+				}
 			}
 
 			type = typedef;

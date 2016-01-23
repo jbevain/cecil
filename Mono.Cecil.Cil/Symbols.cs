@@ -159,6 +159,7 @@ namespace Mono.Cecil.Cil {
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
 	}
 
+#if !PCL
 	static class SymbolProvider {
 
 		static readonly string symbol_kind = Type.GetType ("Mono.Runtime") != null ? "Mdb" : "Pdb";
@@ -194,9 +195,7 @@ namespace Mono.Cecil.Cil {
 				if (assembly != null)
 					return assembly.GetType (fullname);
 			} catch (FileNotFoundException) {
-#if !CF
 			} catch (FileLoadException) {
-#endif
 			}
 
 			return null;
@@ -239,6 +238,7 @@ namespace Mono.Cecil.Cil {
 
 #endif
 	}
+#endif
 
 #if !READ_ONLY
 

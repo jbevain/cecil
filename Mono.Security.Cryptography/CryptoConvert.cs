@@ -27,10 +27,12 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if !READ_ONLY
+
+#if !PCL && !NET_CORE
+
 using System;
 using System.Security.Cryptography;
-
-#if !SILVERLIGHT && !READ_ONLY && !NET_CORE
 
 namespace Mono.Security.Cryptography {
 
@@ -246,3 +248,6 @@ namespace Mono.Security.Cryptography {
 }
 
 #endif
+
+#endif
+
