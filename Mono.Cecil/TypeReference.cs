@@ -66,7 +66,7 @@ namespace Mono.Cecil {
 			get { return base.Name; }
 			set {
 				base.Name = value;
-				fullname = null;
+				ClearFullName ();
 			}
 		}
 
@@ -74,7 +74,7 @@ namespace Mono.Cecil {
 			get { return @namespace; }
 			set {
 				@namespace = value;
-				fullname = null;
+				ClearFullName ();
 			}
 		}
 
@@ -148,7 +148,7 @@ namespace Mono.Cecil {
 			get { return base.DeclaringType; }
 			set {
 				base.DeclaringType = value;
-				fullname = null;
+				ClearFullName ();
 			}
 		}
 
@@ -239,6 +239,11 @@ namespace Mono.Cecil {
 			this (@namespace, name, module, scope)
 		{
 			value_type = valueType;
+		}
+
+		protected virtual void ClearFullName ()
+		{
+			this.fullname = null;
 		}
 
 		public virtual TypeReference GetElementType ()

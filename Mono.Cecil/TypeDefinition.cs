@@ -442,6 +442,19 @@ namespace Mono.Cecil {
 			this.BaseType = baseType;
 		}
 
+		protected override void ClearFullName ()
+		{
+			base.ClearFullName ();
+
+			if (!HasNestedTypes)
+				return;
+
+			var nested_types = this.NestedTypes;
+
+			for (int i = 0; i < nested_types.Count; i++)
+				nested_types [i].ClearFullName ();
+		}
+
 		public override TypeDefinition Resolve ()
 		{
 			return this;
