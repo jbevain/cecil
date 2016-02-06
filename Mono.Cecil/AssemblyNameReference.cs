@@ -162,6 +162,11 @@ namespace Mono.Cecil {
 				} else
 					builder.Append ("null");
 
+				if (IsRetargetable) {
+					builder.Append (sep);
+					builder.Append ("Retargetable=Yes");
+				}
+
 				return full_name = builder.ToString ();
 			}
 		}
