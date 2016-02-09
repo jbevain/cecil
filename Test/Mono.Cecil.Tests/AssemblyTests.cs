@@ -61,15 +61,15 @@ namespace Mono.Cecil.Tests {
 		{
 			TestModule ("RetargetableExample.dll", module => {
 				var type = module.Types [1];
-				//var property = type.Properties [0];
-				//var attribute = property.CustomAttributes [0];
+				var property = type.Properties [0];
+				var attribute = property.CustomAttributes [0];
 
-				//var argumentType = ((CustomAttributeArgument) attribute.ConstructorArguments[0].Value).Type;
-				//var reference = (AssemblyNameReference) argumentType.Scope;
+				var argumentType = ((CustomAttributeArgument) attribute.ConstructorArguments [0].Value).Type;
+				var reference = (AssemblyNameReference) argumentType.Scope;
 
-				//Assert.AreEqual (
-				//	"System.Data, Version=3.5.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, Retargetable=Yes",
-				//	reference.FullName);
+				Assert.AreEqual (
+					"System.Data, Version=3.5.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, Retargetable=Yes",
+					reference.FullName);
 			});
 		}
 	}
