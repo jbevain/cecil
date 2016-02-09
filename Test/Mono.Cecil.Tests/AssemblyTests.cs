@@ -70,7 +70,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (
 					"System.Data, Version=3.5.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, Retargetable=Yes",
 					reference.FullName);
-			});
+			}, verify: !Platform.OnMono);
 		}
 	}
 }
