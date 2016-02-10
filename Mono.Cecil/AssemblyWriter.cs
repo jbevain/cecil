@@ -835,6 +835,8 @@ namespace Mono.Cecil {
 
 			BuildTypes ();
 
+			AddTypeReferences ();
+
 			if (assembly != null) {
 				if (assembly.HasCustomAttributes)
 					AddCustomAttributes (assembly);
@@ -1051,6 +1053,16 @@ namespace Mono.Cecil {
 			}
 
 			throw new NotSupportedException ();
+		}
+
+		void AddTypeReferences ()
+		{
+			foreach (var pair in module.typeref_custom_attribute_providers) {
+				if (!pair.Value.HasCustomAttributes)
+					continue;
+				GetTypeRefToken (pair.Key);
+				AddCustomAttributes (pair.Value);
+			}
 		}
 
 		void BuildTypes ()
@@ -1327,10 +1339,16 @@ namespace Mono.Cecil {
 			var interfaces = type.Interfaces;
 			var type_rid = type.token.RID;
 
-			for (int i = 0; i < interfaces.Count; i++)
-				iface_impl_table.AddRow (new InterfaceImplRow (
+			for (int i = 0; i < interfaces.Count; i++) {
+				var rid = iface_impl_table.AddRow (new InterfaceImplRow (
 					type_rid,
 					MakeCodedRID (GetTypeToken (interfaces [i]), CodedIndex.TypeDefOrRef)));
+
+				var provider = type.GetInterfaceImplementationCustomAttributes (i);
+				provider.MetadataToken = new MetadataToken (TokenType.InterfaceImpl, rid);
+				if (provider.HasCustomAttributes)
+					AddCustomAttributes (provider);
+			}
 		}
 
 		void AddLayoutInfo (TypeDefinition type)

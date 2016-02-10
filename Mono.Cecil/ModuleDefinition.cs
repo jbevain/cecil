@@ -251,6 +251,7 @@ namespace Mono.Cecil {
 		Collection<Resource> resources;
 		Collection<ExportedType> exported_types;
 		TypeDefinitionCollection types;
+		internal Dictionary<TypeReference, CustomAttributeProvider> typeref_custom_attribute_providers;
 
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
@@ -509,6 +510,7 @@ namespace Mono.Cecil {
 		{
 			this.MetadataSystem = new MetadataSystem ();
 			this.token = new MetadataToken (TokenType.Module, 1);
+			this.typeref_custom_attribute_providers = new Dictionary<TypeReference, CustomAttributeProvider> ();
 		}
 
 		internal ModuleDefinition (Image image)
@@ -525,7 +527,7 @@ namespace Mono.Cecil {
 			this.reader = new MetadataReader (this);
 		}
 
-			public bool HasTypeReference (string fullName)
+		public bool HasTypeReference (string fullName)
 		{
 			return HasTypeReference (string.Empty, fullName);
 		}
@@ -560,6 +562,30 @@ namespace Mono.Cecil {
 		TypeReference GetTypeReference (string scope, string fullname)
 		{
 			return Read (new Row<string, string> (scope, fullname), (row, reader) => reader.GetTypeReference (row.Col1, row.Col2));
+		}
+
+		public ICustomAttributeProvider GetTypeReferenceCustomAttributes (TypeReference type)
+		{
+			if (type.MetadataToken.TokenType != TokenType.TypeRef)
+				throw new ArgumentException (string.Format ("Type '{0}' is not a type reference", type));
+			if (type.Module != this)
+				throw new ArgumentException (string.Format ("Type '{0}' is declared in another module and needs to be imported", type));
+
+			CustomAttributeProvider provider;
+			if (typeref_custom_attribute_providers.TryGetValue (type, out provider))
+				return provider;
+
+			foreach (var pair in typeref_custom_attribute_providers) {
+				if (pair.Key.FullName != type.FullName)
+					continue;
+				if (pair.Key.Scope != type.Scope)
+					continue;
+				return pair.Value;
+			}
+
+			provider = new CustomAttributeProvider (this, type);
+			typeref_custom_attribute_providers.Add (type, provider);
+			return provider;
 		}
 
 		public IEnumerable<TypeReference> GetTypeReferences ()

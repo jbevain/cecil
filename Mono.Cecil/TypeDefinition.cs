@@ -25,7 +25,7 @@ namespace Mono.Cecil {
 		short packing_size = Mixin.NotResolvedMarker;
 		int class_size = Mixin.NotResolvedMarker;
 
-		Collection<TypeReference> interfaces;
+		InterfaceCollection interfaces;
 		Collection<TypeDefinition> nested_types;
 		Collection<MethodDefinition> methods;
 		Collection<FieldDefinition> fields;
@@ -113,7 +113,7 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref interfaces, this, (type, reader) => reader.ReadInterfaces (type));
 
-				return interfaces = new Collection<TypeReference> ();
+				return interfaces = new InterfaceCollection (this);
 			}
 		}
 
@@ -458,6 +458,16 @@ namespace Mono.Cecil {
 		public override TypeDefinition Resolve ()
 		{
 			return this;
+		}
+
+		public ICustomAttributeProvider GetInterfaceImplementationCustomAttributes (TypeReference @interface)
+		{
+			return GetInterfaceImplementationCustomAttributes (Interfaces.IndexOf (@interface));
+		}
+
+		public ICustomAttributeProvider GetInterfaceImplementationCustomAttributes (int index)
+		{
+			return ((InterfaceCollection) Interfaces).GetCustomAttributes (index);
 		}
 	}
 
