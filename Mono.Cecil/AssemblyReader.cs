@@ -78,6 +78,8 @@ namespace Mono.Cecil {
 #endif
 #endif
 
+			GetMetadataKind(module, parameters);
+
 			reader.ReadModule ();
 
 			ReadSymbols (module, parameters);
@@ -103,6 +105,23 @@ namespace Mono.Cecil {
 
 				module.ReadSymbols (reader);
 			}
+		}
+
+		static void GetMetadataKind (ModuleDefinition module, ReaderParameters parameters)
+		{
+			if (!parameters.ApplyWindowsRuntimeProjections) {
+				module.MetadataKind = MetadataKind.Ecma335;
+				return;
+			}
+
+			var runtime_version = module.RuntimeVersion;
+
+			if (!runtime_version.Contains ("WindowsRuntime"))
+				module.MetadataKind = MetadataKind.Ecma335;
+			else if (runtime_version.Contains ("CLR"))
+				module.MetadataKind = MetadataKind.ManagedWindowsMetadata;
+			else
+				module.MetadataKind = MetadataKind.WindowsMetadata;
 		}
 
 		static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
@@ -535,7 +554,11 @@ namespace Mono.Cecil {
 		{
 			InitializeAssemblyReferences ();
 
-			return new Collection<AssemblyNameReference> (metadata.AssemblyReferences);
+			var references = new Collection<AssemblyNameReference> (metadata.AssemblyReferences);
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				module.Projections.AddVirtualReferences (references);
+
+			return references;
 		}
 
 		public MethodDefinition ReadEntryPoint ()
@@ -875,6 +898,9 @@ namespace Mono.Cecil {
 			if (IsNested (attributes))
 				type.DeclaringType = GetNestedTypeDeclaringType (type);
 
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				WindowsRuntimeProjections.Project (type);
+
 			return type;
 		}
 
@@ -1058,6 +1084,9 @@ namespace Mono.Cecil {
 
 			MetadataSystem.TryProcessPrimitiveTypeReference (type);
 
+			if (type.Module.MetadataKind != MetadataKind.Ecma335)
+				WindowsRuntimeProjections.Project (type);
+
 			return type;
 		}
 
@@ -1205,6 +1234,9 @@ namespace Mono.Cecil {
 				return;
 
 			fields.Add (field);
+
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				WindowsRuntimeProjections.Project (field);
 		}
 
 		void InitializeFields ()
@@ -1720,12 +1752,14 @@ namespace Mono.Cecil {
 			ReadMethodSignature (signature, method);
 			metadata.AddMethodDefinition (method);
 
-			if (param_range.Length == 0)
-				return;
+			if (param_range.Length != 0) {
+				var position = base.position;
+				ReadParameters (method, param_range);
+				base.position = position;
+			}
 
-			var position = base.position;
-			ReadParameters (method, param_range);
-			base.position = position;
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				WindowsRuntimeProjections.Project (method);
 		}
 
 		void ReadParameters (MethodDefinition method, Range param_range)
@@ -2237,6 +2271,9 @@ namespace Mono.Cecil {
 
 			member.token = new MetadataToken (TokenType.MemberRef, rid);
 
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				WindowsRuntimeProjections.Project (member);
+
 			return member;
 		}
 
@@ -2407,6 +2444,10 @@ namespace Mono.Cecil {
 
 			metadata.RemoveCustomAttributeRange (owner);
 
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				foreach (var custom_attribute in custom_attributes)
+					WindowsRuntimeProjections.Project (owner, custom_attribute);
+
 			return custom_attributes;
 		}
 
@@ -2415,7 +2456,7 @@ namespace Mono.Cecil {
 			if (!MoveTo (Table.CustomAttribute, range.Start))
 				return;
 
-			for (int i = 0; i < range.Length; i++) {
+			for (var i = 0; i < range.Length; i++) {
 				ReadMetadataToken (CodedIndex.HasCustomAttribute);
 
 				var constructor = (MethodReference) LookupToken (
