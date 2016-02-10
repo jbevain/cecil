@@ -307,6 +307,10 @@ namespace Mono.Cecil {
 					return ret | 18;
 				case TokenType.GenericParam:
 					return ret | 19;
+				case TokenType.GenericParamConstraint:
+					return ret | 20;
+				case TokenType.MethodSpec:
+					return ret | 21;
 				default:
 					goto exit;
 				}

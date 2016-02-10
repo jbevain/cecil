@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -445,6 +446,60 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsNotNull (attribute);
 			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
+		}
+
+		[Test]
+		public void GetInterfaceImplementation ()
+		{
+			IgnoreOnMono();
+
+			TestIL ("ca.il", module => {
+				var type = module.GetType ("FooType");
+				var iface = type.Interfaces.Single (i => i.FullName == "IFoo");
+				var attributes = type.GetInterfaceImplementationCustomAttributes (iface).CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
+			});
+		}
+
+		[Test]
+		public void GetTypeReference ()
+		{
+			IgnoreOnMono ();
+
+			TestIL ("ca.il", module => {
+				TypeReference type;
+				Assert.IsTrue (module.TryGetTypeReference ("mscorlib", "System.Collections.ArrayList", out type));
+				var attributes = module.GetTypeReferenceCustomAttributes (type).CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
+			});
+		}
+
+		[Test]
+		public void AddTypeReference ()
+		{
+			var file = Path.Combine(Path.GetTempPath(), "CaTypeRef.dll");
+
+			var module = ModuleDefinition.CreateModule("CaTypeRef.dll", new ModuleParameters { Kind = ModuleKind.Dll, Runtime = TargetRuntime.Net_2_0 });
+			var ctor = module.ImportReference (typeof (System.Reflection.ObfuscationAttribute).GetConstructor (Empty<Type>.Array));
+			Assert.IsNotNull(ctor);
+
+			var type = module.ImportReference (typeof (ArrayList));
+			var attributes = module.GetTypeReferenceCustomAttributes (type).CustomAttributes;
+			attributes.Add (new CustomAttribute (ctor));
+
+			var attributes2 = module.GetTypeReferenceCustomAttributes (new TypeReference (type.Namespace, type.Name, type.Module, type.Scope)).CustomAttributes;
+			Assert.AreSame (attributes, attributes2);
+
+			module.Write(file);
+
+			module = ModuleDefinition.ReadModule(file);
+
+			Assert.IsTrue (module.TryGetTypeReference ("mscorlib", "System.Collections.ArrayList", out type));
+			attributes = module.GetTypeReferenceCustomAttributes (type).CustomAttributes;
+			Assert.AreEqual (1, attributes.Count);
+			Assert.AreEqual (typeof (System.Reflection.ObfuscationAttribute).FullName, attributes [0].AttributeType.FullName);
 		}
 
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)

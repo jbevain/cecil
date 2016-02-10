@@ -259,6 +259,11 @@ namespace Mono.Cecil {
 
 			return module.Resolve (this);
 		}
+
+		public override string ToString ()
+		{
+			return FullName;
+		}
 	}
 
 	static partial class Mixin {
