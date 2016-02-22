@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 using Mono.Cecil.Rocks;
 
@@ -8,8 +9,34 @@ namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class TypeReferenceRocksTests {
+        interface IFoo { }
+        interface IBar : IFoo { }
 
-		[Test]
+        [Test]
+        public void AreSame()
+        {
+            var ifoo = typeof(IFoo).ToDefinition();
+            var ibar = typeof(IBar).ToDefinition();
+            var ibarfoo = ibar.Interfaces.Single();
+
+            // for reasons, TypeDefinitions got from ToDefinition() are not same as their "nature" equivalent
+            // this makes testing code involves TypeDefinition relations hard
+            Assert.AreNotEqual(typeof(object).ToDefinition(), typeof(object).ToDefinition());
+            Assert.AreNotEqual(ifoo, ibarfoo);
+
+            Assert.IsTrue(TypeReferenceRocks.AreSame(typeof(object).ToDefinition(), typeof(object).ToDefinition()));
+            Assert.IsTrue(TypeReferenceRocks.AreSame(ibarfoo, ifoo));
+            Assert.IsFalse(TypeReferenceRocks.AreSame(ifoo, null));
+            Assert.IsFalse(TypeReferenceRocks.AreSame(null, ibar));
+
+            Assert.IsTrue(typeof(object).ToDefinition().IsSameAs(typeof(object).ToDefinition()));
+            Assert.IsTrue(ibarfoo.IsSameAs(ifoo));
+            Assert.Throws<ArgumentNullException>(() => ifoo.IsSameAs(null));
+            Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(ibar));
+            Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(null));
+        }
+
+        [Test]
 		public void MakeArrayType ()
 		{
 			var @string = GetTypeReference (typeof (string));

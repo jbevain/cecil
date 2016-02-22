@@ -18,8 +18,46 @@ namespace Mono.Cecil.Rocks {
 	public
 #endif
 	static class TypeReferenceRocks {
+        public static bool AreSame(TypeReference a, TypeReference b)
+        {
+            var aIsNull = a == null;
+            var bIsNull = b == null;
 
-		public static ArrayType MakeArrayType (this TypeReference self)
+            if (aIsNull)
+            {
+                if (bIsNull)
+                    return true;
+                return false;
+            }
+            if (bIsNull)
+                return false;
+
+            if (a == b)
+                return true;
+
+            if (a.FullName != b.FullName)
+                return false;
+
+            return a.Module.Assembly.FullName == b.Module.Assembly.FullName;
+        }
+
+        public static bool IsSameAs(this TypeReference a, TypeReference b)
+        {
+            if (a == null)
+                throw new NullReferenceException();
+            if (b == null)
+                throw new ArgumentNullException();
+
+            if (a == b)
+                return true;
+
+            if (a.FullName != b.FullName)
+                return false;
+
+            return a.Module.Assembly.FullName == b.Module.Assembly.FullName;
+        }
+
+        public static ArrayType MakeArrayType (this TypeReference self)
 		{
 			return new ArrayType (self);
 		}
