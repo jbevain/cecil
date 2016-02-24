@@ -71,6 +71,53 @@ namespace Mono.Cecil.Rocks {
             return _a.Name.Name == _b.Name.Name;
         }
 
+        public static bool AreMatch(IEnumerable<TypeReference> self, IEnumerable<TypeReference> test, bool? useAssemblyFullName = null)
+        {
+            return self.SequenceEqual(test, (a, b) => AreSame(a, b, useAssemblyFullName));
+        }
+
+        static bool SequenceEqual<T>(this IEnumerable<T> self, IEnumerable<T> that, Func<T, T, bool> test)
+        {
+            var selfCollection = self as ICollection<T>;
+            var thatCollection = that as ICollection<T>;
+            if (selfCollection != null && thatCollection != null
+                && selfCollection.Count != thatCollection.Count)
+            {
+                return false;
+            }
+
+            var selfEnumerator = self.GetEnumerator();
+            var thatEnumerator = that.GetEnumerator();
+            while (selfEnumerator.MoveNext())
+            {
+                if (!thatEnumerator.MoveNext())
+                    return false;
+
+                if (!test(selfEnumerator.Current, thatEnumerator.Current))
+                    return false;
+            }
+            return !thatEnumerator.MoveNext();
+        }
+
+        public static bool IsAssignableFrom(this TypeReference target, TypeReference from, bool? useAssemblyFullName = null)
+        {
+            if (target.IsSameAs(from, useAssemblyFullName))
+                return true;
+
+            var targetDefinition = target.Resolve();
+            var fromDefinition = from.Resolve();
+
+            if (targetDefinition.IsInterface)
+                return fromDefinition.Interfaces.Any(i => i.Resolve().IsSameAs(target, useAssemblyFullName));
+
+            if (target.IsValueType)
+                return false;
+
+            return fromDefinition.IsSubclassOf(targetDefinition, useAssemblyFullName);
+        }
+        public static bool IsAssignableTo(this TypeReference source, TypeReference to, bool? useAssemblyFullName = null)
+            => to.IsAssignableFrom(source, useAssemblyFullName);
+
         public static ArrayType MakeArrayType (this TypeReference self)
 		{
 			return new ArrayType (self);

@@ -62,26 +62,12 @@ namespace Mono.Cecil.Rocks {
 			return Mixin.GetEnumUnderlyingType (self);
 		}
 
-        public static bool IsAssignableFrom(this TypeDefinition type, TypeDefinition test)
-        {
-            if (type.IsSameAs(test))
-                return true;
-
-            if (type.IsInterface)
-                return test.Interfaces.Any(i => i.Resolve().IsSameAs(type));
-
-            if (type.IsValueType)
-                return false;
-
-            return test.IsSubclassOf(type);
-        }
-
         public static bool IsEventuallyAccessible(this TypeDefinition type)
         {
             if (type.IsPublic)
                 return true;
 
-            if (type.IsNested)
+            if (type.IsNested && type.DeclaringType.IsEventuallyAccessible())
             {
                 if (type.IsNestedPublic)
                     return true;
@@ -93,8 +79,8 @@ namespace Mono.Cecil.Rocks {
 
             return false;
         }
-        
-        public static bool IsSubclassOf(this TypeDefinition type, TypeDefinition test)
+
+        public static bool IsSubclassOf(this TypeDefinition type, TypeDefinition test, bool? useAssemblyFullName = null)
         {
             if (type == null)
                 throw new NullReferenceException();
@@ -102,17 +88,17 @@ namespace Mono.Cecil.Rocks {
                 throw new ArgumentNullException();
 
             if (test.IsInterface)
-                return test.IsAssignableFrom(type);
+                return test.IsAssignableFrom(type, useAssemblyFullName);
 
             var baseType = type.BaseType;
             if (baseType == null)
                 return false;
             type = baseType.Resolve();
 
-            if (type.IsSameAs(test))
-                    return true;
+            if (type.IsSameAs(test, useAssemblyFullName))
+                return true;
 
-            return type.IsSubclassOf(test);
+            return type.IsSubclassOf(test, useAssemblyFullName);
         }
     }
 }

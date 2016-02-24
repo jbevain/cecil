@@ -10,34 +10,6 @@ namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class TypeDefinitionRocksTests {
 
-        interface IFoo { }
-        interface IBar : IFoo { }
-        interface IFooBar : IBar { }
-        class FooBar : IFooBar { }
-
-        [Test]
-        public void Assignable()
-        {
-            var foobar = typeof(FooBar).ToDefinition();
-            var ifoobar = typeof(IFooBar).ToDefinition();
-
-            Assert.Throws<ArgumentNullException>(() => foobar.IsAssignableFrom(null));
-            Assert.Throws<ArgumentNullException>(() => foobar.IsSubclassOf(null));
-
-            Assert.IsTrue(foobar.IsAssignableFrom(foobar));
-            Assert.IsFalse(foobar.IsSubclassOf(foobar));
-            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(ifoobar));
-            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(ifoobar));
-
-            Assert.IsTrue(ifoobar.IsAssignableFrom(foobar));
-            Assert.IsTrue(foobar.IsSubclassOf(ifoobar));
-            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(ifoobar));
-            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(ifoobar));
-
-            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(null));
-            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(null));
-        }
-
         class Foo {
 
 			static Foo ()
@@ -122,27 +94,54 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System.Byte", underlying_type.FullName);
 		}
 
-        public class Public { }
-        protected class Family { }
-        protected internal class FamilyOrAssembly { }
-        internal class AssemblyOnly { }
-        private class Private { }
+        public class Public
+        {
+            public class InnerPublic { }
+            internal class InnerAssembly { }
+        }
+        protected class Family
+        {
+            public class InnerPublic { }
+            internal class InnerAssembly { }
+        }
+        protected internal class FamilyOrAssembly
+        {
+            public class InnerPublic { }
+            internal class InnerAssembly { }
+        }
+        internal class AssemblyOnly
+        {
+            public class InnerPublic { }
+        }
+        private class Private
+        {
+            public class InnerPublic { }
+        }
 
         [Test]
         public void IsEventuallyAccessible()
         {
-            Assert.IsTrue(typeof(Public).ToDefinition().IsEventuallyAccessible());
             Assert.IsTrue(typeof(TypeDefinitionRocksTests).ToDefinition().IsEventuallyAccessible());
-            Assert.IsTrue(typeof(Family).ToDefinition().IsEventuallyAccessible());
-            Assert.IsTrue(typeof(FamilyOrAssembly).ToDefinition().IsEventuallyAccessible());
 
+            Assert.IsTrue(typeof(Public).ToDefinition().IsEventuallyAccessible());
+            Assert.IsTrue(typeof(Public.InnerPublic).ToDefinition().IsEventuallyAccessible());
+            Assert.IsTrue(typeof(Family).ToDefinition().IsEventuallyAccessible());
+            Assert.IsTrue(typeof(Family.InnerPublic).ToDefinition().IsEventuallyAccessible());
+            Assert.IsTrue(typeof(FamilyOrAssembly).ToDefinition().IsEventuallyAccessible());
+            Assert.IsTrue(typeof(FamilyOrAssembly.InnerPublic).ToDefinition().IsEventuallyAccessible());
+
+            Assert.IsFalse(typeof(Public.InnerAssembly).ToDefinition().IsEventuallyAccessible());
+            Assert.IsFalse(typeof(Family.InnerAssembly).ToDefinition().IsEventuallyAccessible());
+            Assert.IsFalse(typeof(FamilyOrAssembly.InnerAssembly).ToDefinition().IsEventuallyAccessible());
             Assert.IsFalse(typeof(AssemblyOnly).ToDefinition().IsEventuallyAccessible());
+            Assert.IsFalse(typeof(AssemblyOnly.InnerPublic).ToDefinition().IsEventuallyAccessible());
             Assert.IsFalse(typeof(Private).ToDefinition().IsEventuallyAccessible());
+            Assert.IsFalse(typeof(Private.InnerPublic).ToDefinition().IsEventuallyAccessible());
+
             Assert.IsFalse(typeof(NotPublic).ToDefinition().IsEventuallyAccessible());
         }
     }
 
-    // for the purpose of testing, these classes can't be defined inside another type
-    public class Public { }
+    // for the purpose of testing, this class can't be defined inside another type
     internal class NotPublic { }
 }

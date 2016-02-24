@@ -12,6 +12,9 @@ namespace Mono.Cecil.Tests {
         interface IFoo { }
         interface IBar : IFoo { }
 
+        interface IFooBar : IBar { }
+        class FooBar : IFooBar { }
+
         [Test]
         public void AreSame()
         {
@@ -34,6 +37,29 @@ namespace Mono.Cecil.Tests {
             Assert.Throws<ArgumentNullException>(() => ifoo.IsSameAs(null));
             Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(ibar));
             Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(null));
+        }
+
+        [Test]
+        public void Assignable()
+        {
+            var foobar = typeof(FooBar).ToDefinition();
+            var ifoobar = typeof(IFooBar).ToDefinition();
+
+            Assert.Throws<ArgumentNullException>(() => foobar.IsAssignableFrom(null));
+            Assert.Throws<ArgumentNullException>(() => foobar.IsSubclassOf(null));
+
+            Assert.IsTrue(foobar.IsAssignableFrom(foobar));
+            Assert.IsFalse(foobar.IsSubclassOf(foobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(ifoobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(ifoobar));
+
+            Assert.IsTrue(ifoobar.IsAssignableFrom(foobar));
+            Assert.IsTrue(foobar.IsSubclassOf(ifoobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(ifoobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(ifoobar));
+
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(null));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(null));
         }
 
         [Test]
