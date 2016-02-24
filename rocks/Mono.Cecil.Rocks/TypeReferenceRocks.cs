@@ -78,6 +78,11 @@ namespace Mono.Cecil.Rocks {
 
         static bool SequenceEqual<T>(this IEnumerable<T> self, IEnumerable<T> that, Func<T, T, bool> test)
         {
+            if (that == null)
+                throw new ArgumentNullException("that");
+            if (test == null)
+                throw new ArgumentNullException("test");
+
             var selfCollection = self as ICollection<T>;
             var thatCollection = that as ICollection<T>;
             if (selfCollection != null && thatCollection != null
@@ -86,17 +91,19 @@ namespace Mono.Cecil.Rocks {
                 return false;
             }
 
-            var selfEnumerator = self.GetEnumerator();
-            var thatEnumerator = that.GetEnumerator();
-            while (selfEnumerator.MoveNext())
+            using (var selfEnumerator = self.GetEnumerator())
+            using (var thatEnumerator = that.GetEnumerator())
             {
-                if (!thatEnumerator.MoveNext())
-                    return false;
+                while (selfEnumerator.MoveNext())
+                {
+                    if (!thatEnumerator.MoveNext())
+                        return false;
 
-                if (!test(selfEnumerator.Current, thatEnumerator.Current))
-                    return false;
+                    if (!test(selfEnumerator.Current, thatEnumerator.Current))
+                        return false;
+                }
+                return !thatEnumerator.MoveNext();
             }
-            return !thatEnumerator.MoveNext();
         }
 
         public static bool IsAssignableFrom(this TypeReference target, TypeReference from, bool? useAssemblyFullName = null)

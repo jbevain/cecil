@@ -24,6 +24,7 @@ namespace Mono.Cecil.Tests {
 
             // for reasons, TypeDefinitions got from ToDefinition() are not same as their "nature" equivalent
             // this makes testing code involves TypeDefinition relations hard
+
             Assert.AreNotEqual(typeof(object).ToDefinition(), typeof(object).ToDefinition());
             Assert.AreNotEqual(ifoo, ibarfoo);
 
@@ -37,6 +38,15 @@ namespace Mono.Cecil.Tests {
             Assert.Throws<ArgumentNullException>(() => ifoo.IsSameAs(null));
             Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(ibar));
             Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(null));
+
+            var actual = new[] { ifoo, ibar };
+            Assert.IsTrue(TypeReferenceRocks.AreMatch(actual, actual));
+            Assert.IsTrue(TypeReferenceRocks.AreMatch(actual, new[] { ifoo, ibar }));
+            Assert.IsTrue(TypeReferenceRocks.AreMatch(actual, 
+                new[] { typeof(IFoo).ToDefinition(), typeof(IBar).ToDefinition() }));
+            Assert.IsFalse(TypeReferenceRocks.AreMatch(actual, new[] { ifoo }));
+            Assert.IsFalse(TypeReferenceRocks.AreMatch(actual, new[] { ifoo, null }));
+            Assert.IsFalse(TypeReferenceRocks.AreMatch(actual, new[] { ifoo, ibar, ibar }));
         }
 
         [Test]
