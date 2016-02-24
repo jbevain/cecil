@@ -116,7 +116,9 @@ namespace Mono.Cecil.Rocks {
             return fromDefinition.IsSubclassOf(targetDefinition, useAssemblyFullName);
         }
         public static bool IsAssignableTo(this TypeReference source, TypeReference to, bool? useAssemblyFullName = null)
-            => to.IsAssignableFrom(source, useAssemblyFullName);
+        {
+            return to.IsAssignableFrom(source, useAssemblyFullName);
+        }
 
         public static ArrayType MakeArrayType (this TypeReference self)
 		{
