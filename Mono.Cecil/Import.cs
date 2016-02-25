@@ -601,7 +601,7 @@ namespace Mono.Cecil {
 				for (int i = 0; i < dimensions.Count; i++) {
 					var dimension = dimensions [i];
 
-					imported_dimensions.Add (new ArrayDimension (dimension.LowerBound, dimension.UpperBound));
+					imported_dimensions.Add (new ArrayDimension (dimension.lower_bound, dimension.upper_bound));
 				}
 
 				return imported_array;
