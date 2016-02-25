@@ -51,16 +51,6 @@ namespace Mono.Cecil {
 			get { return signature.MethodReturnType; }
 		}
 
-		public string Name {
-			get { return string.Empty; }
-			set { throw new InvalidOperationException (); }
-		}
-
-		public string Namespace {
-			get { return string.Empty; }
-			set { throw new InvalidOperationException (); }
-		}
-
 		public ModuleDefinition Module {
 			get { return ReturnType.Module; }
 		}
