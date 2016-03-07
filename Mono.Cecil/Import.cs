@@ -516,7 +516,8 @@ namespace Mono.Cecil {
 			reference = new AssemblyNameReference (name.Name, name.Version) {
 				Culture = name.Culture,
 				HashAlgorithm = name.HashAlgorithm,
-				IsRetargetable = name.IsRetargetable
+				IsRetargetable = name.IsRetargetable,
+				IsWindowsRuntime = name.IsWindowsRuntime
 			};
 
 			var pk_token = !name.PublicKeyToken.IsNullOrEmpty ()
