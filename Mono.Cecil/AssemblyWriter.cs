@@ -918,6 +918,9 @@ namespace Mono.Cecil {
 			var references = module.AssemblyReferences;
 			var table = GetTable<AssemblyRefTable> (Table.AssemblyRef);
 
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				module.Projections.RemoveVirtualReferences (references);
+
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
 
@@ -940,6 +943,9 @@ namespace Mono.Cecil {
 
 				reference.token = new MetadataToken (TokenType.AssemblyRef, rid);
 			}
+
+			if (module.MetadataKind != MetadataKind.Ecma335)
+				module.Projections.AddVirtualReferences (references);
 		}
 
 		void AddModuleReferences ()
@@ -1158,13 +1164,17 @@ namespace Mono.Cecil {
 
 		MetadataToken GetTypeRefToken (TypeReference type)
 		{
+			var projection = WindowsRuntimeProjections.RemoveProjection (type);
+
 			var row = CreateTypeRefRow (type);
 
 			MetadataToken token;
-			if (type_ref_map.TryGetValue (row, out token))
-				return token;
+			if (!type_ref_map.TryGetValue (row, out token))
+				token = AddTypeReference (type, row);
 
-			return AddTypeReference (type, row);
+			WindowsRuntimeProjections.ApplyProjection (type, projection);
+
+			return token;
 		}
 
 		TypeRefRow CreateTypeRefRow (TypeReference type)
@@ -1219,6 +1229,8 @@ namespace Mono.Cecil {
 
 		void AddType (TypeDefinition type)
 		{
+			var treatment = WindowsRuntimeProjections.RemoveProjection (type);
+
 			type_def_table.AddRow (new TypeDefRow (
 				type.Attributes,
 				GetStringIndex (type.Name),
@@ -1256,6 +1268,8 @@ namespace Mono.Cecil {
 
 			if (type.HasNestedTypes)
 				AddNestedTypes (type);
+
+			WindowsRuntimeProjections.ApplyProjection (type, treatment);
 		}
 
 		void AddGenericParameters (IGenericParameterProvider owner)
@@ -1365,6 +1379,8 @@ namespace Mono.Cecil {
 
 		void AddField (FieldDefinition field)
 		{
+			var projection = WindowsRuntimeProjections.RemoveProjection (field);
+
 			field_table.AddRow (new FieldRow (
 				field.Attributes,
 				GetStringIndex (field.Name),
@@ -1384,6 +1400,8 @@ namespace Mono.Cecil {
 
 			if (field.HasMarshalInfo)
 				AddMarshalInfo (field);
+
+			WindowsRuntimeProjections.ApplyProjection (field, projection);
 		}
 
 		void AddFieldRVA (FieldDefinition field)
@@ -1410,6 +1428,8 @@ namespace Mono.Cecil {
 
 		void AddMethod (MethodDefinition method)
 		{
+			var projection = WindowsRuntimeProjections.RemoveProjection (method);
+
 			method_table.AddRow (new MethodRow (
 				method.HasBody ? code.WriteMethodBody (method) : 0,
 				method.ImplAttributes,
@@ -1434,6 +1454,8 @@ namespace Mono.Cecil {
 
 			if (method.HasOverrides)
 				AddOverrides (method);
+
+			WindowsRuntimeProjections.ApplyProjection (method, projection);
 		}
 
 		void AddParameters (MethodDefinition method)
@@ -1716,10 +1738,14 @@ namespace Mono.Cecil {
 			for (int i = 0; i < custom_attributes.Count; i++) {
 				var attribute = custom_attributes [i];
 
+				var projection = WindowsRuntimeProjections.RemoveProjection (attribute);
+
 				custom_attribute_table.AddRow (new CustomAttributeRow (
 					MakeCodedRID (owner, CodedIndex.HasCustomAttribute),
 					MakeCodedRID (LookupToken (attribute.Constructor), CodedIndex.CustomAttributeType),
 					GetBlobIndex (GetCustomAttributeSignature (attribute))));
+
+				WindowsRuntimeProjections.ApplyProjection (attribute, projection);
 			}
 		}
 
@@ -1739,15 +1765,17 @@ namespace Mono.Cecil {
 
 		MetadataToken GetMemberRefToken (MemberReference member)
 		{
+			var projection = WindowsRuntimeProjections.RemoveProjection (member);
+
 			var row = CreateMemberRefRow (member);
 
 			MetadataToken token;
-			if (member_ref_map.TryGetValue (row, out token))
-				return token;
+			if (!member_ref_map.TryGetValue (row, out token))
+				token = AddMemberReference (member, row);
 
-			AddMemberReference (member, row);
+			WindowsRuntimeProjections.ApplyProjection (member, projection);
 
-			return member.token;
+			return token;
 		}
 
 		MemberRefRow CreateMemberRefRow (MemberReference member)
@@ -1758,10 +1786,13 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetMemberRefSignature (member)));
 		}
 
-		void AddMemberReference (MemberReference member, MemberRefRow row)
+		MetadataToken AddMemberReference (MemberReference member, MemberRefRow row)
 		{
 			member.token = new MetadataToken (TokenType.MemberRef, member_ref_table.AddRow (row));
-			member_ref_map.Add (row, member.token);
+
+			var token = member.token;
+			member_ref_map.Add (row, token);
+			return token;
 		}
 
 		MetadataToken GetMethodSpecToken (MethodSpecification method_spec)
