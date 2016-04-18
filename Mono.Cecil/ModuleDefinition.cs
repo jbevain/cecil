@@ -1144,7 +1144,7 @@ namespace Mono.Cecil {
 			if (assembly_name != "mscorlib" && assembly_name != "System.Runtime")
 				return false;
 
-			if (module.HasImage && !module.Read (module, (m, reader) => reader.image.GetTableLength (Table.TypeDef) > 1))
+			if (module.HasImage && module.Read (module, (m, reader) => reader.image.GetTableLength (Table.AssemblyRef) > 0))
 				return false;
 
 			return true;
