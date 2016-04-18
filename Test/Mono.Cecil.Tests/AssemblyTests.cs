@@ -72,5 +72,16 @@ namespace Mono.Cecil.Tests {
 					reference.FullName);
 			}, verify: !Platform.OnMono);
 		}
+
+		[Test]
+		public void SystemRuntime ()
+		{
+			TestModule ("System.Runtime.dll", module => {
+				Assert.AreEqual ("System.Runtime", module.Assembly.Name.Name);
+				Assert.AreEqual (1, module.AssemblyReferences.Count);
+				Assert.AreNotEqual (module, module.TypeSystem.CoreLibrary);
+				Assert.AreEqual (module.AssemblyReferences [0], module.TypeSystem.CoreLibrary);
+			}, verify: !Platform.OnMono);
+		}
 	}
 }
