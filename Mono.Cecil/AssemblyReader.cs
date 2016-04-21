@@ -1123,25 +1123,29 @@ namespace Mono.Cecil {
 		public bool HasInterfaces (TypeDefinition type)
 		{
 			InitializeInterfaces ();
-			MetadataToken [] mapping;
+			Row<uint, MetadataToken> [] mapping;
 
 			return metadata.TryGetInterfaceMapping (type, out mapping);
 		}
 
-		public Collection<TypeReference> ReadInterfaces (TypeDefinition type)
+		public InterfaceImplementationCollection ReadInterfaces (TypeDefinition type)
 		{
 			InitializeInterfaces ();
-			MetadataToken [] mapping;
+			Row<uint, MetadataToken> [] mapping;
 
 			if (!metadata.TryGetInterfaceMapping (type, out mapping))
-				return new Collection<TypeReference> ();
+				return new InterfaceImplementationCollection (type);
 
-			var interfaces = new Collection<TypeReference> (mapping.Length);
+			var interfaces = new InterfaceImplementationCollection (type, mapping.Length);
 
 			this.context = type;
 
-			for (int i = 0; i < mapping.Length; i++)
-				interfaces.Add (GetTypeDefOrRef (mapping [i]));
+			for (int i = 0; i < mapping.Length; i++) {
+				interfaces.Add (
+					new InterfaceImplementation (
+						GetTypeDefOrRef (mapping [i].Col2),
+						new MetadataToken(TokenType.InterfaceImpl, mapping [i].Col1)));
+			}
 
 			metadata.RemoveInterfaceMapping (type);
 
@@ -1155,17 +1159,17 @@ namespace Mono.Cecil {
 
 			int length = MoveTo (Table.InterfaceImpl);
 
-			metadata.Interfaces = new Dictionary<uint, MetadataToken []> (length);
+			metadata.Interfaces = new Dictionary<uint, Row<uint, MetadataToken> []> (length);
 
-			for (int i = 0; i < length; i++) {
+			for (uint i = 1; i <= length; i++) {
 				var type = ReadTableIndex (Table.TypeDef);
 				var @interface = ReadMetadataToken (CodedIndex.TypeDefOrRef);
 
-				AddInterfaceMapping (type, @interface);
+				AddInterfaceMapping (type, new Row<uint, MetadataToken> (i, @interface));
 			}
 		}
 
-		void AddInterfaceMapping (uint type, MetadataToken @interface)
+		void AddInterfaceMapping (uint type, Row<uint, MetadataToken> @interface)
 		{
 			metadata.SetInterfaceMapping (type, AddMapping (metadata.Interfaces, type, @interface));
 		}

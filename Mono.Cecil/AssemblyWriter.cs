@@ -1327,10 +1327,18 @@ namespace Mono.Cecil {
 			var interfaces = type.Interfaces;
 			var type_rid = type.token.RID;
 
-			for (int i = 0; i < interfaces.Count; i++)
-				iface_impl_table.AddRow (new InterfaceImplRow (
+			for (int i = 0; i < interfaces.Count; i++) {
+				var iface_impl = interfaces [i];
+
+				var rid = iface_impl_table.AddRow (new InterfaceImplRow (
 					type_rid,
-					MakeCodedRID (GetTypeToken (interfaces [i]), CodedIndex.TypeDefOrRef)));
+					MakeCodedRID (GetTypeToken (iface_impl.InterfaceType), CodedIndex.TypeDefOrRef)));
+
+				iface_impl.token = new MetadataToken (TokenType.InterfaceImpl, rid);
+
+				if (iface_impl.HasCustomAttributes)
+					AddCustomAttributes (iface_impl);
+			}
 		}
 
 		void AddLayoutInfo (TypeDefinition type)
