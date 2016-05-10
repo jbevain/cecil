@@ -79,19 +79,19 @@ namespace Mono.Cecil.Tests {
 			return Path.Combine (path, "Resources");
 		}
 
-		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null)
+		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
 		{
-			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver));
+			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
 		}
 
-		public static void TestCSharp (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null)
+		public static void TestCSharp (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
 		{
-			Run (new CSharpTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver));
+			Run (new CSharpTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
 		}
 
-		public static void TestIL (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null)
+		public static void TestIL (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
 		{
-			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver));
+			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
 		}
 
 		private static void Run (TestCase testCase)
@@ -121,12 +121,13 @@ namespace Mono.Cecil.Tests {
 		public readonly Type SymbolWriterProvider;
 		public readonly IAssemblyResolver AssemblyResolver;
 		public readonly Action<ModuleDefinition> Test;
+		public readonly bool ApplyWindowsRuntimeProjections;
 
 		public abstract string ModuleLocation { get; }
 
 		protected Assembly Assembly { get { return Test.Method.Module.Assembly; } }
 
-		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver)
+		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
 		{
 			Test = test;
 			Verify = verify;
@@ -134,6 +135,7 @@ namespace Mono.Cecil.Tests {
 			SymbolReaderProvider = symbolReaderProvider;
 			SymbolWriterProvider = symbolWriterProvider;
 			AssemblyResolver = assemblyResolver;
+			ApplyWindowsRuntimeProjections = applyWindowsRuntimeProjections;
 		}
 	}
 
@@ -141,8 +143,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string Module;
 
-		public ModuleTestCase (string module, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver)
-			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver)
+		public ModuleTestCase (string module, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections)
 		{
 			Module = module;
 		}
@@ -157,8 +159,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string File;
 
-		public CSharpTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver)
-			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver)
+		public CSharpTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections)
 		{
 			File = file;
 		}
@@ -176,8 +178,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string File;
 
-		public ILTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver)
-			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver)
+		public ILTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections)
 		{
 			File = file;
 		}
@@ -209,6 +211,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters {
 				SymbolReaderProvider = GetSymbolReaderProvider (),
 				AssemblyResolver = GetAssemblyResolver (),
+				ApplyWindowsRuntimeProjections = test_case.ApplyWindowsRuntimeProjections
 			};
 
 			switch (type) {

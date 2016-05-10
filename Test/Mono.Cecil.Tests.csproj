@@ -32,6 +32,7 @@
     <Compile Include="Mono.Cecil.Tests\ModuleTests.cs" />
     <Compile Include="Mono.Cecil.Tests\NestedTypesTests.cs" />
     <Compile Include="Mono.Cecil.Tests\WindowsRuntimeAssemblyResolver.cs" />
+    <Compile Include="Mono.Cecil.Tests\WindowsRuntimeProjectionsTests.cs" />
     <Content Include="Resources\assemblies\winrtcomp.winmd" />
     <None Include="Resources\il\explicitthis.il" />
     <None Include="Resources\cs\CustomAttributes.cs" />
@@ -77,8 +78,10 @@
     <Content Include="Resources\assemblies\iterator.exe" />
     <Content Include="Resources\assemblies\libhello.dll" />
     <Content Include="Resources\assemblies\libres.dll" />
+    <Content Include="Resources\assemblies\ManagedWinmd.winmd" />
     <Content Include="Resources\assemblies\marshal.dll" />
     <Content Include="Resources\assemblies\mma.exe" />
+    <Content Include="Resources\assemblies\NativeWinmd.winmd" />
     <Content Include="Resources\assemblies\noblob.dll" />
     <Content Include="Resources\assemblies\pinvoke.exe" />
     <Content Include="Resources\assemblies\switch.exe" />
