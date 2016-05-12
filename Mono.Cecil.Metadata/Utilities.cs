@@ -108,6 +108,10 @@ namespace Mono.Cecil {
 					token_type = TokenType.ManifestResource; goto ret;
 				case 19:
 					token_type = TokenType.GenericParam; goto ret;
+				case 20:
+					token_type = TokenType.GenericParamConstraint; goto ret;
+				case 21:
+					token_type = TokenType.MethodSpec; goto ret;
 				default:
 					goto exit;
 				}
@@ -307,6 +311,10 @@ namespace Mono.Cecil {
 					return ret | 18;
 				case TokenType.GenericParam:
 					return ret | 19;
+				case TokenType.GenericParamConstraint:
+					return ret | 20;
+				case TokenType.MethodSpec:
+					return ret | 21;
 				default:
 					goto exit;
 				}

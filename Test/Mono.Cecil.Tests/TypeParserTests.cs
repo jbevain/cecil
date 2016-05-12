@@ -12,7 +12,7 @@ namespace Mono.Cecil.Tests {
 		public void SimpleStringReference ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.String";
 
@@ -31,7 +31,7 @@ namespace Mono.Cecil.Tests {
 		public void SimpleInt32Reference ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.Int32";
 
@@ -66,7 +66,7 @@ namespace Mono.Cecil.Tests {
 		public void ByRefTypeReference ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.String&";
 
@@ -105,7 +105,7 @@ namespace Mono.Cecil.Tests {
 		public void OpenGenericType ()
 		{
 			var module = GetCurrentModule ();
-			var corlib = module.TypeSystem.Corlib;
+			var corlib = module.TypeSystem.CoreLibrary;
 
 			const string fullname = "System.Collections.Generic.Dictionary`2";
 
@@ -149,7 +149,7 @@ namespace Mono.Cecil.Tests {
 
 			var type = TypeParser.ParseType (module, fullname);
 
-			Assert.AreEqual ("Bingo.Foo`1+Bar`1+Baz`1, Bingo, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
+			Assert.AreEqual ("Bingo.Foo`1+Bar`1+Baz`1, Bingo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
 
 			Assert.IsNotNull (type);
 			Assert.AreEqual ("Bingo", type.Scope.Name);
@@ -189,7 +189,7 @@ namespace Mono.Cecil.Tests {
 
 			var type = TypeParser.ParseType (module, fullname);
 
-			Assert.AreEqual ("Bingo.Gazonk[], Bingo, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
+			Assert.AreEqual ("Bingo.Gazonk[], Bingo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", TypeParser.ToParseable (type));
 
 			var array = type as ArrayType;
 			Assert.IsNotNull (array);

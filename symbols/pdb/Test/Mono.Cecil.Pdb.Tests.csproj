@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\Mono.Cecil.Tests.settings" />
   <PropertyGroup>
     <ProjectGuid>{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Pdb.Tests</RootNamespace>
@@ -21,7 +20,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mono.Cecil.Tests\Linq.cs" />
     <Compile Include="Mono.Cecil.Tests\PdbTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -32,5 +30,6 @@
     <Content Include="Resources\assemblies\VBConsApp.exe" />
     <Content Include="Resources\assemblies\VBConsApp.pdb" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\..\Mono.Cecil.Tests.settings" />
+  <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

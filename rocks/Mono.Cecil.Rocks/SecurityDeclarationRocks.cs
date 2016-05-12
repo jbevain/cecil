@@ -8,8 +8,6 @@
 // Licensed under the MIT/X11 license.
 //
 
-#if !SILVERLIGHT && !CF
-
 using System;
 using System.Security;
 using SSP = System.Security.Permissions;
@@ -152,5 +150,3 @@ namespace Mono.Cecil.Rocks {
 		}
 	}
 }
-
-#endif

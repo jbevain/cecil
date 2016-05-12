@@ -8,6 +8,8 @@
 // Licensed under the MIT/X11 license.
 //
 
+#if !PCL
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,9 +35,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-#if !SILVERLIGHT && !CF
 	[Serializable]
-#endif
 	public class AssemblyResolutionException : FileNotFoundException {
 
 		readonly AssemblyNameReference reference;
@@ -50,14 +50,12 @@ namespace Mono.Cecil {
 			this.reference = reference;
 		}
 
-#if !SILVERLIGHT && !CF
 		protected AssemblyResolutionException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 			: base (info, context)
 		{
 		}
-#endif
 	}
 
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
@@ -66,9 +64,7 @@ namespace Mono.Cecil {
 
 		readonly Collection<string> directories;
 
-#if !SILVERLIGHT && !CF
 		Collection<string> gac_paths;
-#endif
 
 		public void AddSearchDirectory (string directory)
 		{
@@ -131,10 +127,9 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 
-#if !SILVERLIGHT && !CF
 			if (name.IsRetargetable) {
 				// if the reference is retargetable, zero it
-				name = new AssemblyNameReference (name.Name, new Version (0, 0, 0, 0)) {
+				name = new AssemblyNameReference (name.Name, Mixin.ZeroVersion) {
 					PublicKeyToken = Empty<byte>.Array,
 				};
 			}
@@ -160,7 +155,6 @@ namespace Mono.Cecil {
 			assembly = SearchDirectory (name, new [] { framework_dir }, parameters);
 			if (assembly != null)
 				return assembly;
-#endif
 
 			if (ResolveFailure != null) {
 				assembly = ResolveFailure (this, name);
@@ -173,7 +167,7 @@ namespace Mono.Cecil {
 
 		AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
 		{
-			var extensions = new [] { ".exe", ".dll" };
+			var extensions = name.IsWindowsRuntime ? new [] { ".winmd", ".dll" } : new [] { ".exe", ".dll" };
 			foreach (var directory in directories) {
 				foreach (var extension in extensions) {
 					string file = Path.Combine (directory, name.Name + extension);
@@ -187,10 +181,9 @@ namespace Mono.Cecil {
 
 		static bool IsZero (Version version)
 		{
-			return version == null || (version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0);
+			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
-#if !SILVERLIGHT && !CF
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
@@ -347,6 +340,7 @@ namespace Mono.Cecil {
 					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
 				reference.Name + ".dll");
 		}
-#endif
 	}
 }
+
+#endif

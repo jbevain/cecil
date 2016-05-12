@@ -160,9 +160,24 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MetroAssembly ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			TestModule ("metro.exe", module => {
 				Assert.AreEqual (ModuleCharacteristics.AppContainer, module.Characteristics & ModuleCharacteristics.AppContainer);
-			}, verify: false, readOnly: Platform.OnMono);
+			}, verify: false);
+		}
+
+		[Test]
+		public void WindowsRuntimeComponentAssembly ()
+		{
+			var resolver = WindowsRuntimeAssemblyResolver.CreateInstance ();
+			if (resolver == null)
+				return;
+
+			TestModule("winrtcomp.winmd", module => {
+				Assert.IsTrue (module.Assembly.Name.IsWindowsRuntime);
+			}, verify: false, assemblyResolver: resolver);
 		}
 	}
 }
