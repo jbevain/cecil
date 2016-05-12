@@ -253,10 +253,10 @@ namespace Mono.Cecil.Tests {
 			if (test_case.AssemblyResolver != null)
 				return test_case.AssemblyResolver;
 
-			var resolver = new DefaultAssemblyResolver ();
+			test_resolver = new DefaultAssemblyResolver ();
 			var directory = Path.GetDirectoryName (test_case.ModuleLocation);
-			resolver.AddSearchDirectory (directory);
-			return resolver;
+			test_resolver.AddSearchDirectory (directory);
+			return test_resolver;
 		}
 
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
@@ -294,7 +294,9 @@ namespace Mono.Cecil.Tests {
 		public void Dispose ()
 		{
 			test_module.Dispose ();
-			test_resolver.Dispose ();
+
+			if (test_resolver != null)
+				test_resolver.Dispose ();
 		}
 	}
 
