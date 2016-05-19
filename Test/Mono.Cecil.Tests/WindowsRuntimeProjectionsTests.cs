@@ -16,6 +16,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CanReadMetadataType ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			TestModule (ModuleName, (module) => {
 				Assert.AreEqual (ExpectedMetadataKind, module.MetadataKind);
 			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
@@ -24,6 +27,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CanProjectParametersAndReturnTypes ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			TestModule (ModuleName, (module) => {
 				var types = ManagedClassTypeNames.Select (typeName => module.Types.Single (t => t.Name == typeName));
 
@@ -44,6 +50,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CanProjectInterfaces ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			TestModule (ModuleName, (module) => {
 				var types = CustomListTypeNames.Select (typeName => module.Types.Single (t => t.Name == typeName));
 
@@ -57,6 +66,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CanStripType ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			var assemblyResolver = WindowsRuntimeAssemblyResolver.CreateInstance ();
 
 			TestModule (ModuleName, (originalModule) => {
@@ -93,6 +105,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CanProjectClasses ()
 		{
+			if (Platform.OnMono)
+				return;
+
 			TestModule (ModuleName, (module) => {
 				var managedClassType = module.Types.Single (t => t.Name == "ManagedClass");
 				Assert.AreEqual ("<CLR>ManagedClass", managedClassType.WindowsRuntimeProjection.Name);
