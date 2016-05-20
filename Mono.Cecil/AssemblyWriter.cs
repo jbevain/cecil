@@ -918,7 +918,7 @@ namespace Mono.Cecil {
 			var references = module.AssemblyReferences;
 			var table = GetTable<AssemblyRefTable> (Table.AssemblyRef);
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				module.Projections.RemoveVirtualReferences (references);
 
 			for (int i = 0; i < references.Count; i++) {
@@ -944,7 +944,7 @@ namespace Mono.Cecil {
 				reference.token = new MetadataToken (TokenType.AssemblyRef, rid);
 			}
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				module.Projections.AddVirtualReferences (references);
 		}
 

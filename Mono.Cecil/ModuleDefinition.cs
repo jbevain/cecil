@@ -1214,5 +1214,10 @@ namespace Mono.Cecil {
 				return "v4.0.30319";
 			}
 		}
+
+		public static bool IsWindowsMetadata (this ModuleDefinition module)
+		{
+			return module.MetadataKind != MetadataKind.Ecma335;
+		}
 	}
 }

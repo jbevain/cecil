@@ -555,7 +555,7 @@ namespace Mono.Cecil {
 			InitializeAssemblyReferences ();
 
 			var references = new Collection<AssemblyNameReference> (metadata.AssemblyReferences);
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				module.Projections.AddVirtualReferences (references);
 
 			return references;
@@ -898,7 +898,7 @@ namespace Mono.Cecil {
 			if (IsNested (attributes))
 				type.DeclaringType = GetNestedTypeDeclaringType (type);
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				WindowsRuntimeProjections.Project (type);
 
 			return type;
@@ -1084,7 +1084,7 @@ namespace Mono.Cecil {
 
 			MetadataSystem.TryProcessPrimitiveTypeReference (type);
 
-			if (type.Module.MetadataKind != MetadataKind.Ecma335)
+			if (type.Module.IsWindowsMetadata ())
 				WindowsRuntimeProjections.Project (type);
 
 			return type;
@@ -1235,7 +1235,7 @@ namespace Mono.Cecil {
 
 			fields.Add (field);
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				WindowsRuntimeProjections.Project (field);
 		}
 
@@ -1758,7 +1758,7 @@ namespace Mono.Cecil {
 				base.position = position;
 			}
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				WindowsRuntimeProjections.Project (method);
 		}
 
@@ -2271,7 +2271,7 @@ namespace Mono.Cecil {
 
 			member.token = new MetadataToken (TokenType.MemberRef, rid);
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				WindowsRuntimeProjections.Project (member);
 
 			return member;
@@ -2444,7 +2444,7 @@ namespace Mono.Cecil {
 
 			metadata.RemoveCustomAttributeRange (owner);
 
-			if (module.MetadataKind != MetadataKind.Ecma335)
+			if (module.IsWindowsMetadata ())
 				foreach (var custom_attribute in custom_attributes)
 					WindowsRuntimeProjections.Project (owner, custom_attribute);
 
