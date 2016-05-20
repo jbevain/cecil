@@ -517,7 +517,7 @@ namespace Mono.Cecil {
 				Culture = name.Culture,
 				HashAlgorithm = name.HashAlgorithm,
 				IsRetargetable = name.IsRetargetable,
-				IsWindowsRuntime = name.IsWindowsRuntime
+				IsWindowsRuntime = name.IsWindowsRuntime,
 			};
 
 			var pk_token = !name.PublicKeyToken.IsNullOrEmpty ()
