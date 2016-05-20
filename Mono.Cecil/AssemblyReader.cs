@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 #endif
 #endif
 
-			GetMetadataKind(module, parameters);
+			GetMetadataKind (module, parameters);
 
 			reader.ReadModule ();
 
