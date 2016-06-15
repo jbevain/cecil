@@ -40,6 +40,7 @@ namespace Mono.Cecil {
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
+		bool projections;
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
@@ -83,6 +84,11 @@ namespace Mono.Cecil {
 		public bool ReadSymbols {
 			get { return read_symbols; }
 			set { read_symbols = value; }
+		}
+
+		public bool ApplyWindowsRuntimeProjections {
+			get { return projections; }
+			set { projections = value; }
 		}
 
 		public ReaderParameters ()
@@ -230,6 +236,8 @@ namespace Mono.Cecil {
 
 		internal string runtime_version;
 		internal ModuleKind kind;
+		WindowsRuntimeProjections projections;
+		MetadataKind metadata_kind;
 		TargetRuntime runtime;
 		TargetArchitecture architecture;
 		ModuleAttributes attributes;
@@ -259,6 +267,20 @@ namespace Mono.Cecil {
 		public ModuleKind Kind {
 			get { return kind; }
 			set { kind = value; }
+		}
+
+		public MetadataKind MetadataKind {
+			get { return metadata_kind; }
+			set { metadata_kind = value; }
+		}
+
+		internal WindowsRuntimeProjections Projections {
+			get {
+				if (projections == null)
+					Interlocked.CompareExchange (ref projections, new WindowsRuntimeProjections (this), null);
+
+				return projections;
+			}
 		}
 
 		public TargetRuntime Runtime {
@@ -1191,6 +1213,11 @@ namespace Mono.Cecil {
 			default:
 				return "v4.0.30319";
 			}
+		}
+
+		public static bool IsWindowsMetadata (this ModuleDefinition module)
+		{
+			return module.MetadataKind != MetadataKind.Ecma335;
 		}
 	}
 }
