@@ -9,13 +9,13 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 #if !READ_ONLY
 
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
-
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
@@ -29,7 +29,9 @@ namespace Mono.Cecil.PE {
 		ImageDebugDirectory debug_directory;
 		byte [] debug_data;
 
+		RVA win32_rva;
 		ByteBuffer win32_resources;
+		ResourceDirectory win32_resources_directory;
 
 		const uint pe_header_size = 0x98u;
 		const uint section_header_size = 0x28u;
@@ -75,12 +77,24 @@ namespace Mono.Cecil.PE {
 
 		void GetWin32Resources ()
 		{
-			var rsrc = GetImageResourceSection ();
+			if (module.Win32Resources != null)
+			{
+				win32_rva = module.Win32RVA;
+				win32_resources = new ByteBuffer(module.Win32Resources);
+				return;
+			}
+			if (module.Win32ResourceDirectory != null && module.Win32ResourceDirectory.Entries.Count > 0)
+			{
+				win32_resources_directory = module.Win32ResourceDirectory;
+				return;
+			}
+			var rsrc = GetImageResourceSection();
 			if (rsrc == null)
 				return;
 
 			var raw_resources = new byte [rsrc.Data.Length];
 			Buffer.BlockCopy (rsrc.Data, 0, raw_resources, 0, rsrc.Data.Length);
+			win32_rva = rsrc.VirtualAddress;
 			win32_resources = new ByteBuffer (raw_resources);
 		}
 
@@ -103,17 +117,22 @@ namespace Mono.Cecil.PE {
 
 		void BuildSections ()
 		{
-			var has_win32_resources = win32_resources != null;
-			if (has_win32_resources)
+			if (win32_resources != null || win32_resources_directory != null)
 				sections++;
 
 			text = CreateSection (".text", text_map.GetLength (), null);
 			var previous = text;
 
-			if (has_win32_resources) {
+			if (win32_resources != null) {
 				rsrc = CreateSection (".rsrc", (uint) win32_resources.length, previous);
 
 				PatchWin32Resources (win32_resources);
+				previous = rsrc;
+			} else if (win32_resources_directory != null && win32_resources_directory.Entries.Count > 0) {
+				rsrc = CreateSection(".rsrc", previous);
+
+				WriteWin32ResourcesDirectory(win32_resources_directory);
+				SetSectionSize(rsrc, (uint) win32_resources.length);
 				previous = rsrc;
 			}
 
@@ -123,16 +142,28 @@ namespace Mono.Cecil.PE {
 
 		Section CreateSection (string name, uint size, Section previous)
 		{
-			return new Section {
+			var ret = CreateSection(name, previous);
+			SetSectionSize(ret, size);
+			return ret;
+		}
+
+		void SetSectionSize(Section ret, uint size)
+		{
+			ret.VirtualSize = size;
+			ret.SizeOfRawData = Align(size, file_alignment);
+		}
+
+		Section CreateSection(string name, Section previous)
+		{
+			return new Section
+			{
 				Name = name,
 				VirtualAddress = previous != null
 					? previous.VirtualAddress + Align (previous.VirtualSize, section_alignment)
 					: text_rva,
-				VirtualSize = size,
 				PointerToRawData = previous != null
 					? previous.PointerToRawData + previous.SizeOfRawData
-					: Align (GetHeaderSize (), file_alignment),
-				SizeOfRawData = Align (size, file_alignment)
+					: Align (GetHeaderSize (), file_alignment)
 			};
 		}
 
@@ -815,10 +846,143 @@ namespace Mono.Cecil.PE {
 
 		void PatchResourceDataEntry (ByteBuffer resources)
 		{
-			var old_rsrc = GetImageResourceSection ();
 			var rva = resources.ReadUInt32 ();
 			resources.position -= 4;
-			resources.WriteUInt32 (rva - old_rsrc.VirtualAddress + rsrc.VirtualAddress);
+			resources.WriteUInt32 (rva - win32_rva + rsrc.VirtualAddress);
+		}
+
+		private static int GetDirectoryLength(ResourceDirectory dir)
+		{
+			int length = 16 + dir.Entries.Count * 8;
+			foreach (ResourceEntry entry in dir.Entries)
+				length += GetDirectoryLength(entry);
+			return length;
+		}
+
+		private static int GetDirectoryLength(ResourceEntry entry)
+		{
+			if (entry.Data != null)
+				return 16;
+			return GetDirectoryLength(entry.Directory);
+		}
+
+		private void WriteWin32ResourcesDirectory(ResourceDirectory directory)
+		{
+			win32_resources = new ByteBuffer();
+			if (directory.Entries.Count != 0)
+			{
+				int stringTableOffset = GetDirectoryLength(directory);
+				Dictionary<string, int> strings = new Dictionary<string, int>();
+				ByteBuffer stringTable = new ByteBuffer(16);
+				int offset = 16 + directory.Entries.Count * 8;
+				for (int pass = 0; pass < 3; pass++)
+					Write(directory, pass, 0, ref offset, strings, ref stringTableOffset, stringTable);
+				// the pecoff spec says that the string table is between the directory entries and the data entries,
+				// but the windows linker puts them after the data entries, so we do too.
+				stringTable.Align(4);
+				offset += stringTable.length;
+				WriteResourceDataEntries(directory, ref offset);
+				win32_resources.WriteBytes(stringTable);
+				WriteData(directory);
+			}
+		}
+
+		private void WriteResourceDataEntries(ResourceDirectory directory, ref int offset)
+		{
+			foreach (ResourceEntry entry in directory.Entries)
+			{
+				if (entry.Data != null)
+				{
+					win32_resources.WriteUInt32((uint) (rsrc.VirtualAddress + offset));
+					win32_resources.WriteInt32(entry.Data.Length);
+					win32_resources.WriteUInt32(entry.CodePage);
+					win32_resources.WriteUInt32(entry.Reserved);
+					offset += (entry.Data.Length + 3) & ~3;
+				}
+				else
+				{
+					WriteResourceDataEntries(entry.Directory, ref offset);
+				}
+			}
+		}
+
+		private void WriteData(ResourceDirectory directory)
+		{
+			foreach (ResourceEntry entry in directory.Entries)
+			{
+				if (entry.Data != null)
+				{
+					win32_resources.WriteBytes(entry.Data);
+					win32_resources.Align(4);
+				}
+				else
+				{
+					WriteData(entry.Directory);
+				}
+			}
+		}
+
+		private void Write(ResourceDirectory directory, int writeDepth, int currentDepth, ref int offset, Dictionary<string, int> strings, ref int stringTableOffset, ByteBuffer stringTable)
+		{
+			if (currentDepth == writeDepth)
+			{
+				ushort namedEntries = directory.SortEntries();
+				// directory header
+				win32_resources.WriteUInt32(directory.Characteristics);
+				win32_resources.WriteUInt32(directory.TimeDateStamp);
+				win32_resources.WriteUInt16(directory.MajorVersion);
+				win32_resources.WriteUInt16(directory.MinVersion);
+				win32_resources.WriteUInt16(namedEntries);
+				win32_resources.WriteUInt16((ushort)(directory.Entries.Count - namedEntries));
+				foreach (ResourceEntry entry in directory.Entries)
+				{
+					WriteEntry(entry, ref offset, strings, ref stringTableOffset, stringTable);
+				}
+			}
+			else
+			{
+				foreach (ResourceEntry entry in directory.Entries)
+				{
+					Write(entry.Directory, writeDepth, currentDepth + 1, ref offset, strings, ref stringTableOffset, stringTable);
+				}
+			}
+		}
+
+		private void WriteEntry(ResourceEntry entry, ref int offset, Dictionary<string, int> strings, ref int stringTableOffset, ByteBuffer stringTable)
+		{
+			WriteNameOrOrdinal(entry, strings, ref stringTableOffset, stringTable);
+			if (entry.Data == null)
+			{
+				win32_resources.WriteUInt32(0x80000000U | (uint)offset);
+				offset += entry.Directory.Entries.Count * 8;
+			}
+			else
+			{
+				win32_resources.WriteUInt32((uint)offset);
+			}
+			offset += 16;
+		}
+
+		private void WriteNameOrOrdinal(ResourceEntry entry, Dictionary<string, int> strings, ref int stringTableOffset, ByteBuffer stringTable)
+		{
+			if (entry.Name == null)
+			{
+				win32_resources.WriteUInt32(entry.Id);
+			}
+			else
+			{
+				int stringOffset;
+				if (!strings.TryGetValue(entry.Name, out stringOffset))
+				{
+					stringOffset = stringTableOffset;
+					strings.Add(entry.Name, stringOffset);
+					stringTableOffset += entry.Name.Length * 2 + 2;
+					stringTable.WriteUInt16((ushort)entry.Name.Length);
+					foreach (char c in entry.Name)
+						stringTable.WriteInt16((short)c);
+				}
+				win32_resources.WriteUInt32(0x80000000U | (uint)stringOffset);
+			}
 		}
 	}
 }

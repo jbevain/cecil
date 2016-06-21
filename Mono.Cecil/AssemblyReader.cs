@@ -132,6 +132,7 @@ namespace Mono.Cecil {
 			this.module.Read (this.module, (module, reader) => {
 				ReadModuleManifest (reader);
 				ReadModule (module, resolve: true);
+				module.MetadataSystem.Clear();
 				return module;
 			});
 		}

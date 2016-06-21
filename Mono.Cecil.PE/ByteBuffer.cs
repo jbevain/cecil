@@ -335,6 +335,17 @@ namespace Mono.Cecil.PE {
 			this.buffer = buffer;
 		}
 
+		public void Align(int alignment)
+		{
+			if (position + alignment > buffer.Length)
+				Grow(alignment);
+			int newpos = (position + alignment - 1) & ~(alignment - 1);
+			while (position < newpos)
+				buffer[position++] = 0;
+		}
+
+
+
 #endif
 
 	}

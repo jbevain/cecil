@@ -11,10 +11,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.Cci.Pdb;
 
 using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Pdb {
 
@@ -85,7 +85,12 @@ namespace Mono.Cecil.Pdb {
 			return true;
 		}
 
-		public void Read (MethodBody body, InstructionMapper mapper)
+		public MethodSymbols Create (MethodBody methodBody)
+		{
+			return new PdbMethodSymbols(methodBody);
+		}
+
+		public void Read (MethodBody body, InstructionMapper mapper, ISymbolReaderResolver symbolReaderResolver)
 		{
 			var method_token = body.Method.MetadataToken;
 
@@ -95,47 +100,43 @@ namespace Mono.Cecil.Pdb {
 
 			ReadSequencePoints (function, mapper);
 			ReadScopeAndLocals (function.scopes, null, body, mapper);
+
+			body.Symbols = new PdbMethodSymbols (body);
+			ReadSymbols(body.Symbols, symbolReaderResolver, function);
+		}
+
+		static void SetInstructionRange (MethodBody body, InstructionMapper mapper,	InstructionRange range, uint offset, uint length)
+		{
+			range.Start = mapper ((int) offset);
+			range.End   = mapper ((int)(offset + length));
+
+			if (range.End == null) range.End = body.Instructions[body.Instructions.Count - 1];
+			else                   range.End = range.End.Previous;
+
+			if (range.Start == null) range.Start = range.End;
 		}
 
 		static void ReadScopeAndLocals (PdbScope [] scopes, Scope parent, MethodBody body, InstructionMapper mapper)
 		{
 			foreach (PdbScope scope in scopes)
 				ReadScopeAndLocals (scope, parent, body, mapper);
-
-			CreateRootScope (body);
-		}
-
-		static void CreateRootScope (MethodBody body)
-		{
-			if (!body.HasVariables)
-				return;
-
-			var instructions = body.Instructions;
-
-			var root = new Scope ();
-			root.Start = instructions [0];
-			root.End = instructions [instructions.Count - 1];
-
-			var variables = body.Variables;
-			for (int i = 0; i < variables.Count; i++)
-				root.Variables.Add (variables [i]);
-
-			body.Scope = root;
 		}
 
 		static void ReadScopeAndLocals (PdbScope scope, Scope parent, MethodBody body, InstructionMapper mapper)
 		{
-			//Scope s = new Scope ();
-			//s.Start = GetInstruction (body, instructions, (int) scope.address);
-			//s.End = GetInstruction (body, instructions, (int) scope.length - 1);
-
-			//if (parent != null)
-			//	parent.Scopes.Add (s);
-			//else
-			//	body.Scopes.Add (s);
-
 			if (scope == null)
 				return;
+
+			Scope s = new Scope ();
+			SetInstructionRange (body, mapper, s, scope.offset, scope.length);
+
+			if (parent != null)
+				parent.Scopes.Add (s);
+			else
+			if (body.Scope == null)
+				body.Scope = s;
+			else
+				throw new InvalidDataException () ;
 
 			foreach (PdbSlot slot in scope.slots) {
 				int index = (int) slot.slot;
@@ -145,10 +146,10 @@ namespace Mono.Cecil.Pdb {
 				VariableDefinition variable = body.Variables [index];
 				variable.Name = slot.name;
 
-				//s.Variables.Add (variable);
+				s.Variables.Add (variable);
 			}
 
-			ReadScopeAndLocals (scope.scopes, null /* s */, body, mapper);
+			ReadScopeAndLocals (scope.scopes, s, body, mapper);
 		}
 
 		void ReadSequencePoints (PdbFunction function, InstructionMapper mapper)
@@ -199,37 +200,102 @@ namespace Mono.Cecil.Pdb {
 			return document;
 		}
 
-		public void Read (MethodSymbols symbols)
+		public void Read (MethodSymbols symbols, ISymbolReaderResolver symbolReaderResolver)
 		{
 			PdbFunction function;
-			if (!functions.TryGetValue (symbols.MethodToken.ToUInt32 (), out function))
+			if (!functions.TryGetValue (symbols.OriginalMethodToken.ToUInt32 (), out function))
 				return;
 
 			ReadSequencePoints (function, symbols);
-			ReadLocals (function.scopes, symbols);
+			ReadScopeAndLocals (function.scopes, null, symbols);
+
+		    ReadSymbols (symbols, symbolReaderResolver, function);
 		}
 
-		void ReadLocals (PdbScope [] scopes, MethodSymbols symbols)
+		private static void ReadSymbols (MethodSymbols symbols, ISymbolReaderResolver symbolReaderResolver, PdbFunction function)
 		{
-			foreach (var scope in scopes)
-				ReadLocals (scope, symbols);
+			var pdbSymbols = symbols as PdbMethodSymbols;
+			if (pdbSymbols != null) {
+				// Iterator info
+				pdbSymbols.IteratorClass = function.iteratorClass;
+
+			    if (function.iteratorScopes != null) {
+			        pdbSymbols.IteratorScopes = new Collection<PdbIteratorScope> ();
+					foreach (var iteratorScope in function.iteratorScopes) {
+						pdbSymbols.IteratorScopes.Add (new PdbIteratorScope (
+							CodeReader.GetInstruction(symbols.Body.Instructions, (int)iteratorScope.Offset), // start
+							CodeReader.GetInstruction(symbols.Body.Instructions, (int)iteratorScope.Offset + (int)iteratorScope.Length) // end
+								?? CodeReader.GetInstruction(symbols.Body.Instructions, (int)iteratorScope.Offset + (int)iteratorScope.Length + 1) // alternative end
+							));
+					}
+			    }
+
+				// Using info
+				pdbSymbols.MethodWhoseUsingInfoAppliesToThisMethod = symbolReaderResolver.LookupMethod (new MetadataToken (function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod));
+
+				// Note: since we don't generate scopes from PDB, we use first scope and ignore custom data stored in function.usedNamespaces for now
+			    if (function.scopes.Length > 0 && function.scopes [0].usedNamespaces.Length > 0) {
+			        pdbSymbols.UsedNamespaces = new Collection<string> (function.scopes[0].usedNamespaces);
+			    }
+			    if (function.usingCounts != null) {
+					pdbSymbols.UsingCounts = new Collection<ushort>(function.usingCounts);
+				}
+
+				// Store asyncMethodInfo
+				if (function.synchronizationInformation != null) {
+					pdbSymbols.SynchronizationInformation = new PdbSynchronizationInformation {
+						KickoffMethod = symbolReaderResolver.LookupMethod (new MetadataToken (function.synchronizationInformation.kickoffMethodToken)),
+						GeneratedCatchHandlerIlOffset = function.synchronizationInformation.generatedCatchHandlerIlOffset,
+					};
+					if (function.synchronizationInformation.synchronizationPoints != null) {
+						pdbSymbols.SynchronizationInformation.SynchronizationPoints = new Collection<PdbSynchronizationPoint> ();
+						foreach (var synchronizationPoint in function.synchronizationInformation.synchronizationPoints) {
+							pdbSymbols.SynchronizationInformation.SynchronizationPoints.Add (new PdbSynchronizationPoint {
+								SynchronizeOffset = synchronizationPoint.synchronizeOffset,
+								ContinuationMethod = symbolReaderResolver.LookupMethod(new MetadataToken(synchronizationPoint.continuationMethodToken)),
+								ContinuationOffset = synchronizationPoint.continuationOffset,
+							});
+						}
+					}
+				}
+			}
 		}
 
-		void ReadLocals (PdbScope scope, MethodSymbols symbols)
+
+		static void ReadScopeAndLocals (PdbScope [] scopes, ScopeSymbol parent, MethodSymbols symbols)
+		{
+			foreach (PdbScope scope in scopes)
+				ReadScopeAndLocals (scope, parent, symbols);
+		}
+
+		static void ReadScopeAndLocals (PdbScope scope, ScopeSymbol parent, MethodSymbols symbols)
 		{
 			if (scope == null)
 				return;
 
-			foreach (var slot in scope.slots) {
+			ScopeSymbol s = new ScopeSymbol ();
+			s.start = (int) scope.offset;
+			s.end   = (int)(scope.offset + scope.length);
+
+			if (parent != null)
+				parent.Scopes.Add (s);
+			else if (symbols.scope == null)
+				symbols.scope = s;
+			else
+				throw new InvalidDataException () ;
+
+			foreach (PdbSlot slot in scope.slots) {
 				int index = (int) slot.slot;
 				if (index < 0 || index >= symbols.Variables.Count)
 					continue;
 
-				var variable = symbols.Variables [index];
+				VariableDefinition variable = symbols.Variables [index];
 				variable.Name = slot.name;
+
+				s.Variables.Add (variable);
 			}
 
-			ReadLocals (scope.scopes, symbols);
+			ReadScopeAndLocals (scope.scopes, s, symbols);
 		}
 
 		void ReadSequencePoints (PdbFunction function, MethodSymbols symbols)

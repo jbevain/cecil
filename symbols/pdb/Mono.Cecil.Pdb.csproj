@@ -40,10 +40,12 @@
     <Compile Include="Microsoft.Cci.Pdb\PdbTokenLine.cs" />
     <Compile Include="Microsoft.Cci.Pdb\SourceLocationProvider.cs" />
     <Compile Include="Mono.Cecil.Pdb\AssemblyInfo.cs" />
+    <Compile Include="Mono.Cecil.Pdb\PdbMethodSymbols.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedDocumentWriter.cs" />
     <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedWriter2.cs" />
     <Compile Include="Mono.Cecil.Pdb\ModuleMetadata.cs" />
     <Compile Include="Mono.Cecil.Pdb\PdbHelper.cs" />
+    <Compile Include="Mono.Cecil.Pdb\PdbIteratorScope.cs" />
     <Compile Include="Mono.Cecil.Pdb\PdbReader.cs" />
     <Compile Include="Mono.Cecil.Pdb\PdbWriter.cs" />
     <Compile Include="Mono.Cecil.Pdb\SymDocumentWriter.cs" />

@@ -82,10 +82,7 @@ namespace Mono.Cecil.Cil {
 
 			WriteBytes (buffer);
 
-			if (symbols.instructions.IsNullOrEmpty ())
-				return;
-
-			symbols.method_token = method.token;
+			symbols.original_method_token = method.token;
 			symbols.local_var_token = GetLocalVarToken (buffer, symbols);
 
 			var symbol_writer = metadata.symbol_writer;

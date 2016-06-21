@@ -17,6 +17,7 @@
     <Compile Include="Mono.Cecil.Cil\OpCode.cs" />
     <Compile Include="Mono.Cecil.Cil\OpCodes.cs" />
     <Compile Include="Mono.Cecil.Cil\SequencePoint.cs" />
+    <Compile Include="Mono.Cecil.Cil\SymbolReaderResolver.cs" />
     <Compile Include="Mono.Cecil.Cil\Symbols.cs" />
     <Compile Include="Mono.Cecil.Cil\VariableDefinition.cs" />
     <Compile Include="Mono.Cecil.Cil\VariableReference.cs" />
@@ -41,6 +42,9 @@
     <Compile Include="Mono.Cecil.PE\Image.cs" />
     <Compile Include="Mono.Cecil.PE\ImageReader.cs" />
     <Compile Include="Mono.Cecil.PE\ImageWriter.cs" />
+    <Compile Include="Mono.Cecil.PE\ResourceDirectory.cs" />
+    <Compile Include="Mono.Cecil.PE\ResourceEntry.cs" />
+    <Compile Include="Mono.Cecil.PE\RsrcReader.cs" />
     <Compile Include="Mono.Cecil.PE\Section.cs" />
     <Compile Include="Mono.Cecil.PE\TextMap.cs" />
     <Compile Include="Mono.Cecil\ArrayType.cs" />

@@ -128,6 +128,14 @@ namespace Mono.Collections.Generic {
 			version++;
 		}
 
+		public void SetCapacity(int capacity)
+		{
+			if (size < capacity)
+			{
+				Grow(capacity-size);
+			}
+		}
+
 		public bool Contains (T item)
 		{
 			return IndexOf (item) != -1;
@@ -323,6 +331,11 @@ namespace Mono.Collections.Generic {
 		void IList.RemoveAt (int index)
 		{
 			RemoveAt (index);
+		}
+
+		public void Sort(IComparer<T> cmp)
+		{
+			Array.Sort(items, 0, size, cmp);
 		}
 
 		void ICollection.CopyTo (Array array, int index)

@@ -9,6 +9,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using SR = System.Reflection;
@@ -29,13 +30,10 @@ namespace Mono.Cecil.Cil {
 		public int PointerToRawData;
 	}
 
-	public sealed class Scope : IVariableDefinitionProvider {
+	public class InstructionRange {
 
 		Instruction start;
 		Instruction end;
-
-		Collection<Scope> scopes;
-		Collection<VariableDefinition> variables;
 
 		public Instruction Start {
 			get { return start; }
@@ -46,6 +44,12 @@ namespace Mono.Cecil.Cil {
 			get { return end; }
 			set { end = value; }
 		}
+	}
+
+	public sealed class Scope : InstructionRange, IVariableDefinitionProvider {
+
+		Collection<Scope> scopes;
+		Collection<VariableDefinition> variables;
 
 		public bool HasScopes {
 			get { return !scopes.IsNullOrEmpty (); }
@@ -55,6 +59,52 @@ namespace Mono.Cecil.Cil {
 			get {
 				if (scopes == null)
 					scopes = new Collection<Scope> ();
+
+				return scopes;
+			}
+		}
+
+		public bool HasVariables {
+			get { return !variables.IsNullOrEmpty (); }
+		}
+
+		public Collection<VariableDefinition> Variables {
+			get {
+				if (variables == null)
+					variables = new Collection<VariableDefinition> ();
+
+				return variables;
+			}
+		}
+	}
+
+	public class RangeSymbol {
+
+		internal int start;
+		internal int end;
+
+		public int Start {
+			get { return start; }
+		}
+
+		public int End {
+			get { return end; }
+		}
+	}
+
+	public sealed class ScopeSymbol : RangeSymbol, IVariableDefinitionProvider {
+
+		Collection<ScopeSymbol> scopes;
+		Collection<VariableDefinition> variables;
+
+		public bool HasScopes {
+			get { return !scopes.IsNullOrEmpty (); }
+		}
+
+		public Collection<ScopeSymbol> Scopes {
+			get {
+				if (scopes == null)
+					scopes = new Collection<ScopeSymbol> ();
 
 				return scopes;
 			}
@@ -86,16 +136,22 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	public sealed class MethodSymbols {
-
+	public class MethodSymbols
+	{
+		internal MethodBody method_body;
 		internal int code_size;
-		internal string method_name;
-		internal MetadataToken method_token;
+		internal MetadataToken original_method_token;
+		internal ScopeSymbol scope;
 		internal MetadataToken local_var_token;
 		internal Collection<VariableDefinition> variables;
 		internal Collection<InstructionSymbol> instructions;
 
-		public bool HasVariables {
+		public MethodBody Body {
+			get { return method_body; }
+			set { method_body = value; }
+		}
+
+	    public bool HasVariables {
 			get { return !variables.IsNullOrEmpty (); }
 		}
 
@@ -117,40 +173,73 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
+		public ScopeSymbol Scope {
+			get { return scope; }
+		}
+
 		public int CodeSize {
 			get { return code_size; }
+			set { code_size = value; }
 		}
 
 		public string MethodName {
-			get { return method_name; }
+			get { return method_body.Method.Name; }
 		}
 
-		public MetadataToken MethodToken {
-			get { return method_token; }
+		public MetadataToken OriginalMethodToken {
+			get { return original_method_token; }
+			set { original_method_token = value; }
 		}
 
 		public MetadataToken LocalVarToken {
 			get { return local_var_token; }
+			set { local_var_token = value; }
 		}
 
-		internal MethodSymbols (string methodName)
-		{
-			this.method_name = methodName;
-		}
+	    public virtual MethodSymbols Clone ()
+	    {
+	        var result = new MethodSymbols (method_body);
+	        CloneTo (result);
+	        return result;
+	    }
 
-		public MethodSymbols (MetadataToken methodToken)
+	    protected void CloneTo (MethodSymbols symbols)
+	    {
+	        symbols.method_body = method_body;
+	        symbols.code_size = code_size;
+	        symbols.original_method_token = original_method_token;
+	        symbols.local_var_token = local_var_token;
+
+	        if (variables != null) {
+	            symbols.variables = new Collection<VariableDefinition> (variables);
+	        }
+
+	        if (instructions != null) {
+	            symbols.instructions = new Collection<InstructionSymbol> ();
+	            foreach (var instruction in instructions) {
+	                symbols.instructions.Add (new InstructionSymbol (instruction.Offset, instruction.SequencePoint));
+	            }
+	        }
+	    }
+
+		public MethodSymbols (MethodBody methodBody)
 		{
-			this.method_token = methodToken;
+			this.method_body = methodBody;
 		}
 	}
 
 	public delegate Instruction InstructionMapper (int offset);
 
+	public interface ISymbolReaderResolver {
+		MethodReference LookupMethod(MetadataToken old_token);
+	}
+
 	public interface ISymbolReader : IDisposable {
 
+		MethodSymbols Create (MethodBody methodBody);
 		bool ProcessDebugHeader (ImageDebugDirectory directory, byte [] header);
-		void Read (MethodBody body, InstructionMapper mapper);
-		void Read (MethodSymbols symbols);
+		void Read (MethodBody body, InstructionMapper mapper, ISymbolReaderResolver symbolReaderResolver);
+		void Read (MethodSymbols symbols, ISymbolReaderResolver symbolReaderResolver);
 	}
 
 	public interface ISymbolReaderProvider {

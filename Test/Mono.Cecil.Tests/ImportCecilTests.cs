@@ -370,5 +370,22 @@ namespace Mono.Cecil.Tests {
 
 			return "ImportCecil_" + stack_frame.GetMethod ().Name;
 		}
+
+		internal static T GenericMethod<T>(T[,] array)
+		{
+			return array[0,0];
+		}
+
+		[Test]
+		public void MethodContextGenericTest()
+		{
+			var module = ModuleDefinition.ReadModule(typeof(ContextGeneric1Method2<>).Module.FullyQualifiedName);
+			var type_def = GetType().ToDefinition();
+			var meth_def = type_def.GetMethod("GenericMethod");
+			var meth_ref = module.Import(meth_def);
+			var instr = meth_def.Body.Instructions.First(i => i.OpCode.OperandType == OperandType.InlineMethod);
+			var method = module.Import((MethodReference)instr.Operand, meth_ref);
+			Assert.AreEqual("T T[0...,0...]::Get(System.Int32,System.Int32)", method.FullName);
+		}
 	}
 }

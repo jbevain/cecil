@@ -243,7 +243,7 @@ namespace Mono.Cecil.Mdb {
 			public SourceMethodSymbol (MethodSymbols symbols)
 			{
 				name = symbols.MethodName;
-				token = symbols.MethodToken.ToInt32 ();
+				token = symbols.OriginalMethodToken.ToInt32 ();
 			}
 		}
 
