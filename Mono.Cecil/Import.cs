@@ -55,13 +55,18 @@ namespace Mono.Cecil {
 				if (candidate == null)
 					continue;
 
-				if (method != candidate.Name)
+				if (method != NormalizeMethodName (candidate))
 					continue;
 
 				return candidate.GenericParameters [position];
 			}
 
 			throw new InvalidOperationException ();
+		}
+
+		public string NormalizeMethodName (MethodReference method)
+		{
+			return method.DeclaringType.FullName + "." + method.Name;
 		}
 
 		public TypeReference TypeParameter (string type, int position)
@@ -198,18 +203,23 @@ namespace Mono.Cecil {
 				throw new InvalidOperationException ();
 
 			if (type.DeclaringMethod != null)
-				return context.MethodParameter (type.DeclaringMethod.Name, type.GenericParameterPosition);
+				return context.MethodParameter (NormalizeMethodName (type.DeclaringMethod), type.GenericParameterPosition);
 
 			if (type.DeclaringType != null)
-				return  context.TypeParameter (NormalizedFullName (type.DeclaringType), type.GenericParameterPosition);
+				return context.TypeParameter (NormalizeTypeFullName (type.DeclaringType), type.GenericParameterPosition);
 
 			throw new InvalidOperationException();
 		}
 
-		private static string NormalizedFullName (Type type)
+		static string NormalizeMethodName (SR.MethodBase method)
+		{
+			return NormalizeTypeFullName (method.DeclaringType) + "." + method.Name;
+		}
+
+		static string NormalizeTypeFullName (Type type)
 		{
 			if (IsNestedType (type))
-				return NormalizedFullName (type.DeclaringType) + "/" + type.Name;
+				return NormalizeTypeFullName (type.DeclaringType) + "/" + type.Name;
 
 			return type.FullName;
 		}
@@ -576,7 +586,7 @@ namespace Mono.Cecil {
 				var mvar_parameter = (GenericParameter) type;
 				if (mvar_parameter.DeclaringMethod == null)
 					throw new InvalidOperationException ();
-				return context.MethodParameter (mvar_parameter.DeclaringMethod.Name, mvar_parameter.Position);
+				return context.MethodParameter (context.NormalizeMethodName (mvar_parameter.DeclaringMethod), mvar_parameter.Position);
 			}
 
 			throw new NotSupportedException (type.etype.ToString ());
