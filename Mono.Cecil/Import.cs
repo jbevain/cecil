@@ -90,7 +90,7 @@ namespace Mono.Cecil {
 
 		public string NormalizeMethodName (MethodReference method)
 		{
-			return method.DeclaringType.FullName + "." + method.Name;
+			return method.DeclaringType.GetElementType ().FullName + "." + method.Name;
 		}
 
 		public TypeReference TypeParameter (string type, int position)
