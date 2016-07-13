@@ -10,7 +10,7 @@
 
 using System;
 using System.Collections;
-using System .Collections.Generic;
+using System.Collections.Generic;
 
 namespace Mono.Collections.Generic {
 
@@ -34,7 +34,7 @@ namespace Mono.Collections.Generic {
 			get { return true; }
 		}
 
-		private ReadOnlyCollection ()
+		ReadOnlyCollection ()
 		{
 		}
 

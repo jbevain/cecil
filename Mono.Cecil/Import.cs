@@ -760,7 +760,7 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		private static bool Equals (byte [] a, byte [] b)
+		static bool Equals (byte [] a, byte [] b)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -774,7 +774,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		private static bool Equals<T> (T a, T b) where T : class, IEquatable<T>
+		static bool Equals<T> (T a, T b) where T : class, IEquatable<T>
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -783,7 +783,7 @@ namespace Mono.Cecil {
 			return a.Equals (b);
 		}
 
-		private static bool Equals (AssemblyNameReference a, AssemblyNameReference b)
+		static bool Equals (AssemblyNameReference a, AssemblyNameReference b)
 		{
 			if (ReferenceEquals (a, b))
 				return true;

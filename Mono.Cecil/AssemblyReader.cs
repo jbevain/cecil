@@ -120,7 +120,7 @@ namespace Mono.Cecil {
 
 	sealed class ImmediateModuleReader : ModuleReader {
 
-		private bool resolve;
+		bool resolve;
 
 		public ImmediateModuleReader (Image image)
 			: base (image, ReadingMode.Immediate)
