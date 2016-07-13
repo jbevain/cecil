@@ -41,6 +41,11 @@ namespace Mono.Cecil.Pdb {
 
 		public bool ProcessDebugHeader (ImageDebugDirectory directory, byte [] header)
 		{
+			if (directory.Type != 2) //IMAGE_DEBUG_TYPE_CODEVIEW
+				return false;
+			if (directory.MajorVersion != 0 || directory.MinorVersion != 0)
+				return false;
+
 			if (header.Length < 24)
 				return false;
 
