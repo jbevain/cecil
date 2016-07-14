@@ -54,14 +54,14 @@ namespace Mono.Cecil.Cil {
 		readonly ModuleDefinition module;
 		readonly MetadataReader reader;
 		readonly MetadataReader debug_reader;
-		readonly MetadataSystem metadata;
+
+		bool IsEmbedded { get { return reader.image == debug_reader.image; } }
 
 		internal PortablePdbReader (Image image, ModuleDefinition module)
 		{
 			this.image = image;
 			this.module = module;
 			this.reader = module.reader;
-			this.metadata = module.MetadataSystem;
 			this.debug_reader = new MetadataReader (image, module, this.reader);
 		}
 
@@ -129,6 +129,9 @@ namespace Mono.Cecil.Cil {
 
 		public void Dispose ()
 		{
+			if (IsEmbedded)
+				return;
+
 			image.Dispose ();
 		}
 	}

@@ -274,19 +274,20 @@ namespace Mono.Cecil.Tests {
 
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
 		{
-			var module = ModuleDefinition.ReadModule (location, reader_parameters);
 			var rt_folder = Path.Combine (Path.GetTempPath (), folder);
 			if (!Directory.Exists (rt_folder))
 				Directory.CreateDirectory (rt_folder);
 			var rt_module = Path.Combine (rt_folder, Path.GetFileName (location));
 
-			var writer_parameters = new WriterParameters {
-				SymbolWriterProvider = GetSymbolWriterProvider (),
-			};
+			using (var module = ModuleDefinition.ReadModule (location, reader_parameters)) {
+				var writer_parameters = new WriterParameters {
+					SymbolWriterProvider = GetSymbolWriterProvider (),
+				};
 
-			test_case.Test (module);
+				test_case.Test (module);
 
-			module.Write (rt_module, writer_parameters);
+				module.Write (rt_module, writer_parameters);
+			}
 
 			if (test_case.Verify)
 				CompilationService.Verify (rt_module);
@@ -306,7 +307,8 @@ namespace Mono.Cecil.Tests {
 
 		public void Dispose ()
 		{
-			test_module.Dispose ();
+			if (test_module != null)
+				test_module.Dispose ();
 
 			if (test_resolver != null)
 				test_resolver.Dispose ();
