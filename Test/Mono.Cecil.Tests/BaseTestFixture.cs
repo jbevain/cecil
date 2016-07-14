@@ -54,7 +54,7 @@ namespace Mono.Cecil.Tests {
 		internal Image GetResourceImage (string name)
 		{
 			using (var fs = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read))
-				return ImageReader.ReadImage (fs);
+				return ImageReader.ReadImage (fs, fs.Name);
 		}
 
 		public ModuleDefinition GetCurrentModule ()
@@ -109,20 +109,20 @@ namespace Mono.Cecil.Tests {
 
 		static void Run (TestCase testCase)
 		{
-			var runner = new TestRunner (testCase, TestCaseType.ReadDeferred);
-			runner.RunTest ();
+			using (var runner = new TestRunner (testCase, TestCaseType.ReadDeferred))
+				runner.RunTest ();
 
-			runner = new TestRunner (testCase, TestCaseType.ReadImmediate);
-			runner.RunTest ();
+			using (var runner = new TestRunner (testCase, TestCaseType.ReadImmediate))
+				runner.RunTest ();
 
 			if (testCase.ReadOnly)
 				return;
 
-			runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred);
-			runner.RunTest ();
+			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred))
+				runner.RunTest ();
 
-			runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate);
-			runner.RunTest ();
+			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate))
+				runner.RunTest ();
 		}
 	}
 
@@ -204,10 +204,13 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 
-	class TestRunner {
+	class TestRunner : IDisposable {
 
 		readonly TestCase test_case;
 		readonly TestCaseType type;
+
+		ModuleDefinition test_module;
+		DefaultAssemblyResolver test_resolver;
 
 		public TestRunner (TestCase testCase, TestCaseType type)
 		{
@@ -263,10 +266,10 @@ namespace Mono.Cecil.Tests {
 			if (test_case.AssemblyResolver != null)
 				return test_case.AssemblyResolver;
 
-			var resolver = new DefaultAssemblyResolver ();
+			test_resolver = new DefaultAssemblyResolver ();
 			var directory = Path.GetDirectoryName (test_case.ModuleLocation);
-			resolver.AddSearchDirectory (directory);
-			return resolver;
+			test_resolver.AddSearchDirectory (directory);
+			return test_resolver;
 		}
 
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
@@ -297,7 +300,16 @@ namespace Mono.Cecil.Tests {
 			if (module == null)
 				return;
 
+			test_module = module;
 			test_case.Test (module);
+		}
+
+		public void Dispose ()
+		{
+			test_module.Dispose ();
+
+			if (test_resolver != null)
+				test_resolver.Dispose ();
 		}
 	}
 

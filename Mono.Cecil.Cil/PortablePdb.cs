@@ -26,7 +26,7 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckModule (module);
 
 			using (var file = File.OpenRead (GetPdbFileName (fileName)))
-				return GetSymbolReader (module, file);
+				return GetSymbolReader (module, file, file.Name);
 		}
 
 		static string GetPdbFileName (string assemblyFileName)
@@ -39,7 +39,12 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			return new PortablePdbReader (ImageReader.ReadPortablePdb (symbolStream), module);
+			return GetSymbolReader (module, symbolStream, "");
+		}
+
+		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string fileName)
+		{
+			return new PortablePdbReader (ImageReader.ReadPortablePdb (symbolStream, fileName), module);
 		}
 	}
 
@@ -124,6 +129,7 @@ namespace Mono.Cecil.Cil {
 
 		public void Dispose ()
 		{
+			image.Dispose ();
 		}
 	}
 

@@ -17,58 +17,40 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil.Cil {
 
-	sealed class CodeReader : ByteBuffer {
+	sealed class CodeReader : BinaryStreamReader {
 
 		readonly internal MetadataReader reader;
 
 		int start;
-		Section code_section;
 
 		MethodDefinition method;
 		MethodBody body;
 
 		int Offset {
-			get { return base.position - start; }
+			get { return Position - start; }
 		}
 
-		public CodeReader (Section section, MetadataReader reader)
-			: base (section.Data)
+		public CodeReader (MethodDefinition method, MetadataReader reader)
+			: base (reader.image.Stream)
 		{
-			this.code_section = section;
 			this.reader = reader;
+			this.reader.context = method;
+			this.Position = (int) reader.image.ResolveVirtualAddress ((uint) method.RVA);
 		}
 
-		public MethodBody ReadMethodBody (MethodDefinition method)
+		public static MethodBody ReadMethodBody (MethodDefinition method, MetadataReader metadata)
 		{
-			this.method = method;
-			this.body = new MethodBody (method);
+			var reader = new CodeReader (method, metadata);
+			reader.method = method;
+			reader.body = new MethodBody (method);
 
-			reader.context = method;
+			reader.ReadMethodBody ();
 
-			ReadMethodBody ();
-
-			return this.body;
-		}
-
-		public void MoveTo (int rva)
-		{
-			if (!IsInSection (rva)) {
-				code_section = reader.image.GetSectionAtVirtualAddress ((uint) rva);
-				Reset (code_section.Data);
-			}
-
-			base.position = rva - (int) code_section.VirtualAddress;
-		}
-
-		bool IsInSection (int rva)
-		{
-			return code_section.VirtualAddress <= rva && rva < code_section.VirtualAddress + code_section.SizeOfRawData;
+			return reader.body;
 		}
 
 		void ReadMethodBody ()
 		{
-			MoveTo (method.RVA);
-
 			var flags = ReadByte ();
 			switch (flags & 0x3) {
 			case 0x2: // tiny
@@ -77,7 +59,7 @@ namespace Mono.Cecil.Cil {
 				ReadCode ();
 				break;
 			case 0x3: // fat
-				base.position--;
+				Advance (-1);
 				ReadFatMethod ();
 				break;
 			default:
@@ -209,17 +191,17 @@ namespace Mono.Cecil.Cil {
 
 		void ReadCode ()
 		{
-			start = position;
+			start = Position;
 			var code_size = body.code_size;
 
-			if (code_size < 0 || buffer.Length <= (uint) (code_size + position))
+			if (code_size < 0 || Length <= (uint) (code_size + Position))
 				code_size = 0;
 
 			var end = start + code_size;
 			var instructions = body.instructions = new InstructionCollection ((code_size + 1) / 2);
 
-			while (position < end) {
-				var offset = base.position - start;
+			while (Position < end) {
+				var offset = Position - start;
 				var opcode = ReadOpCode ();
 				var current = new Instruction (offset, opcode);
 
@@ -394,7 +376,7 @@ namespace Mono.Cecil.Cil {
 
 		void ReadFatSection ()
 		{
-			position--;
+			Advance (-1);
 			var count = (ReadInt32 () >> 8) / 24;
 
 			ReadExceptionHandlers (
@@ -440,6 +422,7 @@ namespace Mono.Cecil.Cil {
 		void Align (int align)
 		{
 			align--;
+			var position = Position;
 			Advance (((position + align) & ~align) - position);
 		}
 
@@ -454,11 +437,6 @@ namespace Mono.Cecil.Cil {
 		{
 			var buffer = new ByteBuffer ();
 
-			this.method = method;
-			reader.context = method;
-
-			MoveTo (method.RVA);
-
 			var flags = ReadByte ();
 
 			switch (flags & 0x3) {
@@ -469,8 +447,7 @@ namespace Mono.Cecil.Cil {
 				PatchRawCode (buffer, code_size, writer);
 				break;
 			case 0x3: // fat
-				base.position--;
-
+				Advance (-1);
 				PatchRawFatMethod (buffer, writer, out code_size, out local_var_token);
 				break;
 			default:
@@ -571,9 +548,9 @@ namespace Mono.Cecil.Cil {
 
 		void PatchRawSection (ByteBuffer buffer, MetadataBuilder metadata)
 		{
-			var position = base.position;
+			var position = Position;
 			Align (4);
-			buffer.WriteBytes (base.position - position);
+			buffer.WriteBytes (Position - position);
 
 			const byte fat_format = 0x40;
 			const byte more_sects = 0x80;
@@ -604,7 +581,7 @@ namespace Mono.Cecil.Cil {
 
 		void PatchRawFatSection (ByteBuffer buffer, MetadataBuilder metadata)
 		{
-			position--;
+			Advance (-1);
 			var length = ReadInt32 ();
 			buffer.WriteInt32 (length);
 

@@ -102,7 +102,7 @@ namespace Mono.Cecil {
 
 				var reader = parameters.SymbolStream != null
 					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream)
-					: symbol_reader_provider.GetSymbolReader (module, module.FullyQualifiedName);
+					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
 
 				module.ReadSymbols (reader);
 			}
@@ -414,7 +414,6 @@ namespace Mono.Cecil {
 		readonly internal MetadataSystem metadata;
 
 		internal IGenericContext context;
-		internal CodeReader code;
 
 		readonly MetadataReader metadata_reader;
 
@@ -424,21 +423,19 @@ namespace Mono.Cecil {
 		}
 
 		public MetadataReader (ModuleDefinition module)
-			: base (module.Image.MetadataSection.Data)
+			: base (module.Image.TableHeap.data)
 		{
 			this.image = module.Image;
 			this.module = module;
 			this.metadata = module.MetadataSystem;
-			this.code = new CodeReader (image.MetadataSection, this);
 		}
 
 		public MetadataReader (Image image, ModuleDefinition module, MetadataReader metadata_reader)
-			: base (image.MetadataSection.Data)
+			: base (image.TableHeap.data)
 		{
 			this.image = image;
 			this.module = module;
 			this.metadata = module.MetadataSystem;
-			this.code = new CodeReader (image.MetadataSection, this);
 			this.metadata_reader = metadata_reader;
 		}
 
@@ -648,10 +645,10 @@ namespace Mono.Cecil {
 #if !PCL
 		string GetModuleFileName (string name)
 		{
-			if (module.FullyQualifiedName == null)
+			if (module.FileName == null)
 				throw new NotSupportedException ();
 
-			var path = Path.GetDirectoryName (module.FullyQualifiedName);
+			var path = Path.GetDirectoryName (module.FileName);
 			return Path.Combine (path, name);
 		}
 #endif
@@ -746,17 +743,12 @@ namespace Mono.Cecil {
 
 		public MemoryStream GetManagedResourceStream (uint offset)
 		{
-			var rva = image.Resources.VirtualAddress;
-			var section = image.GetSectionAtVirtualAddress (rva);
-			var position = (rva - section.VirtualAddress) + offset;
-			var buffer = section.Data;
+			var reader = image.GetReaderAt (image.Resources.VirtualAddress);
+			if (reader == null)
+				return new MemoryStream ();
 
-			var length = buffer [position]
-				| (buffer [position + 1] << 8)
-				| (buffer [position + 2] << 16)
-				| (buffer [position + 3] << 24);
-
-			return new MemoryStream (buffer, (int) position + 4, length);
+			reader.Advance ((int) offset);
+			return new MemoryStream (reader.ReadBytes (reader.ReadInt32 ()));
 		}
 
 		void PopulateVersionAndFlags (AssemblyNameReference name)
@@ -1317,13 +1309,10 @@ namespace Mono.Cecil {
 
 		byte [] GetFieldInitializeValue (int size, RVA rva)
 		{
-			var section = image.GetSectionAtVirtualAddress (rva);
-			if (section == null)
-				return Empty<byte>.Array;
-
-			var value = new byte [size];
-			Buffer.BlockCopy (section.Data, (int) (rva - section.VirtualAddress), value, 0, size);
-			return value;
+			var reader = image.GetReaderAt (rva);
+			return reader != null
+				? reader.ReadBytes (size)
+				: Empty<byte>.Array;
 		}
 
 		static int GetFieldTypeSize (TypeReference type)
@@ -2102,7 +2091,7 @@ namespace Mono.Cecil {
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			return code.ReadMethodBody (method);
+			return CodeReader.ReadMethodBody (method, this);
 		}
 
 		public CallSite ReadCallSite (MetadataToken token)
@@ -3159,19 +3148,12 @@ namespace Mono.Cecil {
 		}
 
 		public SignatureReader (uint blob, MetadataReader reader)
-			: base (reader.buffer)
+			: base (reader.image.BlobHeap.data)
 		{
 			this.reader = reader;
-
-			MoveToBlob (blob);
-
-			this.sig_length = ReadCompressedUInt32 ();
-			this.start = (uint) position;
-		}
-
-		void MoveToBlob (uint blob)
-		{
-			position = (int) (reader.image.BlobHeap.Offset + blob);
+			this.position = (int) blob;
+			this.sig_length = ReadCompressedUInt32();
+			this.start = (uint) this.position;
 		}
 
 		MetadataToken ReadTypeTokenSignature ()

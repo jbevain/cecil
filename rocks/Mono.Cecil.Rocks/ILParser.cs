@@ -61,8 +61,6 @@ namespace Mono.Cecil.Rocks {
 			var context = CreateContext (method, visitor);
 			var code = context.Code;
 
-			code.MoveTo (method.RVA);
-
 			var flags = code.ReadByte ();
 
 			switch (flags & 0x3) {
@@ -71,7 +69,7 @@ namespace Mono.Cecil.Rocks {
 				ParseCode (code_size, context);
 				break;
 			case 0x3: // fat
-				code.position--;
+				code.Advance (-1);
 				ParseFatMethod (context);
 				break;
 			default:
@@ -81,7 +79,7 @@ namespace Mono.Cecil.Rocks {
 
 		static ParseContext CreateContext (MethodDefinition method, IILVisitor visitor)
 		{
-			var code = method.Module.Read (method, (_, reader) => new CodeReader (reader.image.MetadataSection, reader));
+			var code = method.Module.Read (method, (m, reader) => new CodeReader (method, reader));
 
 			return new ParseContext {
 				Code = code,
@@ -110,10 +108,10 @@ namespace Mono.Cecil.Rocks {
 			var metadata = context.Metadata;
 			var visitor = context.Visitor;
 
-			var start = code.position;
+			var start = code.Position;
 			var end = start + code_size;
 
-			while (code.position < end) {
+			while (code.Position < end) {
 				var il_opcode = code.ReadByte ();
 				var opcode = il_opcode != 0xfe
 					? OpCodes.OneByteOpCode [il_opcode]

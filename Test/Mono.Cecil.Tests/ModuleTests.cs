@@ -208,7 +208,7 @@ namespace Mono.Cecil.Tests {
 		public void Win32FileVersion ()
 		{
 			TestModule ("libhello.dll", module => {
-				var version = FileVersionInfo.GetVersionInfo (module.FullyQualifiedName);
+				var version = FileVersionInfo.GetVersionInfo (module.FileName);
 
 				Assert.AreEqual ("0.0.0.0", version.FileVersion);
 			});
@@ -225,10 +225,10 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MixedModeModule ()
 		{
-			var module = GetResourceModule ("cppcli.dll");
-
-			Assert.AreEqual (1, module.ModuleReferences.Count);
-			Assert.AreEqual (string.Empty, module.ModuleReferences [0].Name);
+			using (var module = GetResourceModule ("cppcli.dll")) {
+				Assert.AreEqual (1, module.ModuleReferences.Count);
+				Assert.AreEqual (string.Empty, module.ModuleReferences [0].Name);
+			}
 		}
 
 		[Test]
@@ -239,40 +239,28 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void WriteModuleTwice ()
-		{
-			var module = GetResourceModule ("iterator.exe");
-
-			var path = Path.Combine (Path.GetTempPath (), "cecil");
-			var file = Path.Combine (path, "iteratorrt.exe");
-
-			module.Write (file);
-			module.Write (file);
-		}
-
-		[Test]
 		public void GetTypeNamespacePlusName ()
 		{
-			var module = GetResourceModule ("moda.netmodule");
-
-			var type = module.GetType ("Module.A", "Foo");
-			Assert.IsNotNull (type);
+			using (var module = GetResourceModule ("moda.netmodule")) {
+				var type = module.GetType ("Module.A", "Foo");
+				Assert.IsNotNull (type);
+			}
 		}
 
 		[Test]
 		public void OpenModuleImmediate ()
 		{
-			var module = GetResourceModule ("hello.exe", ReadingMode.Immediate);
-
-			Assert.AreEqual (ReadingMode.Immediate, module.ReadingMode);
+			using (var module = GetResourceModule ("hello.exe", ReadingMode.Immediate)) {
+				Assert.AreEqual (ReadingMode.Immediate, module.ReadingMode);
+			}
 		}
 
 		[Test]
 		public void OpenModuleDeferred ()
 		{
-			var module = GetResourceModule ("hello.exe", ReadingMode.Deferred);
-
-			Assert.AreEqual (ReadingMode.Deferred, module.ReadingMode);
+			using (var module = GetResourceModule ("hello.exe", ReadingMode.Deferred)) {
+				Assert.AreEqual (ReadingMode.Deferred, module.ReadingMode);
+			}
 		}
 	}
 }

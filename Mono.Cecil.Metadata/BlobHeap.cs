@@ -10,25 +10,21 @@
 
 using System;
 
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	sealed class BlobHeap : Heap {
 
-		public BlobHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public BlobHeap (byte [] data)
+			: base (data)
 		{
 		}
 
 		public byte [] Read (uint index)
 		{
-			if (index == 0 || index > Size - 1)
+			if (index == 0 || index > this.data.Length - 1)
 				return Empty<byte>.Array;
 
-			var data = Section.Data;
-
-			int position = (int) (index + Offset);
+			int position = (int) index;
 			int length = (int) data.ReadCompressedUInt32 (ref position);
 
 			if (length > data.Length - position)
@@ -43,15 +39,15 @@ namespace Mono.Cecil.Metadata {
 
 		public void GetView (uint signature, out byte [] buffer, out int index, out int length)
 		{
-			if (signature == 0 || signature > Size - 1) {
+			if (signature == 0 || signature > data.Length - 1) {
 				buffer = null;
 				index = length = 0;
 				return;
 			}
 
-			buffer = Section.Data;
+			buffer = data;
 
-			index = (int) (signature + Offset);
+			index = (int) signature;
 			length = (int) buffer.ReadCompressedUInt32 (ref index);
 		}
 	}

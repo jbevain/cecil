@@ -445,6 +445,8 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsNotNull (attribute);
 			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
+
+			module.Dispose ();
 		}
 
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)

@@ -12,16 +12,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	class StringHeap : Heap {
 
 		readonly Dictionary<uint, string> strings = new Dictionary<uint, string> ();
 
-		public StringHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public StringHeap (byte [] data)
+			: base (data)
 		{
 		}
 
@@ -34,7 +32,7 @@ namespace Mono.Cecil.Metadata {
 			if (strings.TryGetValue (index, out @string))
 				return @string;
 
-			if (index > Size - 1)
+			if (index > data.Length - 1)
 				return string.Empty;
 
 			@string = ReadStringAt (index);
@@ -47,8 +45,7 @@ namespace Mono.Cecil.Metadata {
 		protected virtual string ReadStringAt (uint index)
 		{
 			int length = 0;
-			byte [] data = Section.Data;
-			int start = (int) (index + Offset);
+			int start = (int) index;
 
 			for (int i = start; ; i++) {
 				if (data [i] == 0)

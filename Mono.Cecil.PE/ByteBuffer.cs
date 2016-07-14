@@ -34,12 +34,6 @@ namespace Mono.Cecil.PE {
 			this.length = this.buffer.Length;
 		}
 
-		public void Reset (byte [] buffer)
-		{
-			this.buffer = buffer ?? Empty<byte>.Array;
-			this.length = this.buffer.Length;
-		}
-
 		public void Advance (int length)
 		{
 			position += length;

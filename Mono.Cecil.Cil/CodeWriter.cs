@@ -75,7 +75,7 @@ namespace Mono.Cecil.Cil {
 
 		void WriteUnresolvedMethodBody (MethodDefinition method)
 		{
-			var code_reader = metadata.module.Read (method, (_, reader) => reader.code);
+			var code_reader = metadata.module.Read (method, (m, reader) => new CodeReader (m, reader));
 
 			int code_size;
 			MetadataToken local_var_token;

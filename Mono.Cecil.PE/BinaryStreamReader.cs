@@ -15,17 +15,31 @@ namespace Mono.Cecil.PE {
 
 	class BinaryStreamReader : BinaryReader {
 
+		public int Position {
+			get { return (int) BaseStream.Position; }
+			set { BaseStream.Position = value; }
+		}
+
+		public int Length {
+			get { return (int) BaseStream.Length; }
+		}
+
 		public BinaryStreamReader (Stream stream)
 			: base (stream)
 		{
 		}
 
-		protected void Advance (int bytes)
+		public void Advance (int bytes)
 		{
 			BaseStream.Seek (bytes, SeekOrigin.Current);
 		}
 
-		protected DataDirectory ReadDataDirectory ()
+		public void MoveTo (uint position)
+		{
+			BaseStream.Seek (position, SeekOrigin.Begin);
+		}
+
+		public DataDirectory ReadDataDirectory ()
 		{
 			return new DataDirectory (ReadUInt32 (), ReadUInt32 ());
 		}

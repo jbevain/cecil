@@ -87,8 +87,8 @@ namespace Mono.Cecil.Metadata {
 			get { return Tables [(int) table]; }
 		}
 
-		public TableHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public TableHeap (byte [] data)
+			: base (data)
 		{
 		}
 

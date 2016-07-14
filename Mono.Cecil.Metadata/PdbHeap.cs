@@ -21,8 +21,8 @@ namespace Mono.Cecil.Metadata {
 		public long TypeSystemTables;
 		public uint [] TypeSystemTableRows;
 
-		public PdbHeap (Section section, uint offset, uint size)
-			: base (section, offset, size)
+		public PdbHeap (byte [] data)
+			: base (data)
 		{
 		}
 
