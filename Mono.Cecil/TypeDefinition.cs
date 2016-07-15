@@ -479,12 +479,20 @@ namespace Mono.Cecil {
 				if (custom_attributes != null)
 					return custom_attributes.Count > 0;
 
+				if (type == null)
+					return false;
+
 				return this.GetHasCustomAttributes (type.Module);
 			}
 		}
 
 		public Collection<CustomAttribute> CustomAttributes {
-			get { return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, type.Module)); }
+			get {
+				if (type == null)
+					return custom_attributes = new Collection<CustomAttribute> ();
+
+				return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, type.Module));
+			}
 		}
 
 		public MetadataToken MetadataToken {
