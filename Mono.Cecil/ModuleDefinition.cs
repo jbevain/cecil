@@ -1092,12 +1092,6 @@ namespace Mono.Cecil {
 			return ReadModule (stream, new ReaderParameters (ReadingMode.Deferred));
 		}
 
-		static void CheckStream (object stream)
-		{
-			if (stream == null)
-				throw new ArgumentNullException ("stream");
-		}
-
 		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
 		{
 			return ReadModule (stream, "", parameters);
