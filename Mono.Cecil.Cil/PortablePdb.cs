@@ -235,7 +235,11 @@ namespace Mono.Cecil.Cil {
 			writer.BuildMetadataTextMap ();
 			writer.WriteMetadataHeader ();
 			writer.WriteMetadata ();
+#if NET_4_0
 			writer.Dispose ();
+#else
+			writer.Close ();
+#endif
 		}
 
 		void WritePdbHeap ()
@@ -278,7 +282,7 @@ namespace Mono.Cecil.Cil {
 
 #endif
 
-	static class PdbGuidMapping {
+			static class PdbGuidMapping {
 
 		static readonly Dictionary<Guid, DocumentLanguage> guid_language = new Dictionary<Guid, DocumentLanguage> ();
 		static readonly Dictionary<DocumentLanguage, Guid> language_guid = new Dictionary<DocumentLanguage, Guid> ();

@@ -72,7 +72,7 @@ namespace Mono.Cecil.Tests {
 #else
 			{
 				// this will fail on 64-bit process as there's no way (other than pinoke) to read from 32-bit registry view
-				using (var sdkKey = Registry.LocalMachine.OpenSubKey (@"SOFTWARE\Microsoft\Microsoft SDKs\Windows\" + version)) {
+				using (var sdkKey = Registry.LocalMachine.OpenSubKey (@"SOFTWARE\Microsoft\Microsoft SDKs\Windows\" + registryVersion)) {
 #endif
 					string installationFolder = null;
 					if (sdkKey != null)
