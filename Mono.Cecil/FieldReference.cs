@@ -53,7 +53,12 @@ namespace Mono.Cecil {
 			this.DeclaringType = declaringType;
 		}
 
-		public virtual FieldDefinition Resolve ()
+		protected override IMemberDefinition ResolveDefinition ()
+		{
+			return this.Resolve ();
+		}
+
+		public new virtual FieldDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

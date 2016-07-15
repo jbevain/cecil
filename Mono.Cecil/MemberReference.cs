@@ -92,6 +92,13 @@ namespace Mono.Cecil {
 			return declaring_type.FullName + "::" + name;
 		}
 
+		public IMemberDefinition Resolve ()
+		{
+			return null;
+		}
+
+		protected abstract IMemberDefinition ResolveDefinition ();
+
 		public override string ToString ()
 		{
 			return FullName;
