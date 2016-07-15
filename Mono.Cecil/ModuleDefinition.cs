@@ -1201,7 +1201,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		public static string GetFullyQualifiedName (this Stream self)
+		public static string GetFileName (this Stream self)
 		{
 #if !PCL
 			var file_stream = self as FileStream;

@@ -85,7 +85,7 @@ namespace Mono.Cecil {
 			module.MetadataSystem.Clear ();
 
 			var name = module.assembly != null ? module.assembly.Name : null;
-			var fq_name = stream.GetFullyQualifiedName ();
+			var fq_name = stream.GetFileName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 #if !PCL
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
