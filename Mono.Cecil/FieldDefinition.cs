@@ -112,7 +112,8 @@ namespace Mono.Cecil {
 			get { return (FieldAttributes) attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
-					throw new InvalidOperationException ("Projected field definition attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				attributes = (ushort) value;
 			}
 		}

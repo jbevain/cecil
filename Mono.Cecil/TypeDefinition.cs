@@ -38,7 +38,8 @@ namespace Mono.Cecil {
 			get { return (TypeAttributes) attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
-					throw new InvalidOperationException ("Projected type definition attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				attributes = (uint) value;
 			}
 		}
@@ -52,7 +53,8 @@ namespace Mono.Cecil {
 			get { return base.Name; }
 			set {
 				if (IsWindowsRuntimeProjection && value != base.Name)
-					throw new InvalidOperationException ("Projected type definition name can't be changed.");
+					throw new InvalidOperationException ();
+
 				base.Name = value;
 			}
 		}

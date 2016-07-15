@@ -24,7 +24,8 @@ namespace Mono.Cecil {
 			get { return name; }
 			set {
 				if (IsWindowsRuntimeProjection && value != name)
-					throw new InvalidOperationException ("Projected member reference name can't be changed.");
+					throw new InvalidOperationException ();
+
 				name = value;
 			}
 		}

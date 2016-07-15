@@ -31,12 +31,12 @@ namespace Mono.Cecil {
 
 		internal MethodBody body;
 
-		public override string Name
-		{
+		public override string Name {
 			get { return base.Name; }
 			set {
 				if (IsWindowsRuntimeProjection && value != base.Name)
-					throw new InvalidOperationException ("Projected method name can't be changed.");
+					throw new InvalidOperationException ();
+
 				base.Name = value;
 			}
 		}
@@ -45,7 +45,8 @@ namespace Mono.Cecil {
 			get { return (MethodAttributes) attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
-					throw new InvalidOperationException ("Projected method attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				attributes = (ushort) value;
 			}
 		}
@@ -54,7 +55,8 @@ namespace Mono.Cecil {
 			get { return (MethodImplAttributes) impl_attributes; }
 			set {
 				if (IsWindowsRuntimeProjection && (ushort) value != impl_attributes)
-					throw new InvalidOperationException ("Projected method implementation attributes can't be changed.");
+					throw new InvalidOperationException ();
+
 				impl_attributes = (ushort) value;
 			}
 		}
