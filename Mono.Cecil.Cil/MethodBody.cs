@@ -89,12 +89,21 @@ namespace Mono.Cecil.Cil {
 
 		static ParameterDefinition CreateThisParameter (MethodDefinition method)
 		{
-			var declaring_type = method.DeclaringType;
-			var type = declaring_type.IsValueType || declaring_type.IsPrimitive
-				? new ByReferenceType (declaring_type)
-				: declaring_type as TypeReference;
+			var parameter_type = method.DeclaringType as TypeReference;
 
-			return new ParameterDefinition (type, method);
+			if (parameter_type.HasGenericParameters) {
+				var instance = new GenericInstanceType (parameter_type);
+				for (int i = 0; i < parameter_type.GenericParameters.Count; i++)
+					instance.GenericArguments.Add (parameter_type.GenericParameters [i]);
+
+				parameter_type = instance;
+
+			}
+
+			if (parameter_type.IsValueType || parameter_type.IsPrimitive)
+				parameter_type = new ByReferenceType (parameter_type);
+
+			return new ParameterDefinition (parameter_type, method);
 		}
 
 		public MethodBody (MethodDefinition method)
