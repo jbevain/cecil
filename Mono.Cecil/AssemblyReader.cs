@@ -87,6 +87,9 @@ namespace Mono.Cecil {
 
 			reader.ReadSymbols (module);
 
+			if (parameters.ReadingMode == ReadingMode.Immediate)
+				module.MetadataSystem.Clear ();
+
 			return module;
 		}
 

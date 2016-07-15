@@ -132,28 +132,28 @@ namespace Mono.Cecil {
 
 		public void Clear ()
 		{
-			if (NestedTypes != null) NestedTypes.Clear ();
-			if (ReverseNestedTypes != null) ReverseNestedTypes.Clear ();
-			if (Interfaces != null) Interfaces.Clear ();
-			if (ClassLayouts != null) ClassLayouts.Clear ();
-			if (FieldLayouts != null) FieldLayouts.Clear ();
-			if (FieldRVAs != null) FieldRVAs.Clear ();
-			if (FieldMarshals != null) FieldMarshals.Clear ();
-			if (Constants != null) Constants.Clear ();
-			if (Overrides != null) Overrides.Clear ();
-			if (CustomAttributes != null) CustomAttributes.Clear ();
-			if (SecurityDeclarations != null) SecurityDeclarations.Clear ();
-			if (Events != null) Events.Clear ();
-			if (Properties != null) Properties.Clear ();
-			if (Semantics != null) Semantics.Clear ();
-			if (PInvokes != null) PInvokes.Clear ();
-			if (GenericParameters != null) GenericParameters.Clear ();
-			if (GenericConstraints != null) GenericConstraints.Clear ();
+			if (NestedTypes != null) NestedTypes = new Dictionary<uint, uint []> (capacity: 0);
+			if (ReverseNestedTypes != null) ReverseNestedTypes = new Dictionary<uint, uint> (capacity: 0);
+			if (Interfaces != null) Interfaces = new Dictionary<uint, Row<uint, MetadataToken> []> (capacity: 0);
+			if (ClassLayouts != null) ClassLayouts = new Dictionary<uint, Row<ushort, uint>> (capacity: 0);
+			if (FieldLayouts != null) FieldLayouts = new Dictionary<uint, uint> (capacity: 0);
+			if (FieldRVAs != null) FieldRVAs = new Dictionary<uint, uint> (capacity: 0);
+			if (FieldMarshals != null) FieldMarshals = new Dictionary<MetadataToken, uint> (capacity: 0);
+			if (Constants != null) Constants = new Dictionary<MetadataToken, Row<ElementType, uint>> (capacity: 0);
+			if (Overrides != null) Overrides = new Dictionary<uint, MetadataToken []> (capacity: 0);
+			if (CustomAttributes != null) CustomAttributes = new Dictionary<MetadataToken, Range []> (capacity: 0);
+			if (SecurityDeclarations != null) SecurityDeclarations = new Dictionary<MetadataToken, Range []> (capacity: 0);
+			if (Events != null) Events = new Dictionary<uint, Range> (capacity: 0);
+			if (Properties != null) Properties = new Dictionary<uint, Range> (capacity: 0);
+			if (Semantics != null) Semantics = new Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> (capacity: 0);
+			if (PInvokes != null) PInvokes = new Dictionary<uint, Row<PInvokeAttributes, uint, uint>> (capacity: 0);
+			if (GenericParameters != null) GenericParameters = new Dictionary<MetadataToken, Range []> (capacity: 0);
+			if (GenericConstraints != null) GenericConstraints = new Dictionary<uint, MetadataToken []> (capacity: 0);
 
-			Documents = new Document [0];
-			ImportScopes = new ImportDebugInformation [0];
-			if (LocalScopes != null) LocalScopes.Clear ();
-			if (StateMachineMethods != null) StateMachineMethods.Clear ();
+			Documents = Empty<Document>.Array;
+			ImportScopes = Empty<ImportDebugInformation>.Array;
+			if (LocalScopes != null) LocalScopes = new Dictionary<uint, Row<uint, Range, Range, uint, uint, uint> []> (capacity: 0);
+			if (StateMachineMethods != null) StateMachineMethods = new Dictionary<uint, uint> (capacity: 0);
 		}
 
 		public AssemblyNameReference GetAssemblyNameReference (uint rid)
