@@ -44,8 +44,8 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (2, interfaces.Count);
 
 				// Mono's ilasm and .NET's are ordering interfaces differently
-				Assert.IsNotNull (interfaces.Single (i => i.FullName == "IBar"));
-				Assert.IsNotNull (interfaces.Single (i => i.FullName == "IFoo"));
+				Assert.IsNotNull (interfaces.Single (i => i.InterfaceType.FullName == "IBar"));
+				Assert.IsNotNull (interfaces.Single (i => i.InterfaceType.FullName == "IFoo"));
 			});
 		}
 
@@ -181,7 +181,7 @@ namespace Mono.Cecil.Tests {
 				var type = module.GetType ("Program");
 				var iface = type.Interfaces [0];
 
-				var instance = (GenericInstanceType) iface;
+				var instance = (GenericInstanceType) iface.InterfaceType;
 				var owner = instance.ElementType;
 
 				Assert.AreEqual (1, instance.GenericArguments.Count);

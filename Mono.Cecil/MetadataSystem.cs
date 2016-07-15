@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 
 		internal Dictionary<uint, uint []> NestedTypes;
 		internal Dictionary<uint, uint> ReverseNestedTypes;
-		internal Dictionary<uint, MetadataToken []> Interfaces;
+		internal Dictionary<uint, Row<uint, MetadataToken> []> Interfaces;
 		internal Dictionary<uint, Row<ushort, uint>> ClassLayouts;
 		internal Dictionary<uint, uint> FieldLayouts;
 		internal Dictionary<uint, uint> FieldRVAs;
@@ -259,12 +259,12 @@ namespace Mono.Cecil {
 			ReverseNestedTypes.Remove (type.token.RID);
 		}
 
-		public bool TryGetInterfaceMapping (TypeDefinition type, out MetadataToken [] mapping)
+		public bool TryGetInterfaceMapping (TypeDefinition type, out Row<uint, MetadataToken> [] mapping)
 		{
 			return Interfaces.TryGetValue (type.token.RID, out mapping);
 		}
 
-		public void SetInterfaceMapping (uint type_rid, MetadataToken [] mapping)
+		public void SetInterfaceMapping (uint type_rid, Row<uint, MetadataToken> [] mapping)
 		{
 			Interfaces [type_rid] = mapping;
 		}
