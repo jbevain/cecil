@@ -23,11 +23,13 @@ using RID = System.UInt32;
 using CodedRID = System.UInt32;
 using StringIndex = System.UInt32;
 using BlobIndex = System.UInt32;
+using GuidIndex = System.UInt32;
 
 namespace Mono.Cecil {
 
 #if !READ_ONLY
 
+	using ModuleRow      = Row<StringIndex, GuidIndex>;
 	using TypeRefRow     = Row<CodedRID, StringIndex, StringIndex>;
 	using TypeDefRow     = Row<TypeAttributes, StringIndex, StringIndex, CodedRID, RID, RID>;
 	using FieldRow       = Row<FieldAttributes, StringIndex, BlobIndex>;
@@ -58,6 +60,14 @@ namespace Mono.Cecil {
 	using GenericParamRow = Row<ushort, GenericParameterAttributes, CodedRID, StringIndex>;
 	using MethodSpecRow = Row<CodedRID, BlobIndex>;
 	using GenericParamConstraintRow = Row<RID, CodedRID>;
+	using DocumentRow = Row<BlobIndex, GuidIndex, BlobIndex, GuidIndex>;
+	using MethodDebugInformationRow = Row<RID, BlobIndex>;
+	using LocalScopeRow = Row<RID, RID, RID, RID, uint, uint>;
+	using LocalVariableRow = Row<VariableAttributes, ushort, StringIndex>;
+	using LocalConstantRow = Row<StringIndex, BlobIndex>;
+	using ImportScopeRow = Row<RID, BlobIndex>;
+	using StateMachineMethodRow = Row<RID, RID>;
+	using CustomDebugInformationRow = Row<CodedRID, GuidIndex, BlobIndex>;
 
 	static class ModuleWriter {
 
@@ -68,7 +78,8 @@ namespace Mono.Cecil {
 
 			if (module.HasImage && module.ReadingMode == ReadingMode.Deferred) {
 				var immediate_reader = new ImmediateModuleReader (module.Image);
-				immediate_reader.ReadModule (module, resolve: false);
+				immediate_reader.ReadModule (module, resolve_attributes: false);
+				immediate_reader.ReadSymbols (module);
 			}
 
 			module.MetadataSystem.Clear ();
@@ -88,8 +99,8 @@ namespace Mono.Cecil {
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 			}
 #endif
-			var metadata = new MetadataBuilder (module, fq_name,
-				symbol_writer_provider, symbol_writer);
+
+			var metadata = new MetadataBuilder (module, fq_name, symbol_writer_provider, symbol_writer);
 
 			BuildMetadata (module, metadata);
 
@@ -98,14 +109,18 @@ namespace Mono.Cecil {
 
 			var writer = ImageWriter.CreateWriter (module, metadata, stream);
 
+			if (module.HasImage)
+				module.Image.Dispose ();
+
 			writer.WriteImage ();
+
+			if (metadata.symbol_writer != null)
+				metadata.symbol_writer.Dispose ();
 
 #if !PCL
 			if (parameters.StrongNameKeyPair != null)
 				CryptoService.StrongName (stream, writer, parameters.StrongNameKeyPair);
 #endif
-			if (symbol_writer != null)
-				symbol_writer.Dispose ();
 		}
 
 		static void BuildMetadata (ModuleDefinition module, MetadataBuilder metadata)
@@ -200,13 +215,13 @@ namespace Mono.Cecil {
 		public abstract int Compare (TRow x, TRow y);
 	}
 
-	sealed class ModuleTable : OneRowTable<uint> {
+	sealed class ModuleTable : OneRowTable<ModuleRow> {
 
 		public override void Write (TableHeapBuffer buffer)
 		{
 			buffer.WriteUInt16 (0);		// Generation
-			buffer.WriteString (row);	// Name
-			buffer.WriteUInt16 (1);		// Mvid
+			buffer.WriteString (row.Col1);	// Name
+			buffer.WriteGuid (row.Col2);		// Mvid
 			buffer.WriteUInt16 (0);		// EncId
 			buffer.WriteUInt16 (0);		// EncBaseId
 		}
@@ -671,6 +686,102 @@ namespace Mono.Cecil {
 		}
 	}
 
+	sealed class DocumentTable : MetadataTable<DocumentRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteBlob (rows [i].Col1);	// Name
+				buffer.WriteGuid (rows [i].Col2);	// HashAlgorithm
+				buffer.WriteBlob (rows [i].Col3);	// Hash
+				buffer.WriteGuid (rows [i].Col4);	// Language
+			}
+		}
+	}
+
+	sealed class MethodDebugInformationTable : MetadataTable<MethodDebugInformationRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteRID (rows [i].Col1, Table.Document);	// Document
+				buffer.WriteBlob (rows [i].Col2);	// SequencePoints
+			}
+		}
+	}
+
+	sealed class LocalScopeTable : MetadataTable<LocalScopeRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteRID (rows [i].Col1, Table.Method);	// Method
+				buffer.WriteRID (rows [i].Col2, Table.ImportScope);	// ImportScope
+				buffer.WriteRID (rows [i].Col3, Table.LocalVariable); // VariableList
+				buffer.WriteRID (rows [i].Col4, Table.LocalConstant); // ConstantList
+				buffer.WriteUInt32 (rows [i].Col5); // StartOffset
+				buffer.WriteUInt32 (rows [i].Col6); // Length
+			}
+		}
+	}
+
+	sealed class LocalVariableTable : MetadataTable<LocalVariableRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Attributes
+				buffer.WriteUInt16 (rows [i].Col2);	// Index
+				buffer.WriteString (rows [i].Col3); // Name
+			}
+		}
+	}
+
+	sealed class LocalConstantTable : MetadataTable<LocalConstantRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteString (rows [i].Col1);	// Name
+				buffer.WriteBlob (rows [i].Col2);	// Signature
+			}
+		}
+	}
+
+	sealed class ImportScopeTable : MetadataTable<ImportScopeRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteRID (rows [i].Col1, Table.ImportScope);	// Parent
+				buffer.WriteBlob (rows [i].Col2);	// Imports
+			}
+		}
+	}
+
+	sealed class StateMachineMethodTable : MetadataTable<StateMachineMethodRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteRID (rows [i].Col1, Table.Method);	// MoveNextMethod
+				buffer.WriteRID (rows [i].Col2, Table.Method);	// KickoffMethod
+			}
+		}
+	}
+
+	sealed class CustomDebugInformationTable : MetadataTable<CustomDebugInformationRow> {
+
+		public override void Write (TableHeapBuffer buffer)
+		{
+			for (int i = 0; i < length; i++) {
+				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.HasCustomDebugInformation);	// Parent
+				buffer.WriteGuid (rows [i].Col2);	// Kind
+				buffer.WriteBlob (rows [i].Col3);	// Value
+			}
+		}
+	}
+
 	sealed class MetadataBuilder {
 
 		readonly internal ModuleDefinition module;
@@ -684,24 +795,27 @@ namespace Mono.Cecil {
 		readonly Dictionary<MemberRefRow, MetadataToken> member_ref_map;
 		readonly Dictionary<MethodSpecRow, MetadataToken> method_spec_map;
 		readonly Collection<GenericParameter> generic_parameters;
-		readonly Dictionary<MetadataToken, MetadataToken> method_def_map;
 
 		readonly internal CodeWriter code;
 		readonly internal DataBuffer data;
 		readonly internal ResourceBuffer resources;
 		readonly internal StringHeapBuffer string_heap;
+		readonly internal GuidHeapBuffer guid_heap;
 		readonly internal UserStringHeapBuffer user_string_heap;
 		readonly internal BlobHeapBuffer blob_heap;
 		readonly internal TableHeapBuffer table_heap;
+		readonly internal PdbHeapBuffer pdb_heap;
 
 		internal MetadataToken entry_point;
 
-		RID type_rid = 1;
-		RID field_rid = 1;
-		RID method_rid = 1;
-		RID param_rid = 1;
-		RID property_rid = 1;
-		RID event_rid = 1;
+		internal RID type_rid = 1;
+		internal RID field_rid = 1;
+		internal RID method_rid = 1;
+		internal RID param_rid = 1;
+		internal RID property_rid = 1;
+		internal RID event_rid = 1;
+		internal RID local_variable_rid = 1;
+		internal RID local_constant_rid = 1;
 
 		readonly TypeRefTable type_ref_table;
 		readonly TypeDefTable type_def_table;
@@ -721,6 +835,22 @@ namespace Mono.Cecil {
 		readonly TypeSpecTable typespec_table;
 		readonly MethodSpecTable method_spec_table;
 
+		readonly bool portable_pdb;
+
+		internal MetadataBuilder metadata_builder;
+
+		readonly DocumentTable document_table;
+		readonly MethodDebugInformationTable method_debug_information_table;
+		readonly LocalScopeTable local_scope_table;
+		readonly LocalVariableTable local_variable_table;
+		readonly LocalConstantTable local_constant_table;
+		readonly ImportScopeTable import_scope_table;
+		readonly StateMachineMethodTable state_machine_method_table;
+		readonly CustomDebugInformationTable custom_debug_information_table;
+
+		readonly Dictionary<ImportScopeRow, MetadataToken> import_scope_map;
+		readonly Dictionary<string, MetadataToken> document_map;
+
 		readonly internal bool write_symbols;
 
 		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
@@ -729,12 +859,25 @@ namespace Mono.Cecil {
 			this.text_map = CreateTextMap ();
 			this.fq_name = fq_name;
 			this.symbol_writer_provider = symbol_writer_provider;
+
+			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ()) {
+				symbol_writer = new PortablePdbWriter (this, module);
+			}
+
 			this.symbol_writer = symbol_writer;
 			this.write_symbols = symbol_writer != null;
+
+			var pdb_writer = symbol_writer as PortablePdbWriter;
+			if (pdb_writer != null) {
+				portable_pdb = true;
+				pdb_writer.SetModuleMetadata (this);
+			}
+
 			this.code = new CodeWriter (this);
 			this.data = new DataBuffer ();
 			this.resources = new ResourceBuffer ();
 			this.string_heap = new StringHeapBuffer ();
+			this.guid_heap = new GuidHeapBuffer ();
 			this.user_string_heap = new UserStringHeapBuffer ();
 			this.blob_heap = new BlobHeapBuffer ();
 			this.table_heap = new TableHeapBuffer (module, this);
@@ -763,8 +906,50 @@ namespace Mono.Cecil {
 			member_ref_map = new Dictionary<MemberRefRow, MetadataToken> (row_equality_comparer);
 			method_spec_map = new Dictionary<MethodSpecRow, MetadataToken> (row_equality_comparer);
 			generic_parameters = new Collection<GenericParameter> ();
-			if (write_symbols)
-				method_def_map = new Dictionary<MetadataToken, MetadataToken> ();
+
+			if (!portable_pdb)
+				return;
+
+			this.document_table = GetTable<DocumentTable> (Table.Document);
+			this.method_debug_information_table = GetTable<MethodDebugInformationTable> (Table.MethodDebugInformation);
+			this.local_scope_table = GetTable<LocalScopeTable> (Table.LocalScope);
+			this.local_variable_table = GetTable<LocalVariableTable> (Table.LocalVariable);
+			this.local_constant_table = GetTable<LocalConstantTable> (Table.LocalConstant);
+			this.import_scope_table = GetTable<ImportScopeTable> (Table.ImportScope);
+			this.state_machine_method_table = GetTable<StateMachineMethodTable> (Table.StateMachineMethod);
+			this.custom_debug_information_table = GetTable<CustomDebugInformationTable> (Table.CustomDebugInformation);
+
+			this.document_map = new Dictionary<string, MetadataToken> (StringComparer.Ordinal);
+			this.import_scope_map = new Dictionary<ImportScopeRow, MetadataToken> (row_equality_comparer);
+		}
+
+		public MetadataBuilder (ModuleDefinition module, PortablePdbWriterProvider writer_provider)
+		{
+			this.module = module;
+			this.text_map = new TextMap ();
+			this.symbol_writer_provider = writer_provider;
+			this.portable_pdb = true;
+
+			this.string_heap = new StringHeapBuffer ();
+			this.guid_heap = new GuidHeapBuffer ();
+			this.user_string_heap = new UserStringHeapBuffer ();
+			this.blob_heap = new BlobHeapBuffer ();
+			this.table_heap = new TableHeapBuffer (module, this);
+			this.pdb_heap = new PdbHeapBuffer();
+
+			this.document_table = GetTable<DocumentTable> (Table.Document);
+			this.method_debug_information_table = GetTable<MethodDebugInformationTable> (Table.MethodDebugInformation);
+			this.local_scope_table = GetTable<LocalScopeTable> (Table.LocalScope);
+			this.local_variable_table = GetTable<LocalVariableTable> (Table.LocalVariable);
+			this.local_constant_table = GetTable<LocalConstantTable> (Table.LocalConstant);
+			this.import_scope_table = GetTable<ImportScopeTable> (Table.ImportScope);
+			this.state_machine_method_table = GetTable<StateMachineMethodTable> (Table.StateMachineMethod);
+			this.custom_debug_information_table = GetTable<CustomDebugInformationTable> (Table.CustomDebugInformation);
+
+			var row_equality_comparer = new RowEqualityComparer ();
+
+			this.document_map = new Dictionary<string, MetadataToken> ();
+			this.import_scope_map = new Dictionary<ImportScopeRow, MetadataToken> (row_equality_comparer);
 		}
 
 		TextMap CreateTextMap ()
@@ -786,6 +971,11 @@ namespace Mono.Cecil {
 				return 0;
 
 			return string_heap.GetStringIndex (@string);
+		}
+
+		uint GetGuidIndex (Guid guid)
+		{
+			return guid_heap.GetGuidIndex (guid);
 		}
 
 		uint GetBlobIndex (ByteBuffer blob)
@@ -814,7 +1004,8 @@ namespace Mono.Cecil {
 		void BuildModule ()
 		{
 			var table = GetTable<ModuleTable> (Table.Module);
-			table.row = GetStringIndex (module.Name);
+			table.row.Col1 = GetStringIndex (module.Name);
+			table.row.Col2 = GetGuidIndex (module.Mvid);
 
 			var assembly = module.Assembly;
 
@@ -1112,20 +1303,8 @@ namespace Mono.Cecil {
 		{
 			var methods = type.Methods;
 			type.methods_range.Length = (uint) methods.Count;
-			for (int i = 0; i < methods.Count; i++) {
-				var method = methods [i];
-				var new_token = new MetadataToken (TokenType.Method, method_rid++);
-
-				if (write_symbols && method.token != MetadataToken.Zero)
-					method_def_map.Add (new_token, method.token);
-
-				method.token = new_token;
-			}
-		}
-
-		public bool TryGetOriginalMethodToken (MetadataToken new_token, out MetadataToken original)
-		{
-			return method_def_map.TryGetValue (new_token, out original);
+			for (int i = 0; i < methods.Count; i++)
+				methods [i].token = new MetadataToken (TokenType.Method, method_rid++);
 		}
 
 		MetadataToken GetTypeToken (TypeReference type)
@@ -1341,10 +1520,18 @@ namespace Mono.Cecil {
 			var interfaces = type.Interfaces;
 			var type_rid = type.token.RID;
 
-			for (int i = 0; i < interfaces.Count; i++)
-				iface_impl_table.AddRow (new InterfaceImplRow (
+			for (int i = 0; i < interfaces.Count; i++) {
+				var iface_impl = interfaces [i];
+
+				var rid = iface_impl_table.AddRow (new InterfaceImplRow (
 					type_rid,
-					MakeCodedRID (GetTypeToken (interfaces [i]), CodedIndex.TypeDefOrRef)));
+					MakeCodedRID (GetTypeToken (iface_impl.InterfaceType), CodedIndex.TypeDefOrRef)));
+
+				iface_impl.token = new MetadataToken (TokenType.InterfaceImpl, rid);
+
+				if (iface_impl.HasCustomAttributes)
+					AddCustomAttributes (iface_impl);
+			}
 		}
 
 		void AddLayoutInfo (TypeDefinition type)
@@ -2003,6 +2190,9 @@ namespace Mono.Cecil {
 			if (provider == null)
 				throw new ArgumentNullException ();
 
+			if (metadata_builder != null)
+				return metadata_builder.LookupToken (provider);
+
 			var member = provider as MemberReference;
 			if (member == null || member.Module != module)
 				throw CreateForeignMemberException (member);
@@ -2027,6 +2217,342 @@ namespace Mono.Cecil {
 			default:
 				throw new NotSupportedException ();
 			}
+		}
+
+		public void AddMethodDebugInformation (MethodDebugInformation method_info)
+		{
+			if (method_info.HasSequencePoints)
+				AddSequencePoints (method_info);
+
+			if (method_info.Scope != null)
+				AddLocalScope (method_info, method_info.Scope);
+
+			if (method_info.StateMachineKickOffMethod != null)
+				AddStateMachineMethod (method_info);
+
+			AddCustomDebugInformations (method_info.Method);
+		}
+
+		void AddStateMachineMethod (MethodDebugInformation method_info)
+		{
+			state_machine_method_table.AddRow (new StateMachineMethodRow (method_info.Method.MetadataToken.RID, method_info.StateMachineKickOffMethod.MetadataToken.RID));
+		}
+
+		void AddLocalScope (MethodDebugInformation method_info, ScopeDebugInformation scope)
+		{
+			var rid = local_scope_table.AddRow (new LocalScopeRow (
+				method_info.Method.MetadataToken.RID,
+				AddImportScope (scope.Import),
+				local_variable_rid,
+				local_constant_rid,
+				(uint) scope.Start.Offset,
+				(uint) ((scope.End.IsEndOfMethod ? method_info.code_size : scope.End.Offset) - scope.Start.Offset)));
+
+			scope.token = new MetadataToken (TokenType.LocalScope, rid);
+
+			AddCustomDebugInformations (scope);
+
+			if (scope.HasVariables)
+				AddLocalVariables (scope);
+
+			if (scope.HasConstants)
+				AddLocalConstants (scope);
+
+			if (scope.Import != null)
+				AddImportScope (scope.Import);
+
+			for (int i = 0; i < scope.Scopes.Count; i++)
+				AddLocalScope (method_info, scope.Scopes [i]);
+		}
+
+		void AddLocalVariables (ScopeDebugInformation scope)
+		{
+			for (int i = 0; i < scope.Variables.Count; i++) {
+				var variable = scope.Variables [i];
+				local_variable_table.AddRow (new LocalVariableRow (variable.Attributes, (ushort) variable.Index, GetStringIndex (variable.Name)));
+				variable.token = new MetadataToken (TokenType.LocalVariable, local_variable_rid);
+				local_variable_rid++;
+
+				AddCustomDebugInformations (variable);
+			}
+		}
+
+		void AddLocalConstants (ScopeDebugInformation scope)
+		{
+			for (int i = 0; i < scope.Constants.Count; i++) {
+				var constant = scope.Constants [i];
+				local_constant_table.AddRow (new LocalConstantRow (GetStringIndex (constant.Name), GetBlobIndex (GetConstantSignature(constant))));
+				constant.token = new MetadataToken (TokenType.LocalConstant, local_constant_rid);
+				local_constant_rid++;
+			}
+		}
+
+		SignatureWriter GetConstantSignature (ConstantDebugInformation constant)
+		{
+			var type = constant.ConstantType;
+
+			var signature = CreateSignatureWriter ();
+			signature.WriteTypeSignature (type);
+
+			if (type.IsTypeOf ("System", "Decimal")) {
+				var bits = decimal.GetBits ((decimal) constant.Value);
+
+				var low = (uint) bits [0];
+				var mid = (uint) bits [1];
+				var high = (uint) bits [2];
+
+				var scale = (byte) (bits [3] >> 16);
+				var negative = (bits [3] & 0x80000000) != 0;
+
+				signature.WriteByte ((byte) (scale | (negative ? 0x80 : 0x00)));
+				signature.WriteUInt32 (low);
+				signature.WriteUInt32 (mid);
+				signature.WriteUInt32 (high);
+
+				return signature;
+			}
+
+			if (type.IsTypeOf ("System", "DateTime")) {
+				var date = (DateTime) constant.Value;
+				signature.WriteInt64 (date.Ticks);
+				return signature;
+			}
+
+			signature.WriteBytes (GetConstantSignature (type.etype, constant.Value));
+
+			return signature;
+		}
+
+		void AddCustomDebugInformations (ICustomDebugInformationProvider provider)
+		{
+			if (!provider.HasCustomDebugInformations)
+				return;
+
+			var custom_infos = provider.CustomDebugInformations;
+
+			for (int i = 0; i < custom_infos.Count; i++) {
+				var custom_info = custom_infos [i];
+				switch (custom_info.Kind) {
+				case CustomDebugInformationKind.Binary:
+					var binary_info = (BinaryCustomDebugInformation) custom_info;
+					AddCustomDebugInformation (provider, binary_info, GetBlobIndex (binary_info.Data));
+					break;
+				case CustomDebugInformationKind.AsyncMethodBody:
+					AddAsyncMethodBodyDebugInformation (provider, (AsyncMethodBodyDebugInformation) custom_info);
+					break;
+				case CustomDebugInformationKind.StateMachineScope:
+					AddStateMachineScopeDebugInformation (provider, (StateMachineScopeDebugInformation) custom_info);
+					break;
+				default:
+					throw new NotImplementedException ();
+				}
+			}
+		}
+
+		void AddStateMachineScopeDebugInformation (ICustomDebugInformationProvider provider, StateMachineScopeDebugInformation state_machine_scope)
+		{
+			var method_info = ((MethodDefinition) provider).DebugInformation;
+
+			var signature = CreateSignatureWriter ();
+			signature.WriteUInt32 ((uint) state_machine_scope.Start.Offset);
+
+			var end_offset = state_machine_scope.End.IsEndOfMethod
+				? method_info.code_size
+				: state_machine_scope.End.Offset;
+
+			signature.WriteUInt32 ((uint) (end_offset - state_machine_scope.Start.Offset));
+
+			AddCustomDebugInformation (provider, state_machine_scope, signature);
+		}
+
+		void AddAsyncMethodBodyDebugInformation (ICustomDebugInformationProvider provider, AsyncMethodBodyDebugInformation async_method)
+		{
+			var signature = CreateSignatureWriter ();
+			signature.WriteUInt32 ((uint) async_method.catch_handler.Offset + 1);
+
+			for (int i = 0; i < async_method.yields.Count; i++) {
+				signature.WriteUInt32 ((uint) async_method.yields [i].Offset);
+				signature.WriteUInt32 ((uint) async_method.resumes [i].Offset);
+				signature.WriteCompressedUInt32 (async_method.move_next.MetadataToken.RID);
+			}
+
+			AddCustomDebugInformation (provider, async_method, signature);
+		}
+
+		void AddCustomDebugInformation (ICustomDebugInformationProvider provider, CustomDebugInformation custom_info, SignatureWriter signature)
+		{
+			AddCustomDebugInformation (provider, custom_info, GetBlobIndex (signature));
+		}
+
+		void AddCustomDebugInformation (ICustomDebugInformationProvider provider, CustomDebugInformation custom_info, uint blob_index)
+		{
+			var rid = custom_debug_information_table.AddRow (new CustomDebugInformationRow (
+				MakeCodedRID (provider.MetadataToken, CodedIndex.HasCustomDebugInformation),
+				GetGuidIndex (custom_info.Identifier),
+				blob_index));
+
+			custom_info.token = new MetadataToken (TokenType.CustomDebugInformation, rid);
+		}
+
+		uint AddImportScope (ImportDebugInformation import)
+		{
+			uint parent = 0;
+			if (import.Parent != null)
+				parent = AddImportScope (import.Parent);
+
+			uint targets_index = 0;
+			if (import.HasTargets) {
+				var signature = CreateSignatureWriter ();
+
+				for (int i = 0; i < import.Targets.Count; i++)
+					AddImportTarget (import.Targets [i], signature);
+
+				targets_index = GetBlobIndex (signature);
+			}
+
+			var row = new ImportScopeRow (parent, targets_index);
+
+			MetadataToken import_token;
+			if (import_scope_map.TryGetValue (row, out import_token))
+				return import_token.RID;
+
+			import_token = new MetadataToken (TokenType.ImportScope, import_scope_table.AddRow (row));
+			import_scope_map.Add (row, import_token);
+
+			return import_token.RID;
+		}
+
+		void AddImportTarget (ImportTarget target, SignatureWriter signature)
+		{
+			signature.WriteCompressedUInt32 ((uint)target.kind);
+
+			switch (target.kind) {
+			case ImportTargetKind.ImportNamespace:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
+				break;
+			case ImportTargetKind.ImportNamespaceInAssembly:
+				signature.WriteCompressedUInt32 (target.reference.MetadataToken.RID);
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
+				break;
+			case ImportTargetKind.ImportType:
+				signature.WriteTypeToken (target.type);
+				break;
+			case ImportTargetKind.ImportXmlNamespaceWithAlias:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));	
+				break;
+			case ImportTargetKind.ImportAlias:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
+				break;
+			case ImportTargetKind.DefineAssemblyAlias:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
+				signature.WriteCompressedUInt32 (target.reference.MetadataToken.RID);
+				break;
+			case ImportTargetKind.DefineNamespaceAlias:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
+				break;
+			case ImportTargetKind.DefineNamespaceInAssemblyAlias:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
+				signature.WriteCompressedUInt32 (target.reference.MetadataToken.RID);
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
+				break;
+			case ImportTargetKind.DefineTypeAlias:
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
+				signature.WriteTypeToken (target.type);
+				break;
+			}
+		}
+
+		uint GetUTF8StringBlobIndex (string s)
+		{
+			return GetBlobIndex (Encoding.UTF8.GetBytes (s));
+		}
+
+		public MetadataToken GetDocumentToken (Document document)
+		{
+			MetadataToken token;
+			if (document_map.TryGetValue (document.Url, out token))
+				return token;
+
+			token = new MetadataToken (TokenType.Document, document_table.AddRow (
+				new DocumentRow (GetBlobIndex (GetDocumentNameSignature (document)),
+				GetGuidIndex (document.HashAlgorithm.ToGuid ()),
+				GetBlobIndex (document.Hash),
+				GetGuidIndex (document.Language.ToGuid ()))));
+
+			document.token = token;
+
+			document_map.Add (document.Url, token);
+
+			return token;
+		}
+
+		SignatureWriter GetDocumentNameSignature (Document document)
+		{
+			var name = document.Url;
+			var signature = CreateSignatureWriter ();
+
+			char separator;
+			if (!TryGetDocumentNameSeparator (name, out separator)) {
+				signature.WriteByte (0);
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (name));
+				return signature;
+			}
+
+			signature.WriteByte ((byte) separator);
+
+			var parts = name.Split (new [] { separator }, StringSplitOptions.RemoveEmptyEntries);
+			for (int i = 0; i < parts.Length; i++)
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (parts [i]));
+
+			return signature;
+		}
+
+		static bool TryGetDocumentNameSeparator (string path, out char separator)
+		{
+			const char unix = '/';
+			const char win = '\\';
+			const char zero = (char) 0;
+
+			separator = zero;
+			if (string.IsNullOrEmpty (path))
+				return false;
+
+			int unix_count = 0;
+			int win_count = 0;
+
+			for (int i = 0; i < path.Length; i++) {
+				if (path [i] == unix)
+					unix_count++;
+				else if (path [i] == win)
+					win_count++;
+			}
+
+			if (unix_count == 0 && win_count == 0)
+				return false;
+
+			if (unix_count >= win_count) {
+				separator = unix;
+				return true;
+			}
+
+			separator = win;
+			return true;
+		}
+
+		void AddSequencePoints (MethodDebugInformation info)
+		{
+			var rid = info.Method.MetadataToken.RID;
+
+			Document document;
+			if (info.TryGetUniqueDocument (out document))
+				method_debug_information_table.rows [rid - 1].Col1 = GetDocumentToken (document).RID;
+
+			var signature = CreateSignatureWriter ();
+			signature.WriteSequencePoints (info);
+
+			method_debug_information_table.rows [rid - 1].Col2 = GetBlobIndex (signature);
 		}
 	}
 
@@ -2095,6 +2621,11 @@ namespace Mono.Cecil {
 		uint MakeTypeDefOrRefCodedRID (TypeReference type)
 		{
 			return CodedIndex.TypeDefOrRef.CompressMetadataToken (metadata.LookupToken (type));
+		}
+
+		public void WriteTypeToken (TypeReference type)
+		{
+			WriteCompressedUInt32 (MakeTypeDefOrRefCodedRID (type));
 		}
 
 		public void WriteTypeSignature (TypeReference type)
@@ -2251,7 +2782,10 @@ namespace Mono.Cecil {
 
 		public void WriteConstantString (string value)
 		{
-			WriteBytes (Encoding.Unicode.GetBytes (value));
+			if (value != null)
+				WriteBytes (Encoding.Unicode.GetBytes (value));
+			else
+				WriteByte (0xff);
 		}
 
 		public void WriteConstantPrimitive (object value)
@@ -2605,8 +3139,81 @@ namespace Mono.Cecil {
 		{
 			WriteByte ((byte) variant);
 		}
+
+		public void WriteSequencePoints (MethodDebugInformation info)
+		{
+			var start_line = -1;
+			var start_column = -1;
+
+			WriteCompressedUInt32 (info.local_var_token.RID);
+
+			Document previous_document;
+			if (!info.TryGetUniqueDocument (out previous_document))
+				previous_document = null;
+
+			for (int i = 0; i < info.SequencePoints.Count; i++) {
+				var sequence_point = info.SequencePoints [i];
+
+				var document = sequence_point.Document;
+				if (previous_document != document) {
+					var document_token = metadata.GetDocumentToken (document);
+
+					if (previous_document != null)
+						WriteCompressedUInt32 (0);
+
+					WriteCompressedUInt32 (document_token.RID);
+					previous_document = document;
+				}
+
+				if (i > 0)
+					WriteCompressedUInt32 ((uint) (sequence_point.Offset - info.SequencePoints [i - 1].Offset));
+				else
+					WriteCompressedUInt32 ((uint) sequence_point.Offset);
+
+				if (sequence_point.IsHidden) {
+					WriteInt16 (0);
+					continue;
+				}
+
+				var delta_lines = sequence_point.EndLine - sequence_point.StartLine;
+				var delta_columns = sequence_point.EndColumn - sequence_point.StartColumn;
+
+				WriteCompressedUInt32 ((uint) delta_lines);
+
+				if (delta_lines == 0)
+					WriteCompressedUInt32((uint) delta_columns);
+				else
+					WriteCompressedInt32 (delta_columns);
+
+				if (start_line < 0) {
+					WriteCompressedUInt32 ((uint) sequence_point.StartLine);
+					WriteCompressedUInt32 ((uint) sequence_point.StartColumn);
+				} else {
+					WriteCompressedInt32 (sequence_point.StartLine - start_line);
+					WriteCompressedInt32 (sequence_point.StartColumn - start_column);
+				}
+
+				start_line = sequence_point.StartLine;
+				start_column = sequence_point.StartColumn;
+			}
+		}
 	}
 
 #endif
 
+	static partial class Mixin {
+
+		public static bool TryGetUniqueDocument (this MethodDebugInformation info, out Document document)
+		{
+			document = info.SequencePoints [0].Document;
+
+			for (int i = 1; i < info.SequencePoints.Count; i++) {
+				var sequence_point = info.SequencePoints [i];
+				if (sequence_point.Document != document)
+					return false;
+			}
+
+			return true;
+		}
+	}
 }

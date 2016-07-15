@@ -57,8 +57,8 @@ namespace Mono.Cecil.Tests {
 				var types = CustomListTypeNames.Select (typeName => module.Types.Single (t => t.Name == typeName));
 
 				foreach (var type in types) {
-					Assert.IsNotNull (type.Interfaces.SingleOrDefault (i => i.FullName == "System.Collections.Generic.IList`1<System.Int32>"));
-					Assert.IsNotNull (type.Interfaces.SingleOrDefault (i => i.FullName == "System.Collections.Generic.IEnumerable`1<System.Int32>"));
+					Assert.IsNotNull (type.Interfaces.SingleOrDefault (i => i.InterfaceType.FullName == "System.Collections.Generic.IList`1<System.Int32>"));
+					Assert.IsNotNull (type.Interfaces.SingleOrDefault (i => i.InterfaceType.FullName == "System.Collections.Generic.IEnumerable`1<System.Int32>"));
 				}
 			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
 		}

@@ -208,8 +208,8 @@ namespace Mono.Cecil {
 		AssemblyNameReference[] VirtualReferences {
 			get {
 				if (virtual_references == null) {
-					// force module to read its assembly references. that will in turn initialze virtual_references
-					var temp = module.AssemblyReferences;
+					// force module to read its assembly references. that will in turn initialize virtual_references
+					Mixin.Read (module.AssemblyReferences);
 				}
 
 				return virtual_references;

@@ -11,6 +11,7 @@
     <Compile Include="Mono.Cecil.Tests\AssemblyInfo.cs" />
     <Compile Include="Mono.Cecil.Tests\BaseTestFixture.cs" />
     <Compile Include="Mono.Cecil.Tests\CompilationService.cs" />
+    <Compile Include="Mono.Cecil.Tests\PortablePdbTests.cs" />
     <Compile Include="Mono.Cecil.Tests\VariableTests.cs" />
     <Compile Include="Mono.Cecil.Tests\TypeParserTests.cs" />
     <Compile Include="Mono.Cecil.Tests\ImportCecilTests.cs" />

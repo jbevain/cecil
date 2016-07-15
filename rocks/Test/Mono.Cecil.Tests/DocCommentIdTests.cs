@@ -70,13 +70,15 @@ namespace N
         /// <summary>
         /// ID string generated is "E:N.X.d".
         /// </summary>
+#pragma warning disable 67
         public event D d;
+#pragma warning restore 67
 
 
-        /// <summary>
-        /// ID string generated is "P:N.X.Item(System.String)".
-        /// </summary>
-        public int this[string s] { get { return 1; } }
+		/// <summary>
+		/// ID string generated is "P:N.X.Item(System.String)".
+		/// </summary>
+		public int this[string s] { get { return 1; } }
 
 
         /// <summary>

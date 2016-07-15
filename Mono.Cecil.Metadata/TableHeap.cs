@@ -59,6 +59,15 @@ namespace Mono.Cecil.Metadata {
 		GenericParam = 0x2a,
 		MethodSpec = 0x2b,
 		GenericParamConstraint = 0x2c,
+
+		Document = 0x30,
+		MethodDebugInformation = 0x31,
+		LocalScope = 0x32,
+		LocalVariable = 0x33,
+		LocalConstant = 0x34,
+		ImportScope = 0x35,
+		StateMachineMethod = 0x36,
+		CustomDebugInformation = 0x37,
 	}
 
 	struct TableInformation {
@@ -72,16 +81,14 @@ namespace Mono.Cecil.Metadata {
 		public long Valid;
 		public long Sorted;
 
-		public const int TableCount = 45;
-
-		public readonly TableInformation [] Tables = new TableInformation [TableCount];
+		public readonly TableInformation [] Tables = new TableInformation [Mixin.TableCount];
 
 		public TableInformation this [Table table] {
 			get { return Tables [(int) table]; }
 		}
 
-		public TableHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public TableHeap (byte [] data)
+			: base (data)
 		{
 		}
 

@@ -54,7 +54,7 @@ namespace Mono.Cecil.Tests {
 		internal Image GetResourceImage (string name)
 		{
 			using (var fs = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read))
-				return ImageReader.ReadImageFrom (fs);
+				return ImageReader.ReadImage (fs, fs.Name);
 		}
 
 		public ModuleDefinition GetCurrentModule ()
@@ -79,6 +79,19 @@ namespace Mono.Cecil.Tests {
 			return Path.Combine (path, "Resources");
 		}
 
+		public static void AssertCode (string expected, MethodDefinition method)
+		{
+			Assert.IsTrue (method.HasBody);
+			Assert.IsNotNull (method.Body);
+
+			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
+		}
+
+		static string Normalize (string str)
+		{
+			return str.Trim ().Replace ("\r\n", "\n");
+		}
+
 		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
 		{
 			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
@@ -94,22 +107,22 @@ namespace Mono.Cecil.Tests {
 			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
 		}
 
-		private static void Run (TestCase testCase)
+		static void Run (TestCase testCase)
 		{
-			var runner = new TestRunner (testCase, TestCaseType.ReadDeferred);
-			runner.RunTest ();
+			using (var runner = new TestRunner (testCase, TestCaseType.ReadDeferred))
+				runner.RunTest ();
 
-			runner = new TestRunner (testCase, TestCaseType.ReadImmediate);
-			runner.RunTest ();
+			using (var runner = new TestRunner (testCase, TestCaseType.ReadImmediate))
+				runner.RunTest ();
 
 			if (testCase.ReadOnly)
 				return;
 
-			runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred);
-			runner.RunTest();
+			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred))
+				runner.RunTest ();
 
-			runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate);
-			runner.RunTest();
+			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate))
+				runner.RunTest ();
 		}
 	}
 
@@ -193,10 +206,13 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 
-	class TestRunner {
+	class TestRunner : IDisposable {
 
 		readonly TestCase test_case;
 		readonly TestCaseType type;
+
+		ModuleDefinition test_module;
+		DefaultAssemblyResolver test_resolver;
 
 		public TestRunner (TestCase testCase, TestCaseType type)
 		{
@@ -253,27 +269,28 @@ namespace Mono.Cecil.Tests {
 			if (test_case.AssemblyResolver != null)
 				return test_case.AssemblyResolver;
 
-			var resolver = new DefaultAssemblyResolver ();
+			test_resolver = new DefaultAssemblyResolver ();
 			var directory = Path.GetDirectoryName (test_case.ModuleLocation);
-			resolver.AddSearchDirectory (directory);
-			return resolver;
+			test_resolver.AddSearchDirectory (directory);
+			return test_resolver;
 		}
 
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
 		{
-			var module = ModuleDefinition.ReadModule (location, reader_parameters);
 			var rt_folder = Path.Combine (Path.GetTempPath (), folder);
 			if (!Directory.Exists (rt_folder))
 				Directory.CreateDirectory (rt_folder);
 			var rt_module = Path.Combine (rt_folder, Path.GetFileName (location));
 
-			var writer_parameters = new WriterParameters {
-				SymbolWriterProvider = GetSymbolWriterProvider (),
-			};
+			using (var module = ModuleDefinition.ReadModule (location, reader_parameters)) {
+				var writer_parameters = new WriterParameters {
+					SymbolWriterProvider = GetSymbolWriterProvider (),
+				};
 
-			test_case.Test (module);
+				test_case.Test (module);
 
-			module.Write (rt_module, writer_parameters);
+				module.Write (rt_module, writer_parameters);
+			}
 
 			if (test_case.Verify)
 				CompilationService.Verify (rt_module);
@@ -287,7 +304,17 @@ namespace Mono.Cecil.Tests {
 			if (module == null)
 				return;
 
-			test_case.Test(module);
+			test_module = module;
+			test_case.Test (module);
+		}
+
+		public void Dispose ()
+		{
+			if (test_module != null)
+				test_module.Dispose ();
+
+			if (test_resolver != null)
+				test_resolver.Dispose ();
 		}
 	}
 

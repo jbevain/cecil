@@ -8,23 +8,17 @@
 // Licensed under the MIT/X11 license.
 //
 
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	abstract class Heap {
 
 		public int IndexSize;
 
-		public readonly Section Section;
-		public readonly uint Offset;
-		public readonly uint Size;
+		internal byte [] data;
 
-		protected Heap (Section section, uint offset, uint size)
+		protected Heap (byte [] data)
 		{
-			this.Section = section;
-			this.Offset = offset;
-			this.Size = size;
+			this.data = data;
 		}
 	}
 }

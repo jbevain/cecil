@@ -17,7 +17,7 @@ namespace Mono.Cecil.Tests {
 
 				AssertCode (@"
 	.locals init (System.Int32 i)
-	.line 7,-1:-1,-1 'C:\sources\cecil\symbols\Mono.Cecil.Mdb\Test\Resources\assemblies\hello.cs'
+	.line 6,-1:-1,-1 'C:\sources\cecil\symbols\Mono.Cecil.Mdb\Test\Resources\assemblies\hello.cs'
 	IL_0000: ldc.i4.0
 	IL_0001: stloc.0
 	.line 7,-1:-1,-1 'C:\sources\cecil\symbols\Mono.Cecil.Mdb\Test\Resources\assemblies\hello.cs'
@@ -42,19 +42,6 @@ namespace Mono.Cecil.Tests {
 	IL_001d: ret
 ", main);
 			}, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
-		}
-
-		static void AssertCode (string expected, MethodDefinition method)
-		{
-			Assert.IsTrue (method.HasBody);
-			Assert.IsNotNull (method.Body);
-
-			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
-		}
-
-		static string Normalize (string str)
-		{
-			return str.Trim ().Replace ("\r\n", "\n");
 		}
 	}
 }

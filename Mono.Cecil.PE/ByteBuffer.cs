@@ -34,12 +34,6 @@ namespace Mono.Cecil.PE {
 			this.length = this.buffer.Length;
 		}
 
-		public void Reset (byte [] buffer)
-		{
-			this.buffer = buffer ?? Empty<byte>.Array;
-			this.length = this.buffer.Length;
-		}
-
 		public void Advance (int length)
 		{
 			position += length;
@@ -122,16 +116,22 @@ namespace Mono.Cecil.PE {
 
 		public int ReadCompressedInt32 ()
 		{
-			var value = (int) (ReadCompressedUInt32 () >> 1);
-			if ((value & 1) == 0)
-				return value;
-			if (value < 0x40)
-				return value - 0x40;
-			if (value < 0x2000)
-				return value - 0x2000;
-			if (value < 0x10000000)
-				return value - 0x10000000;
-			return value - 0x20000000;
+			var b = buffer [position];
+			var u = (int) ReadCompressedUInt32 ();
+			var v = u >> 1;
+			if ((u & 1) == 0)
+				return v;
+
+			switch (b & 0xc0)
+			{
+				case 0:
+				case 0x40:
+					return v - 0x40;
+				case 0x80:
+					return v - 0x2000;
+				default:
+					return v - 0x10000000;
+			}
 		}
 
 		public float ReadSingle ()

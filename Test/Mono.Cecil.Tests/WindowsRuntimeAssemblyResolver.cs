@@ -53,7 +53,18 @@ namespace Mono.Cecil.Tests {
 			RegisterAssembly (assembly);
 		}
 
-		private void LoadWindowsSdk (string registryVersion, string windowsKitsVersion, Action<string> registerAssembliesCallback)
+		protected override void Dispose (bool disposing)
+		{
+			if (!disposing)
+				return;
+
+			foreach (var assembly in assemblies.Values)
+				assembly.Dispose ();
+
+			base.Dispose (true);
+		}
+
+		void LoadWindowsSdk (string registryVersion, string windowsKitsVersion, Action<string> registerAssembliesCallback)
 		{
 #if NET_4_0
 			using (var localMachine32Key = RegistryKey.OpenBaseKey (RegistryHive.LocalMachine, RegistryView.Registry32)) {
