@@ -43,7 +43,6 @@ namespace Mono.Cecil.PE {
 
 		readonly bool pe64;
 		readonly bool has_reloc;
-		readonly internal uint time_stamp;
 
 		internal Section text;
 		internal Section rsrc;
@@ -67,7 +66,6 @@ namespace Mono.Cecil.PE {
 			this.GetWin32Resources ();
 			this.BuildTextMap ();
 			this.sections = (ushort) (has_reloc ? 2 : 1); // text + reloc?
-			this.time_stamp = (uint) DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1)).TotalSeconds;
 		}
 
 		void GetDebugHeader ()
@@ -195,7 +193,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (0x00004550);		// Magic
 			WriteUInt16 (GetMachine ());	// Machine
 			WriteUInt16 (sections);			// NumberOfSections
-			WriteUInt32 (time_stamp);
+			WriteUInt32 (metadata.time_stamp);
 			WriteUInt32 (0);	// PointerToSymbolTable
 			WriteUInt32 (0);	// NumberOfSymbols
 			WriteUInt16 (SizeOfOptionalHeader ());	// SizeOfOptionalHeader
@@ -590,7 +588,7 @@ namespace Mono.Cecil.PE {
 		void WriteDebugDirectory ()
 		{
 			WriteInt32 (debug_directory.Characteristics);
-			WriteUInt32 (time_stamp);
+			WriteUInt32 (metadata.time_stamp);
 			WriteInt16 (debug_directory.MajorVersion);
 			WriteInt16 (debug_directory.MinorVersion);
 			WriteInt32 (debug_directory.Type);

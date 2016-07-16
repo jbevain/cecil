@@ -789,6 +789,7 @@ namespace Mono.Cecil {
 		readonly internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
 		readonly internal string fq_name;
+		readonly internal uint time_stamp;
 
 		readonly Dictionary<TypeRefRow, MetadataToken> type_ref_map;
 		readonly Dictionary<uint, MetadataToken> type_spec_map;
@@ -858,7 +859,9 @@ namespace Mono.Cecil {
 			this.module = module;
 			this.text_map = CreateTextMap ();
 			this.fq_name = fq_name;
+			this.time_stamp = (uint) DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1)).TotalSeconds;
 			this.symbol_writer_provider = symbol_writer_provider;
+
 
 			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ()) {
 				symbol_writer = new PortablePdbWriter (this, module);

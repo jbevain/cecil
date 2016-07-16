@@ -203,8 +203,6 @@ namespace Mono.Cecil.Cil {
 			}
 
 			directory = new ImageDebugDirectory () {
-				Characteristics = 0,
-				TimeDateStamp = 0,
 				MajorVersion = 256,
 				MinorVersion = 20577,
 				Type = 2,
@@ -268,7 +266,7 @@ namespace Mono.Cecil.Cil {
 			var pdb_heap = pdb_metadata.pdb_heap;
 
 			pdb_heap.WriteBytes (module.Mvid.ToByteArray ());
-			pdb_heap.WriteUInt32 (writer.time_stamp);
+			pdb_heap.WriteUInt32 (module_metadata.time_stamp);
 
 			pdb_heap.WriteUInt32 (module_metadata.entry_point.ToUInt32 ());
 
