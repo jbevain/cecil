@@ -123,7 +123,7 @@ namespace Mono.Cecil.Metadata {
 			WriteByte (GetHeapSizes ());		// HeapSizes
 			WriteByte (10);						// Reserved2
 			WriteUInt64 (GetValid ());			// Valid
-			WriteUInt64 (0x0016003301fa00);		// Sorted
+			WriteUInt64 (0xc416003301fa00);		// Sorted
 
 			WriteRowCount ();
 			WriteTables ();
