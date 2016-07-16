@@ -105,7 +105,6 @@ namespace Mono.Cecil {
 		public ReaderParameters (ReadingMode readingMode)
 		{
 			this.reading_mode = readingMode;
-			this.in_memory = true; // back compatibility
 		}
 	}
 
