@@ -268,7 +268,7 @@ namespace Mono.Cecil.Cil {
 			var pdb_heap = pdb_metadata.pdb_heap;
 
 			pdb_heap.WriteBytes (module.Mvid.ToByteArray ());
-			pdb_heap.WriteUInt32 (0); // Timestamp
+			pdb_heap.WriteUInt32 (writer.time_stamp);
 
 			pdb_heap.WriteUInt32 (module_metadata.entry_point.ToUInt32 ());
 

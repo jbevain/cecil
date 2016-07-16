@@ -43,7 +43,7 @@ namespace Mono.Cecil.PE {
 
 		readonly bool pe64;
 		readonly bool has_reloc;
-		readonly uint time_stamp;
+		readonly internal uint time_stamp;
 
 		internal Section text;
 		internal Section rsrc;
