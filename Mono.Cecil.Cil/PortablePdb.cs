@@ -196,14 +196,34 @@ namespace Mono.Cecil.Cil {
 
 		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
 		{
-			//if (IsEmbedded) {
+			if (IsEmbedded) {
 				directory = new ImageDebugDirectory ();
 				header = Empty<byte>.Array;
 				return false;
-			//}
+			}
 
+			directory = new ImageDebugDirectory () {
+				Characteristics = 0,
+				TimeDateStamp = 0,
+				MajorVersion = 256,
+				MinorVersion = 20577,
+				Type = 2,
+			};
 
-			//throw new NotImplementedException ();
+			var buffer = new ByteBuffer ();
+			// RSDS
+			buffer.WriteUInt32 (0x53445352);
+			// Module ID
+			buffer.WriteBytes (module.Mvid.ToByteArray ());
+			// PDB Age
+			buffer.WriteUInt32 (1);
+			// PDB Path
+			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (writer.BaseStream.GetFileName ()));
+			buffer.WriteByte (0);
+
+			header = buffer.buffer;
+			directory.SizeOfData = header.Length;
+			return true;
 		}
 
 		public void Write (MethodDebugInformation info)
@@ -282,7 +302,7 @@ namespace Mono.Cecil.Cil {
 
 #endif
 
-			static class PdbGuidMapping {
+	static class PdbGuidMapping {
 
 		static readonly Dictionary<Guid, DocumentLanguage> guid_language = new Dictionary<Guid, DocumentLanguage> ();
 		static readonly Dictionary<DocumentLanguage, Guid> language_guid = new Dictionary<DocumentLanguage, Guid> ();
