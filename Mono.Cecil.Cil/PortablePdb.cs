@@ -221,7 +221,8 @@ namespace Mono.Cecil.Cil {
 			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (writer.BaseStream.GetFileName ()));
 			buffer.WriteByte (0);
 
-			header = buffer.buffer;
+			header = new byte [buffer.length];
+			Buffer.BlockCopy (buffer.buffer, 0, header, 0, buffer.length);
 			directory.SizeOfData = header.Length;
 			return true;
 		}
@@ -266,11 +267,9 @@ namespace Mono.Cecil.Cil {
 		{
 			var pdb_heap = pdb_metadata.pdb_heap;
 
-			var id = new ByteBuffer (20);
-			id.WriteBytes (module.Mvid.ToByteArray ());
-			id.WriteUInt32 (0); // Timestamp
+			pdb_heap.WriteBytes (module.Mvid.ToByteArray ());
+			pdb_heap.WriteUInt32 (0); // Timestamp
 
-			pdb_heap.WriteBytes (id);
 			pdb_heap.WriteUInt32 (module_metadata.entry_point.ToUInt32 ());
 
 			var table_heap = module_metadata.table_heap;
