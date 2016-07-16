@@ -764,7 +764,9 @@ namespace Mono.Cecil.PE {
 				// #GUID header
 				+ 16
 				// #Blob header
-				+ (metadata.blob_heap.IsEmpty ? 0 : 16);
+				+ (metadata.blob_heap.IsEmpty ? 0 : 16)
+				//
+				+ (metadata.pdb_heap == null ? 0 : 16);
 		}
 
 		int GetStrongNameLength ()
