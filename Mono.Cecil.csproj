@@ -10,6 +10,7 @@
     <Compile Include="Mono.Cecil.Cil\CodeWriter.cs" />
     <Compile Include="Mono.Cecil.Cil\CodeReader.cs" />
     <Compile Include="Mono.Cecil.Cil\Document.cs" />
+    <Compile Include="Mono.Cecil.Cil\PortablePdb.cs" />
     <Compile Include="Mono.Cecil.Cil\ExceptionHandler.cs" />
     <Compile Include="Mono.Cecil.Cil\ILProcessor.cs" />
     <Compile Include="Mono.Cecil.Cil\Instruction.cs" />
@@ -27,6 +28,7 @@
     <Compile Include="Mono.Cecil.Metadata\GuidHeap.cs" />
     <Compile Include="Mono.Cecil.Metadata\Heap.cs" />
     <Compile Include="Mono.Cecil.Metadata\MetadataToken.cs" />
+    <Compile Include="Mono.Cecil.Metadata\PdbHeap.cs" />
     <Compile Include="Mono.Cecil.Metadata\Row.cs" />
     <Compile Include="Mono.Cecil.Metadata\StringHeap.cs" />
     <Compile Include="Mono.Cecil.Metadata\TableHeap.cs" />
@@ -55,8 +57,10 @@
     <Compile Include="Mono.Cecil\AssemblyWriter.cs" />
     <Compile Include="Mono.Cecil\BaseAssemblyResolver.cs" />
     <Compile Include="Mono.Cecil\CallSite.cs" />
+    <Compile Include="Mono.Cecil\Treatments.cs" />
     <Compile Include="Mono.Cecil\TypeParser.cs" />
     <Compile Include="Mono.Cecil\Import.cs" />
+    <Compile Include="Mono.Cecil\WindowsRuntimeProjections.cs" />
     <Compile Include="Mono.Collections.Generic\Collection.cs" />
     <Compile Include="Mono.Cecil\ExportedType.cs" />
     <Compile Include="Mono.Cecil\SecurityDeclaration.cs" />

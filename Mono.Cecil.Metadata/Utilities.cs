@@ -16,6 +16,9 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
+		public const int TableCount = 58;
+		public const int CodedIndexCount = 14;
+
 		public static uint ReadCompressedUInt32 (this byte [] data, ref int position)
 		{
 			uint integer;
@@ -108,6 +111,10 @@ namespace Mono.Cecil {
 					token_type = TokenType.ManifestResource; goto ret;
 				case 19:
 					token_type = TokenType.GenericParam; goto ret;
+				case 20:
+					token_type = TokenType.GenericParamConstraint; goto ret;
+				case 21:
+					token_type = TokenType.MethodSpec; goto ret;
 				default:
 					goto exit;
 				}
@@ -224,6 +231,66 @@ namespace Mono.Cecil {
 					token_type = TokenType.Method; goto ret;
 				default: goto exit;
 				}
+			case CodedIndex.HasCustomDebugInformation:
+				rid = data >> 5;
+				switch (data & 31) {
+				case 0:
+					token_type = TokenType.Method; goto ret;
+				case 1:
+					token_type = TokenType.Field; goto ret;
+				case 2:
+					token_type = TokenType.TypeRef; goto ret;
+				case 3:
+					token_type = TokenType.TypeDef; goto ret;
+				case 4:
+					token_type = TokenType.Param; goto ret;
+				case 5:
+					token_type = TokenType.InterfaceImpl; goto ret;
+				case 6:
+					token_type = TokenType.MemberRef; goto ret;
+				case 7:
+					token_type = TokenType.Module; goto ret;
+				case 8:
+					token_type = TokenType.Permission; goto ret;
+				case 9:
+					token_type = TokenType.Property; goto ret;
+				case 10:
+					token_type = TokenType.Event; goto ret;
+				case 11:
+					token_type = TokenType.Signature; goto ret;
+				case 12:
+					token_type = TokenType.ModuleRef; goto ret;
+				case 13:
+					token_type = TokenType.TypeSpec; goto ret;
+				case 14:
+					token_type = TokenType.Assembly; goto ret;
+				case 15:
+					token_type = TokenType.AssemblyRef; goto ret;
+				case 16:
+					token_type = TokenType.File; goto ret;
+				case 17:
+					token_type = TokenType.ExportedType; goto ret;
+				case 18:
+					token_type = TokenType.ManifestResource; goto ret;
+				case 19:
+					token_type = TokenType.GenericParam; goto ret;
+				case 20:
+					token_type = TokenType.GenericParamConstraint; goto ret;
+				case 21:
+					token_type = TokenType.MethodSpec; goto ret;
+				case 22:
+					token_type = TokenType.Document; goto ret;
+				case 23:
+					token_type = TokenType.LocalScope; goto ret;
+				case 24:
+					token_type = TokenType.LocalVariable; goto ret;
+				case 25:
+					token_type = TokenType.LocalConstant; goto ret;
+				case 26:
+					token_type = TokenType.ImportScope; goto ret;
+				default:
+					goto exit;
+				}
 			default:
 				goto exit;
 			}
@@ -307,6 +374,10 @@ namespace Mono.Cecil {
 					return ret | 18;
 				case TokenType.GenericParam:
 					return ret | 19;
+				case TokenType.GenericParamConstraint:
+					return ret | 20;
+				case TokenType.MethodSpec:
+					return ret | 21;
 				default:
 					goto exit;
 				}
@@ -424,6 +495,66 @@ namespace Mono.Cecil {
 				default:
 					goto exit;
 				}
+			case CodedIndex.HasCustomDebugInformation:
+				ret = token.RID << 5;
+				switch (token.TokenType) {
+				case TokenType.Method:
+					return ret | 0;
+				case TokenType.Field:
+					return ret | 1;
+				case TokenType.TypeRef:
+					return ret | 2;
+				case TokenType.TypeDef:
+					return ret | 3;
+				case TokenType.Param:
+					return ret | 4;
+				case TokenType.InterfaceImpl:
+					return ret | 5;
+				case TokenType.MemberRef:
+					return ret | 6;
+				case TokenType.Module:
+					return ret | 7;
+				case TokenType.Permission:
+					return ret | 8;
+				case TokenType.Property:
+					return ret | 9;
+				case TokenType.Event:
+					return ret | 10;
+				case TokenType.Signature:
+					return ret | 11;
+				case TokenType.ModuleRef:
+					return ret | 12;
+				case TokenType.TypeSpec:
+					return ret | 13;
+				case TokenType.Assembly:
+					return ret | 14;
+				case TokenType.AssemblyRef:
+					return ret | 15;
+				case TokenType.File:
+					return ret | 16;
+				case TokenType.ExportedType:
+					return ret | 17;
+				case TokenType.ManifestResource:
+					return ret | 18;
+				case TokenType.GenericParam:
+					return ret | 19;
+				case TokenType.GenericParamConstraint:
+					return ret | 20;
+				case TokenType.MethodSpec:
+					return ret | 21;
+				case TokenType.Document:
+					return ret | 22;
+				case TokenType.LocalScope:
+					return ret | 23;
+				case TokenType.LocalVariable:
+					return ret | 24;
+				case TokenType.LocalConstant:
+					return ret | 25;
+				case TokenType.ImportScope:
+					return ret | 26;
+				default:
+					goto exit;
+				}
 			default:
 				goto exit;
 			}
@@ -452,7 +583,7 @@ namespace Mono.Cecil {
 					Table.Method, Table.Field, Table.TypeRef, Table.TypeDef, Table.Param, Table.InterfaceImpl, Table.MemberRef,
 					Table.Module, Table.DeclSecurity, Table.Property, Table.Event, Table.StandAloneSig, Table.ModuleRef,
 					Table.TypeSpec, Table.Assembly, Table.AssemblyRef, Table.File, Table.ExportedType,
-					Table.ManifestResource, Table.GenericParam
+					Table.ManifestResource, Table.GenericParam, Table.GenericParamConstraint, Table.MethodSpec,
 				};
 				break;
 			case CodedIndex.HasFieldMarshal:
@@ -494,6 +625,16 @@ namespace Mono.Cecil {
 			case CodedIndex.TypeOrMethodDef:
 				bits = 1;
 				tables = new [] { Table.TypeDef, Table.Method };
+				break;
+			case CodedIndex.HasCustomDebugInformation:
+				bits = 5;
+				tables = new[] {
+					Table.Method, Table.Field, Table.TypeRef, Table.TypeDef, Table.Param, Table.InterfaceImpl, Table.MemberRef,
+					Table.Module, Table.DeclSecurity, Table.Property, Table.Event, Table.StandAloneSig, Table.ModuleRef,
+					Table.TypeSpec, Table.Assembly, Table.AssemblyRef, Table.File, Table.ExportedType,
+					Table.ManifestResource, Table.GenericParam, Table.GenericParamConstraint, Table.MethodSpec,
+					Table.Document, Table.LocalScope, Table.LocalVariable, Table.LocalConstant, Table.ImportScope,
+				};
 				break;
 			default:
 				throw new ArgumentException ();

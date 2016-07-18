@@ -316,19 +316,6 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (body, method.Body);
 		}
 
-		static void AssertCode (string expected, MethodDefinition method)
-		{
-			Assert.IsTrue (method.HasBody);
-			Assert.IsNotNull (method.Body);
-
-			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
-		}
-
-		static string Normalize (string str)
-		{
-			return str.Trim ().Replace ("\r\n", "\n");
-		}
-
 		[Test]
 		public void AddInstruction ()
 		{

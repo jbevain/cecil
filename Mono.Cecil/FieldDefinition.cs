@@ -8,6 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
+using System;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -62,6 +63,11 @@ namespace Mono.Cecil {
 			set { offset = value; }
 		}
 
+		internal new FieldDefinitionProjection WindowsRuntimeProjection {
+			get { return (FieldDefinitionProjection) projection; }
+			set { projection = value; }
+		}
+
 		void ResolveRVA ()
 		{
 			if (rva != Mixin.NotResolvedMarker)
@@ -104,7 +110,12 @@ namespace Mono.Cecil {
 
 		public FieldAttributes Attributes {
 			get { return (FieldAttributes) attributes; }
-			set { attributes = (ushort) value; }
+			set {
+				if (IsWindowsRuntimeProjection && (ushort) value != attributes)
+					throw new InvalidOperationException ();
+
+				attributes = (ushort) value;
+			}
 		}
 
 		public bool HasConstant {

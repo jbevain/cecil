@@ -8,6 +8,8 @@
 // Licensed under the MIT/X11 license.
 //
 
+using System;
+
 namespace Mono.Cecil {
 
 	public abstract class MemberReference : IMetadataTokenProvider {
@@ -16,10 +18,16 @@ namespace Mono.Cecil {
 		TypeReference declaring_type;
 
 		internal MetadataToken token;
+		internal object projection;
 
 		public virtual string Name {
 			get { return name; }
-			set { name = value; }
+			set {
+				if (IsWindowsRuntimeProjection && value != name)
+					throw new InvalidOperationException ();
+
+				name = value;
+			}
 		}
 
 		public abstract string FullName {
@@ -34,6 +42,15 @@ namespace Mono.Cecil {
 		public MetadataToken MetadataToken {
 			get { return token; }
 			set { token = value; }
+		}
+
+		public bool IsWindowsRuntimeProjection {
+			get { return projection != null; }
+		}
+
+		internal MemberReferenceProjection WindowsRuntimeProjection {
+			get { return (MemberReferenceProjection) projection; }
+			set { projection = value; }
 		}
 
 		internal bool HasImage {
@@ -74,6 +91,13 @@ namespace Mono.Cecil {
 
 			return declaring_type.FullName + "::" + name;
 		}
+
+		public IMemberDefinition Resolve ()
+		{
+			return null;
+		}
+
+		protected abstract IMemberDefinition ResolveDefinition ();
 
 		public override string ToString ()
 		{

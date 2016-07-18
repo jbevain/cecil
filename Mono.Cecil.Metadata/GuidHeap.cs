@@ -10,32 +10,27 @@
 
 using System;
 
-using Mono.Cecil.PE;
-
 namespace Mono.Cecil.Metadata {
 
 	sealed class GuidHeap : Heap {
 
-		public GuidHeap (Section section, uint start, uint size)
-			: base (section, start, size)
+		public GuidHeap (byte [] data)
+			: base (data)
 		{
 		}
 
 		public Guid Read (uint index)
 		{
-			if (index == 0)
-				return new Guid ();
-
 			const int guid_size = 16;
+
+			if (index == 0 || ((index - 1) + guid_size) > data.Length)
+				return new Guid ();
 
 			var buffer = new byte [guid_size];
 
-			index--;
-
-			Buffer.BlockCopy (Section.Data, (int) (Offset + index), buffer, 0, guid_size);
+			Buffer.BlockCopy (this.data, (int) ((index - 1) * guid_size), buffer, 0, guid_size);
 
 			return new Guid (buffer);
-
 		}
 	}
 }

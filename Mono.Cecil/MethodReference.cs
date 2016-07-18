@@ -163,7 +163,12 @@ namespace Mono.Cecil {
 			return this;
 		}
 
-		public virtual MethodDefinition Resolve ()
+		protected override IMemberDefinition ResolveDefinition ()
+		{
+			return this.Resolve ();
+		}
+
+		public new virtual MethodDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

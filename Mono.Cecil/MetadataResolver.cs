@@ -296,7 +296,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		private static bool IsVarArgCallTo (MethodDefinition method, MethodReference reference)
+		static bool IsVarArgCallTo (MethodDefinition method, MethodReference reference)
 		{
 			if (method.Parameters.Count >= reference.Parameters.Count)
 				return false;

@@ -18,8 +18,8 @@ namespace Mono.Cecil.Tests {
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
-			var x = new VariableDefinition ("x", object_ref);
-			var y = new VariableDefinition ("y", object_ref);
+			var x = new VariableDefinition (object_ref);
+			var y = new VariableDefinition (object_ref);
 
 			body.Variables.Add (x);
 			body.Variables.Add (y);
@@ -35,9 +35,9 @@ namespace Mono.Cecil.Tests {
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
-			var x = new VariableDefinition ("x", object_ref);
-			var y = new VariableDefinition ("y", object_ref);
-			var z = new VariableDefinition ("z", object_ref);
+			var x = new VariableDefinition (object_ref);
+			var y = new VariableDefinition (object_ref);
+			var z = new VariableDefinition (object_ref);
 
 			body.Variables.Add (x);
 			body.Variables.Add (y);
@@ -61,9 +61,9 @@ namespace Mono.Cecil.Tests {
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
-			var x = new VariableDefinition ("x", object_ref);
-			var y = new VariableDefinition ("y", object_ref);
-			var z = new VariableDefinition ("z", object_ref);
+			var x = new VariableDefinition (object_ref);
+			var y = new VariableDefinition (object_ref);
+			var z = new VariableDefinition (object_ref);
 
 			body.Variables.Add (x);
 			body.Variables.Add (y);
@@ -87,9 +87,9 @@ namespace Mono.Cecil.Tests {
 			var method = new MethodDefinition ("foo", MethodAttributes.Static, object_ref);
 			var body = new MethodBody (method);
 
-			var x = new VariableDefinition ("x", object_ref);
-			var y = new VariableDefinition ("y", object_ref);
-			var z = new VariableDefinition ("z", object_ref);
+			var x = new VariableDefinition (object_ref);
+			var y = new VariableDefinition (object_ref);
+			var z = new VariableDefinition (object_ref);
 
 			body.Variables.Add (x);
 			body.Variables.Add (z);

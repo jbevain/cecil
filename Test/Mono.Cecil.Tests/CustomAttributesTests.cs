@@ -33,7 +33,7 @@ namespace Mono.Cecil.Tests {
 
 				AssertArgument ("bar", attribute.ConstructorArguments [0]);
 			});
-        }
+		}
 
 		[Test]
 		public void NullString ()
@@ -412,6 +412,21 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void InterfaceImplementation ()
+		{
+			IgnoreOnMono();
+
+			TestIL ("ca-iface-impl.il", module => {
+				var type = module.GetType ("FooType");
+				var iface = type.Interfaces.Single (i => i.InterfaceType.FullName == "IFoo");
+				Assert.IsTrue (iface.HasCustomAttributes);
+				var attributes = iface.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
+			});
+		}
+
+		[Test]
 		public void DefineCustomAttributeFromBlob ()
 		{
 			var file = Path.Combine (Path.GetTempPath (), "CaBlob.dll");
@@ -445,6 +460,8 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsNotNull (attribute);
 			Assert.AreEqual ("CaBlob", (string) attribute.ConstructorArguments [0].Value);
+
+			module.Dispose ();
 		}
 
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)

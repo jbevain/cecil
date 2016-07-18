@@ -65,6 +65,8 @@ namespace Mono.Cecil {
 		public override string Name {
 			get { return base.Name; }
 			set {
+				if (IsWindowsRuntimeProjection && value != base.Name)
+					throw new InvalidOperationException ("Projected type reference name can't be changed.");
 				base.Name = value;
 				ClearFullName ();
 			}
@@ -73,6 +75,8 @@ namespace Mono.Cecil {
 		public virtual string Namespace {
 			get { return @namespace; }
 			set {
+				if (IsWindowsRuntimeProjection && value != @namespace)
+					throw new InvalidOperationException ("Projected type reference namespace can't be changed.");
 				@namespace = value;
 				ClearFullName ();
 			}
@@ -94,6 +98,11 @@ namespace Mono.Cecil {
 
 				return null;
 			}
+		}
+
+		internal new TypeReferenceProjection WindowsRuntimeProjection {
+			get { return (TypeReferenceProjection) projection; }
+			set { projection = value; }
 		}
 
 		IGenericParameterProvider IGenericContext.Type {
@@ -132,10 +141,14 @@ namespace Mono.Cecil {
 			set {
 				var declaring_type = this.DeclaringType;
 				if (declaring_type != null) {
+					if (IsWindowsRuntimeProjection && value != declaring_type.Scope)
+						throw new InvalidOperationException ("Projected type scope can't be changed.");
 					declaring_type.Scope = value;
 					return;
 				}
 
+				if (IsWindowsRuntimeProjection && value != scope)
+					throw new InvalidOperationException ("Projected type scope can't be changed.");
 				scope = value;
 			}
 		}
@@ -147,6 +160,8 @@ namespace Mono.Cecil {
 		public override TypeReference DeclaringType {
 			get { return base.DeclaringType; }
 			set {
+				if (IsWindowsRuntimeProjection && value != base.DeclaringType)
+					throw new InvalidOperationException ("Projected type declaring type can't be changed.");
 				base.DeclaringType = value;
 				ClearFullName ();
 			}
@@ -251,7 +266,12 @@ namespace Mono.Cecil {
 			return this;
 		}
 
-		public virtual TypeDefinition Resolve ()
+		protected override IMemberDefinition ResolveDefinition ()
+		{
+			return this.Resolve ();
+		}
+
+		public new virtual TypeDefinition Resolve ()
 		{
 			var module = this.Module;
 			if (module == null)

@@ -55,5 +55,33 @@ namespace Mono.Cecil.Tests {
 			name = new AssemblyNameReference ("Foo", new Version (0, 0, 0));
 			Assert.AreEqual ("Foo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null", name.FullName);
 		}
+
+		[Test]
+		public void Retargetable ()
+		{
+			TestModule ("RetargetableExample.dll", module => {
+				var type = module.Types [1];
+				var property = type.Properties [0];
+				var attribute = property.CustomAttributes [0];
+
+				var argumentType = ((CustomAttributeArgument) attribute.ConstructorArguments [0].Value).Type;
+				var reference = (AssemblyNameReference) argumentType.Scope;
+
+				Assert.AreEqual (
+					"System.Data, Version=3.5.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac, Retargetable=Yes",
+					reference.FullName);
+			}, verify: !Platform.OnMono);
+		}
+
+		[Test]
+		public void SystemRuntime ()
+		{
+			TestModule ("System.Runtime.dll", module => {
+				Assert.AreEqual ("System.Runtime", module.Assembly.Name.Name);
+				Assert.AreEqual (1, module.AssemblyReferences.Count);
+				Assert.AreNotEqual (module, module.TypeSystem.CoreLibrary);
+				Assert.AreEqual (module.AssemblyReferences [0], module.TypeSystem.CoreLibrary);
+			}, verify: !Platform.OnMono);
+		}
 	}
 }
