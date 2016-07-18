@@ -11,3 +11,5 @@ obj
 *Resharper*
 Mono.Cecil.sln.ide*
 TestResults
+project.lock.json
+

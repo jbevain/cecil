@@ -175,7 +175,7 @@ namespace Mono.Cecil {
 #if !PCL && !NET_CORE
 			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
 #else
-			var corlib_name = AssemblyNameReference.Parse (typeof (object).Assembly.FullName);
+			var corlib_name = AssemblyNameReference.Parse (typeof (object).GetAssembly ().FullName);
 			var corlib_version = corlib_name.Version;
 
 			switch (corlib_version.Major) {
@@ -1273,7 +1273,7 @@ namespace Mono.Cecil {
 			while ((read = self.Read (buffer, 0, buffer.Length)) != 0)
 				memory.Write (buffer, 0, read);
 
-			return memory.GetBuffer ();
+			return memory.ToArray ();
 		}
 
 		public static void Read (object o)

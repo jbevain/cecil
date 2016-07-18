@@ -8,7 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
-#if !PCL
+#if !PCL && !NET_CORE
 
 using System;
 using System.Collections.Generic;

@@ -1,37 +1,38 @@
 ﻿{
-	"version": "0.9.6.0",
-	"author": "Jb Evain",
-	"description": "Cecil is a library to generate and inspect programs and libraries in the ECMA CIL form",
+  "version": "0.9.6.0",
+  "author": "Jb Evain",
+  "description": "Cecil is a library to generate and inspect programs and libraries in the ECMA CIL form",
 
-	"compilationOptions": {
-		"define": ["NET_CORE", "NET_4_0", "NET_3_5", "NET_2_0"]
-	},
+  "buildOptions": {
+      "outputName": "Mono.Cecil",
+      "define": ["NET_CORE", "NET_4_0", "NET_3_5", "NET_2_0"],
+      "compile": {
+        "include": [
+          "Mono/*.cs",
+          "Mono.Cecil/*.cs",
+          "Mono.Cecil.Cil/*.cs",
+          "Mono.Cecil.Metadata/*.cs",
+          "Mono.Cecil.PE/*.cs",
+          "Mono.Collections.Generic/*.cs",
+          "Mono.Security.Cryptography/*.cs",
+          "System.Runtime.CompilerServices/*.cs"
+        ],
+        "exclude": [
+          "rocks/**",
+          "symbols/**",
+          "Test/**"
+        ]
+      }
+  },
 
-	"code": [
-		"Mono/*.cs",
-		"Mono.Cecil/*.cs",
-		"Mono.Cecil.Cil/*.cs",
-		"Mono.Cecil.Metadata/*.cs",
-		"Mono.Cecil.PE/*.cs",
-		"Mono.Collections.Generic/*.cs",
-		"Mono.Security.Cryptography/*.cs",
-		"System.Runtime.CompilerServices/*.cs"
-	],
-
-	"frameworks" : {
-		"net45" : {},
-		"dnxcore50" : {
-			"dependencies": {
-				"System.IO": "4.0.0.0-*",
-				"System.IO.FileSystem": "4.0.0.0-*",
-				"System.Linq": "4.0.0.0-*",
-				"System.Reflection": "4.0.0.0-*",
-				"System.Runtime": "4.0.0.0-*",
-				"System.Runtime.Extensions": "4.0.0.0-*",
-				"System.Security.Cryptography.Hashing": "4.0.0.0-*",
-				"System.Security.Cryptography.Hashing.Algorithms": "4.0.0.0-*",
-				"System.Threading": "4.0.0.0-*"
-			}
-		}
-	}
+  "supports": {},
+  "dependencies": {
+    "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
+    "NETStandard.Library": "1.6.0",
+    "System.Security.Cryptography.Algorithms": "4.2.0",
+    "System.Security.Cryptography.Csp": "4.0.0"
+  },
+  "frameworks": {
+    "netstandard1.3": {}
+  }
 }
