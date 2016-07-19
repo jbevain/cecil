@@ -1050,6 +1050,11 @@ namespace Mono.Cecil {
 			symbol_reader = reader;
 
 			ProcessDebugHeader ();
+
+			if (HasImage && ReadingMode == ReadingMode.Immediate) {
+				var immediate_reader = new ImmediateModuleReader (Image);
+				immediate_reader.ReadSymbols (this);
+			}
 		}
 
 #if !PCL
