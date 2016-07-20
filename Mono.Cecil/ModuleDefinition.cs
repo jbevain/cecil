@@ -1104,8 +1104,7 @@ namespace Mono.Cecil {
 		static ModuleDefinition ReadModule (Stream stream, string fileName, ReaderParameters parameters)
 		{
 			Mixin.CheckStream (stream);
-			if (!stream.CanRead || !stream.CanSeek)
-				throw new ArgumentException ();
+			Mixin.CheckReadSeek (stream);
 			Mixin.CheckParameters (parameters);
 
 			return ModuleReader.CreateModule (
@@ -1137,8 +1136,7 @@ namespace Mono.Cecil {
 		public void Write (Stream stream, WriterParameters parameters)
 		{
 			Mixin.CheckStream (stream);
-			if (!stream.CanWrite || !stream.CanSeek)
-				throw new ArgumentException ();
+			Mixin.CheckWriteSeek (stream);
 			Mixin.CheckParameters (parameters);
 
 			ModuleWriter.WriteModuleTo (this, stream, parameters);
@@ -1154,6 +1152,18 @@ namespace Mono.Cecil {
 		{
 			if (stream == null)
 				throw new ArgumentNullException ("stream");
+		}
+
+		public static void CheckWriteSeek (Stream stream)
+		{
+			if (!stream.CanWrite || !stream.CanSeek)
+				throw new ArgumentException ();
+		}
+
+		public static void CheckReadSeek (Stream stream)
+		{
+			if (!stream.CanRead || !stream.CanSeek)
+				throw new ArgumentException ();
 		}
 
 #if !READ_ONLY
