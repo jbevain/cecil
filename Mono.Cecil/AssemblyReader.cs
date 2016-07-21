@@ -448,11 +448,6 @@ namespace Mono.Cecil {
 
 		readonly MetadataReader metadata_reader;
 
-		uint Position {
-			get { return (uint) base.position; }
-			set { base.position = (int) value; }
-		}
-
 		public MetadataReader (ModuleDefinition module)
 			: base (module.Image.TableHeap.data)
 		{
@@ -551,7 +546,7 @@ namespace Mono.Cecil {
 		{
 			var info = image.TableHeap [table];
 			if (info.Length != 0)
-				Position = info.Offset;
+				this.position = (int) info.Offset;
 
 			return (int) info.Length;
 		}
@@ -563,7 +558,7 @@ namespace Mono.Cecil {
 			if (length == 0 || row > length)
 				return false;
 
-			Position = info.Offset + (info.RowSize * (row - 1));
+			this.position = (int) (info.Offset + (info.RowSize * (row - 1)));
 			return true;
 		}
 
@@ -1008,10 +1003,10 @@ namespace Mono.Cecil {
 			if (current_index == current_table.Length)
 				next_index = image.TableHeap [target].Length + 1;
 			else {
-				var position = Position;
-				Position += (uint) (current_table.RowSize - image.GetTableIndexSize (target));
+				var position = this.position;
+				this.position += (int) (current_table.RowSize - image.GetTableIndexSize (target));
 				next_index = ReadTableIndex (target);
-				Position = position;
+				this.position = position;
 			}
 
 			list.Length = next_index - list.Start;
