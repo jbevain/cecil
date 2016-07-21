@@ -79,7 +79,8 @@ namespace Mono.Cecil.Rocks {
 
 		static ParseContext CreateContext (MethodDefinition method, IILVisitor visitor)
 		{
-			var code = method.Module.Read (method, (m, reader) => new CodeReader (method, reader));
+			var code = method.Module.Read (method, (_, reader) => reader.code);
+			code.MoveTo (method);
 
 			return new ParseContext {
 				Code = code,

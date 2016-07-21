@@ -443,6 +443,7 @@ namespace Mono.Cecil {
 		readonly internal ModuleDefinition module;
 		readonly internal MetadataSystem metadata;
 
+		internal CodeReader code;
 		internal IGenericContext context;
 
 		readonly MetadataReader metadata_reader;
@@ -458,6 +459,7 @@ namespace Mono.Cecil {
 			this.image = module.Image;
 			this.module = module;
 			this.metadata = module.MetadataSystem;
+			this.code = new CodeReader (this);
 		}
 
 		public MetadataReader (Image image, ModuleDefinition module, MetadataReader metadata_reader)
@@ -2140,7 +2142,7 @@ namespace Mono.Cecil {
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			return CodeReader.ReadMethodBody (method, this);
+			return code.ReadMethodBody (method);
 		}
 
 		public CallSite ReadCallSite (MetadataToken token)
