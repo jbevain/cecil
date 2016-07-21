@@ -63,10 +63,9 @@ namespace Mono.Cecil.Tests {
 
 		static string GetVariableName (VariableDefinition variable, MethodBody body)
 		{
-			foreach (var scope in body.Method.DebugInformation.GetScopes ())
-				foreach (var variable_symbol in scope.Variables)
-					if (variable_symbol.Index == variable.Index)
-						return variable_symbol.Name;
+			string name;
+			if (body.Method.DebugInformation.TryGetName (variable, out name))
+				return name;
 
 			return variable.ToString ();
 		}
