@@ -262,5 +262,24 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (ReadingMode.Deferred, module.ReadingMode);
 			}
 		}
+
+		[Test]
+		public void ReadAndWriteFile ()
+		{
+			var path = Path.GetTempFileName ();
+
+			var original = ModuleDefinition.CreateModule ("FooFoo", ModuleKind.Dll);
+			var type = new TypeDefinition ("Foo", "Foo", TypeAttributes.Abstract | TypeAttributes.Sealed);
+			original.Types.Add (type);
+			original.Write (path);
+
+
+			using (var module = ModuleDefinition.ReadModule (path)) {
+				module.Write ();
+			}
+
+			using (var module = ModuleDefinition.ReadModule (path))
+				Assert.AreEqual ("Foo.Foo", module.Types [1].FullName);
+		}
 	}
 }

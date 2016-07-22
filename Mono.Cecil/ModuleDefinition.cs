@@ -1065,7 +1065,7 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read) as Stream;
+			var stream = GetFileStream (fileName, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
 
 			if (parameters.InMemory) {
 				var memory = new MemoryStream (stream.CanSeek ? (int) stream.Length : 0);
@@ -1127,6 +1127,24 @@ namespace Mono.Cecil {
 			}
 		}
 #endif
+
+		public void Write ()
+		{
+			if (!HasImage)
+				throw new InvalidOperationException ();
+
+			Image.Stream.Position = 0;
+			Write (Image.Stream);
+		}
+
+		public void Write (WriterParameters parameters)
+		{
+			if (!HasImage)
+				throw new InvalidOperationException ();
+
+			Image.Stream.Position = 0;
+			Write (Image.Stream, parameters);
+		}
 
 		public void Write (Stream stream)
 		{
