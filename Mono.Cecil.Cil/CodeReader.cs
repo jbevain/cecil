@@ -83,7 +83,8 @@ namespace Mono.Cecil.Cil {
 
 		void ReadDebugInfo ()
 		{
-			ReadSequencePoints ();
+			if (method.debug_info.sequence_points != null)
+				ReadSequencePoints ();
 
 			if (method.debug_info.scope != null)
 				ReadScope (method.debug_info.scope);
