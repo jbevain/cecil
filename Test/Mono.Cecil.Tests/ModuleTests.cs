@@ -273,8 +273,7 @@ namespace Mono.Cecil.Tests {
 			original.Types.Add (type);
 			original.Write (path);
 
-
-			using (var module = ModuleDefinition.ReadModule (path)) {
+			using (var module = ModuleDefinition.ReadModule (path, new ReaderParameters { ReadWrite = true })) {
 				module.Write ();
 			}
 

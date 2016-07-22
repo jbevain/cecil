@@ -42,6 +42,7 @@ namespace Mono.Cecil {
 		bool read_symbols;
 		bool projections;
 		bool in_memory;
+		bool read_write;
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
@@ -90,6 +91,11 @@ namespace Mono.Cecil {
 		public bool ReadSymbols {
 			get { return read_symbols; }
 			set { read_symbols = value; }
+		}
+
+		public bool ReadWrite {
+			get { return read_write; }
+			set { read_write = value; }
 		}
 
 		public bool ApplyWindowsRuntimeProjections {
@@ -1065,7 +1071,7 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			var stream = GetFileStream (fileName, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+			var stream = GetFileStream (fileName, FileMode.Open, parameters.ReadWrite ? FileAccess.ReadWrite : FileAccess.Read, FileShare.Read);
 
 			if (parameters.InMemory) {
 				var memory = new MemoryStream (stream.CanSeek ? (int) stream.Length : 0);
