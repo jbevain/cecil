@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.9.6.0",
+  "version": "0.10.0.0",
   "author": "Jb Evain",
   "description": "Cecil is a library to generate and inspect programs and libraries in the ECMA CIL form",
 
