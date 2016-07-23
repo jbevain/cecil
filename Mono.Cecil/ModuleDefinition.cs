@@ -1297,6 +1297,7 @@ namespace Mono.Cecil {
 			return module.MetadataKind != MetadataKind.Ecma335;
 		}
 
+#if !PCL
 		public static byte [] ReadAll (this Stream self)
 		{
 			int read;
@@ -1308,6 +1309,7 @@ namespace Mono.Cecil {
 
 			return memory.GetBuffer ();
 		}
+#endif
 
 		public static void Read (object o)
 		{

@@ -21,6 +21,7 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class PortablePdbReaderProvider : ISymbolReaderProvider {
 
+#if !PCL
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
@@ -33,6 +34,7 @@ namespace Mono.Cecil.Cil {
 		{
 			return Path.ChangeExtension (assemblyFileName, ".pdb");
 		}
+#endif
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
@@ -140,6 +142,7 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class PortablePdbWriterProvider : ISymbolWriterProvider
 	{
+#if !PCL
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
@@ -151,6 +154,7 @@ namespace Mono.Cecil.Cil {
 		{
 			return Path.ChangeExtension (assemblyFileName, ".pdb");
 		}
+#endif
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
 		{
@@ -306,18 +310,18 @@ namespace Mono.Cecil.Cil {
 
 		static PdbGuidMapping ()
 		{
-			AddMapping (DocumentLanguage.C, new Guid (0x63a08714, 0xfc37, 0x11d2, 0x90, 0x4c, 0x0, 0xc0, 0x4f, 0xa3, 0x02, 0xa1));
-			AddMapping (DocumentLanguage.Cpp, new Guid (0x3a12d0b7, 0xc26c, 0x11d0, 0xb4, 0x42, 0x0, 0xa0, 0x24, 0x4a, 0x1d, 0xd2));
-			AddMapping (DocumentLanguage.CSharp, new Guid (0x3f5162f8, 0x07c6, 0x11d3, 0x90, 0x53, 0x0, 0xc0, 0x4f, 0xa3, 0x02, 0xa1));
-			AddMapping (DocumentLanguage.Basic, new Guid (0x3a12d0b8, 0xc26c, 0x11d0, 0xb4, 0x42, 0x0, 0xa0, 0x24, 0x4a, 0x1d, 0xd2));
-			AddMapping (DocumentLanguage.Java, new Guid (0x3a12d0b4, 0xc26c, 0x11d0, 0xb4, 0x42, 0x0, 0xa0, 0x24, 0x4a, 0x1d, 0xd2));
-			AddMapping (DocumentLanguage.Cobol, new Guid (0xaf046cd1, 0xd0e1, 0x11d2, 0x97, 0x7c, 0x0, 0xa0, 0xc9, 0xb4, 0xd5, 0xc));
-			AddMapping (DocumentLanguage.Pascal, new Guid (0xaf046cd2, 0xd0e1, 0x11d2, 0x97, 0x7c, 0x0, 0xa0, 0xc9, 0xb4, 0xd5, 0xc));
-			AddMapping (DocumentLanguage.Cil, new Guid (0xaf046cd3, 0xd0e1, 0x11d2, 0x97, 0x7c, 0x0, 0xa0, 0xc9, 0xb4, 0xd5, 0xc));
-			AddMapping (DocumentLanguage.JScript, new Guid (0x3a12d0b6, 0xc26c, 0x11d0, 0xb4, 0x42, 0x0, 0xa0, 0x24, 0x4a, 0x1d, 0xd2));
-			AddMapping (DocumentLanguage.Smc, new Guid (0xd9b9f7b, 0x6611, 0x11d3, 0xbd, 0x2a, 0x0, 0x0, 0xf8, 0x8, 0x49, 0xbd));
-			AddMapping (DocumentLanguage.MCpp, new Guid (0x4b35fde8, 0x07c6, 0x11d3, 0x90, 0x53, 0x0, 0xc0, 0x4f, 0xa3, 0x02, 0xa1));
-			AddMapping (DocumentLanguage.FSharp, new Guid (0xab4f38c9, 0xb6e6, 0x43ba, 0xbe, 0x3b, 0x58, 0x08, 0x0b, 0x2c, 0xcc, 0xe3));
+			AddMapping (DocumentLanguage.C, new Guid ("63a08714-fc37-11d2-904c-00c04fa302a1"));
+			AddMapping (DocumentLanguage.Cpp, new Guid ("3a12d0b7-c26c-11d0-b442-00a0244a1dd2"));
+			AddMapping (DocumentLanguage.CSharp, new Guid ("3f5162f8-07c6-11d3-9053-00c04fa302a1"));
+			AddMapping (DocumentLanguage.Basic, new Guid ("3a12d0b8-c26c-11d0-b442-00a0244a1dd2"));
+			AddMapping (DocumentLanguage.Java, new Guid ("3a12d0b4-c26c-11d0-b442-00a0244a1dd2"));
+			AddMapping (DocumentLanguage.Cobol, new Guid ("af046cd1-d0e1-11d2-977c-00a0c9b4d50c"));
+			AddMapping (DocumentLanguage.Pascal, new Guid ("af046cd2-d0e1-11d2-977c-00a0c9b4d50c"));
+			AddMapping (DocumentLanguage.Cil, new Guid ("af046cd3-d0e1-11d2-977c-00a0c9b4d50c"));
+			AddMapping (DocumentLanguage.JScript, new Guid ("3a12d0b6-c26c-11d0-b442-00a0244a1dd2"));
+			AddMapping (DocumentLanguage.Smc, new Guid ("0d9b9f7b-6611-11d3-bd2a-0000f80849bd"));
+			AddMapping (DocumentLanguage.MCpp, new Guid ("4b35fde8-07c6-11d3-9053-00c04fa302a1"));
+			AddMapping (DocumentLanguage.FSharp, new Guid ("ab4f38c9-b6e6-43ba-be3b-58080b2ccce3"));
 		}
 
 		static void AddMapping (DocumentLanguage language, Guid guid)
@@ -326,7 +330,7 @@ namespace Mono.Cecil.Cil {
 			language_guid.Add (language, guid);
 		}
 
-		static readonly Guid type_text = new Guid (0x5a869d0b, 0x6611, 0x11d3, 0xbd, 0x2a, 0x00, 0x00, 0xf8, 0x08, 0x49, 0xbd);
+		static readonly Guid type_text = new Guid ("5a869d0b-6611-11d3-bd2a-0000f80849bd");
 
 		public static DocumentType ToType (this Guid guid)
 		{
@@ -344,9 +348,9 @@ namespace Mono.Cecil.Cil {
 			return new Guid ();
 		}
 
-		static readonly Guid hash_md5 = new Guid (0x406ea660, 0x64cf, 0x4c82, 0xb6, 0xf0, 0x42, 0xd4, 0x81, 0x72, 0xa7, 0x99);
-		static readonly Guid hash_sha1 = new Guid (0xff1816ec, 0xaa5e, 0x4d10, 0x87, 0xf7, 0x6f, 0x49, 0x63, 0x83, 0x34, 0x60);
-		static readonly Guid hash_sha256 = new Guid (0x8829d00f, 0x11b8, 0x4213, 0x87, 0x8b, 0x77, 0x0e, 0x85, 0x97, 0xac, 0x16);
+		static readonly Guid hash_md5 = new Guid ("406ea660-64cf-4c82-b6f0-42d48172a799");
+		static readonly Guid hash_sha1 = new Guid ("ff1816ec-aa5e-4d10-87f7-6f4963833460");
+		static readonly Guid hash_sha256 = new Guid ("8829d00f-11b8-4213-878b-770e8597ac16");
 
 		public static DocumentHashAlgorithm ToHashAlgorithm (this Guid guid)
 		{
@@ -391,7 +395,7 @@ namespace Mono.Cecil.Cil {
 			return guid;
 		}
 
-		static readonly Guid vendor_ms = new Guid (0x994b45c4, 0xe6e9, 0x11d2, 0x90, 0x3f, 0x00, 0xc0, 0x4f, 0xa3, 0x02, 0xa1);
+		static readonly Guid vendor_ms = new Guid ("994b45c4-e6e9-11d2-903f-00c04fa302a1");
 
 		public static DocumentLanguageVendor ToVendor (this Guid guid)
 		{

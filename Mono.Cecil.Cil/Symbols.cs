@@ -601,8 +601,9 @@ namespace Mono.Cecil.Cil {
 	}
 
 	public interface ISymbolReaderProvider {
-
+#if !PCL
 		ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName);
+#endif
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
 	}
 
@@ -697,9 +698,11 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriterProvider {
 
+#if !PCL
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
+#endif
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
 
 #endif
-}
+	}

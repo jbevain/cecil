@@ -104,10 +104,16 @@ namespace Mono.Cecil {
 
 			if (symbol_reader_provider != null) {
 				module.SymbolReaderProvider = symbol_reader_provider;
-
+#if !PCL
 				var reader = parameters.SymbolStream != null
 					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream)
 					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
+#else
+				if (parameters.SymbolStream == null)
+					throw new InvalidOperationException ();
+
+				var reader = symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream);
+#endif
 
 				module.ReadSymbols (reader);
 			}
@@ -2974,9 +2980,10 @@ namespace Mono.Cecil {
 
 			object value;
 			if (type.etype == ElementType.String) {
-				if (signature.buffer [signature.position] != 0xff)
-					value = Encoding.Unicode.GetString (signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start))));
-				else
+				if (signature.buffer [signature.position] != 0xff) {
+					var bytes = signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start)));
+					value = Encoding.Unicode.GetString (bytes, 0, bytes.Length);
+				} else
 					value = null;
 			} else if (type.etype == ElementType.Object) {
 				value = null;

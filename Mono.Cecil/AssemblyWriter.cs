@@ -137,8 +137,11 @@ namespace Mono.Cecil {
 		{
 			if (symbol_writer_provider == null)
 				return null;
-
+#if !PCL
 			return symbol_writer_provider.GetSymbolWriter (module, fq_name);
+#else
+			return null;
+#endif
 		}
 	}
 
@@ -3201,7 +3204,7 @@ namespace Mono.Cecil {
 
 #endif
 
-	static partial class Mixin {
+			static partial class Mixin {
 
 		public static bool TryGetUniqueDocument (this MethodDebugInformation info, out Document document)
 		{
