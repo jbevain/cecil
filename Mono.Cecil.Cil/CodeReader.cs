@@ -30,23 +30,29 @@ namespace Mono.Cecil.Cil {
 			get { return Position - start; }
 		}
 
-		public CodeReader (MethodDefinition method, MetadataReader reader)
+		public CodeReader (MetadataReader reader)
 			: base (reader.image.Stream)
 		{
 			this.reader = reader;
+		}
+
+		public void MoveTo (MethodDefinition method)
+		{
+			this.method = method;
 			this.reader.context = method;
 			this.Position = (int) reader.image.ResolveVirtualAddress ((uint) method.RVA);
 		}
 
-		public static MethodBody ReadMethodBody (MethodDefinition method, MetadataReader metadata)
+		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			var reader = new CodeReader (method, metadata);
-			reader.method = method;
-			reader.body = new MethodBody (method);
+			MoveTo (method);
+			this.body = new MethodBody (method);
 
-			reader.ReadMethodBody ();
+			ReadMethodBody ();
 
-			return reader.body;
+			this.reader.context = null;
+
+			return this.body;
 		}
 
 		void ReadMethodBody ()
@@ -77,7 +83,8 @@ namespace Mono.Cecil.Cil {
 
 		void ReadDebugInfo ()
 		{
-			ReadSequencePoints ();
+			if (method.debug_info.sequence_points != null)
+				ReadSequencePoints ();
 
 			if (method.debug_info.scope != null)
 				ReadScope (method.debug_info.scope);
@@ -435,6 +442,8 @@ namespace Mono.Cecil.Cil {
 
 		public ByteBuffer PatchRawMethodBody (MethodDefinition method, CodeWriter writer, out int code_size, out MetadataToken local_var_token)
 		{
+			MoveTo (method);
+
 			var buffer = new ByteBuffer ();
 
 			var flags = ReadByte ();
@@ -453,6 +462,8 @@ namespace Mono.Cecil.Cil {
 			default:
 				throw new NotSupportedException ();
 			}
+
+			reader.context = null;
 
 			return buffer;
 		}

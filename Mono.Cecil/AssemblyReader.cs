@@ -104,10 +104,16 @@ namespace Mono.Cecil {
 
 			if (symbol_reader_provider != null) {
 				module.SymbolReaderProvider = symbol_reader_provider;
-
+#if !PCL
 				var reader = parameters.SymbolStream != null
 					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream)
 					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
+#else
+				if (parameters.SymbolStream == null)
+					throw new InvalidOperationException ();
+
+				var reader = symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream);
+#endif
 
 				module.ReadSymbols (reader);
 			}
@@ -443,14 +449,10 @@ namespace Mono.Cecil {
 		readonly internal ModuleDefinition module;
 		readonly internal MetadataSystem metadata;
 
+		internal CodeReader code;
 		internal IGenericContext context;
 
 		readonly MetadataReader metadata_reader;
-
-		uint Position {
-			get { return (uint) base.position; }
-			set { base.position = (int) value; }
-		}
 
 		public MetadataReader (ModuleDefinition module)
 			: base (module.Image.TableHeap.data)
@@ -458,6 +460,7 @@ namespace Mono.Cecil {
 			this.image = module.Image;
 			this.module = module;
 			this.metadata = module.MetadataSystem;
+			this.code = new CodeReader (this);
 		}
 
 		public MetadataReader (Image image, ModuleDefinition module, MetadataReader metadata_reader)
@@ -549,7 +552,7 @@ namespace Mono.Cecil {
 		{
 			var info = image.TableHeap [table];
 			if (info.Length != 0)
-				Position = info.Offset;
+				this.position = (int) info.Offset;
 
 			return (int) info.Length;
 		}
@@ -561,7 +564,7 @@ namespace Mono.Cecil {
 			if (length == 0 || row > length)
 				return false;
 
-			Position = info.Offset + (info.RowSize * (row - 1));
+			this.position = (int) (info.Offset + (info.RowSize * (row - 1)));
 			return true;
 		}
 
@@ -1006,10 +1009,10 @@ namespace Mono.Cecil {
 			if (current_index == current_table.Length)
 				next_index = image.TableHeap [target].Length + 1;
 			else {
-				var position = Position;
-				Position += (uint) (current_table.RowSize - image.GetTableIndexSize (target));
+				var position = this.position;
+				this.position += (int) (current_table.RowSize - image.GetTableIndexSize (target));
 				next_index = ReadTableIndex (target);
-				Position = position;
+				this.position = position;
 			}
 
 			list.Length = next_index - list.Start;
@@ -2140,7 +2143,7 @@ namespace Mono.Cecil {
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			return CodeReader.ReadMethodBody (method, this);
+			return code.ReadMethodBody (method);
 		}
 
 		public CallSite ReadCallSite (MetadataToken token)
@@ -2977,9 +2980,10 @@ namespace Mono.Cecil {
 
 			object value;
 			if (type.etype == ElementType.String) {
-				if (signature.buffer [signature.position] != 0xff)
-					value = Encoding.Unicode.GetString (signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start))));
-				else
+				if (signature.buffer [signature.position] != 0xff) {
+					var bytes = signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start)));
+					value = Encoding.Unicode.GetString (bytes, 0, bytes.Length);
+				} else
 					value = null;
 			} else if (type.etype == ElementType.Object) {
 				value = null;

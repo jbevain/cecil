@@ -42,6 +42,7 @@ namespace Mono.Cecil {
 		bool read_symbols;
 		bool projections;
 		bool in_memory;
+		bool read_write;
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
@@ -90,6 +91,11 @@ namespace Mono.Cecil {
 		public bool ReadSymbols {
 			get { return read_symbols; }
 			set { read_symbols = value; }
+		}
+
+		public bool ReadWrite {
+			get { return read_write; }
+			set { read_write = value; }
 		}
 
 		public bool ApplyWindowsRuntimeProjections {
@@ -1056,6 +1062,11 @@ namespace Mono.Cecil {
 			symbol_reader = reader;
 
 			ProcessDebugHeader ();
+
+			if (HasImage && ReadingMode == ReadingMode.Immediate) {
+				var immediate_reader = new ImmediateModuleReader (Image);
+				immediate_reader.ReadSymbols (this);
+			}
 		}
 
 #if !PCL
@@ -1066,7 +1077,7 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			var stream = GetFileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read) as Stream;
+			var stream = GetFileStream (fileName, FileMode.Open, parameters.ReadWrite ? FileAccess.ReadWrite : FileAccess.Read, FileShare.Read);
 
 			if (parameters.InMemory) {
 				var memory = new MemoryStream (stream.CanSeek ? (int) stream.Length : 0);
@@ -1105,8 +1116,7 @@ namespace Mono.Cecil {
 		static ModuleDefinition ReadModule (Stream stream, string fileName, ReaderParameters parameters)
 		{
 			Mixin.CheckStream (stream);
-			if (!stream.CanRead || !stream.CanSeek)
-				throw new ArgumentException ();
+			Mixin.CheckReadSeek (stream);
 			Mixin.CheckParameters (parameters);
 
 			return ModuleReader.CreateModule (
@@ -1130,6 +1140,24 @@ namespace Mono.Cecil {
 		}
 #endif
 
+		public void Write ()
+		{
+			if (!HasImage)
+				throw new InvalidOperationException ();
+
+			Image.Stream.Position = 0;
+			Write (Image.Stream);
+		}
+
+		public void Write (WriterParameters parameters)
+		{
+			if (!HasImage)
+				throw new InvalidOperationException ();
+
+			Image.Stream.Position = 0;
+			Write (Image.Stream, parameters);
+		}
+
 		public void Write (Stream stream)
 		{
 			Write (stream, new WriterParameters ());
@@ -1138,8 +1166,7 @@ namespace Mono.Cecil {
 		public void Write (Stream stream, WriterParameters parameters)
 		{
 			Mixin.CheckStream (stream);
-			if (!stream.CanWrite || !stream.CanSeek)
-				throw new ArgumentException ();
+			Mixin.CheckWriteSeek (stream);
 			Mixin.CheckParameters (parameters);
 
 			ModuleWriter.WriteModuleTo (this, stream, parameters);
@@ -1155,6 +1182,18 @@ namespace Mono.Cecil {
 		{
 			if (stream == null)
 				throw new ArgumentNullException ("stream");
+		}
+
+		public static void CheckWriteSeek (Stream stream)
+		{
+			if (!stream.CanWrite || !stream.CanSeek)
+				throw new ArgumentException ();
+		}
+
+		public static void CheckReadSeek (Stream stream)
+		{
+			if (!stream.CanRead || !stream.CanSeek)
+				throw new ArgumentException ();
 		}
 
 #if !READ_ONLY
@@ -1264,6 +1303,7 @@ namespace Mono.Cecil {
 			return module.MetadataKind != MetadataKind.Ecma335;
 		}
 
+#if !PCL
 		public static byte [] ReadAll (this Stream self)
 		{
 			int read;
@@ -1275,6 +1315,7 @@ namespace Mono.Cecil {
 
 			return memory.ToArray ();
 		}
+#endif
 
 		public static void Read (object o)
 		{

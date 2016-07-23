@@ -94,6 +94,22 @@ namespace Mono.Cecil.Cil {
 			if (end != null)
 				this.end = new InstructionOffset (end);
 		}
+
+		public bool TryGetName (VariableDefinition variable, out string name)
+		{
+			name = null;
+			if (variables == null || variables.Count == 0)
+				return false;
+
+			for (int i = 0; i < variables.Count; i++) {
+				if (variables [i].Index == variable.Index) {
+					name = variables [i].Name;
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 
 	public struct InstructionOffset {
@@ -550,6 +566,32 @@ namespace Mono.Cecil.Cil {
 					yield return sub_scope;
 			}
 		}
+
+		public bool TryGetName (VariableDefinition variable, out string name)
+		{
+			name = null;
+
+			var has_name = false;
+			var unique_name = "";
+
+			foreach (var scope in GetScopes ()) {
+				string slot_name;
+				if (!scope.TryGetName (variable, out slot_name))
+					continue;
+
+				if (!has_name) {
+					has_name = true;
+					unique_name = slot_name;
+					continue;
+				}
+
+				if (unique_name != slot_name)
+					return false;
+			}
+
+			name = unique_name;
+			return has_name;
+		}
 	}
 
 	public interface ISymbolReader : IDisposable {
@@ -559,8 +601,9 @@ namespace Mono.Cecil.Cil {
 	}
 
 	public interface ISymbolReaderProvider {
-
+#if !PCL
 		ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName);
+#endif
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
 	}
 
@@ -655,9 +698,11 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriterProvider {
 
+#if !PCL
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
+#endif
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
 
 #endif
-}
+	}
