@@ -1088,8 +1088,12 @@ namespace Mono.Cecil {
 				stream = memory;
 			}
 
-			return ReadModule (stream, fileName, parameters);
-
+			try {
+				return ReadModule (stream, fileName, parameters);
+			} catch (Exception) {
+				stream.Dispose ();
+				throw;
+			}
 		}
 
 		static Stream GetFileStream (string fileName, FileMode mode, FileAccess access, FileShare share)
