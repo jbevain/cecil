@@ -169,6 +169,16 @@ namespace Mono.Cecil {
 		}
 #endif
 
+		public void Write ()
+		{
+			main_module.Write ();
+		}
+
+		public void Write (WriterParameters parameters)
+		{
+			main_module.Write (parameters);
+		}
+
 		public void Write (Stream stream)
 		{
 			Write (stream, new WriterParameters ());
