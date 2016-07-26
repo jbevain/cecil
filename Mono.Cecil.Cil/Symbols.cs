@@ -544,6 +544,28 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
+		public IDictionary<Instruction, SequencePoint> GetSequencePointMapping ()
+		{
+			var instruction_mapping = new Dictionary<Instruction, SequencePoint> ();
+			if (!HasSequencePoints || !method.HasBody)
+				return instruction_mapping;
+
+			var offset_mapping = new Dictionary<int, SequencePoint> (sequence_points.Count);
+
+			for (int i = 0; i < sequence_points.Count; i++)
+				offset_mapping.Add (sequence_points [i].Offset, sequence_points [i]);
+
+			var instructions = method.Body.Instructions;
+
+			for (int i = 0; i < instructions.Count; i++) {
+				SequencePoint sequence_point;
+				if (offset_mapping.TryGetValue (instructions [i].Offset, out sequence_point))
+					instruction_mapping.Add (instructions [i], sequence_point);
+			}
+
+			return instruction_mapping;
+		}
+
 		public IEnumerable<ScopeDebugInformation> GetScopes ()
 		{
 			if (scope == null)
