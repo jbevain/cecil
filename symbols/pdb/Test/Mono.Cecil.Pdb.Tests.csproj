@@ -20,15 +20,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mono.Cecil.Tests\PdbTests.cs" />
+    <Compile Include="Mono.Cecil.Tests\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\assemblies\fsapp.exe" />
-    <Content Include="Resources\assemblies\fsapp.pdb" />
-    <Content Include="Resources\assemblies\test.exe" />
-    <Content Include="Resources\assemblies\test.pdb" />
-    <Content Include="Resources\assemblies\VBConsApp.exe" />
-    <Content Include="Resources\assemblies\VBConsApp.pdb" />
+    <None Include="Resources\**\*" />
   </ItemGroup>
   <Import Project="..\..\..\Mono.Cecil.Tests.settings" />
   <Import Project="$(MSBuildCSharpTargets)" />

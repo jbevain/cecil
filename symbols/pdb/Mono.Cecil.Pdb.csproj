@@ -14,40 +14,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\ProjectInfo.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\BitAccess.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\BitSet.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\CvInfo.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DataStream.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiDbgHdr.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiHeader.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiModuleInfo.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\DbiSecCon.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\Interfaces.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\IntHashTable.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\MsfDirectory.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbConstant.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbDebugException.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbException.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbFile.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbFileHeader.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbFunction.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbLine.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbLines.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbReader.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbScope.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbSlot.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbSource.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\PdbTokenLine.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\SourceLocationProvider.cs" />
-    <Compile Include="Mono.Cecil.Pdb\AssemblyInfo.cs" />
-    <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedDocumentWriter.cs" />
-    <Compile Include="Mono.Cecil.Pdb\ISymUnmanagedWriter2.cs" />
-    <Compile Include="Mono.Cecil.Pdb\ModuleMetadata.cs" />
-    <Compile Include="Mono.Cecil.Pdb\PdbHelper.cs" />
-    <Compile Include="Mono.Cecil.Pdb\PdbReader.cs" />
-    <Compile Include="Mono.Cecil.Pdb\PdbWriter.cs" />
-    <Compile Include="Mono.Cecil.Pdb\SymDocumentWriter.cs" />
-    <Compile Include="Mono.Cecil.Pdb\SymWriter.cs" />
+    <Compile Include="Microsoft.Cci.Pdb\*.cs" />
+    <Compile Include="Mono.Cecil.Pdb\*.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.settings" />
   <Import Project="$(MSBuildCSharpTargets)" />

@@ -20,14 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\ProjectInfo.cs" />
-    <Compile Include="Mono.Cecil.Mdb\AssemblyInfo.cs" />
-    <Compile Include="Mono.Cecil.Mdb\MdbReader.cs" />
-    <Compile Include="Mono.Cecil.Mdb\MdbWriter.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolFile.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolTable.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\MonoSymbolWriter.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\SourceMethodBuilder.cs" />
-    <Compile Include="Mono.CompilerServices.SymbolWriter\SymbolWriterImpl.cs" />
+    <Compile Include="Mono.Cecil.Mdb\*.cs" />
+    <Compile Include="Mono.CompilerServices.SymbolWriter\*.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.settings" />
   <Import Project="$(MSBuildCSharpTargets)" />

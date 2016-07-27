@@ -20,20 +20,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mono.Cecil.Tests\DocCommentIdTests.cs" />
-    <Compile Include="Mono.Cecil.Tests\MethodDefinitionRocksTests.cs" />
-    <Compile Include="Mono.Cecil.Tests\ModuleDefinitionRocksTests.cs" />
-    <Compile Include="Mono.Cecil.Tests\SecurityDeclarationRocksTests.cs" />
-    <Compile Include="Mono.Cecil.Tests\TypeDefinitionRocksTests.cs" />
-    <Compile Include="Mono.Cecil.Tests\TypeReferenceRocksTests.cs" />
-    <Content Include="Resources\cs\Types.cs" />
+    <Compile Include="Mono.Cecil.Tests\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\assemblies\decsec-att.dll" />
-    <Content Include="Resources\assemblies\decsec-xml.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <None Include="Resources\**\*" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.Tests.settings" />
   <Import Project="$(MSBuildCSharpTargets)" />
