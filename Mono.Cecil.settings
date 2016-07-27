@@ -31,21 +31,17 @@
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_3_5')) ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);NET_3_5;</DefineConstants>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_4_0')) ">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('net_4_5')) ">
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;NET_4_5;</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_4_0;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('pcl')) ">
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkProfile>Profile344</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);NET_3_5;NET_4_0;PCL;</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_4_0;PCL;</DefineConstants>
     <MSBuildCSharpTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</MSBuildCSharpTargets>
   </PropertyGroup>
   <!-- Shared References -->
@@ -58,17 +54,11 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug' ">
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_5_Debug' ">
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'pcl_Debug' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_2_0_Release' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Release' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_5_Release' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'pcl_Release' ">
   </PropertyGroup>

@@ -7,7 +7,7 @@
   "buildOptions": {
     "outputName": "Mono.Cecil",
     "debugType": "portable",
-    "define": ["NET_CORE", "NET_4_0", "NET_3_5", "NET_2_0"],
+    "define": [ "NET_CORE", "NET_4_0" ],
     "compile": {
       "include": [
         "../Mono/*.cs",
