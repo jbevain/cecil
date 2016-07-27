@@ -16,6 +16,6 @@
       <Name>Mono.Cecil</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\Mono.Cecil.settings" />
+  <Import Project="..\Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

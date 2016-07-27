@@ -25,6 +25,6 @@
   <ItemGroup>
     <None Include="Resources\**\*" />
   </ItemGroup>
-  <Import Project="..\..\Mono.Cecil.Tests.settings" />
+  <Import Project="..\..\Mono.Cecil.Tests.props" />
   <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

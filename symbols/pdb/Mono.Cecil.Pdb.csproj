@@ -17,6 +17,6 @@
     <Compile Include="Microsoft.Cci.Pdb\*.cs" />
     <Compile Include="Mono.Cecil.Pdb\*.cs" />
   </ItemGroup>
-  <Import Project="..\..\Mono.Cecil.settings" />
+  <Import Project="..\..\Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" />
 </Project>

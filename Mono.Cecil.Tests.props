@@ -3,7 +3,7 @@
   <PropertyGroup>
     <BuildDirectory>$(MSBuildProjectDirectory)</BuildDirectory>
   </PropertyGroup>
-  <Import Project="Mono.Cecil.settings" />
+  <Import Project="Mono.Cecil.props" />
   <ItemGroup>
     <Reference Include="nunit.core">
       <SpecificVersion>False</SpecificVersion>
