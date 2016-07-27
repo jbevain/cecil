@@ -240,7 +240,7 @@ namespace Mono.Cecil {
 		internal ISymbolReaderProvider SymbolReaderProvider;
 
 		internal ISymbolReader symbol_reader;
-		internal IAssemblyResolver assembly_resolver;
+		internal Disposable<IAssemblyResolver> assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
 		internal TypeSystem type_system;
 		internal readonly MetadataReader reader;
@@ -384,11 +384,14 @@ namespace Mono.Cecil {
 		public IAssemblyResolver AssemblyResolver {
 			get {
 #if !PCL && !NET_CORE
-				if (assembly_resolver == null)
-					Interlocked.CompareExchange (ref assembly_resolver, new AssemblyResolver (), null);
+				if (assembly_resolver.value == null) {
+					lock (module_lock) {
+						assembly_resolver = Disposable.Owned (new DefaultAssemblyResolver () as IAssemblyResolver);
+					}
+				}
 #endif
 
-				return assembly_resolver;
+				return assembly_resolver.value;
 			}
 		}
 
@@ -569,8 +572,11 @@ namespace Mono.Cecil {
 			if (Image != null)
 				Image.Dispose ();
 
-			if (SymbolReader != null)
-				SymbolReader.Dispose ();
+			if (symbol_reader != null)
+				symbol_reader.Dispose ();
+
+			if (assembly_resolver.value != null)
+				assembly_resolver.Dispose ();
 		}
 
 		public bool HasTypeReference (string fullName)
@@ -1004,7 +1010,7 @@ namespace Mono.Cecil {
 			};
 
 			if (parameters.AssemblyResolver != null)
-				module.assembly_resolver = parameters.AssemblyResolver;
+				module.assembly_resolver = Disposable.NotOwned (parameters.AssemblyResolver);
 
 			if (parameters.MetadataResolver != null)
 				module.metadata_resolver = parameters.MetadataResolver;

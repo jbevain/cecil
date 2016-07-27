@@ -340,6 +340,15 @@ namespace Mono.Cecil {
 					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
 				reference.Name + ".dll");
 		}
+
+		public void Dispose ()
+		{
+			Dispose (true);
+		}
+
+		protected virtual void Dispose (bool disposing)
+		{
+		}
 	}
 }
 

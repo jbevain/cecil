@@ -65,7 +65,7 @@ namespace Mono.Cecil {
 			var module = reader.module;
 
 			if (parameters.assembly_resolver != null)
-				module.assembly_resolver = parameters.assembly_resolver;
+				module.assembly_resolver = Disposable.NotOwned (parameters.assembly_resolver);
 
 			if (parameters.metadata_resolver != null)
 				module.metadata_resolver = parameters.metadata_resolver;
