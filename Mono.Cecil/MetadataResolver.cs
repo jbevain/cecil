@@ -31,7 +31,7 @@ namespace Mono.Cecil {
 #if !PCL && !NET_CORE
 	[Serializable]
 #endif
-	public class ResolutionException : Exception {
+	public sealed class ResolutionException : Exception {
 
 		readonly MemberReference member;
 

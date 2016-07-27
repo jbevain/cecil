@@ -36,7 +36,7 @@ namespace Mono.Cecil {
 	}
 
 	[Serializable]
-	public class AssemblyResolutionException : FileNotFoundException {
+	public sealed class AssemblyResolutionException : FileNotFoundException {
 
 		readonly AssemblyNameReference reference;
 

@@ -481,7 +481,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	public class InterfaceImplementation : ICustomAttributeProvider
+	public sealed class InterfaceImplementation : ICustomAttributeProvider
 	{
 		internal TypeDefinition type;
 		internal MetadataToken token;

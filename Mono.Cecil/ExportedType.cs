@@ -12,7 +12,7 @@ using System;
 
 namespace Mono.Cecil {
 
-	public class ExportedType : IMetadataTokenProvider {
+	public sealed class ExportedType : IMetadataTokenProvider {
 
 		string @namespace;
 		string name;
