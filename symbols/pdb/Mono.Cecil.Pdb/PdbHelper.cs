@@ -42,12 +42,12 @@ namespace Mono.Cecil.Pdb {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
-			return new PdbReader (File.OpenRead (PdbHelper.GetPdbFileName (fileName)));
+			return new PdbReader (Disposable.Owned (File.OpenRead (PdbHelper.GetPdbFileName (fileName)) as Stream));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
-			return new PdbReader (symbolStream);
+			return new PdbReader (Disposable.NotOwned (symbolStream));
 		}
 	}
 

@@ -31,7 +31,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public CodeReader (MetadataReader reader)
-			: base (reader.image.Stream)
+			: base (reader.image.Stream.value)
 		{
 			this.reader = reader;
 		}

@@ -1095,7 +1095,7 @@ namespace Mono.Cecil {
 			}
 
 			try {
-				return ReadModule (stream, fileName, parameters);
+				return ReadModule (Disposable.Owned (stream), fileName, parameters);
 			} catch (Exception) {
 				stream.Dispose ();
 				throw;
@@ -1120,13 +1120,14 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (Stream stream, ReaderParameters parameters)
 		{
-			return ReadModule (stream, "", parameters);
-		}
-
-		static ModuleDefinition ReadModule (Stream stream, string fileName, ReaderParameters parameters)
-		{
 			Mixin.CheckStream (stream);
 			Mixin.CheckReadSeek (stream);
+
+			return ReadModule (Disposable.NotOwned (stream), "", parameters);
+		}
+
+		static ModuleDefinition ReadModule (Disposable<Stream> stream, string fileName, ReaderParameters parameters)
+		{
 			Mixin.CheckParameters (parameters);
 
 			return ModuleReader.CreateModule (
@@ -1152,11 +1153,7 @@ namespace Mono.Cecil {
 
 		public void Write ()
 		{
-			if (!HasImage)
-				throw new InvalidOperationException ();
-
-			Image.Stream.Position = 0;
-			Write (Image.Stream);
+			Write (new WriterParameters ());
 		}
 
 		public void Write (WriterParameters parameters)
@@ -1164,8 +1161,9 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				throw new InvalidOperationException ();
 
-			Image.Stream.Position = 0;
-			Write (Image.Stream, parameters);
+			var image_stream = Image.Stream.value;
+			image_stream.Position = 0;
+			Write (image_stream, parameters);
 		}
 
 		public void Write (Stream stream)

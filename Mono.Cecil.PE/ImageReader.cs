@@ -26,8 +26,8 @@ namespace Mono.Cecil.PE {
 
 		uint table_heap_offset;
 
-		public ImageReader (Stream stream, string file_name)
-			: base (stream)
+		public ImageReader (Disposable<Stream> stream, string file_name)
+			: base (stream.value)
 		{
 			image = new Image ();
 			image.Stream = stream;
@@ -704,22 +704,22 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static Image ReadImage (Stream stream, string file_name)
+		public static Image ReadImage (Disposable<Stream> stream, string file_name)
 		{
 			try {
 				var reader = new ImageReader (stream, file_name);
 				reader.ReadImage ();
 				return reader.image;
 			} catch (EndOfStreamException e) {
-				throw new BadImageFormatException (stream.GetFileName (), e);
+				throw new BadImageFormatException (stream.value.GetFileName (), e);
 			}
 		}
 
-		public static Image ReadPortablePdb (Stream stream, string file_name)
+		public static Image ReadPortablePdb (Disposable<Stream> stream, string file_name)
 		{
 			try {
 				var reader = new ImageReader (stream, file_name);
-				var length = (uint) stream.Length;
+				var length = (uint) stream.value.Length;
 
 				reader.image.Sections = new[] {
 					new Section {
@@ -734,7 +734,7 @@ namespace Mono.Cecil.PE {
 				reader.ReadMetadata ();
 				return reader.image;
 			} catch (EndOfStreamException e) {
-				throw new BadImageFormatException (stream.GetFileName (), e);
+				throw new BadImageFormatException (stream.value.GetFileName (), e);
 			}
 		}
 	}

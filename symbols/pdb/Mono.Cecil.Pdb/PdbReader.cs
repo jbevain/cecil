@@ -25,11 +25,11 @@ namespace Mono.Cecil.Pdb {
 		int age;
 		Guid guid;
 
-		readonly Stream pdb_file;
+		readonly Disposable<Stream> pdb_file;
 		readonly Dictionary<string, Document> documents = new Dictionary<string, Document> ();
 		readonly Dictionary<uint, PdbFunction> functions = new Dictionary<uint, PdbFunction> ();
 
-		internal PdbReader (Stream file)
+		internal PdbReader (Disposable<Stream> file)
 		{
 			this.pdb_file = file;
 		}
@@ -80,7 +80,7 @@ namespace Mono.Cecil.Pdb {
 				int age;
 				Guid guid;
 
-				var funcs = PdbFile.LoadFunctions (pdb_file, out tokenToSourceMapping,  out sourceServerData, out age, out guid);
+				var funcs = PdbFile.LoadFunctions (pdb_file.value, out tokenToSourceMapping,  out sourceServerData, out age, out guid);
 
 				if (this.guid != guid)
 					return false;
@@ -205,7 +205,7 @@ namespace Mono.Cecil.Pdb {
 
 		public void Dispose ()
 		{
-			pdb_file.Close ();
+			pdb_file.Dispose ();
 		}
 	}
 }

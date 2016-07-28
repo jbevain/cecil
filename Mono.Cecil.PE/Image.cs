@@ -20,7 +20,7 @@ namespace Mono.Cecil.PE {
 
 	sealed class Image : IDisposable {
 
-		public Stream Stream;
+		public Disposable<Stream> Stream;
 		public string FileName;
 
 		public ModuleKind Kind;
@@ -124,7 +124,7 @@ namespace Mono.Cecil.PE {
 			if (section == null)
 				return null;
 
-			var reader = new BinaryStreamReader (Stream);
+			var reader = new BinaryStreamReader (Stream.value);
 			reader.MoveTo (ResolveVirtualAddressInSection (rva, section));
 			return reader;
 		}
