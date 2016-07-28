@@ -50,7 +50,7 @@ namespace Mono.Cecil {
 			this.reference = reference;
 		}
 
-		protected AssemblyResolutionException (
+		AssemblyResolutionException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 			: base (info, context)
