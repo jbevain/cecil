@@ -18,7 +18,7 @@ using Mono.CompilerServices.SymbolWriter;
 
 namespace Mono.Cecil.Mdb {
 
-	public class MdbReaderProvider : ISymbolReaderProvider {
+	public sealed class MdbReaderProvider : ISymbolReaderProvider {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
@@ -45,7 +45,7 @@ namespace Mono.Cecil.Mdb {
 		}
 	}
 
-	public class MdbReader : ISymbolReader {
+	public sealed class MdbReader : ISymbolReader {
 
 		readonly ModuleDefinition module;
 		readonly MonoSymbolFile symbol_file;

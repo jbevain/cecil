@@ -19,7 +19,7 @@ using Mono.CompilerServices.SymbolWriter;
 namespace Mono.Cecil.Mdb {
 
 #if !READ_ONLY
-	public class MdbWriterProvider : ISymbolWriterProvider {
+	public sealed class MdbWriterProvider : ISymbolWriterProvider {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
@@ -35,7 +35,7 @@ namespace Mono.Cecil.Mdb {
 		}
 	}
 
-	public class MdbWriter : ISymbolWriter {
+	public sealed class MdbWriter : ISymbolWriter {
 
 		readonly Guid mvid;
 		readonly MonoSymbolWriter writer;
