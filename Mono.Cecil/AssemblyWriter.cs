@@ -92,7 +92,7 @@ namespace Mono.Cecil {
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
 #endif
-			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider);
+			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters);
 
 #if !PCL && !NET_CORE
 			if (parameters.StrongNameKeyPair != null && name != null) {
@@ -136,10 +136,14 @@ namespace Mono.Cecil {
 			});
 		}
 
-		static ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider)
+		static ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, WriterParameters parameters)
 		{
 			if (symbol_writer_provider == null)
 				return null;
+
+			if (parameters.SymbolStream != null)
+				return symbol_writer_provider.GetSymbolWriter (module, parameters.SymbolStream);
+
 #if !PCL
 			return symbol_writer_provider.GetSymbolWriter (module, fq_name);
 #else
