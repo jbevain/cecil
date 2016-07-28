@@ -2490,7 +2490,7 @@ namespace Mono.Cecil {
 			return reader.ReadConstantSignature (type);
 		}
 
-		void InitializeCustomAttributes ()
+		internal void InitializeCustomAttributes ()
 		{
 			if (metadata.CustomAttributes != null)
 				return;
