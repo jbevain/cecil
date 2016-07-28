@@ -25,6 +25,7 @@ namespace Mono.Cecil.PE {
 		readonly ModuleDefinition module;
 		readonly MetadataBuilder metadata;
 		readonly TextMap text_map;
+		readonly internal Disposable<Stream> stream;
 
 		readonly string runtime_version;
 
@@ -50,12 +51,13 @@ namespace Mono.Cecil.PE {
 
 		ushort sections;
 
-		ImageWriter (ModuleDefinition module, string runtime_version, MetadataBuilder metadata, Stream stream, bool metadataOnly = false)
-			: base (stream)
+		ImageWriter (ModuleDefinition module, string runtime_version, MetadataBuilder metadata, Disposable<Stream> stream, bool metadataOnly = false)
+			: base (stream.value)
 		{
 			this.module = module;
 			this.runtime_version = runtime_version;
 			this.text_map = metadata.text_map;
+			this.stream = stream;
 			this.metadata = metadata;
 			if (metadataOnly)
 				return;
@@ -98,14 +100,14 @@ namespace Mono.Cecil.PE {
 			return module.Image.GetSection (rsrc_section);
 		}
 
-		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Stream stream)
+		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Disposable<Stream> stream)
 		{
 			var writer = new ImageWriter (module, module.runtime_version, metadata, stream);
 			writer.BuildSections ();
 			return writer;
 		}
 
-		public static ImageWriter CreateDebugWriter (ModuleDefinition module, MetadataBuilder metadata, Stream stream)
+		public static ImageWriter CreateDebugWriter (ModuleDefinition module, MetadataBuilder metadata, Disposable<Stream> stream)
 		{
 			var writer = new ImageWriter (module, "PDB V1.0", metadata, stream, metadataOnly: true);
 			var length = metadata.text_map.GetLength ();

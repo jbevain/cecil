@@ -72,7 +72,7 @@ namespace Mono.Cecil {
 
 	static class ModuleWriter {
 
-		public static void WriteModuleTo (ModuleDefinition module, Stream stream, WriterParameters parameters)
+		public static void WriteModuleTo (ModuleDefinition module, Disposable<Stream> stream, WriterParameters parameters)
 		{
 			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
 				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
@@ -86,7 +86,7 @@ namespace Mono.Cecil {
 			module.MetadataSystem.Clear ();
 
 			var name = module.assembly != null ? module.assembly.Name : null;
-			var fq_name = stream.GetFileName ();
+			var fq_name = stream.value.GetFileName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 #if !PCL && !NET_CORE
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
@@ -117,7 +117,9 @@ namespace Mono.Cecil {
 
 #if !PCL && !NET_CORE
 			if (parameters.StrongNameKeyPair != null)
-				CryptoService.StrongName (stream, writer, parameters.StrongNameKeyPair);
+				CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
+
+			stream.Dispose ();
 #endif
 		}
 

@@ -147,7 +147,8 @@ namespace Mono.Cecil.Cil {
 		{
 			Mixin.CheckModule (module);
 
-			return GetSymbolWriter (module, File.OpenWrite (GetPdbFileName (fileName)));
+			var file = File.OpenWrite (GetPdbFileName (fileName));
+			return GetSymbolWriter (module, Disposable.Owned (file as Stream));
 		}
 
 		static string GetPdbFileName (string assemblyFileName)
@@ -161,8 +162,13 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
+			return GetSymbolWriter (module, Disposable.NotOwned (symbolStream));
+		}
+
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Disposable<Stream> stream)
+		{
 			var metadata = new MetadataBuilder (module, this);
-			var writer = ImageWriter.CreateDebugWriter (module, metadata, symbolStream);
+			var writer = ImageWriter.CreateDebugWriter (module, metadata, stream);
 
 			return new PortablePdbWriter (metadata, module, writer);
 		}
@@ -258,11 +264,8 @@ namespace Mono.Cecil.Cil {
 			writer.BuildMetadataTextMap ();
 			writer.WriteMetadataHeader ();
 			writer.WriteMetadata ();
-#if NET_4_0
-			writer.Dispose ();
-#else
-			writer.Close ();
-#endif
+
+			writer.stream.Dispose ();
 		}
 
 		void WritePdbHeap ()
