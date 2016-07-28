@@ -869,7 +869,6 @@ namespace Mono.Cecil {
 			this.time_stamp = (uint) DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1)).TotalSeconds;
 			this.symbol_writer_provider = symbol_writer_provider;
 
-
 			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ()) {
 				symbol_writer = new PortablePdbWriter (this, module);
 			}

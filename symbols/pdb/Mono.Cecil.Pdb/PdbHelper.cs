@@ -16,9 +16,9 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Cecil.Pdb {
 
+#if !READ_ONLY
 	class PdbHelper {
 
-#if !READ_ONLY
 		public static SymWriter CreateWriter (ModuleDefinition module, string pdb)
 		{
 			var writer = new SymWriter ();
@@ -30,19 +30,14 @@ namespace Mono.Cecil.Pdb {
 
 			return writer;
 		}
-#endif
-
-		public static string GetPdbFileName (string assemblyFileName)
-		{
-			return Path.ChangeExtension (assemblyFileName, ".pdb");
-		}
 	}
+#endif
 
 	public class PdbReaderProvider : ISymbolReaderProvider {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
-			return new PdbReader (Disposable.Owned (File.OpenRead (PdbHelper.GetPdbFileName (fileName)) as Stream));
+			return new PdbReader (Disposable.Owned (File.OpenRead (Mixin.GetPdbFileName (fileName)) as Stream));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
@@ -57,7 +52,7 @@ namespace Mono.Cecil.Pdb {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
-			return new PdbWriter (module, PdbHelper.CreateWriter (module, PdbHelper.GetPdbFileName (fileName)));
+			return new PdbWriter (module, PdbHelper.CreateWriter (module, Mixin.GetPdbFileName (fileName)));
 		}
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)

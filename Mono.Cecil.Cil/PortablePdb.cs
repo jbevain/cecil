@@ -12,8 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using Mono.Collections.Generic;
-
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
 
@@ -26,13 +24,8 @@ namespace Mono.Cecil.Cil {
 		{
 			Mixin.CheckModule (module);
 
-			var file = File.OpenRead (GetPdbFileName (fileName));
+			var file = File.OpenRead (Mixin.GetPdbFileName (fileName));
 			return GetSymbolReader (module, Disposable.Owned (file as Stream), file.Name);
-		}
-
-		static string GetPdbFileName (string assemblyFileName)
-		{
-			return Path.ChangeExtension (assemblyFileName, ".pdb");
 		}
 #endif
 
@@ -147,13 +140,8 @@ namespace Mono.Cecil.Cil {
 		{
 			Mixin.CheckModule (module);
 
-			var file = File.OpenWrite (GetPdbFileName (fileName));
+			var file = File.OpenWrite (Mixin.GetPdbFileName (fileName));
 			return GetSymbolWriter (module, Disposable.Owned (file as Stream));
-		}
-
-		static string GetPdbFileName (string assemblyFileName)
-		{
-			return Path.ChangeExtension (assemblyFileName, ".pdb");
 		}
 #endif
 

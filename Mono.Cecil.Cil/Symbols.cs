@@ -727,4 +727,20 @@ namespace Mono.Cecil.Cil {
 	}
 
 #endif
+}
+
+namespace Mono.Cecil {
+
+	static partial class Mixin {
+
+		public static string GetPdbFileName (string assemblyFileName)
+		{
+			return Path.ChangeExtension (assemblyFileName, ".pdb");
+		}
+
+		public static string GetMdbFileName (string assemblyFileName)
+		{
+			return assemblyFileName + ".mdb";
+		}
 	}
+}
