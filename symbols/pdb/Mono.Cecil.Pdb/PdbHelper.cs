@@ -37,11 +37,17 @@ namespace Mono.Cecil.Pdb {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
+			Mixin.CheckModule (module);
+			Mixin.CheckFileName (fileName);
+
 			return new PdbReader (Disposable.Owned (File.OpenRead (Mixin.GetPdbFileName (fileName)) as Stream));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
+			Mixin.CheckModule (module);
+			Mixin.CheckStream (symbolStream);
+
 			return new PdbReader (Disposable.NotOwned (symbolStream));
 		}
 	}
@@ -52,6 +58,9 @@ namespace Mono.Cecil.Pdb {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
+			Mixin.CheckModule (module);
+			Mixin.CheckFileName (fileName);
+
 			return new PdbWriter (module, PdbHelper.CreateWriter (module, Mixin.GetPdbFileName (fileName)));
 		}
 

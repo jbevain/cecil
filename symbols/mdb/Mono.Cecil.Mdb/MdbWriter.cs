@@ -23,6 +23,9 @@ namespace Mono.Cecil.Mdb {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
+			Mixin.CheckModule (module);
+			Mixin.CheckFileName (fileName);
+
 			return new MdbWriter (module.Mvid, fileName);
 		}
 

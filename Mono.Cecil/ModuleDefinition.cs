@@ -1104,10 +1104,7 @@ namespace Mono.Cecil {
 
 		static Stream GetFileStream (string fileName, FileMode mode, FileAccess access, FileShare share)
 		{
-			if (fileName == null)
-				throw new ArgumentNullException ("fileName");
-			if (fileName.Length == 0)
-				throw new ArgumentException ();
+			Mixin.CheckFileName (fileName);
 
 			return new FileStream (fileName, mode, access, share);
 		}
@@ -1185,6 +1182,14 @@ namespace Mono.Cecil {
 	}
 
 	static partial class Mixin {
+
+		public static void CheckFileName (string fileName)
+		{
+			if (fileName == null)
+				throw new ArgumentNullException ("fileName");
+			if (fileName.Length == 0)
+				throw new ArgumentException ();
+		}
 
 		public static void CheckStream (object stream)
 		{

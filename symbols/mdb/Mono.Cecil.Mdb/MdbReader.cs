@@ -22,11 +22,17 @@ namespace Mono.Cecil.Mdb {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
+			Mixin.CheckModule (module);
+			Mixin.CheckFileName (fileName);
+
 			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (Mixin.GetMdbFileName (fileName), module.Mvid));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
+			Mixin.CheckModule (module);
+			Mixin.CheckStream (symbolStream);
+
 			var file = MonoSymbolFile.ReadSymbolFile (symbolStream);
 			if (module.Mvid != file.Guid) {
 				var file_stream = symbolStream as FileStream;

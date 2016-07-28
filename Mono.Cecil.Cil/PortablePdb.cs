@@ -23,6 +23,7 @@ namespace Mono.Cecil.Cil {
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
+			Mixin.CheckFileName (fileName);
 
 			var file = File.OpenRead (Mixin.GetPdbFileName (fileName));
 			return GetSymbolReader (module, Disposable.Owned (file as Stream), file.Name);
@@ -139,6 +140,7 @@ namespace Mono.Cecil.Cil {
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
+			Mixin.CheckFileName (fileName);
 
 			var file = File.OpenWrite (Mixin.GetPdbFileName (fileName));
 			return GetSymbolWriter (module, Disposable.Owned (file as Stream));
