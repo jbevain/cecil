@@ -729,6 +729,8 @@ namespace Mono.Cecil.Cil {
 #endif
 }
 
+#if !PCL
+
 namespace Mono.Cecil {
 
 	static partial class Mixin {
@@ -744,3 +746,5 @@ namespace Mono.Cecil {
 		}
 	}
 }
+
+#endif
