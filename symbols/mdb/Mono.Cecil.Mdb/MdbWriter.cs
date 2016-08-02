@@ -117,30 +117,27 @@ namespace Mono.Cecil.Mdb {
 			}
 
 			if (info.scope != null)
-				WriteScope (info.scope);
+				WriteScope (info.scope, info);
 
 			writer.CloseMethod ();
 		}
 
-		void WriteScope (ScopeDebugInformation scope)
+		void WriteScope (ScopeDebugInformation scope, MethodDebugInformation info)
 		{
-			if (scope.Start.Offset == scope.End.Offset)
-				return;
-
-			writer.OpenScope(scope.Start.Offset);
+			writer.OpenScope (scope.Start.Offset);
 
 			WriteScopeVariables (scope);
 
 			if (scope.HasScopes)
-				WriteScopes (scope.Scopes);
+				WriteScopes (scope.Scopes, info);
 
-			writer.CloseScope(scope.End.Offset);
+			writer.CloseScope (scope.End.IsEndOfMethod ? info.code_size : scope.End.Offset);
 		}
 
-		void WriteScopes (Collection<ScopeDebugInformation> scopes)
+		void WriteScopes (Collection<ScopeDebugInformation> scopes, MethodDebugInformation info)
 		{
 			for (int i = 0; i < scopes.Count; i++)
-				WriteScope (scopes [i]);
+				WriteScope (scopes [i], info);
 		}
 
 		void WriteScopeVariables (ScopeDebugInformation scope)
@@ -153,12 +150,10 @@ namespace Mono.Cecil.Mdb {
 					writer.DefineLocalVariable (variable.Index, variable.Name);
 		}
 
-		readonly static byte [] empty_header = new byte [0];
-
 		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
 		{
 			directory = new ImageDebugDirectory ();
-			header = empty_header;
+			header = Empty<byte>.Array;
 			return false;
 		}
 

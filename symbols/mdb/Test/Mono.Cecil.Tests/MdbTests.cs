@@ -43,5 +43,16 @@ namespace Mono.Cecil.Tests {
 ", main);
 			}, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
 		}
+
+		[Test]
+		public void RoundTripCoreLib ()
+		{
+			TestModule ("mscorlib.dll", module => {
+				var type = module.GetType ("System.IO.__Error");
+				var method = type.GetMethod ("WinIOError");
+
+				Assert.IsNotNull (method.Body);
+			}, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
+		}
 	}
 }
