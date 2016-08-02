@@ -717,20 +717,27 @@ namespace Mono.CompilerServices.SymbolWriter
 			if (guid == null)
 				guid = new byte[16];
 
-			if (hash == null) {
-				try {
-				    using (FileStream fs = new FileStream (file_name, FileMode.Open, FileAccess.Read)) {
-				        MD5 md5 = MD5.Create ();
-				        hash = md5.ComputeHash (fs);
-				    }
-				} catch {
-					hash = new byte [16];
-				}
-			}
+			if (hash == null)
+				hash = ComputeHash ();
 
 			bw.Write (guid);
 			bw.Write (hash);
 			bw.Write ((byte) (auto_generated ? 1 : 0));
+		}
+
+		private byte [] ComputeHash ()
+		{
+			if (!File.Exists (file_name))
+				return new byte [16];
+
+			try {
+				using (FileStream fs = new FileStream (file_name, FileMode.Open, FileAccess.Read)) {
+					MD5 md5 = MD5.Create ();
+					return md5.ComputeHash (fs);
+				}
+			} catch {
+				return new byte [16];
+			}
 		}
 
 		internal void Write (BinaryWriter bw)
