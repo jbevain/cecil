@@ -53,7 +53,7 @@ namespace Mono.Cecil {
 				return new MemoryStream (data);
 
 			if (offset.HasValue)
-				return reader.GetManagedResourceStream (offset.Value);
+				return new MemoryStream (reader.GetManagedResource (offset.Value));
 
 			throw new InvalidOperationException ();
 		}
@@ -67,7 +67,7 @@ namespace Mono.Cecil {
 				return data;
 
 			if (offset.HasValue)
-				return reader.GetManagedResourceStream (offset.Value).ToArray ();
+				return reader.GetManagedResource (offset.Value);
 
 			throw new InvalidOperationException ();
 		}

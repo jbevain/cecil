@@ -36,22 +36,29 @@ namespace Mono.Cecil.Cil {
 			this.reader = reader;
 		}
 
-		public void MoveTo (MethodDefinition method)
+		public int MoveTo (MethodDefinition method)
 		{
 			this.method = method;
 			this.reader.context = method;
+			var position = this.Position;
 			this.Position = (int) reader.image.ResolveVirtualAddress ((uint) method.RVA);
+			return position;
+		}
+
+		void MoveBackTo (int position)
+		{
+			this.reader.context = null;
+			this.Position = position;
 		}
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			MoveTo (method);
+			var position = MoveTo (method);
 			this.body = new MethodBody (method);
 
 			ReadMethodBody ();
 
-			this.reader.context = null;
-
+			MoveBackTo (position);
 			return this.body;
 		}
 
@@ -442,7 +449,7 @@ namespace Mono.Cecil.Cil {
 
 		public ByteBuffer PatchRawMethodBody (MethodDefinition method, CodeWriter writer, out int code_size, out MetadataToken local_var_token)
 		{
-			MoveTo (method);
+			var position = MoveTo (method);
 
 			var buffer = new ByteBuffer ();
 
@@ -463,7 +470,7 @@ namespace Mono.Cecil.Cil {
 				throw new NotSupportedException ();
 			}
 
-			reader.context = null;
+			MoveBackTo (position);
 
 			return buffer;
 		}

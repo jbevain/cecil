@@ -118,7 +118,7 @@ namespace Mono.Cecil.PE {
 			return null;
 		}
 
-		public BinaryStreamReader GetReaderAt (RVA rva)
+		BinaryStreamReader GetReaderAt (RVA rva)
 		{
 			var section = GetSectionAtVirtualAddress (rva);
 			if (section == null)
@@ -127,6 +127,20 @@ namespace Mono.Cecil.PE {
 			var reader = new BinaryStreamReader (Stream.value);
 			reader.MoveTo (ResolveVirtualAddressInSection (rva, section));
 			return reader;
+		}
+
+		public TRet GetReaderAt<TItem, TRet> (RVA rva, TItem item, Func<TItem, BinaryStreamReader, TRet> read) where TRet : class
+		{
+			var position = Stream.value.Position;
+			try {
+				var reader = GetReaderAt (rva);
+				if (reader == null)
+					return null;
+
+				return read (item, reader);
+			} finally {
+				Stream.value.Position = position;
+			}
 		}
 
 		public ImageDebugDirectory GetDebugHeader (out byte [] header)
