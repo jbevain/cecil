@@ -128,7 +128,10 @@ namespace Mono.Cecil.Rocks {
 
 		void WriteGenericInstanceTypeSignature (GenericInstanceType type)
 		{
-			WriteTypeSignature (type.ElementType);
+			if (type.ElementType.IsTypeSpecification ())
+				throw new NotSupportedException ();
+
+			WriteTypeFullName (type.ElementType, stripGenericArity: true);
 			id.Append ('{');
 			WriteList (type.GenericArguments, WriteTypeSignature);
 			id.Append ('}');
@@ -154,7 +157,7 @@ namespace Mono.Cecil.Rocks {
 		void WriteFunctionPointerTypeSignature (FunctionPointerType type)
 		{
 			id.Append ("=FUNC:");
-			WriteTypeFullName (type.ReturnType);
+			WriteTypeSignature (type.ReturnType);
 
 			if (type.HasParameters)
 				WriteParameters (type.Parameters);
@@ -194,7 +197,7 @@ namespace Mono.Cecil.Rocks {
 			WriteItemName (member.Name);
 		}
 
-		void WriteTypeFullName (TypeReference type)
+		void WriteTypeFullName (TypeReference type, bool stripGenericArity = false)
 		{
 			if (type.DeclaringType != null) {
 				WriteTypeFullName (type.DeclaringType);
@@ -206,7 +209,15 @@ namespace Mono.Cecil.Rocks {
 				id.Append ('.');
 			}
 
-			id.Append (type.Name);
+			var name = type.Name;
+
+			if (stripGenericArity) {
+				var index = name.LastIndexOf ('`');
+				if (index > 0)
+					name = name.Substring (0, index);
+			}
+
+			id.Append (name);
 		}
 
 		void WriteItemName (string name)
