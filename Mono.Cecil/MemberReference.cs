@@ -94,7 +94,7 @@ namespace Mono.Cecil {
 
 		public IMemberDefinition Resolve ()
 		{
-			return null;
+			return ResolveDefinition ();
 		}
 
 		protected abstract IMemberDefinition ResolveDefinition ();
