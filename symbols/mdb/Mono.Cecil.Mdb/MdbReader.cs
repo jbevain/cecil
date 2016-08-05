@@ -86,7 +86,7 @@ namespace Mono.Cecil.Mdb {
 			foreach (var local in locals) {
 				var variable = new VariableDebugInformation (local.Index, local.Name);
 
-				var index = local.BlockIndex - 1;
+				var index = local.BlockIndex;
 				if (index < 0 || index >= scopes.Length)
 					continue;
 
@@ -134,22 +134,22 @@ namespace Mono.Cecil.Mdb {
 		static ScopeDebugInformation [] ReadScopes (MethodEntry entry, MethodDebugInformation info)
 		{
 			var blocks = entry.GetCodeBlocks ();
-			var scopes = new ScopeDebugInformation [blocks.Length];
+			var scopes = new ScopeDebugInformation [blocks.Length + 1];
+
+			info.scope = scopes [0] = new ScopeDebugInformation {
+				Start = new InstructionOffset (0),
+				End = new InstructionOffset (info.code_size),
+			};
 
 			foreach (var block in blocks) {
-				if (block.BlockType != CodeBlockEntry.Type.Lexical)
+				if (block.BlockType != CodeBlockEntry.Type.Lexical && block.BlockType != CodeBlockEntry.Type.CompilerGenerated)
 					continue;
 
 				var scope = new ScopeDebugInformation ();
 				scope.Start = new InstructionOffset (block.StartOffset);
 				scope.End = new InstructionOffset (block.EndOffset);
 
-				scopes [block.Index] = scope;
-
-				if (info.scope == null) {
-					info.scope = scope;
-					continue;
-				}
+				scopes [block.Index + 1] = scope;
 
 				if (!AddScope (info.scope.Scopes, scope))
 					info.scope.Scopes.Add (scope);

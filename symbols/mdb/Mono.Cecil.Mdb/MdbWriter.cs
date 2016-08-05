@@ -117,9 +117,17 @@ namespace Mono.Cecil.Mdb {
 			}
 
 			if (info.scope != null)
-				WriteScope (info.scope, info);
+				WriteRootScope (info.scope, info);
 
 			writer.CloseMethod ();
+		}
+
+		void WriteRootScope (ScopeDebugInformation scope, MethodDebugInformation info)
+		{
+			WriteScopeVariables (scope);
+
+			if (scope.HasScopes)
+				WriteScopes (scope.Scopes, info);
 		}
 
 		void WriteScope (ScopeDebugInformation scope, MethodDebugInformation info)
@@ -155,14 +163,6 @@ namespace Mono.Cecil.Mdb {
 			directory = new ImageDebugDirectory ();
 			header = Empty<byte>.Array;
 			return false;
-		}
-
-		void AddVariables (IList<VariableDebugInformation> variables)
-		{
-			for (int i = 0; i < variables.Count; i++) {
-				var variable = variables [i];
-				writer.DefineLocalVariable (i, variable.Name);
-			}
 		}
 
 		public void Dispose ()
