@@ -125,7 +125,10 @@ namespace Mono.Cecil.Mdb {
 			if (documents.TryGetValue (file_name, out document))
 				return document;
 
-			document = new Document (file_name);
+			document = new Document (file_name) {
+				Hash = file.Checksum,
+			};
+
 			documents.Add (file_name, document);
 
 			return document;

@@ -56,7 +56,7 @@ namespace Mono.Cecil.Mdb {
 			if (source_files.TryGetValue (url, out source_file))
 				return source_file;
 
-			var entry = writer.DefineDocument (url);
+			var entry = writer.DefineDocument (url, null, document.Hash != null && document.Hash.Length == 16 ? document.Hash : null);
 			var compile_unit = writer.DefineCompilationUnit (entry);
 
 			source_file = new SourceFile (compile_unit, entry);
