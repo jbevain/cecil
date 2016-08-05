@@ -117,7 +117,7 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	class VariableDefinitionCollection : Collection<VariableDefinition> {
+	sealed class VariableDefinitionCollection : Collection<VariableDefinition> {
 
 		internal VariableDefinitionCollection ()
 		{

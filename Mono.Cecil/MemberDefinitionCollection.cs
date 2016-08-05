@@ -14,7 +14,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	class MemberDefinitionCollection<T> : Collection<T> where T : IMemberDefinition {
+	sealed class MemberDefinitionCollection<T> : Collection<T> where T : IMemberDefinition {
 
 		TypeDefinition container;
 

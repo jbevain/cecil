@@ -15,7 +15,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	class MemberReferenceProjection {
+	sealed class MemberReferenceProjection {
 
 		public readonly string Name;
 		public readonly MemberReferenceTreatment Treatment;
@@ -27,7 +27,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class TypeDefinitionProjection {
+	sealed class TypeDefinitionProjection {
 
 		public readonly TypeAttributes Attributes;
 		public readonly string Name;
@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class TypeReferenceProjection {
+	sealed class TypeReferenceProjection {
 
 		public readonly string Name;
 		public readonly string Namespace;
@@ -57,7 +57,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class MethodDefinitionProjection {
+	sealed class MethodDefinitionProjection {
 
 		public readonly MethodAttributes Attributes;
 		public readonly MethodImplAttributes ImplAttributes;
@@ -73,7 +73,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class FieldDefinitionProjection {
+	sealed class FieldDefinitionProjection {
 
 		public readonly FieldAttributes Attributes;
 		public readonly FieldDefinitionTreatment Treatment;
@@ -85,7 +85,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class CustomAttributeValueProjection {
+	sealed class CustomAttributeValueProjection {
 
 		public readonly AttributeTargets Targets;
 		public readonly CustomAttributeValueTreatment Treatment;
@@ -97,7 +97,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	class WindowsRuntimeProjections {
+	sealed class WindowsRuntimeProjections {
 
 		struct ProjectionInfo {
 
