@@ -14,6 +14,9 @@
     <language>en-US</language>
     <tags>assembly assemblies module modules il cil msil bytecode reflection injection cecil mono aop</tags>
     <dependencies>
+      <group targetFramework=".NETFramework3.5" />
+      <group targetFramework=".NETFramework4.0" />
+      <group targetFramework=".NETPortable4.0-Profile344" />
       <group targetFramework=".NETStandard1.3">
         <dependency id="NETStandard.Library" version="[1.6.0, )" />
         <dependency id="System.Security.Cryptography.Algorithms" version="[4.2.0, )" />
