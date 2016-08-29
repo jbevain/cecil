@@ -13,6 +13,13 @@
     <description>Cecil is a library written by Jb Evain to generate and inspect programs and libraries in the ECMA CIL format. It has full support for generics, and support some debugging symbol format. In simple English, with Cecil, you can load existing managed assemblies, browse all the contained types, modify them on the fly and save back to the disk the modified assembly.</description>
     <language>en-US</language>
     <tags>assembly assemblies module modules il cil msil bytecode reflection injection cecil mono aop</tags>
+    <dependencies>
+      <group targetFramework=".NETStandard1.3">
+        <dependency id="NETStandard.Library" version="[1.6.0, )" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="[4.2.0, )" />
+        <dependency id="System.Security.Cryptography.Csp" version="[4.0.0, )" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
     <file src="bin\net_3_5_Release\*.dll" target="lib/net35" />
