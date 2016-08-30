@@ -753,7 +753,7 @@ namespace Mono.Cecil {
 						hash = ReadBlob (file_record.Col3)
 					};
 				} else
-					throw new NotSupportedException ();
+					continue;
 
 				resources.Add (resource);
 			}
