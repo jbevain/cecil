@@ -12,4 +12,4 @@ obj
 Mono.Cecil.sln.ide*
 TestResults
 project.lock.json
-
+.vs/

@@ -18,9 +18,14 @@
       <group targetFramework=".NETFramework4.0" />
       <group targetFramework=".NETPortable4.0-Profile344" />
       <group targetFramework=".NETStandard1.3">
-        <dependency id="NETStandard.Library" version="[1.6.0, )" />
-        <dependency id="System.Security.Cryptography.Algorithms" version="[4.2.0, )" />
-        <dependency id="System.Security.Cryptography.Csp" version="[4.0.0, )" />
+        <dependency id="System.Collections" version="4.0.11" />
+        <dependency id="System.IO.FileSystem" version="4.0.1" />
+        <dependency id="System.IO.FileSystem.Primitives" version="4.0.1" />
+        <dependency id="System.Reflection" version="4.1.0" />
+        <dependency id="System.Runtime.Extensions" version="4.1.0" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
+        <dependency id="System.Security.Cryptography.Csp" version="4.0.0" />
+        <dependency id="System.Threading" version="4.0.11" />
       </group>
     </dependencies>
   </metadata>
