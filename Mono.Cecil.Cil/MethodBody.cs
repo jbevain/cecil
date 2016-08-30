@@ -53,7 +53,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public Collection<Instruction> Instructions {
-			get { return instructions ?? (instructions = new InstructionCollection ()); }
+			get { return instructions ?? (instructions = new InstructionCollection (method)); }
 		}
 
 		public bool HasExceptionHandlers {
@@ -157,13 +157,17 @@ namespace Mono.Cecil.Cil {
 
 	class InstructionCollection : Collection<Instruction> {
 
-		internal InstructionCollection ()
+		readonly MethodDefinition method;
+
+		internal InstructionCollection (MethodDefinition method)
 		{
+			this.method = method;
 		}
 
-		internal InstructionCollection (int capacity)
+		internal InstructionCollection (MethodDefinition method, int capacity)
 			: base (capacity)
 		{
+			this.method = method;
 		}
 
 		protected override void OnAdd (Instruction item, int index)
@@ -220,8 +224,25 @@ namespace Mono.Cecil.Cil {
 			if (next != null)
 				next.previous = item.previous;
 
+			RemoveSequencePoint (item);
+
 			item.previous = null;
 			item.next = null;
+		}
+
+		void RemoveSequencePoint (Instruction instruction)
+		{
+			var debug_info = method.debug_info;
+			if (debug_info == null || !debug_info.HasSequencePoints)
+				return;
+
+			var sequence_points = debug_info.sequence_points;
+			for (int i = 0; i < sequence_points.Count; i++) {
+				if (sequence_points [i].Offset == instruction.offset) {
+					sequence_points.RemoveAt (i);
+					return;
+				}
+			}
 		}
 	}
 }

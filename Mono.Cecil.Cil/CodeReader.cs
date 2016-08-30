@@ -212,7 +212,7 @@ namespace Mono.Cecil.Cil {
 				code_size = 0;
 
 			var end = start + code_size;
-			var instructions = body.instructions = new InstructionCollection ((code_size + 1) / 2);
+			var instructions = body.instructions = new InstructionCollection (method, (code_size + 1) / 2);
 
 			while (Position < end) {
 				var offset = Position - start;
