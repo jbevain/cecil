@@ -1052,7 +1052,7 @@ namespace Mono.Cecil {
 			if (string.IsNullOrEmpty (file_name))
 				throw new InvalidOperationException ();
 
-			var provider = SymbolProvider.GetPlatformReaderProvider ();
+			var provider = SymbolProvider.GetReaderProvider (this);
 			if (provider == null)
 				throw new InvalidOperationException ();
 

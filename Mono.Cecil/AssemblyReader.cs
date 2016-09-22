@@ -99,7 +99,7 @@ namespace Mono.Cecil {
 
 #if !PCL
 			if (symbol_reader_provider == null && parameters.ReadSymbols)
-				symbol_reader_provider = SymbolProvider.GetPlatformReaderProvider ();
+				symbol_reader_provider = SymbolProvider.GetReaderProvider (module);
 #endif
 
 			if (symbol_reader_provider != null) {
