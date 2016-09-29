@@ -318,8 +318,11 @@ namespace Mono.Cecil {
 				}
 			}
 
-			foreach (var implementedInterface in allImplementedInterfaces) {
-				RedirectInterfaceMethods (implementedInterface, redirectedMethods);
+			// Interfaces don't inherit methods of the interfaces they implement
+			if (!type.IsInterface) {
+				foreach (var implementedInterface in allImplementedInterfaces) {
+					RedirectInterfaceMethods (implementedInterface, redirectedMethods);
+				}
 			}
 
 			return TypeDefinitionTreatment.RedirectImplementedMethods;
