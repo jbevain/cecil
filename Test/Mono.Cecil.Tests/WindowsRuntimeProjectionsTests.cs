@@ -166,6 +166,31 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual(0, customListClass.Interfaces[4].CustomAttributes.Count);
 				Assert.AreEqual("Windows.Foundation.Collections.IIterable`1<System.Int32>", customListClass.Interfaces[4].InterfaceType.FullName);
 
+				var customPropertySetClass = module.Types.Single(t => t.Name == "CustomPropertySet");
+				Assert.AreEqual(7, customPropertySetClass.Interfaces.Count);
+
+				Assert.AreEqual(0, customPropertySetClass.Interfaces[0].CustomAttributes.Count);
+				Assert.AreEqual("Windows.Foundation.Collections.IPropertySet", customPropertySetClass.Interfaces[0].InterfaceType.FullName);
+
+				Assert.AreEqual(1, customPropertySetClass.Interfaces[1].CustomAttributes.Count);
+				Assert.AreEqual("Windows.Foundation.Metadata.DefaultAttribute", customPropertySetClass.Interfaces[1].CustomAttributes[0].AttributeType.FullName);
+				Assert.AreEqual("NativeWinmd.__ICustomPropertySetPublicNonVirtuals", customPropertySetClass.Interfaces[1].InterfaceType.FullName);
+
+				Assert.AreEqual(0, customPropertySetClass.Interfaces[2].CustomAttributes.Count);
+				Assert.AreEqual("Windows.Foundation.Collections.IObservableMap`2<System.String,System.Object>", customPropertySetClass.Interfaces[2].InterfaceType.FullName);
+
+				Assert.AreEqual(0, customPropertySetClass.Interfaces[3].CustomAttributes.Count);
+				Assert.AreEqual("System.Collections.Generic.IDictionary`2<System.String,System.Object>", customPropertySetClass.Interfaces[3].InterfaceType.FullName);
+
+				Assert.AreEqual(0, customPropertySetClass.Interfaces[4].CustomAttributes.Count);
+				Assert.AreEqual("System.Collections.Generic.IEnumerable`1<System.Collections.Generic.KeyValuePair`2<System.String,System.Object>>", customPropertySetClass.Interfaces[4].InterfaceType.FullName);
+
+				Assert.AreEqual(0, customPropertySetClass.Interfaces[5].CustomAttributes.Count);
+				Assert.AreEqual("Windows.Foundation.Collections.IMap`2<System.String,System.Object>", customPropertySetClass.Interfaces[5].InterfaceType.FullName);
+
+				Assert.AreEqual(0, customPropertySetClass.Interfaces[6].CustomAttributes.Count);
+				Assert.AreEqual("Windows.Foundation.Collections.IIterable`1<System.Collections.Generic.KeyValuePair`2<System.String,System.Object>>", customPropertySetClass.Interfaces[6].InterfaceType.FullName);
+
 			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance(), applyWindowsRuntimeProjections: true);
 		}
 
