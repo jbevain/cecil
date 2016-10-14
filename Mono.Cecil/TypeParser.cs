@@ -420,7 +420,9 @@ namespace Mono.Cecil {
 
 		static void AppendType (TypeReference type, StringBuilder name, bool fq_name, bool top_level)
 		{
-			var declaring_type = type.DeclaringType;
+			var element_type = type.GetElementType ();
+
+			var declaring_type = element_type.DeclaringType;
 			if (declaring_type != null) {
 				AppendType (declaring_type, name, false, top_level);
 				name.Append ('+');
@@ -432,7 +434,7 @@ namespace Mono.Cecil {
 				name.Append ('.');
 			}
 
-			AppendNamePart (type.GetElementType ().Name, name);
+			AppendNamePart (element_type.Name, name);
 
 			if (!fq_name)
 				return;

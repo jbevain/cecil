@@ -402,6 +402,29 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void TypeOfArrayOfNestedClass ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var parent = module.GetType ("Parent");
+				Assert.IsNotNull (parent);
+
+				var attribute = GetAttribute (parent, "Foo");
+				Assert.IsNotNull (attribute);
+
+				Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+
+				var argument = attribute.ConstructorArguments [0];
+
+				Assert.AreEqual ("System.Type", argument.Type.FullName);
+
+				var type = argument.Value as TypeReference;
+				Assert.IsNotNull (type);
+
+				Assert.AreEqual ("Parent/Child[]", type.FullName);
+			});
+		}
+
+		[Test]
 		public void EmptyBlob ()
 		{
 			TestIL ("ca-empty-blob.il", module => {
