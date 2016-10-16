@@ -100,20 +100,16 @@ namespace Mono.Cecil.Mdb {
 
 		void ReadLineNumbers (MethodEntry entry, MethodDebugInformation info)
 		{
-			Document document = null;
 			var table = entry.GetLineNumberTable ();
 
 			info.sequence_points = new Collection<SequencePoint> (table.LineNumbers.Length);
 
 			for (var i = 0; i < table.LineNumbers.Length; i++) {
 				var line = table.LineNumbers [i];
-				if (document == null)
-					document = GetDocument (entry.CompileUnit.SourceFile);
-
 				if (i > 0 && table.LineNumbers [i - 1].Offset == line.Offset)
 					continue;
 
-				info.sequence_points.Add (LineToSequencePoint (line, entry, document));
+				info.sequence_points.Add (LineToSequencePoint (line));
 			}
 		}
 
@@ -176,9 +172,10 @@ namespace Mono.Cecil.Mdb {
 			return false;
 		}
 
-		static SequencePoint LineToSequencePoint (LineNumberEntry line, MethodEntry entry, Document document)
+		SequencePoint LineToSequencePoint (LineNumberEntry line)
 		{
-			return new SequencePoint (line.Offset, document) {
+			var source = symbol_file.GetSourceFile (line.File);
+			return new SequencePoint (line.Offset, GetDocument (source)) {
 				StartLine = line.Row,
 				EndLine = line.EndRow,
 				StartColumn = line.Column,
