@@ -30,10 +30,6 @@ namespace Mono {
 		internal readonly T value;
 		readonly bool owned;
 
-		public bool HasValue {
-			get { return value != null; }
-		}
-
 		public Disposable (T value, bool owned)
 		{
 			this.value = value;
