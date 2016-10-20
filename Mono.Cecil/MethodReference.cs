@@ -122,6 +122,9 @@ namespace Mono.Cecil {
 				if (this.ReturnType.ContainsGenericParameter || base.ContainsGenericParameter)
 					return true;
 
+				if (!HasParameters)
+					return false;
+
 				var parameters = this.Parameters;
 
 				for (int i = 0; i < parameters.Count; i++)
