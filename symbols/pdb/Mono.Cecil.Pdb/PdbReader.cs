@@ -104,10 +104,16 @@ namespace Mono.Cecil.Pdb {
 
 			ReadSequencePoints (function, symbol);
 
-			if (function.scopes.Length > 1)
-				throw new NotSupportedException ();
-			else if (function.scopes.Length == 1)
+			if (!function.scopes.IsNullOrEmpty())
 				symbol.scope = ReadScopeAndLocals (function.scopes [0], symbol);
+
+			if (function.scopes.Length > 1) {
+				for (int i = 1; i < function.scopes.Length; i++) {
+					var s = ReadScopeAndLocals (function.scopes [i], symbol);
+					if (!AddScope (symbol.scope.Scopes, s))
+						symbol.scope.Scopes.Add (s);
+				}
+			}
 
 			return symbol;
 		}
@@ -155,6 +161,21 @@ namespace Mono.Cecil.Pdb {
 			parent.scopes = ReadScopeAndLocals (scope.scopes, info);
 
 			return parent;
+		}
+
+		static bool AddScope (Collection<ScopeDebugInformation> scopes, ScopeDebugInformation scope)
+		{
+			foreach (var sub_scope in scopes) {
+				if (sub_scope.HasScopes && AddScope (sub_scope.Scopes, scope))
+					return true;
+
+				if (scope.Start.Offset >= sub_scope.Start.Offset && scope.End.Offset <= sub_scope.End.Offset) {
+					sub_scope.Scopes.Add (scope);
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		void ReadSequencePoints (PdbFunction function, MethodDebugInformation info)
