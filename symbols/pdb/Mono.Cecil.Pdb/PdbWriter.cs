@@ -45,7 +45,8 @@ namespace Mono.Cecil.Pdb {
 
 			writer.OpenMethod (sym_token);
 
-			DefineSequencePoints (info.sequence_points);
+			if (!info.sequence_points.IsNullOrEmpty ())
+				DefineSequencePoints (info.sequence_points);
 
 			if (info.scope != null)
 				DefineScope (info.scope, info);

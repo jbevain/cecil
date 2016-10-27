@@ -148,6 +148,13 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void EmptyEnumerable ()
+		{
+			TestModule ("empty-iterator.dll", module => {
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+		}
+
+		[Test]
 		public void CreateMethodFromScratch ()
 		{
 			IgnoreOnMono ();
