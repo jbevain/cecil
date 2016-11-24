@@ -85,6 +85,9 @@ namespace Mono.Cecil {
 
 			module.MetadataSystem.Clear ();
 
+			if (module.symbol_reader != null)
+				module.symbol_reader.Dispose ();
+
 			var name = module.assembly != null ? module.assembly.Name : null;
 			var fq_name = stream.value.GetFileName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
@@ -104,9 +107,6 @@ namespace Mono.Cecil {
 			var metadata = new MetadataBuilder (module, fq_name, symbol_writer_provider, symbol_writer);
 
 			BuildMetadata (module, metadata);
-
-			if (module.symbol_reader != null)
-				module.symbol_reader.Dispose ();
 
 			var writer = ImageWriter.CreateWriter (module, metadata, stream);
 
