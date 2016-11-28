@@ -83,19 +83,6 @@ namespace Mono.Cecil {
 			return directories;
 		}
 
-		public virtual AssemblyDefinition Resolve (string fullName)
-		{
-			return Resolve (fullName, new ReaderParameters ());
-		}
-
-		public virtual AssemblyDefinition Resolve (string fullName, ReaderParameters parameters)
-		{
-			if (fullName == null)
-				throw new ArgumentNullException ("fullName");
-
-			return Resolve (AssemblyNameReference.Parse (fullName), parameters);
-		}
-
 		public event AssemblyResolveEventHandler ResolveFailure;
 
 		protected BaseAssemblyResolver ()
