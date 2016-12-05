@@ -174,6 +174,15 @@ namespace Mono.Cecil.Rocks {
 			instruction.Operand = null;
 		}
 
+		public static void Optimize(this MethodBody self)
+		{
+			if (self == null)
+				throw new ArgumentNullException("self");
+
+			OptimizeLongs(self);
+			OptimizeMacros(self);
+		}
+
 		static void OptimizeLongs(this MethodBody self)
 		{
 			var method = self.Method;
@@ -193,8 +202,6 @@ namespace Mono.Cecil.Rocks {
 		{
 			if (self == null)
 				throw new ArgumentNullException ("self");
-
-			OptimizeLongs(self);
 
 			var method = self.Method;
 
