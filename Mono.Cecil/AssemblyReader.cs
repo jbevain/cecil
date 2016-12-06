@@ -2558,6 +2558,17 @@ namespace Mono.Cecil {
 			return (int) size;
 		}
 
+		public IEnumerable<CustomAttribute> GetCustomAttributes ()
+		{
+			InitializeTypeDefinitions ();
+
+			var length = image.TableHeap [Table.CustomAttribute].Length;
+			var custom_attributes = new Collection<CustomAttribute> ((int) length);
+			ReadCustomAttributeRange (new Range (1, length), custom_attributes);
+
+			return custom_attributes;
+		}
+
 		public byte [] ReadCustomAttributeBlob (uint signature)
 		{
 			return ReadBlob (signature);

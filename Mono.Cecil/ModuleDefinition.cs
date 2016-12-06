@@ -632,6 +632,14 @@ namespace Mono.Cecil {
 			return Read (this, (_, reader) => reader.GetMemberReferences ());
 		}
 
+		public IEnumerable<CustomAttribute> GetCustomAttributes ()
+		{
+			if (!HasImage)
+				return Empty<CustomAttribute>.Array;
+
+			return Read (this, (_, reader) => reader.GetCustomAttributes ());
+		}
+
 		public TypeReference GetType (string fullName, bool runtimeName)
 		{
 			return runtimeName
