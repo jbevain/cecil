@@ -174,27 +174,26 @@ namespace Mono.Cecil.Rocks {
 			instruction.Operand = null;
 		}
 
-		public static void Optimize(this MethodBody self)
+		public static void Optimize (this MethodBody self)
 		{
 			if (self == null)
-				throw new ArgumentNullException("self");
+				throw new ArgumentNullException ("self");
 
-			OptimizeLongs(self);
-			OptimizeMacros(self);
+			OptimizeLongs (self);
+			OptimizeMacros (self);
 		}
 
-		static void OptimizeLongs(this MethodBody self)
+		static void OptimizeLongs (this MethodBody self)
 		{
-			var method = self.Method;
 			for (var i = 0; i < self.Instructions.Count; i++) {
-				var instruction = self.Instructions[i];
+				var instruction = self.Instructions [i];
 				if (instruction.OpCode.Code != Code.Ldc_I8)
 					continue;
 				var l = (long)instruction.Operand;
 				if (l >= uint.MaxValue)
 					continue;
-				ExpandMacro(instruction, OpCodes.Ldc_I4, (uint)l);
-				self.Instructions.Insert(++i, Instruction.Create(OpCodes.Conv_I8));
+				ExpandMacro (instruction, OpCodes.Ldc_I4, (uint)l);
+				self.Instructions.Insert (++i, Instruction.Create (OpCodes.Conv_I8));
 			}
 		}
 
