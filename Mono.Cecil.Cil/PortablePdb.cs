@@ -204,7 +204,7 @@ namespace Mono.Cecil.Cil {
 
 			directory = new ImageDebugDirectory () {
 				MajorVersion = 256,
-				MinorVersion = 20577,
+				MinorVersion = 20557,
 				Type = 2,
 			};
 
