@@ -3750,7 +3750,9 @@ namespace Mono.Cecil {
 				if (i > 0 && separator != 0)
 					builder.Append (separator);
 
-				builder.Append (reader.ReadUTF8StringBlob (ReadCompressedUInt32 ()));
+				uint part = ReadCompressedUInt32 ();
+				if (part != 0)
+					builder.Append (reader.ReadUTF8StringBlob (part));
 			}
 
 			return builder.ToString ();

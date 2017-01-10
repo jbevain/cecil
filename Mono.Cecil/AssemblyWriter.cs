@@ -2507,10 +2507,13 @@ namespace Mono.Cecil {
 			}
 
 			signature.WriteByte ((byte) separator);
-
-			var parts = name.Split (new [] { separator }, StringSplitOptions.RemoveEmptyEntries);
-			for (int i = 0; i < parts.Length; i++)
-				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (parts [i]));
+			var parts = name.Split (new [] { separator });
+			for (int i = 0; i < parts.Length; i++) {
+				if (parts [i] == String.Empty)
+					signature.WriteCompressedUInt32 (0);
+				else
+					signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (parts [i]));
+			}
 
 			return signature;
 		}

@@ -351,5 +351,21 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (module.HasSymbols);
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
+
+		[Test]
+		public void PortablePdbLineInfo  ()
+		{
+			TestModule ("line.exe", module => {
+				var type = module.GetType ("Tests");
+				var main = type.GetMethod ("Main");
+
+				AssertCode (@"
+	.locals ()
+	.line 4,4:42,43 '/foo/bar.cs'
+	IL_0000: nop
+	.line 5,5:2,3 '/foo/bar.cs'
+	IL_0001: ret", main);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
 	}
 }
