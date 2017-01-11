@@ -678,6 +678,7 @@ namespace Mono.Cecil.PE {
 				WriteRsrc ();
 			if (reloc != null)
 				WriteReloc ();
+			Flush ();
 		}
 
 		void BuildTextMap ()

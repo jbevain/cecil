@@ -255,6 +255,7 @@ namespace Mono.Cecil.Cil {
 			writer.WriteMetadataHeader ();
 			writer.WriteMetadata ();
 
+			writer.Flush ();
 			writer.stream.Dispose ();
 		}
 
