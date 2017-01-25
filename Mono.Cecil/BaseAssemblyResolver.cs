@@ -158,8 +158,13 @@ namespace Mono.Cecil {
 			foreach (var directory in directories) {
 				foreach (var extension in extensions) {
 					string file = Path.Combine (directory, name.Name + extension);
-					if (File.Exists (file))
+					if (!File.Exists (file))
+						continue;
+					try {
 						return GetAssembly (file, parameters);
+					} catch (System.BadImageFormatException) {
+						continue;
+					}
 				}
 			}
 
