@@ -630,16 +630,52 @@ namespace Mono.Cecil.Cil {
 	}
 
 #if !PCL
+	public class DefaultSymbolReaderProvider : ISymbolReaderProvider {
+
+		readonly bool throw_if_no_symbol;
+
+		public DefaultSymbolReaderProvider (bool throwIfNoSymbol = true)
+		{
+			throw_if_no_symbol = throwIfNoSymbol;
+		}
+
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
+		{
+			var pdb_file_name = Mixin.GetPdbFileName (fileName);
+			if (File.Exists (pdb_file_name))
+				return SymbolProvider.GetReaderProvider (SymbolKind.Pdb).GetSymbolReader (module, fileName);
+
+			var mdb_file_name = Mixin.GetMdbFileName (fileName);
+			if (File.Exists (mdb_file_name))
+				return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, fileName);
+
+			if (throw_if_no_symbol)
+				throw new FileNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
+
+			return null;
+		}
+
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		{
+			throw new NotSupportedException ();
+		}
+	}
+#endif
+
+#if !PCL
+	enum SymbolKind {
+		Pdb = 1,
+		Mdb = 2,
+	}
+
 	static class SymbolProvider {
 
-		static readonly string symbol_kind = Type.GetType ("Mono.Runtime") != null ? "Mdb" : "Pdb";
-
-		static SR.AssemblyName GetPlatformSymbolAssemblyName ()
+		static SR.AssemblyName GetSymbolAssemblyName (SymbolKind kind)
 		{
 			var cecil_name = typeof (SymbolProvider).GetAssembly ().GetName ();
 
 			var name = new SR.AssemblyName {
-				Name = "Mono.Cecil." + symbol_kind,
+				Name = typeof (SymbolProvider).Assembly.GetName ().Name + "." + kind,
 				Version = cecil_name.Version,
 			};
 
@@ -648,13 +684,13 @@ namespace Mono.Cecil.Cil {
 			return name;
 		}
 
-		static Type GetPlatformType (string fullname)
+		static Type GetSymbolType (SymbolKind kind, string fullname)
 		{
 			var type = Type.GetType (fullname);
 			if (type != null)
 				return type;
 
-			var assembly_name = GetPlatformSymbolAssemblyName ();
+			var assembly_name = GetSymbolAssemblyName (kind);
 
 			type = Type.GetType (fullname + ", " + assembly_name.FullName);
 			if (type != null)
@@ -673,37 +709,47 @@ namespace Mono.Cecil.Cil {
 
 		static ISymbolReaderProvider reader_provider;
 
-		public static ISymbolReaderProvider GetPlatformReaderProvider ()
+		public static ISymbolReaderProvider GetReaderProvider (SymbolKind kind)
 		{
 			if (reader_provider != null)
 				return reader_provider;
 
-			var type = GetPlatformType (GetProviderTypeName ("ReaderProvider"));
+			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "ReaderProvider"));
 			if (type == null)
 				return null;
 
 			return reader_provider = (ISymbolReaderProvider) Activator.CreateInstance (type);
 		}
 
-		static string GetProviderTypeName (string name)
+		static string GetSymbolTypeName (SymbolKind kind, string name)
 		{
-			return "Mono.Cecil." + symbol_kind + "." + symbol_kind + name;
+			return typeof (SymbolProvider).Assembly.GetName ().Name + "." + kind + "." + kind + name;
 		}
 
 #if !READ_ONLY
 
 		static ISymbolWriterProvider writer_provider;
 
-		public static ISymbolWriterProvider GetPlatformWriterProvider ()
+		public static ISymbolWriterProvider GetWriterProvider (SymbolKind kind)
 		{
 			if (writer_provider != null)
 				return writer_provider;
 
-			var type = GetPlatformType (GetProviderTypeName ("WriterProvider"));
+			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "WriterProvider"));
 			if (type == null)
 				return null;
 
 			return writer_provider = (ISymbolWriterProvider) Activator.CreateInstance (type);
+		}
+
+		public static SymbolKind GetSymbolKind (Type type)
+		{
+			if (type.Name.Contains (SymbolKind.Pdb.ToString ()))
+				return SymbolKind.Pdb;
+			if (type.Name.Contains (SymbolKind.Mdb.ToString ()))
+				return SymbolKind.Mdb;
+
+			throw new ArgumentException ();
 		}
 
 #endif
@@ -725,6 +771,26 @@ namespace Mono.Cecil.Cil {
 #endif
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
+
+#if !PCL
+	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
+
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		{
+			var reader = module.SymbolReader;
+			if (reader == null)
+				throw new InvalidOperationException ();
+
+			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
+			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName);
+		}
+
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		{
+			throw new NotSupportedException ();
+		}
+	}
+#endif
 
 #endif
 }

@@ -93,7 +93,7 @@ namespace Mono.Cecil {
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 #if !PCL && !NET_CORE
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
-				symbol_writer_provider = SymbolProvider.GetPlatformWriterProvider ();
+				symbol_writer_provider = new DefaultSymbolWriterProvider ();
 #endif
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters);
 
