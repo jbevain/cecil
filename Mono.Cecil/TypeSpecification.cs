@@ -65,13 +65,4 @@ namespace Mono.Cecil {
 			return element_type.GetElementType ();
 		}
 	}
-
-	static partial class Mixin {
-
-		public static void CheckType (TypeReference type)
-		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
-		}
-	}
 }

@@ -188,8 +188,7 @@ namespace Mono.Cecil {
 		internal GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
 			: base (string.Empty, string.Empty)
 		{
-			if (module == null)
-				throw new ArgumentNullException ();
+			Mixin.CheckModule (module);
 
 			this.position = position;
 			this.type = type;

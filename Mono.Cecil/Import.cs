@@ -740,7 +740,7 @@ namespace Mono.Cecil {
 		public static void CheckModule (ModuleDefinition module)
 		{
 			if (module == null)
-				throw new ArgumentNullException ("module");
+				throw new ArgumentNullException (Argument.module.ToString ());
 		}
 
 		public static bool TryGetAssemblyNameReference (this ModuleDefinition module, AssemblyNameReference name_reference, out AssemblyNameReference assembly_reference)

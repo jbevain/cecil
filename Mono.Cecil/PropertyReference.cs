@@ -30,8 +30,7 @@ namespace Mono.Cecil {
 		internal PropertyReference (string name, TypeReference propertyType)
 			: base (name)
 		{
-			if (propertyType == null)
-				throw new ArgumentNullException ("propertyType");
+			Mixin.CheckType (propertyType, Mixin.Argument.propertyType);
 
 			property_type = propertyType;
 		}

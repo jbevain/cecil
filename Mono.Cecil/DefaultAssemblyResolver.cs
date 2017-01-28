@@ -26,8 +26,7 @@ namespace Mono.Cecil {
 
 		public override AssemblyDefinition Resolve (AssemblyNameReference name)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
+			Mixin.CheckName (name);
 
 			AssemblyDefinition assembly;
 			if (cache.TryGetValue (name.FullName, out assembly))

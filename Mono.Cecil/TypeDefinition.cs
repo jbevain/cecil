@@ -528,8 +528,7 @@ namespace Mono.Cecil {
 
 		public InterfaceImplementation (TypeReference interfaceType)
 		{
-			if (interfaceType == null)
-				throw new ArgumentNullException ("interfaceType");
+			Mixin.CheckType (interfaceType, Mixin.Argument.interfaceType);
 
 			this.interface_type = interfaceType;
 			this.token = new MetadataToken (TokenType.InterfaceImpl);

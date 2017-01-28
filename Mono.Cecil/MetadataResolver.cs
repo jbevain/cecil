@@ -87,8 +87,7 @@ namespace Mono.Cecil {
 
 		public virtual TypeDefinition Resolve (TypeReference type)
 		{
-			if (type == null)
-				throw new ArgumentNullException ("type");
+			Mixin.CheckType (type);
 
 			type = type.GetElementType ();
 
@@ -159,8 +158,7 @@ namespace Mono.Cecil {
 
 		public virtual FieldDefinition Resolve (FieldReference field)
 		{
-			if (field == null)
-				throw new ArgumentNullException ("field");
+			Mixin.CheckField (field);
 
 			var type = Resolve (field.DeclaringType);
 			if (type == null)
@@ -207,8 +205,7 @@ namespace Mono.Cecil {
 
 		public virtual MethodDefinition Resolve (MethodReference method)
 		{
-			if (method == null)
-				throw new ArgumentNullException ("method");
+			Mixin.CheckMethod (method);
 
 			var type = Resolve (method.DeclaringType);
 			if (type == null)
