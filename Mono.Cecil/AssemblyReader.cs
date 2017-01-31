@@ -656,6 +656,9 @@ namespace Mono.Cecil {
 		{
 			var rva = image.Resources.VirtualAddress;
 			var section = image.GetSectionAtVirtualAddress (rva);
+			if (section == null)
+				return null;
+
 			var position = (rva - section.VirtualAddress) + offset;
 			var buffer = section.Data;
 
