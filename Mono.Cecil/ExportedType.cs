@@ -45,6 +45,14 @@ namespace Mono.Cecil {
 
 				return scope;
 			}
+			set {
+				if (declaring_type != null) {
+					declaring_type.Scope = value;
+					return;
+				}
+
+				scope = value;
+			}
 		}
 
 		public ExportedType DeclaringType {
