@@ -632,14 +632,12 @@ namespace Mono.Cecil.Cil {
 #if !PCL
 	static class SymbolProvider {
 
-		static readonly string symbol_kind = Type.GetType ("Mono.Runtime") != null ? "Mdb" : "Pdb";
-
-		static SR.AssemblyName GetPlatformSymbolAssemblyName ()
+		static SR.AssemblyName GetPlatformSymbolAssemblyName (string symbolKind)
 		{
 			var cecil_name = typeof (SymbolProvider).GetAssembly ().GetName ();
 
 			var name = new SR.AssemblyName {
-				Name = "Mono.Cecil." + symbol_kind,
+				Name = "Mono.Cecil." + symbolKind,
 				Version = cecil_name.Version,
 			};
 
@@ -648,13 +646,16 @@ namespace Mono.Cecil.Cil {
 			return name;
 		}
 
-		static Type GetPlatformType (string fullname)
+		static Type GetPlatformType (string symbolKind, string fullname)
 		{
 			var type = Type.GetType (fullname);
 			if (type != null)
 				return type;
 
-			var assembly_name = GetPlatformSymbolAssemblyName ();
+			if (symbolKind == null)
+				return null;
+
+			var assembly_name = GetPlatformSymbolAssemblyName (symbolKind);
 
 			type = Type.GetType (fullname + ", " + assembly_name.FullName);
 			if (type != null)
@@ -671,39 +672,71 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
-		static ISymbolReaderProvider reader_provider;
-
-		public static ISymbolReaderProvider GetPlatformReaderProvider ()
+		public static ISymbolReaderProvider GetReaderProvider (ModuleDefinition module)
 		{
-			if (reader_provider != null)
-				return reader_provider;
+			string symbol_kind = GetReaderSymbolKind (module);
+			if (symbol_kind == null)
+				return null;
 
-			var type = GetPlatformType (GetProviderTypeName ("ReaderProvider"));
+			var type = GetPlatformType (symbol_kind, GetProviderTypeName (symbol_kind, "ReaderProvider"));
 			if (type == null)
 				return null;
 
-			return reader_provider = (ISymbolReaderProvider) Activator.CreateInstance (type);
+			return (ISymbolReaderProvider) Activator.CreateInstance (type);
 		}
 
-		static string GetProviderTypeName (string name)
+		static string GetReaderSymbolKind (ModuleDefinition module)
 		{
-			return "Mono.Cecil." + symbol_kind + "." + symbol_kind + name;
+			var pdb_name = Mixin.GetPdbFileName (module.FileName);
+			if (File.Exists (pdb_name)) {
+				// TODO: check mvid match
+				return "Pdb";
+			}
+
+			var mdb_name = Mixin.GetMdbFileName (module.FileName);
+			if (File.Exists (mdb_name)) {
+				// TODO: check mvid match
+				return "Mdb";
+			}
+
+			return null;
+		}
+
+		static string GetProviderTypeName (string symbolKind, string name)
+		{
+			return "Mono.Cecil." + symbolKind + "." + symbolKind + name;
 		}
 
 #if !READ_ONLY
 
-		static ISymbolWriterProvider writer_provider;
-
-		public static ISymbolWriterProvider GetPlatformWriterProvider ()
+		public static ISymbolWriterProvider GetWriterProvider (ISymbolReader reader)
 		{
-			if (writer_provider != null)
-				return writer_provider;
+			string symbolKind;
+			var providerType = GetWriterSymbolProviderType (reader, out symbolKind);
 
-			var type = GetPlatformType (GetProviderTypeName ("WriterProvider"));
+			var type = GetPlatformType (symbolKind, providerType);
 			if (type == null)
 				return null;
 
-			return writer_provider = (ISymbolWriterProvider) Activator.CreateInstance (type);
+			return (ISymbolWriterProvider) Activator.CreateInstance (type);
+		}
+
+		static string GetWriterSymbolProviderType (ISymbolReader reader, out string symbolKind)
+		{
+			string readerType = reader != null ? reader.GetType ().Name : Type.GetType ("Mono.Runtime") != null ? "MdbReader" : "PdbReader";
+			switch (readerType) {
+			case "PortablePdbReader":
+				symbolKind = null;
+				return "Mono.Cecil.Cil.PortablePdbWriterProvider";
+			case "PdbReader":
+				symbolKind = "Pdb";
+				return "Mono.Cecil.Pdb.PdbWriterProvider";
+			case "MdbReader":
+				symbolKind = "Mdb";
+				return "Mono.Cecil.Mdb.MdbWriterProvider";
+			default:
+				throw new NotImplementedException (readerType);
+			}
 		}
 
 #endif
