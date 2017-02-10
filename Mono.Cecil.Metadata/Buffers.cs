@@ -34,6 +34,8 @@ namespace Mono.Cecil.Metadata {
 		readonly int [] coded_index_sizes = new int [Mixin.CodedIndexCount];
 		readonly Func<Table, int> counter;
 
+		internal uint [] string_offsets;
+
 		public override bool IsEmpty {
 			get { return false; }
 		}
@@ -81,7 +83,7 @@ namespace Mono.Cecil.Metadata {
 
 		public void WriteString (uint @string)
 		{
-			WriteBySize (@string, large_string);
+			WriteBySize (string_offsets [@string], large_string);
 		}
 
 		public void WriteBlob (uint blob)
@@ -299,7 +301,7 @@ namespace Mono.Cecil.Metadata {
 
 	class StringHeapBuffer : HeapBuffer {
 
-		readonly Dictionary<string, uint> strings = new Dictionary<string, uint> (StringComparer.Ordinal);
+		protected Dictionary<string, uint> strings = new Dictionary<string, uint> (StringComparer.Ordinal);
 
 		public sealed override bool IsEmpty {
 			get { return length <= 1; }
@@ -311,22 +313,78 @@ namespace Mono.Cecil.Metadata {
 			WriteByte (0);
 		}
 
-		public uint GetStringIndex (string @string)
+		public virtual uint GetStringIndex (string @string)
 		{
 			uint index;
 			if (strings.TryGetValue (@string, out index))
 				return index;
 
-			index = (uint) base.position;
-			WriteString (@string);
+			index = (uint) strings.Count + 1;
 			strings.Add (@string, index);
 			return index;
+		}
+
+		public uint [] WriteStrings()
+		{
+			var sorted = new List<KeyValuePair<string, uint>> (strings);
+			sorted.Sort (new SuffixSort ());
+			strings = null;
+
+			// Add 1 for empty string whose index and offset are both 0
+			var string_offsets = new uint [sorted.Count + 1];
+			string_offsets [0] = 0;
+
+			// Find strings that can be folded
+			var previous = string.Empty;
+			foreach (KeyValuePair<string, uint> entry in sorted) {
+				int position = base.position;
+
+				// It is important to use ordinal comparison otherwise we'll use the current culture!
+				if (previous.EndsWith (entry.Key, StringComparison.Ordinal) && !IsLowSurrogateChar (entry.Key[0])) {
+					// Map over the tail of prev string. Watch for null-terminator of prev string.
+					string_offsets [entry.Value] = (uint) (position - (Encoding.UTF8.GetByteCount (entry.Key) + 1));
+				}
+				else {
+					string_offsets [entry.Value] = (uint) position;
+					WriteString (entry.Key);
+				}
+
+				previous = entry.Key;
+			}
+
+			return string_offsets;
+		}
+
+		static bool IsLowSurrogateChar(int c)
+		{
+			return unchecked((uint)(c - 0xDC00)) <= 0xDFFF - 0xDC00;
 		}
 
 		protected virtual void WriteString (string @string)
 		{
 			WriteBytes (Encoding.UTF8.GetBytes (@string));
 			WriteByte (0);
+		}
+
+		// Sorts strings such that a string is followed immediately by all strings
+		// that are a suffix of it.  
+		private class SuffixSort : IComparer<KeyValuePair<string, uint>> {
+			public int Compare(KeyValuePair<string, uint> xPair, KeyValuePair<string, uint> yPair) {
+				var x = xPair.Key;
+				var y = yPair.Key;
+
+				for (int i = x.Length - 1, j = y.Length - 1; i >= 0 & j >= 0; i--, j--) {
+					if (x [i] < y [j]) {
+						return -1;
+					}
+
+					if (x [i] > y [j]) {
+						return +1;
+					}
+				}
+
+				return y.Length.CompareTo (x.Length);
+			}
 		}
 	}
 
@@ -364,6 +422,18 @@ namespace Mono.Cecil.Metadata {
 	}
 
 	sealed class UserStringHeapBuffer : StringHeapBuffer {
+
+		public override uint GetStringIndex (string @string)
+		{
+			uint index;
+			if (strings.TryGetValue (@string, out index))
+				return index;
+
+			index = (uint) base.position;
+			WriteString (@string);
+			strings.Add (@string, index);
+			return index;
+		}
 
 		protected override void WriteString (string @string)
 		{
