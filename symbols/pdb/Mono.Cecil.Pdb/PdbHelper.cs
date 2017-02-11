@@ -22,7 +22,7 @@ namespace Mono.Cecil.Pdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return new PdbReader (Disposable.Owned (File.OpenRead (Mixin.GetPdbFileName (fileName)) as Stream));
+			return new NativePdbReader (Disposable.Owned (File.OpenRead (Mixin.GetPdbFileName (fileName)) as Stream));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
@@ -30,7 +30,7 @@ namespace Mono.Cecil.Pdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			return new PdbReader (Disposable.NotOwned (symbolStream));
+			return new NativePdbReader (Disposable.NotOwned (symbolStream));
 		}
 	}
 
@@ -41,7 +41,7 @@ namespace Mono.Cecil.Pdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return IsPortablePdb (Mixin.GetPdbFileName (fileName))
+			return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
 				? new PortablePdbReaderProvider ().GetSymbolReader (module, fileName)
 				: new NativePdbReaderProvider ().GetSymbolReader (module, fileName);
 		}
@@ -52,28 +52,9 @@ namespace Mono.Cecil.Pdb {
 			Mixin.CheckStream (symbolStream);
 			Mixin.CheckReadSeek (symbolStream);
 
-			return IsPortablePdb (symbolStream)
+			return Mixin.IsPortablePdb (symbolStream)
 				? new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream)
 				: new NativePdbReaderProvider ().GetSymbolReader (module, symbolStream);
-		}
-
-		static bool IsPortablePdb (string fileName)
-		{
-			using (var file = new FileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-				return IsPortablePdb (file);
-		}
-
-		static bool IsPortablePdb (Stream stream)
-		{
-			const uint ppdb_signature = 0x424a5342;
-
-			var position = stream.Position;
-			try {
-				var reader = new BinaryReader (stream);
-				return reader.ReadUInt32 () == ppdb_signature;
-			} finally {
-				stream.Position = position;
-			}
 		}
 	}
 
@@ -86,7 +67,7 @@ namespace Mono.Cecil.Pdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return new PdbWriter (module, CreateWriter (module, Mixin.GetPdbFileName (fileName)));
+			return new NativePdbWriter (module, CreateWriter (module, Mixin.GetPdbFileName (fileName)));
 		}
 
 		static SymWriter CreateWriter (ModuleDefinition module, string pdb)

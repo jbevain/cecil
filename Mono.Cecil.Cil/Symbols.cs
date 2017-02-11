@@ -642,8 +642,11 @@ namespace Mono.Cecil.Cil {
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			var pdb_file_name = Mixin.GetPdbFileName (fileName);
+
 			if (File.Exists (pdb_file_name))
-				return SymbolProvider.GetReaderProvider (SymbolKind.Pdb).GetSymbolReader (module, fileName);
+				return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
+					? new PortablePdbReaderProvider ().GetSymbolReader (module, fileName)
+					: SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, fileName);
 
 			var mdb_file_name = Mixin.GetMdbFileName (fileName);
 			if (File.Exists (mdb_file_name))
@@ -664,8 +667,9 @@ namespace Mono.Cecil.Cil {
 
 #if !PCL
 	enum SymbolKind {
-		Pdb = 1,
-		Mdb = 2,
+		NativePdb,
+		PortablePdb,
+		Mdb,
 	}
 
 	static class SymbolProvider {
@@ -744,8 +748,10 @@ namespace Mono.Cecil.Cil {
 
 		public static SymbolKind GetSymbolKind (Type type)
 		{
-			if (type.Name.Contains (SymbolKind.Pdb.ToString ()))
-				return SymbolKind.Pdb;
+			if (type.Name.Contains (SymbolKind.PortablePdb.ToString ()))
+				return SymbolKind.PortablePdb;
+			if (type.Name.Contains (SymbolKind.NativePdb.ToString ()))
+				return SymbolKind.NativePdb;
 			if (type.Name.Contains (SymbolKind.Mdb.ToString ()))
 				return SymbolKind.Mdb;
 
@@ -810,6 +816,26 @@ namespace Mono.Cecil {
 		{
 			return assemblyFileName + ".mdb";
 		}
+
+		public static bool IsPortablePdb (string fileName)
+		{
+			using (var file = new FileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+				return IsPortablePdb (file);
+		}
+
+		public static bool IsPortablePdb (Stream stream)
+		{
+			const uint ppdb_signature = 0x424a5342;
+
+			var position = stream.Position;
+			try {
+				var reader = new BinaryReader (stream);
+				return reader.ReadUInt32 () == ppdb_signature;
+			} finally {
+				stream.Position = position;
+			}
+		}
+
 	}
 }
 

@@ -20,7 +20,7 @@ using Mono.Cecil.Cil;
 
 namespace Mono.Cecil.Pdb {
 
-	public class PdbReader : ISymbolReader {
+	public class NativePdbReader : ISymbolReader {
 
 		int age;
 		Guid guid;
@@ -29,7 +29,7 @@ namespace Mono.Cecil.Pdb {
 		readonly Dictionary<string, Document> documents = new Dictionary<string, Document> ();
 		readonly Dictionary<uint, PdbFunction> functions = new Dictionary<uint, PdbFunction> ();
 
-		internal PdbReader (Disposable<Stream> file)
+		internal NativePdbReader (Disposable<Stream> file)
 		{
 			this.pdb_file = file;
 		}
