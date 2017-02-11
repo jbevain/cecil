@@ -634,13 +634,21 @@ namespace Mono.Cecil.Cil {
 
 		readonly bool throw_if_no_symbol;
 
-		public DefaultSymbolReaderProvider (bool throwIfNoSymbol = true)
+		public DefaultSymbolReaderProvider ()
+			: this (throwIfNoSymbol: true)
+		{
+		}
+
+		public DefaultSymbolReaderProvider (bool throwIfNoSymbol)
 		{
 			throw_if_no_symbol = throwIfNoSymbol;
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
+			if (module.Image.HasDebugTables ())
+				return null;
+
 			var pdb_file_name = Mixin.GetPdbFileName (fileName);
 
 			if (File.Exists (pdb_file_name))
@@ -676,10 +684,15 @@ namespace Mono.Cecil.Cil {
 
 		static SR.AssemblyName GetSymbolAssemblyName (SymbolKind kind)
 		{
+			if (kind == SymbolKind.PortablePdb)
+				throw new ArgumentException ();
+
+			var suffix = GetSymbolNamespace (kind);
+
 			var cecil_name = typeof (SymbolProvider).GetAssembly ().GetName ();
 
 			var name = new SR.AssemblyName {
-				Name = typeof (SymbolProvider).Assembly.GetName ().Name + "." + kind,
+				Name = cecil_name.Name + "." + suffix,
 				Version = cecil_name.Version,
 			};
 
@@ -711,39 +724,48 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
-		static ISymbolReaderProvider reader_provider;
-
 		public static ISymbolReaderProvider GetReaderProvider (SymbolKind kind)
 		{
-			if (reader_provider != null)
-				return reader_provider;
+			if (kind == SymbolKind.PortablePdb)
+				return new PortablePdbReaderProvider ();
 
 			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "ReaderProvider"));
 			if (type == null)
 				return null;
 
-			return reader_provider = (ISymbolReaderProvider) Activator.CreateInstance (type);
+			return (ISymbolReaderProvider) Activator.CreateInstance (type);
 		}
 
 		static string GetSymbolTypeName (SymbolKind kind, string name)
 		{
-			return typeof (SymbolProvider).Assembly.GetName ().Name + "." + kind + "." + kind + name;
+			var ns = GetSymbolNamespace (kind);
+			return typeof (SymbolProvider).Assembly.GetName ().Name + "." + ns + "." + kind + name;
+		}
+
+		static string GetSymbolNamespace (SymbolKind kind)
+		{
+			if (kind == SymbolKind.PortablePdb)
+				return "Cil";
+			if (kind == SymbolKind.NativePdb)
+				return "Pdb";
+			if (kind == SymbolKind.Mdb)
+				return "Mdb";
+
+			throw new ArgumentException ();
 		}
 
 #if !READ_ONLY
 
-		static ISymbolWriterProvider writer_provider;
-
 		public static ISymbolWriterProvider GetWriterProvider (SymbolKind kind)
 		{
-			if (writer_provider != null)
-				return writer_provider;
+			if (kind == SymbolKind.PortablePdb)
+				return new PortablePdbWriterProvider ();
 
 			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "WriterProvider"));
 			if (type == null)
 				return null;
 
-			return writer_provider = (ISymbolWriterProvider) Activator.CreateInstance (type);
+			return (ISymbolWriterProvider) Activator.CreateInstance (type);
 		}
 
 		public static SymbolKind GetSymbolKind (Type type)
@@ -786,6 +808,9 @@ namespace Mono.Cecil.Cil {
 			var reader = module.SymbolReader;
 			if (reader == null)
 				throw new InvalidOperationException ();
+
+			if (module.Image != null && module.Image.HasDebugTables ())
+				return null;
 
 			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
 			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName);
