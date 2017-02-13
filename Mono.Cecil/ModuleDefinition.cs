@@ -1061,7 +1061,6 @@ namespace Mono.Cecil {
 			ReadSymbols (provider.GetSymbolReader (this, file_name));
 		}
 #endif
-
 		public void ReadSymbols (ISymbolReader reader)
 		{
 			if (reader == null)

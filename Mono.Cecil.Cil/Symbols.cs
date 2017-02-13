@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Reflection;
 using SR = System.Reflection;
 
 using Mono.Collections.Generic;
@@ -739,7 +740,11 @@ namespace Mono.Cecil.Cil {
 		static string GetSymbolTypeName (SymbolKind kind, string name)
 		{
 			var ns = GetSymbolNamespace (kind);
+#if !NET_CORE
 			return typeof (SymbolProvider).Assembly.GetName ().Name + "." + ns + "." + kind + name;
+#else
+			return typeof (SymbolProvider).GetTypeInfo().Assembly.GetName ().Name + "." + ns + "." + kind + name;
+#endif
 		}
 
 		static string GetSymbolNamespace (SymbolKind kind)

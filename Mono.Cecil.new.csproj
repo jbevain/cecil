@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Mono.Cecil</AssemblyName>
+    <Version>0.10.0.0-beta1</Version>
+    <Copyright>Copyright © 2008 - 2015 Jb Evain</Copyright>
+    <TargetFrameworks>netstandard1.3;net45</TargetFrameworks>
+    <OutputType>library</OutputType>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.3'">$(DefineConstants);NET_CORE</DefineConstants>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Mono\*.cs" />
+    <Compile Include="Mono.Cecil\*.cs" />
+    <Compile Include="Mono.Cecil.Cil\*.cs" />
+    <Compile Include="Mono.Cecil.Metadata\*.cs" />
+    <Compile Include="Mono.Cecil.PE\*.cs" />
+    <Compile Include="Mono.Collections.Generic\*.cs" />
+    <Compile Include="Mono.Security.Cryptography\*.cs" />
+    <Compile Include="System.Security.Cryptography\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>

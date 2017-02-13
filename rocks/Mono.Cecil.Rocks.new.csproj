@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
+    <OutputType>library</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.3'">
+    <Compile Include="..\ProjectInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Mono.Cecil.Rocks\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <Compile Remove="Mono.Cecil.Rocks\SecurityDeclarationRocks.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil.new.csproj" />
+  </ItemGroup>
+
+</Project>
