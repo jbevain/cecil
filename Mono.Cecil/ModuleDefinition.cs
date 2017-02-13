@@ -88,10 +88,12 @@ namespace Mono.Cecil {
 			set { symbol_reader_provider = value; }
 		}
 
+#if !PCL
 		public bool ReadSymbols {
 			get { return read_symbols; }
 			set { read_symbols = value; }
 		}
+#endif
 
 		public bool ReadWrite {
 			get { return read_write; }
@@ -218,10 +220,13 @@ namespace Mono.Cecil {
 			set { symbol_writer_provider = value; }
 		}
 
+#if !PCL
 		public bool WriteSymbols {
 			get { return write_symbols; }
 			set { write_symbols = value; }
 		}
+#endif
+
 #if !PCL && !NET_CORE
 		public SR.StrongNameKeyPair StrongNameKeyPair {
 			get { return key_pair; }
@@ -1060,10 +1065,7 @@ namespace Mono.Cecil {
 			if (string.IsNullOrEmpty (file_name))
 				throw new InvalidOperationException ();
 
-			var provider = SymbolProvider.GetPlatformReaderProvider ();
-			if (provider == null)
-				throw new InvalidOperationException ();
-
+			var provider = new DefaultSymbolReaderProvider (throwIfNoSymbol: true);
 			ReadSymbols (provider.GetSymbolReader (this, file_name));
 		}
 #endif

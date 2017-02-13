@@ -630,16 +630,69 @@ namespace Mono.Cecil.Cil {
 	}
 
 #if !PCL
+	public class DefaultSymbolReaderProvider : ISymbolReaderProvider {
+
+		readonly bool throw_if_no_symbol;
+
+		public DefaultSymbolReaderProvider ()
+			: this (throwIfNoSymbol: true)
+		{
+		}
+
+		public DefaultSymbolReaderProvider (bool throwIfNoSymbol)
+		{
+			throw_if_no_symbol = throwIfNoSymbol;
+		}
+
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
+		{
+			if (module.Image.HasDebugTables ())
+				return null;
+
+			var pdb_file_name = Mixin.GetPdbFileName (fileName);
+
+			if (File.Exists (pdb_file_name))
+				return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
+					? new PortablePdbReaderProvider ().GetSymbolReader (module, fileName)
+					: SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, fileName);
+
+			var mdb_file_name = Mixin.GetMdbFileName (fileName);
+			if (File.Exists (mdb_file_name))
+				return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, fileName);
+
+			if (throw_if_no_symbol)
+				throw new FileNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
+
+			return null;
+		}
+
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		{
+			throw new NotSupportedException ();
+		}
+	}
+#endif
+
+#if !PCL
+	enum SymbolKind {
+		NativePdb,
+		PortablePdb,
+		Mdb,
+	}
+
 	static class SymbolProvider {
 
-		static readonly string symbol_kind = Type.GetType ("Mono.Runtime") != null ? "Mdb" : "Pdb";
-
-		static SR.AssemblyName GetPlatformSymbolAssemblyName ()
+		static SR.AssemblyName GetSymbolAssemblyName (SymbolKind kind)
 		{
+			if (kind == SymbolKind.PortablePdb)
+				throw new ArgumentException ();
+
+			var suffix = GetSymbolNamespace (kind);
+
 			var cecil_name = typeof (SymbolProvider).GetAssembly ().GetName ();
 
 			var name = new SR.AssemblyName {
-				Name = "Mono.Cecil." + symbol_kind,
+				Name = cecil_name.Name + "." + suffix,
 				Version = cecil_name.Version,
 			};
 
@@ -648,13 +701,13 @@ namespace Mono.Cecil.Cil {
 			return name;
 		}
 
-		static Type GetPlatformType (string fullname)
+		static Type GetSymbolType (SymbolKind kind, string fullname)
 		{
 			var type = Type.GetType (fullname);
 			if (type != null)
 				return type;
 
-			var assembly_name = GetPlatformSymbolAssemblyName ();
+			var assembly_name = GetSymbolAssemblyName (kind);
 
 			type = Type.GetType (fullname + ", " + assembly_name.FullName);
 			if (type != null)
@@ -671,39 +724,60 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
-		static ISymbolReaderProvider reader_provider;
-
-		public static ISymbolReaderProvider GetPlatformReaderProvider ()
+		public static ISymbolReaderProvider GetReaderProvider (SymbolKind kind)
 		{
-			if (reader_provider != null)
-				return reader_provider;
+			if (kind == SymbolKind.PortablePdb)
+				return new PortablePdbReaderProvider ();
 
-			var type = GetPlatformType (GetProviderTypeName ("ReaderProvider"));
+			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "ReaderProvider"));
 			if (type == null)
 				return null;
 
-			return reader_provider = (ISymbolReaderProvider) Activator.CreateInstance (type);
+			return (ISymbolReaderProvider) Activator.CreateInstance (type);
 		}
 
-		static string GetProviderTypeName (string name)
+		static string GetSymbolTypeName (SymbolKind kind, string name)
 		{
-			return "Mono.Cecil." + symbol_kind + "." + symbol_kind + name;
+			var ns = GetSymbolNamespace (kind);
+			return typeof (SymbolProvider).Assembly.GetName ().Name + "." + ns + "." + kind + name;
+		}
+
+		static string GetSymbolNamespace (SymbolKind kind)
+		{
+			if (kind == SymbolKind.PortablePdb)
+				return "Cil";
+			if (kind == SymbolKind.NativePdb)
+				return "Pdb";
+			if (kind == SymbolKind.Mdb)
+				return "Mdb";
+
+			throw new ArgumentException ();
 		}
 
 #if !READ_ONLY
 
-		static ISymbolWriterProvider writer_provider;
-
-		public static ISymbolWriterProvider GetPlatformWriterProvider ()
+		public static ISymbolWriterProvider GetWriterProvider (SymbolKind kind)
 		{
-			if (writer_provider != null)
-				return writer_provider;
+			if (kind == SymbolKind.PortablePdb)
+				return new PortablePdbWriterProvider ();
 
-			var type = GetPlatformType (GetProviderTypeName ("WriterProvider"));
+			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "WriterProvider"));
 			if (type == null)
 				return null;
 
-			return writer_provider = (ISymbolWriterProvider) Activator.CreateInstance (type);
+			return (ISymbolWriterProvider) Activator.CreateInstance (type);
+		}
+
+		public static SymbolKind GetSymbolKind (Type type)
+		{
+			if (type.Name.Contains (SymbolKind.PortablePdb.ToString ()))
+				return SymbolKind.PortablePdb;
+			if (type.Name.Contains (SymbolKind.NativePdb.ToString ()))
+				return SymbolKind.NativePdb;
+			if (type.Name.Contains (SymbolKind.Mdb.ToString ()))
+				return SymbolKind.Mdb;
+
+			throw new ArgumentException ();
 		}
 
 #endif
@@ -726,6 +800,29 @@ namespace Mono.Cecil.Cil {
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
 
+#if !PCL
+	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
+
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+		{
+			var reader = module.SymbolReader;
+			if (reader == null)
+				throw new InvalidOperationException ();
+
+			if (module.Image != null && module.Image.HasDebugTables ())
+				return null;
+
+			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
+			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName);
+		}
+
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		{
+			throw new NotSupportedException ();
+		}
+	}
+#endif
+
 #endif
 }
 
@@ -744,6 +841,26 @@ namespace Mono.Cecil {
 		{
 			return assemblyFileName + ".mdb";
 		}
+
+		public static bool IsPortablePdb (string fileName)
+		{
+			using (var file = new FileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+				return IsPortablePdb (file);
+		}
+
+		public static bool IsPortablePdb (Stream stream)
+		{
+			const uint ppdb_signature = 0x424a5342;
+
+			var position = stream.Position;
+			try {
+				var reader = new BinaryReader (stream);
+				return reader.ReadUInt32 () == ppdb_signature;
+			} finally {
+				stream.Position = position;
+			}
+		}
+
 	}
 }
 
