@@ -356,10 +356,7 @@ namespace Mono.Cecil.Metadata {
 
 		static List<KeyValuePair<string, uint>> SortStrings (Dictionary<string, uint> strings)
 		{
-			var sorted = new List<KeyValuePair<string, uint>> (strings.Count);
-			foreach (var pair in strings)
-				sorted.Add (pair);
-
+			var sorted = new List<KeyValuePair<string, uint>> (strings);
 			sorted.Sort (new SuffixSort ());
 			return sorted;
 		}
