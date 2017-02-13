@@ -324,7 +324,7 @@ namespace Mono.Cecil.Metadata {
 			return index;
 		}
 
-		public uint [] WriteStrings()
+		public uint [] WriteStrings ()
 		{
 			var sorted = new List<KeyValuePair<string, uint>> (strings);
 			sorted.Sort (new SuffixSort ());
@@ -336,17 +336,17 @@ namespace Mono.Cecil.Metadata {
 
 			// Find strings that can be folded
 			var previous = string.Empty;
-			foreach (KeyValuePair<string, uint> entry in sorted) {
-				int position = base.position;
+			foreach (var entry in sorted) {
+				var @string = entry.Key;
+				var index = entry.Value;
+				var position = base.position;
 
-				// It is important to use ordinal comparison otherwise we'll use the current culture!
-				if (previous.EndsWith (entry.Key, StringComparison.Ordinal) && !IsLowSurrogateChar (entry.Key[0])) {
+				if (previous.EndsWith (@string, StringComparison.Ordinal) && !IsLowSurrogateChar (entry.Key [0])) {
 					// Map over the tail of prev string. Watch for null-terminator of prev string.
-					string_offsets [entry.Value] = (uint) (position - (Encoding.UTF8.GetByteCount (entry.Key) + 1));
-				}
-				else {
-					string_offsets [entry.Value] = (uint) position;
-					WriteString (entry.Key);
+					string_offsets [index] = (uint) (position - (Encoding.UTF8.GetByteCount (entry.Key) + 1));
+				} else {
+					string_offsets [index] = (uint) position;
+					WriteString (@string);
 				}
 
 				previous = entry.Key;
@@ -355,7 +355,7 @@ namespace Mono.Cecil.Metadata {
 			return string_offsets;
 		}
 
-		static bool IsLowSurrogateChar(int c)
+		static bool IsLowSurrogateChar (int c)
 		{
 			return unchecked((uint)(c - 0xDC00)) <= 0xDFFF - 0xDC00;
 		}
@@ -369,7 +369,9 @@ namespace Mono.Cecil.Metadata {
 		// Sorts strings such that a string is followed immediately by all strings
 		// that are a suffix of it.  
 		private class SuffixSort : IComparer<KeyValuePair<string, uint>> {
-			public int Compare(KeyValuePair<string, uint> xPair, KeyValuePair<string, uint> yPair) {
+
+			public int Compare(KeyValuePair<string, uint> xPair, KeyValuePair<string, uint> yPair)
+			{
 				var x = xPair.Key;
 				var y = yPair.Key;
 
