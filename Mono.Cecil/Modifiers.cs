@@ -56,7 +56,9 @@ namespace Mono.Cecil {
 		public OptionalModifierType (TypeReference modifierType, TypeReference type)
 			: base (type)
 		{
-			Mixin.CheckModifier (modifierType, type);
+			if (modifierType == null)
+				throw new ArgumentNullException (Mixin.Argument.modifierType.ToString ());
+			Mixin.CheckType (type);
 			this.modifier_type = modifierType;
 			this.etype = MD.ElementType.CModOpt;
 		}
@@ -99,21 +101,12 @@ namespace Mono.Cecil {
 		public RequiredModifierType (TypeReference modifierType, TypeReference type)
 			: base (type)
 		{
-			Mixin.CheckModifier (modifierType, type);
+			if (modifierType == null)
+				throw new ArgumentNullException (Mixin.Argument.modifierType.ToString ());
+			Mixin.CheckType (type);
 			this.modifier_type = modifierType;
 			this.etype = MD.ElementType.CModReqD;
 		}
 
-	}
-
-	static partial class Mixin {
-
-		public static void CheckModifier (TypeReference modifierType, TypeReference type)
-		{
-			if (modifierType == null)
-				throw new ArgumentNullException ("modifierType");
-			if (type == null)
-				throw new ArgumentNullException ("type");
-		}
 	}
 }

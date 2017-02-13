@@ -238,8 +238,7 @@ namespace Mono.Cecil {
 
 		public AssemblyNameReference (string name, Version version)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
+			Mixin.CheckName (name);
 
 			this.name = name;
 			this.version = Mixin.CheckVersion (version);

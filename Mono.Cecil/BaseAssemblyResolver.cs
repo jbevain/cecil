@@ -105,10 +105,8 @@ namespace Mono.Cecil {
 
 		public virtual AssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters)
 		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
-			if (parameters == null)
-				parameters = new ReaderParameters ();
+			Mixin.CheckName (name);
+			Mixin.CheckParameters (parameters);
 
 			var assembly = SearchDirectory (name, directories, parameters);
 			if (assembly != null)

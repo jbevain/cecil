@@ -37,8 +37,7 @@ namespace Mono.Cecil {
 		public FieldReference (string name, TypeReference fieldType)
 			: base (name)
 		{
-			if (fieldType == null)
-				throw new ArgumentNullException ("fieldType");
+			Mixin.CheckType (fieldType, Mixin.Argument.fieldType);
 
 			this.field_type = fieldType;
 			this.token = new MetadataToken (TokenType.MemberRef);
@@ -47,8 +46,7 @@ namespace Mono.Cecil {
 		public FieldReference (string name, TypeReference fieldType, TypeReference declaringType)
 			: this (name, fieldType)
 		{
-			if (declaringType == null)
-				throw new ArgumentNullException("declaringType");
+			Mixin.CheckType (declaringType, Mixin.Argument.declaringType);
 
 			this.DeclaringType = declaringType;
 		}

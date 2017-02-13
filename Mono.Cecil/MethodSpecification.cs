@@ -70,8 +70,7 @@ namespace Mono.Cecil {
 
 		internal MethodSpecification (MethodReference method)
 		{
-			if (method == null)
-				throw new ArgumentNullException ("method");
+			Mixin.CheckMethod (method);
 
 			this.method = method;
 			this.token = new MetadataToken (TokenType.MethodSpec);

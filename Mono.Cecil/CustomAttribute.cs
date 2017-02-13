@@ -200,15 +200,4 @@ namespace Mono.Cecil {
 			});
 		}
 	}
-
-	static partial class Mixin {
-
-		public static void CheckName (string name)
-		{
-			if (name == null)
-				throw new ArgumentNullException ("name");
-			if (name.Length == 0)
-				throw new ArgumentException ("Empty name");
-		}
-	}
 }
