@@ -248,6 +248,11 @@ namespace Mono.Cecil.Cil {
 			if (IsEmbedded)
 				return;
 
+			WritePdbFile ();
+		}
+
+		void WritePdbFile ()
+		{
 			WritePdbHeap ();
 
 			WriteTableHeap ();

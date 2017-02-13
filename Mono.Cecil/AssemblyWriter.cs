@@ -1008,7 +1008,6 @@ namespace Mono.Cecil {
 			BuildModule ();
 
 			table_heap.string_offsets = string_heap.WriteStrings ();
-
 			table_heap.WriteTableHeap ();
 		}
 
