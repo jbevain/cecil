@@ -326,8 +326,7 @@ namespace Mono.Cecil.Metadata {
 
 		public uint [] WriteStrings ()
 		{
-			var sorted = new List<KeyValuePair<string, uint>> (strings);
-			sorted.Sort (new SuffixSort ());
+			var sorted = SortStrings (strings);
 			strings = null;
 
 			// Add 1 for empty string whose index and offset are both 0
@@ -353,6 +352,16 @@ namespace Mono.Cecil.Metadata {
 			}
 
 			return string_offsets;
+		}
+
+		static List<KeyValuePair<string, uint>> SortStrings (Dictionary<string, uint> strings)
+		{
+			var sorted = new List<KeyValuePair<string, uint>> (strings.Count);
+			foreach (var pair in strings)
+				sorted.Add (pair);
+
+			sorted.Sort (new SuffixSort ());
+			return sorted;
 		}
 
 		static bool IsLowSurrogateChar (int c)
