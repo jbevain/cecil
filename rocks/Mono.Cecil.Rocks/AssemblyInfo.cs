@@ -11,6 +11,8 @@
 using System;
 using System.Reflection;
 
+#if !NET_CORE
 [assembly: AssemblyTitle ("Mono.Cecil.Rocks")]
+#endif
 
 [assembly: CLSCompliant (false)]
