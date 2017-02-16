@@ -10,6 +10,8 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+#if !NET_CORE
+
 [assembly: AssemblyProduct ("Mono.Cecil")]
 [assembly: AssemblyCopyright ("Copyright © 2008 - 2015 Jb Evain")]
 
@@ -20,3 +22,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion ("0.10.0.0")]
 [assembly: AssemblyFileVersion ("0.10.0.0")]
 [assembly: AssemblyInformationalVersion ("0.10.0.0-beta2")]
+
+#endif
