@@ -53,8 +53,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System" />
   </ItemGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('netstandard')) ">
-  </PropertyGroup>
   <!-- The following keeps Visual Studio happy; let's keep Visual Studio happy -->
   <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug' ">
   </PropertyGroup>
