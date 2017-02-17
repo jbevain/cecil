@@ -4,5 +4,6 @@
     <DefineConstants>$(DefineConstants);NET_4_0;NET_CORE;</DefineConstants>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
 </Project>
