@@ -10,7 +10,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyProduct ("Mono.Cecil")]
+[assembly: AssemblyProduct (Consts.AssemblyName)]
 [assembly: AssemblyCopyright ("Copyright © 2008 - 2015 Jb Evain")]
 
 #if !PCL

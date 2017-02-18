@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle ("Mono.Cecil")]
+[assembly: AssemblyTitle (Consts.AssemblyName)]
 
 #if !PCL && !NET_CORE
 [assembly: Guid ("fd225bb4-fa53-44b2-a6db-85f5e48dcb54")]
