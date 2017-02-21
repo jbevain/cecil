@@ -33,7 +33,7 @@ namespace Mono.Cecil.PE {
 		public Section MetadataSection;
 
 		public uint EntryPointToken;
-		public uint TimeStamp;
+		public uint Timestamp;
 		public ModuleAttributes Attributes;
 
 		public DataDirectory Debug;
