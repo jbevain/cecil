@@ -70,10 +70,11 @@ namespace Mono.Cecil.PE {
 			ushort sections = ReadUInt16 ();
 
 			// TimeDateStamp		4
+			image.TimeStamp = ReadUInt32 ();
 			// PointerToSymbolTable	4
 			// NumberOfSymbols		4
 			// OptionalHeaderSize	2
-			Advance (14);
+			Advance (10);
 
 			// Characteristics		2
 			ushort characteristics = ReadUInt16 ();

@@ -260,6 +260,7 @@ namespace Mono.Cecil {
 		ModuleAttributes attributes;
 		ModuleCharacteristics characteristics;
 		Guid mvid;
+		internal uint timestamp;
 
 		internal AssemblyDefinition assembly;
 		MethodDefinition entry_point;
@@ -568,6 +569,7 @@ namespace Mono.Cecil {
 			this.attributes = image.Attributes;
 			this.characteristics = image.Characteristics;
 			this.file_name = image.FileName;
+			this.timestamp = image.TimeStamp;
 
 			this.reader = new MetadataReader (this);
 		}

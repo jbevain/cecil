@@ -866,7 +866,7 @@ namespace Mono.Cecil {
 			this.module = module;
 			this.text_map = CreateTextMap ();
 			this.fq_name = fq_name;
-			this.time_stamp = (uint) DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1)).TotalSeconds;
+			this.time_stamp = module.timestamp;
 			this.symbol_writer_provider = symbol_writer_provider;
 
 			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ()) {
