@@ -14,7 +14,7 @@ namespace Mono.Cecil.Metadata {
 
 		public int IndexSize;
 
-		internal byte [] data;
+		readonly internal byte [] data;
 
 		protected Heap (byte [] data)
 		{
