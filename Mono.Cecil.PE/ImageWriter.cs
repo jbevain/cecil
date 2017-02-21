@@ -194,7 +194,7 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (0x00004550);		// Magic
 			WriteUInt16 (GetMachine ());	// Machine
 			WriteUInt16 (sections);			// NumberOfSections
-			WriteUInt32 (metadata.time_stamp);
+			WriteUInt32 (metadata.timestamp);
 			WriteUInt32 (0);	// PointerToSymbolTable
 			WriteUInt32 (0);	// NumberOfSymbols
 			WriteUInt16 (SizeOfOptionalHeader ());	// SizeOfOptionalHeader
@@ -589,7 +589,7 @@ namespace Mono.Cecil.PE {
 		void WriteDebugDirectory ()
 		{
 			WriteInt32 (debug_directory.Characteristics);
-			WriteUInt32 (metadata.time_stamp);
+			WriteUInt32 (metadata.timestamp);
 			WriteInt16 (debug_directory.MajorVersion);
 			WriteInt16 (debug_directory.MinorVersion);
 			WriteInt32 (debug_directory.Type);

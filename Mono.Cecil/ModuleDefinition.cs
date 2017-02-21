@@ -122,6 +122,7 @@ namespace Mono.Cecil {
 
 		ModuleKind kind;
 		TargetRuntime runtime;
+		uint? timestamp;
 		TargetArchitecture architecture;
 		IAssemblyResolver assembly_resolver;
 		IMetadataResolver metadata_resolver;
@@ -140,6 +141,11 @@ namespace Mono.Cecil {
 		public TargetRuntime Runtime {
 			get { return runtime; }
 			set { runtime = value; }
+		}
+
+		public uint? Timestamp {
+			get { return timestamp; }
+			set { timestamp = value; }
 		}
 
 		public TargetArchitecture Architecture {
@@ -204,12 +210,21 @@ namespace Mono.Cecil {
 
 	public sealed class WriterParameters {
 
+		uint? timestamp;
 		Stream symbol_stream;
 		ISymbolWriterProvider symbol_writer_provider;
+#if !PCL
 		bool write_symbols;
+#endif
 #if !PCL && !NET_CORE
 		SR.StrongNameKeyPair key_pair;
 #endif
+
+		public uint? Timestamp {
+			get { return timestamp; }
+			set { timestamp = value; }
+		}
+
 		public Stream SymbolStream {
 			get { return symbol_stream; }
 			set { symbol_stream = value; }
@@ -569,7 +584,7 @@ namespace Mono.Cecil {
 			this.attributes = image.Attributes;
 			this.characteristics = image.Characteristics;
 			this.file_name = image.FileName;
-			this.timestamp = image.TimeStamp;
+			this.timestamp = image.Timestamp;
 
 			this.reader = new MetadataReader (this);
 		}
@@ -1009,6 +1024,7 @@ namespace Mono.Cecil {
 			var module = new ModuleDefinition {
 				Name = name,
 				kind = parameters.Kind,
+				timestamp = parameters.Timestamp ?? Mixin.GetTimestamp (),
 				Runtime = parameters.Runtime,
 				architecture = parameters.Architecture,
 				mvid = Guid.NewGuid (),
@@ -1280,6 +1296,11 @@ namespace Mono.Cecil {
 		{
 			if (parameters == null)
 				throw new ArgumentNullException (Argument.parameters.ToString ());
+		}
+
+		public static uint GetTimestamp ()
+		{
+			return (uint) DateTime.UtcNow.Subtract (new DateTime (1970, 1, 1)).TotalSeconds;
 		}
 
 		public static bool HasImage (this ModuleDefinition self)

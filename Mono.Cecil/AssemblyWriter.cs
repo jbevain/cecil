@@ -104,7 +104,9 @@ namespace Mono.Cecil {
 			}
 #endif
 
-			var metadata = new MetadataBuilder (module, fq_name, symbol_writer_provider, symbol_writer);
+			var timestamp = parameters.Timestamp ?? module.timestamp;
+
+			var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider, symbol_writer);
 
 			BuildMetadata (module, metadata);
 
@@ -796,7 +798,7 @@ namespace Mono.Cecil {
 		readonly internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
 		readonly internal string fq_name;
-		readonly internal uint time_stamp;
+		readonly internal uint timestamp;
 
 		readonly Dictionary<TypeRefRow, MetadataToken> type_ref_map;
 		readonly Dictionary<uint, MetadataToken> type_spec_map;
@@ -861,12 +863,12 @@ namespace Mono.Cecil {
 
 		readonly internal bool write_symbols;
 
-		public MetadataBuilder (ModuleDefinition module, string fq_name, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
+		public MetadataBuilder (ModuleDefinition module, string fq_name, uint timestamp, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
 		{
 			this.module = module;
 			this.text_map = CreateTextMap ();
 			this.fq_name = fq_name;
-			this.time_stamp = module.timestamp;
+			this.timestamp = timestamp;
 			this.symbol_writer_provider = symbol_writer_provider;
 
 			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ()) {
