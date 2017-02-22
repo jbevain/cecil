@@ -297,10 +297,7 @@ namespace Mono.Cecil.Cil {
 
 		void WriteTableHeap ()
 		{
-			if (module_metadata.string_heap != pdb_metadata.string_heap) {
-				pdb_metadata.table_heap.string_offsets = pdb_metadata.string_heap.WriteStrings ();
-			}
-
+			pdb_metadata.table_heap.string_offsets = pdb_metadata.string_heap.WriteStrings ();
 			pdb_metadata.table_heap.WriteTableHeap ();
 		}
 	}
