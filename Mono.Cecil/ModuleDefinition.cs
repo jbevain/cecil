@@ -1069,7 +1069,7 @@ namespace Mono.Cecil {
 
 #endif
 
-#if !PCL && !NET_CORE
+#if !PCL
 		public void ReadSymbols ()
 		{
 			if (string.IsNullOrEmpty (file_name))
