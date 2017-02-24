@@ -26,10 +26,10 @@ namespace Mono.Cecil {
 	}
 
 	public enum TargetArchitecture {
-		I386,
-		AMD64,
-		IA64,
-		ARMv7,
+		I386 = 0x014c,
+		AMD64 = 0x8664,
+		IA64 = 0x0200,
+		ARMv7 = 0x01c4,
 	}
 
 	[Flags]
