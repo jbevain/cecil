@@ -845,8 +845,6 @@ namespace Mono.Cecil {
 		readonly TypeSpecTable typespec_table;
 		readonly MethodSpecTable method_spec_table;
 
-		readonly bool portable_pdb;
-
 		internal MetadataBuilder metadata_builder;
 
 		readonly DocumentTable document_table;
@@ -861,8 +859,6 @@ namespace Mono.Cecil {
 		readonly Dictionary<ImportScopeRow, MetadataToken> import_scope_map;
 		readonly Dictionary<string, MetadataToken> document_map;
 
-		readonly internal bool write_symbols;
-
 		public MetadataBuilder (ModuleDefinition module, string fq_name, uint timestamp, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
 		{
 			this.module = module;
@@ -876,9 +872,9 @@ namespace Mono.Cecil {
 			}
 
 			this.symbol_writer = symbol_writer;
-			this.write_symbols = symbol_writer != null;
 
 			var pdb_writer = symbol_writer as PortablePdbWriter;
+			var portable_pdb = false;
 			if (pdb_writer != null) {
 				portable_pdb = true;
 				pdb_writer.SetModuleMetadata (this);
@@ -939,7 +935,6 @@ namespace Mono.Cecil {
 			this.module = module;
 			this.text_map = new TextMap ();
 			this.symbol_writer_provider = writer_provider;
-			this.portable_pdb = true;
 
 			this.string_heap = new StringHeapBuffer ();
 			this.guid_heap = new GuidHeapBuffer ();

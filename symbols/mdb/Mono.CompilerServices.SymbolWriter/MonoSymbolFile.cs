@@ -424,13 +424,6 @@ namespace Mono.CompilerServices.SymbolWriter
 			get { return ot; }
 		}
 
-		internal int LineNumberCount = 0;
-		internal int LocalCount = 0;
-		internal int StringSize = 0;
-
-		internal int LineNumberSize = 0;
-		internal int ExtendedLineNumberSize = 0;
-
 		public SourceFileEntry GetSourceFile (int index)
 		{
 			if ((index < 1) || (index > ot.SourceCount))
