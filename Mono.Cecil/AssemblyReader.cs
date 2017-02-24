@@ -24,12 +24,10 @@ namespace Mono.Cecil {
 
 	abstract class ModuleReader {
 
-		readonly protected Image image;
 		readonly protected ModuleDefinition module;
 
 		protected ModuleReader (Image image, ReadingMode mode)
 		{
-			this.image = image;
 			this.module = new ModuleDefinition (image);
 			this.module.ReadingMode = mode;
 		}
