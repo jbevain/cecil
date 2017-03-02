@@ -27,38 +27,35 @@ namespace Mono.Cecil.Cil {
 		readonly RVA code_base;
 		internal readonly MetadataBuilder metadata;
 		readonly Dictionary<uint, MetadataToken> standalone_signatures;
+		readonly Dictionary<byte [], RVA> small_method_bodies;
 
-		RVA current;
 		MethodBody body;
 
 		public CodeWriter (MetadataBuilder metadata)
 			: base (0)
 		{
 			this.code_base = metadata.text_map.GetNextRVA (TextSegment.CLIHeader);
-			this.current = code_base;
 			this.metadata = metadata;
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
+			this.small_method_bodies = new Dictionary<byte [], RVA> (ByteSequenceComparer.Instance);
 		}
 
 		public RVA WriteMethodBody (MethodDefinition method)
 		{
-			var rva = BeginMethod ();
+			RVA rva;
 
 			if (IsUnresolved (method)) {
 				if (method.rva == 0)
 					return 0;
 
-				WriteUnresolvedMethodBody (method);
+				rva = WriteUnresolvedMethodBody (method);
 			} else {
 				if (IsEmptyMethodBody (method.Body))
 					return 0;
 
-				WriteResolvedMethodBody (method);
+				rva = WriteResolvedMethodBody (method);
 			}
 
-			Align (4);
-
-			EndMethod ();
 			return rva;
 		}
 
@@ -73,18 +70,27 @@ namespace Mono.Cecil.Cil {
 			return method.HasBody && method.HasImage && method.body == null;
 		}
 
-		void WriteUnresolvedMethodBody (MethodDefinition method)
+		RVA WriteUnresolvedMethodBody (MethodDefinition method)
 		{
 			var code_reader = metadata.module.reader.code;
 
 			int code_size;
 			MetadataToken local_var_token;
 			var buffer = code_reader.PatchRawMethodBody (method, this, out code_size, out local_var_token);
+			bool hasFatHeader = (buffer.buffer[0] & 0x3) == 0x3;
 
-			WriteBytes (buffer);
+			if (hasFatHeader) {
+				// Method bodies with fat headers have to be 4-byte aligned.
+				Align (4);
+			}
+			var rva = BeginMethod ();
+
+			if (hasFatHeader || !CanReuseSmallMethodBody (buffer.buffer, ref rva))  {
+				WriteBytes (buffer);
+			}
 
 			if (method.debug_info == null)
-				return;
+				return rva;
 
 			var symbol_writer = metadata.symbol_writer;
 			if (symbol_writer != null) {
@@ -92,27 +98,64 @@ namespace Mono.Cecil.Cil {
 				method.debug_info.local_var_token = local_var_token;
 				symbol_writer.Write (method.debug_info);
 			}
+
+			return rva;
 		}
 
-		void WriteResolvedMethodBody (MethodDefinition method)
+		RVA WriteResolvedMethodBody(MethodDefinition method)
 		{
+			RVA rva;
+
 			body = method.Body;
 			ComputeHeader ();
-			if (RequiresFatHeader ())
+			if (RequiresFatHeader ()) {
+				// Method bodies with fat headers have to be 4-byte aligned.
+				Align (4);
+				rva = BeginMethod ();
 				WriteFatHeader ();
-			else
-				WriteByte ((byte) (0x2 | (body.CodeSize << 2))); // tiny
+				WriteInstructions ();
 
-			WriteInstructions ();
+				if (body.HasExceptionHandlers)
+					WriteExceptionHandlers ();
+			}
+			else {
+				// Tiny method headers can start on any byte boundary.
+				rva = BeginMethod ();
+				WriteByte ((byte)(0x2 | (body.CodeSize << 2))); // tiny
+				WriteInstructions ();
 
-			if (body.HasExceptionHandlers)
-				WriteExceptionHandlers ();
+				// Check if a body with the same bytes has already been emitted.
+				int start_position = (int)(rva - code_base);
+				int body_byte_size = position - start_position;
+				byte [] body_bytes = new byte [body_byte_size];
+				Array.Copy (buffer, start_position, body_bytes, 0, body_byte_size);
+				if (CanReuseSmallMethodBody (body_bytes, ref rva)) {
+					// Discard the bytes just written.
+					position = start_position;
+				}
+			}
 
 			var symbol_writer = metadata.symbol_writer;
 			if (symbol_writer != null && method.debug_info != null) {
 				method.debug_info.code_size = body.CodeSize;
 				method.debug_info.local_var_token = body.local_var_token;
 				symbol_writer.Write (method.debug_info);
+			}
+
+			return rva;
+		}
+
+		bool CanReuseSmallMethodBody(byte[] body_bytes, ref RVA rva)
+		{
+			RVA existing_body_rva;
+			if (small_method_bodies.TryGetValue (body_bytes, out existing_body_rva)) {
+				// Reuse an identical body that has already been emitted.
+				rva = existing_body_rva;
+				return true;
+			}
+			else {
+				small_method_bodies.Add (body_bytes, rva);
+				return false;
 			}
 		}
 
@@ -366,7 +409,7 @@ namespace Mono.Cecil.Cil {
 				CopyBranchStackSize (ref stack_sizes, (Instruction) instruction.operand, stack_size);
 				break;
 			case OperandType.InlineSwitch:
-				var targets = (Instruction[]) instruction.operand;
+				var targets = (Instruction []) instruction.operand;
 				for (int i = 0; i < targets.Length; i++)
 					CopyBranchStackSize (ref stack_sizes, targets [i], stack_size);
 				break;
@@ -605,7 +648,7 @@ namespace Mono.Cecil.Cil {
 
 		RVA BeginMethod ()
 		{
-			return current;
+			return (RVA)(code_base + position);
 		}
 
 		void WriteMetadataToken (MetadataToken token)
@@ -618,12 +661,73 @@ namespace Mono.Cecil.Cil {
 			align--;
 			WriteBytes (((position + align) & ~align) - position);
 		}
+	}
 
-		void EndMethod ()
+	internal sealed class ByteSequenceComparer : IEqualityComparer<byte []>
+	{
+		internal static readonly ByteSequenceComparer Instance = new ByteSequenceComparer ();
+
+		private ByteSequenceComparer()
 		{
-			current = (RVA) (code_base + position);
+		}
+
+		internal static bool Equals(byte [] left, byte [] right)
+		{
+			if (ReferenceEquals (left, right)) {
+				return true;
+			}
+
+			if (left == null || right == null || (left.Length != right.Length)) {
+				return false;
+			}
+
+			for (var i = 0; i < left.Length; i++) {
+				if (left [i] != right [i]) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		// Hash computation below uses the FNV-1a algorithm
+		// (http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function).
+
+		internal static int GetHashCode (byte [] x)
+		{
+			return GetFNVHashCode (x);
+		}
+
+		bool IEqualityComparer<byte []>.Equals(byte [] x, byte [] y)
+		{
+			return Equals (x, y);
+		}
+
+		int IEqualityComparer<byte []>.GetHashCode(byte [] x)
+		{
+			return GetHashCode (x);
+		}
+
+		// The offset bias value used in the FNV-1a algorithm
+		// See http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+		internal const int fnv_offset_bias = unchecked((int)2166136261);
+
+		/// The generative factor used in the FNV-1a algorithm
+		/// See http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+		internal const int fnv_prime = 16777619;
+
+		static int GetFNVHashCode(byte [] data)
+		{
+			int hash_code = fnv_offset_bias;
+
+			for (int i = 0; i < data.Length; i++) {
+				hash_code = unchecked((hash_code ^ data [i]) * fnv_prime);
+			}
+
+			return hash_code;
 		}
 	}
+
 }
 
 #endif
