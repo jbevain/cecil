@@ -282,6 +282,25 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void BranchOutsideMethod ()
+		{
+			IgnoreOnMono ();
+
+			TestIL ("branch-out.il", module => {
+				var type = module.GetType ("Foo");
+				var method = type.GetMethod ("BranchOutside");
+
+				Assert.IsNotNull (method);
+				Assert.IsNotNull (method.Body);
+
+				var leave = method.Body.Instructions [0];
+				Assert.AreEqual (OpCodes.Leave, leave.OpCode);
+				Assert.IsNull (leave.Operand);
+				Assert.AreEqual ("IL_0000: leave", leave.ToString ());
+			}, verify: false);
+		}
+
+		[Test]
 		public void Iterator ()
 		{
 			TestModule ("iterator.exe", module => {
