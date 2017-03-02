@@ -111,7 +111,7 @@ namespace Mono.Cecil.Rocks {
 					id.Append (((GenericParameter) type).Position);
 					break;
 				case MetadataType.OptionalModifier:
-					WriteModiferTypeSignature ((RequiredModifierType) type, '!');
+					WriteModiferTypeSignature ((OptionalModifierType) type, '!');
 					break;
 				case MetadataType.RequiredModifier:
 					WriteModiferTypeSignature ((RequiredModifierType) type, '|');
