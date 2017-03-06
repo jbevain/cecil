@@ -47,7 +47,7 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public bool IsHidden {
-			get { return start_line == 0xfeefee && start_line == start_column; }
+			get { return start_line == 0xfeefee && start_line == end_line; }
 		}
 
 		public Document Document {
