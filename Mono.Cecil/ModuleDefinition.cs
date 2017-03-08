@@ -764,11 +764,6 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 		}
 
-		static ImportGenericContext GenericContextFor (IGenericParameterProvider context)
-		{
-			return context != null ? new ImportGenericContext (context) : default (ImportGenericContext);
-		}
-
 #if !PCL && !NET_CORE
 
 		[Obsolete ("Use ImportReference", error: false)]
