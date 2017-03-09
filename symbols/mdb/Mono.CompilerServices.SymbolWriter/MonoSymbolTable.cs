@@ -927,8 +927,6 @@ namespace Mono.CompilerServices.SymbolWriter
 					}
 				}
 			}
-
-			file.ExtendedLineNumberSize += (int) bw.BaseStream.Position - start;
 		}
 
 		internal static LineNumberTable Read (MonoSymbolFile file, MyBinaryReader br, bool readColumnsInfo, bool readEndInfo)
@@ -1223,7 +1221,6 @@ namespace Mono.CompilerServices.SymbolWriter
 			bw.WriteLeb128 (num_locals);
 			for (int i = 0; i < num_locals; i++)
 				locals [i].Write (file, bw);
-			file.LocalCount += num_locals;
 
 			CodeBlockTableOffset = (int) bw.BaseStream.Position;
 			int num_code_blocks = code_blocks != null ? code_blocks.Length : 0;
