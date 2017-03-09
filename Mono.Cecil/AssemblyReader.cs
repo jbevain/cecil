@@ -3788,7 +3788,9 @@ namespace Mono.Cecil {
 				if (delta_lines == 0 && delta_columns == 0) {
 					sequence_points.Add (new SequencePoint (offset, document) {
 						StartLine = 0xfeefee,
-						StartColumn = 0xfeefee,
+						EndLine = 0xfeefee,
+						StartColumn = 0,
+						EndColumn = 0,
 					});
 					continue;
 				}
