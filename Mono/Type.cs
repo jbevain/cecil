@@ -79,12 +79,57 @@ namespace Mono {
 #endif
 		}
 
-		public static Assembly GetAssembly (this Type type)
+		public static Assembly Assembly (this Type type)
 		{
 #if NET_CORE
 			return type.GetTypeInfo ().Assembly;
 #else
 			return type.Assembly;
+#endif
+		}
+
+		public static MethodBase DeclaringMethod (this Type type)
+		{
+#if NET_CORE
+			return type.GetTypeInfo ().DeclaringMethod;
+#else
+			return type.DeclaringMethod;
+#endif
+		}
+
+		public static Type [] GetGenericArguments (this Type type)
+		{
+#if NET_CORE
+			return type.GetTypeInfo ().GenericTypeArguments;
+#else
+			return type.GetGenericArguments ();
+#endif
+		}
+
+		public static bool IsGenericType (this Type type)
+		{
+#if NET_CORE
+			return type.GetTypeInfo ().IsGenericType;
+#else
+			return type.IsGenericType;
+#endif
+		}
+
+		public static bool IsGenericTypeDefinition (this Type type)
+		{
+#if NET_CORE
+			return type.GetTypeInfo ().IsGenericTypeDefinition;
+#else
+			return type.IsGenericTypeDefinition;
+#endif
+		}
+
+		public static bool IsValueType (this Type type)
+		{
+#if NET_CORE
+			return type.GetTypeInfo ().IsValueType;
+#else
+			return type.IsValueType;
 #endif
 		}
 	}
