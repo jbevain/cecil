@@ -83,6 +83,11 @@ namespace Mono.Cecil.Tests {
 
 		static void WriteSequencePoint (TextWriter writer, SequencePoint sequence_point)
 		{
+			if (sequence_point.IsHidden) {
+				writer.Write (".line hidden '{0}'", sequence_point.Document.Url);
+				return;
+			}
+
 			writer.Write (".line {0},{1}:{2},{3} '{4}'",
 				sequence_point.StartLine,
 				sequence_point.EndLine,

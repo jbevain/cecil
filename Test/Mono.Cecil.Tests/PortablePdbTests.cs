@@ -28,7 +28,7 @@ namespace Mono.Cecil.Tests {
 	IL_0003: stloc.1
 	IL_0004: ldc.i4.0
 	IL_0005: stloc.2
-	.line 16707566,0:16707566,0 'C:\sources\PdbTarget\Program.cs'
+	.line hidden 'C:\sources\PdbTarget\Program.cs'
 	IL_0006: br.s IL_0017
 	.line 22,22:13,20 'C:\sources\PdbTarget\Program.cs'
 	IL_0008: ldloc.1
@@ -39,7 +39,7 @@ namespace Mono.Cecil.Tests {
 	IL_000c: ldloc.3
 	IL_000d: call System.Void System.Console::WriteLine(System.String)
 	IL_0012: nop
-	.line 16707566,0:16707566,0 'C:\sources\PdbTarget\Program.cs'
+	.line hidden 'C:\sources\PdbTarget\Program.cs'
 	IL_0013: ldloc.2
 	IL_0014: ldc.i4.1
 	IL_0015: add
