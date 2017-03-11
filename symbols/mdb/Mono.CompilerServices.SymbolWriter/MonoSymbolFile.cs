@@ -121,8 +121,6 @@ namespace Mono.CompilerServices.SymbolWriter
 		Dictionary<int, AnonymousScopeEntry> anonymous_scopes;
 
 		OffsetTable ot;
-		int last_type_index;
-		int last_method_index;
 		int last_namespace_index;
 
 		public readonly int MajorVersion = OffsetTable.MajorVersion;
@@ -196,16 +194,6 @@ namespace Mono.CompilerServices.SymbolWriter
 
 			AnonymousScopeEntry scope = anonymous_scopes [scope_id];
 			scope.AddCapturedScope (id, captured_name);
-		}
-
-		internal int GetNextTypeIndex ()
-		{
-			return ++last_type_index;
-		}
-
-		internal int GetNextMethodIndex ()
-		{
-			return ++last_method_index;
 		}
 
 		internal int GetNextNamespaceIndex ()
@@ -292,7 +280,7 @@ namespace Mono.CompilerServices.SymbolWriter
 			//
 			// Fixup offset table.
 			//
-			ot.TypeCount = last_type_index;
+			ot.TypeCount = 0;
 			ot.MethodCount = methods.Count;
 			ot.SourceCount = sources.Count;
 			ot.CompileUnitCount = comp_units.Count;
@@ -423,13 +411,6 @@ namespace Mono.CompilerServices.SymbolWriter
 		public OffsetTable OffsetTable {
 			get { return ot; }
 		}
-
-		internal int LineNumberCount = 0;
-		internal int LocalCount = 0;
-		internal int StringSize = 0;
-
-		internal int LineNumberSize = 0;
-		internal int ExtendedLineNumberSize = 0;
 
 		public SourceFileEntry GetSourceFile (int index)
 		{
