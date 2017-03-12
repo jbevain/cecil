@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-
+using System.Linq;
 using NUnit.Framework;
 
 using Mono.Cecil.Cil;
@@ -315,14 +315,13 @@ namespace Mono.Cecil.Tests {
 				var move_next = state_machine.GetMethod ("MoveNext");
 
 				Assert.IsTrue (move_next.HasCustomDebugInformations);
-				Assert.AreEqual (2, move_next.CustomDebugInformations.Count);
 
-				var state_machine_scope = move_next.CustomDebugInformations [0] as StateMachineScopeDebugInformation;
+				var state_machine_scope = move_next.CustomDebugInformations.OfType<StateMachineScopeDebugInformation> ().FirstOrDefault ();
 				Assert.IsNotNull (state_machine_scope);
 				Assert.AreEqual (0, state_machine_scope.Start.Offset);
 				Assert.IsTrue (state_machine_scope.End.IsEndOfMethod);
 
-				var async_body = move_next.CustomDebugInformations [1] as AsyncMethodBodyDebugInformation;
+				var async_body = move_next.CustomDebugInformations.OfType<AsyncMethodBodyDebugInformation> ().FirstOrDefault ();
 				Assert.IsNotNull (async_body);
 				Assert.AreEqual (-1, async_body.CatchHandler.Offset);
 
@@ -338,10 +337,19 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+		[Test]
+		public void EmbeddedCompressedPortablePdb ()
+		{
+			TestModule("EmbeddedCompressedPdbTarget.exe", module => {
+
+			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
+		}
+
 		void TestPortablePdbModule (Action<ModuleDefinition> test)
 		{
 			TestModule ("PdbTarget.exe", test, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 			TestModule ("EmbeddedPdbTarget.exe", test, verify: !Platform.OnMono);
+			TestModule("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof(EmbeddedPortablePdbWriterProvider));
 		}
 
 		[Test]

@@ -13,6 +13,7 @@ using System.IO;
 
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
+using Mono.Collections.Generic;
 
 using RVA = System.UInt32;
 
@@ -144,31 +145,42 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public ImageDebugDirectory GetDebugHeader (out byte [] header)
+		public ImageDebugHeader GetDebugHeader ()
 		{
 			var reader = GetReaderAt (Debug.VirtualAddress);
 			if (reader == null) {
-				header = Empty<byte>.Array;
-				return new ImageDebugDirectory ();
+				return new ImageDebugHeader (Empty<ImageDebugHeaderEntry>.Array);
 			}
 
-			var directory = new ImageDebugDirectory {
-				Characteristics = reader.ReadInt32 (),
-				TimeDateStamp = reader.ReadInt32 (),
-				MajorVersion = reader.ReadInt16 (),
-				MinorVersion = reader.ReadInt16 (),
-				Type = reader.ReadInt32 (),
-				SizeOfData = reader.ReadInt32 (),
-				AddressOfRawData = reader.ReadInt32 (),
-				PointerToRawData = reader.ReadInt32 (),
-			};
+			var count = (int) Debug.Size / ImageDebugDirectory.Size;
+			var collection = new Collection<ImageDebugHeaderEntry> (count);
 
-			reader = GetReaderAt ((uint) directory.AddressOfRawData);
-			header = reader != null
-				? reader.ReadBytes (directory.SizeOfData)
-				: Empty<byte>.Array;
+			for (int i = 0; i < count; i++) {
+				var directory = new ImageDebugDirectory {
+					Characteristics = reader.ReadInt32 (),
+					TimeDateStamp = reader.ReadInt32 (),
+					MajorVersion = reader.ReadInt16 (),
+					MinorVersion = reader.ReadInt16 (),
+					Type = (ImageDebugType) reader.ReadInt32 (),
+					SizeOfData = reader.ReadInt32 (),
+					AddressOfRawData = reader.ReadInt32 (),
+					PointerToRawData = reader.ReadInt32 (),
+				};
 
-			return directory;
+				var position = reader.Position;
+				try {
+					var data_reader = GetReaderAt ((uint) directory.AddressOfRawData);
+					var data = data_reader != null
+						? reader.ReadBytes (directory.SizeOfData)
+						: Empty<byte>.Array;
+
+					collection.Add (new ImageDebugHeaderEntry (directory, data));
+				} finally {
+					reader.Position = position;
+				}
+			}
+
+			return new ImageDebugHeader (collection.ToArray ());
 		}
 
 		public bool HasDebugTables ()

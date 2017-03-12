@@ -41,25 +41,36 @@ namespace Mono.Cecil.Pdb {
 		string FileName;
 		 */
 
-		public bool ProcessDebugHeader (ImageDebugDirectory directory, byte [] header)
+		public bool ProcessDebugHeader (ImageDebugHeader header)
 		{
-			if (directory.Type != 2) //IMAGE_DEBUG_TYPE_CODEVIEW
+			if (!header.HasEntries)
+				return false;
+
+			var entry = header.GetCodeViewEntry ();
+			if (entry == null)
+				return false;
+
+			var directory = entry.Directory;
+
+			if (directory.Type != ImageDebugType.CodeView)
 				return false;
 			if (directory.MajorVersion != 0 || directory.MinorVersion != 0)
 				return false;
 
-			if (header.Length < 24)
+			var data = entry.Data;
+
+			if (data.Length < 24)
 				return false;
 
-			var magic = ReadInt32 (header, 0);
+			var magic = ReadInt32 (data, 0);
 			if (magic != 0x53445352)
 				return false;
 
 			var guid_bytes = new byte [16];
-			Buffer.BlockCopy (header, 4, guid_bytes, 0, 16);
+			Buffer.BlockCopy (data, 4, guid_bytes, 0, 16);
 
 			this.guid = new Guid (guid_bytes);
-			this.age = ReadInt32 (header, 20);
+			this.age = ReadInt32 (data, 20);
 
 			return PopulateFunctions ();
 		}

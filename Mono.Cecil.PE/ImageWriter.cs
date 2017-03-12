@@ -29,8 +29,7 @@ namespace Mono.Cecil.PE {
 
 		readonly string runtime_version;
 
-		ImageDebugDirectory debug_directory;
-		byte [] debug_data;
+		ImageDebugHeader debug_header;
 
 		ByteBuffer win32_resources;
 
@@ -76,8 +75,7 @@ namespace Mono.Cecil.PE {
 			if (symbol_writer == null)
 				return;
 
-			if (!symbol_writer.GetDebugHeader (out debug_directory, out debug_data))
-				debug_data = Empty<byte>.Array;
+			debug_header = symbol_writer.GetDebugHeader ();
 		}
 
 		void GetWin32Resources ()
@@ -308,7 +306,7 @@ namespace Mono.Cecil.PE {
 
 			if (text_map.GetLength (TextSegment.DebugDirectory) > 0) {
 				WriteUInt32 (text_map.GetRVA (TextSegment.DebugDirectory));
-				WriteUInt32 (28u);
+				WriteUInt32 ((uint) (debug_header.Entries.Length * ImageDebugDirectory.Size));
 			} else
 				WriteZeroDataDirectory ();
 
@@ -588,16 +586,27 @@ namespace Mono.Cecil.PE {
 
 		void WriteDebugDirectory ()
 		{
-			WriteInt32 (debug_directory.Characteristics);
-			WriteUInt32 (metadata.timestamp);
-			WriteInt16 (debug_directory.MajorVersion);
-			WriteInt16 (debug_directory.MinorVersion);
-			WriteInt32 (debug_directory.Type);
-			WriteInt32 (debug_directory.SizeOfData);
-			WriteInt32 (debug_directory.AddressOfRawData);
-			WriteInt32 ((int) BaseStream.Position + 4);
+			var data_start = (int) BaseStream.Position + (debug_header.Entries.Length * ImageDebugDirectory.Size);
 
-			WriteBytes (debug_data);
+			for (var i = 0; i < debug_header.Entries.Length; i++) {
+				var entry = debug_header.Entries [i];
+				var directory = entry.Directory;
+				WriteInt32 (directory.Characteristics);
+				WriteInt32 (directory.TimeDateStamp);
+				WriteInt16 (directory.MajorVersion);
+				WriteInt16 (directory.MinorVersion);
+				WriteInt32 ((int) directory.Type);
+				WriteInt32 (directory.SizeOfData);
+				WriteInt32 (directory.AddressOfRawData);
+				WriteInt32 (data_start);
+
+				data_start += entry.Data.Length;
+			}
+			
+			for (var i = 0; i < debug_header.Entries.Length; i++) {
+				var entry = debug_header.Entries [i];
+				WriteBytes (entry.Data);
+			}
 		}
 
 		void WriteImportDirectory ()
@@ -695,11 +704,23 @@ namespace Mono.Cecil.PE {
 			BuildMetadataTextMap ();
 
 			int debug_dir_len = 0;
-			if (!debug_data.IsNullOrEmpty ()) {
-				const int debug_dir_header_len = 28;
+			if (debug_header != null && debug_header.HasEntries) {
+				var directories_len = debug_header.Entries.Length * ImageDebugDirectory.Size;
+				var data_address = (int) map.GetNextRVA (TextSegment.BlobHeap) + directories_len;
+				var data_len = 0;
 
-				debug_directory.AddressOfRawData = (int) map.GetNextRVA (TextSegment.BlobHeap) + debug_dir_header_len;
-				debug_dir_len = debug_data.Length + debug_dir_header_len;
+				for (var i = 0; i < debug_header.Entries.Length; i++) {
+					var entry = debug_header.Entries [i];
+					var directory = entry.Directory;
+					
+					directory.AddressOfRawData = entry.Data.Length == 0 ? 0 : data_address;
+					entry.Directory = directory;
+
+					data_len += entry.Data.Length;
+					data_address += data_len;
+				}
+
+				debug_dir_len = directories_len + data_len;
 			}
 
 			map.AddMap (TextSegment.DebugDirectory, debug_dir_len, 4);

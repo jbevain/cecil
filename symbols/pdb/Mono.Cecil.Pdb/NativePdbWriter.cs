@@ -32,10 +32,12 @@ namespace Mono.Cecil.Pdb {
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
 		}
 
-		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
+		public ImageDebugHeader GetDebugHeader ()
 		{
-			header = writer.GetDebugInfo (out directory);
-			return true;
+			ImageDebugDirectory directory;
+			var data = writer.GetDebugInfo (out directory);
+			directory.TimeDateStamp = (int) module.timestamp;
+			return new ImageDebugHeader (new ImageDebugHeaderEntry (directory, data));
 		}
 
 		public void Write (MethodDebugInformation info)
