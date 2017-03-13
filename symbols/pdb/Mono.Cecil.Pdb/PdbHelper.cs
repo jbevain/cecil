@@ -41,6 +41,13 @@ namespace Mono.Cecil.Pdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
+			if (module.HasDebugHeader) {
+				var header = module.GetDebugHeader ();
+				var entry = header.GetEmbeddedPortablePdbEntry ();
+				if (entry != null)
+					return new EmbeddedPortablePdbReaderProvider ().GetSymbolReader (module, fileName);
+			}
+
 			return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
 				? new PortablePdbReaderProvider ().GetSymbolReader (module, fileName)
 				: new NativePdbReaderProvider ().GetSymbolReader (module, fileName);

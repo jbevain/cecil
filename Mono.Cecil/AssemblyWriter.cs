@@ -875,10 +875,10 @@ namespace Mono.Cecil {
 
 			this.symbol_writer = symbol_writer;
 
-			var pdb_writer = symbol_writer as PortablePdbWriter;
+			var pdb_writer = symbol_writer as IMetadataSymbolWriter;
 			if (pdb_writer != null) {
 				portable_pdb = true;
-				pdb_writer.SetModuleMetadata (this);
+				pdb_writer.SetMetadata (this);
 			}
 
 			this.code = new CodeWriter (this);

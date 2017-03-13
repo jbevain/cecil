@@ -158,11 +158,9 @@ namespace Mono.Cecil.Mdb {
 					writer.DefineLocalVariable (variable.Index, variable.Name);
 		}
 
-		public bool GetDebugHeader (out ImageDebugDirectory directory, out byte [] header)
+		public ImageDebugHeader GetDebugHeader ()
 		{
-			directory = new ImageDebugDirectory ();
-			header = Empty<byte>.Array;
-			return false;
+			return new ImageDebugHeader ();
 		}
 
 		public void Dispose ()
