@@ -150,10 +150,7 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			var header = module.Image.GetDebugHeader ();
-			if (header == null)
-				throw new InvalidOperationException ();
-
+			var header = module.GetDebugHeader ();
 			var entry = header.GetEmbeddedPortablePdbEntry ();
 			if (entry == null)
 				throw new InvalidOperationException ();

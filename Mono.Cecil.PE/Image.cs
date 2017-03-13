@@ -29,6 +29,8 @@ namespace Mono.Cecil.PE {
 		public TargetArchitecture Architecture;
 		public ModuleCharacteristics Characteristics;
 
+		public ImageDebugHeader DebugHeader;
+
 		public Section [] Sections;
 
 		public Section MetadataSection;
@@ -143,44 +145,6 @@ namespace Mono.Cecil.PE {
 			} finally {
 				Stream.value.Position = position;
 			}
-		}
-
-		public ImageDebugHeader GetDebugHeader ()
-		{
-			var reader = GetReaderAt (Debug.VirtualAddress);
-			if (reader == null) {
-				return new ImageDebugHeader (Empty<ImageDebugHeaderEntry>.Array);
-			}
-
-			var count = (int) Debug.Size / ImageDebugDirectory.Size;
-			var collection = new Collection<ImageDebugHeaderEntry> (count);
-
-			for (int i = 0; i < count; i++) {
-				var directory = new ImageDebugDirectory {
-					Characteristics = reader.ReadInt32 (),
-					TimeDateStamp = reader.ReadInt32 (),
-					MajorVersion = reader.ReadInt16 (),
-					MinorVersion = reader.ReadInt16 (),
-					Type = (ImageDebugType) reader.ReadInt32 (),
-					SizeOfData = reader.ReadInt32 (),
-					AddressOfRawData = reader.ReadInt32 (),
-					PointerToRawData = reader.ReadInt32 (),
-				};
-
-				var position = reader.Position;
-				try {
-					var data_reader = GetReaderAt ((uint) directory.AddressOfRawData);
-					var data = data_reader != null
-						? reader.ReadBytes (directory.SizeOfData)
-						: Empty<byte>.Array;
-
-					collection.Add (new ImageDebugHeaderEntry (directory, data));
-				} finally {
-					reader.Position = position;
-				}
-			}
-
-			return new ImageDebugHeader (collection.ToArray ());
 		}
 
 		public bool HasDebugTables ()

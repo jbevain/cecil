@@ -72,10 +72,17 @@ namespace Mono.Cecil.PE {
 		void GetDebugHeader ()
 		{
 			var symbol_writer = metadata.symbol_writer;
-			if (symbol_writer == null)
-				return;
+			if (symbol_writer != null)
+				debug_header = symbol_writer.GetDebugHeader ();
 
-			debug_header = symbol_writer.GetDebugHeader ();
+			if (module.HasDebugHeader) {
+				var header = module.GetDebugHeader ();
+				var deterministic = header.GetDeterministicEntry ();
+				if (deterministic == null)
+					return;
+
+				debug_header = debug_header.AddDeterministicEntry ();
+			}
 		}
 
 		void GetWin32Resources ()
