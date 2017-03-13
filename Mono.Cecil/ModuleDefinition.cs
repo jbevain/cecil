@@ -986,7 +986,7 @@ namespace Mono.Cecil {
 		}
 
 		public bool HasDebugHeader {
-			get { return Image != null && !Image.Debug.IsZero; }
+			get { return Image != null && Image.DebugHeader != null; }
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
@@ -994,7 +994,7 @@ namespace Mono.Cecil {
 			if (!HasDebugHeader)
 				throw new InvalidOperationException ();
 
-			return Image.GetDebugHeader ();
+			return Image.DebugHeader;
 		}
 
 		void ProcessDebugHeader ()

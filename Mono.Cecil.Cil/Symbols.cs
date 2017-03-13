@@ -906,6 +906,23 @@ namespace Mono.Cecil {
 			return GetEntry (header, ImageDebugType.CodeView);
 		}
 
+		public static ImageDebugHeaderEntry GetDeterministicEntry (this ImageDebugHeader header)
+		{
+			return GetEntry (header, ImageDebugType.Deterministic);
+		}
+
+		public static ImageDebugHeader AddDeterministicEntry (this ImageDebugHeader header)
+		{
+			var entry = new ImageDebugHeaderEntry (new ImageDebugDirectory { Type = ImageDebugType.Deterministic }, Empty<byte>.Array);
+			if (header == null)
+				return new ImageDebugHeader (entry);
+
+			var entries = new ImageDebugHeaderEntry [header.Entries.Length + 1];
+			Array.Copy (header.Entries, entries, header.Entries.Length);
+			entries [entries.Length - 1] = entry;
+			return new ImageDebugHeader (entries);
+		}
+
 		public static ImageDebugHeaderEntry GetEmbeddedPortablePdbEntry (this ImageDebugHeader header)
 		{
 			return GetEntry (header, ImageDebugType.EmbeddedPortablePdb);

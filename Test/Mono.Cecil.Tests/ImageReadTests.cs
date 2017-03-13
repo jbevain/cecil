@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using Mono.Cecil.PE;
 using Mono.Cecil.Metadata;
 
@@ -178,6 +180,48 @@ namespace Mono.Cecil.Tests {
 			TestModule("winrtcomp.winmd", module => {
 				Assert.IsTrue (module.Assembly.Name.IsWindowsRuntime);
 			}, verify: false, assemblyResolver: resolver);
+		}
+
+		[Test]
+		public void DeterministicAssembly ()
+		{
+			TestModule ("Deterministic.dll", module => {
+				Assert.IsTrue (module.HasDebugHeader);
+
+				var header = module.GetDebugHeader ();
+
+				Assert.AreEqual (1, header.Entries.Length);
+				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.Deterministic));
+			});
+		}
+
+		[Test]
+		public void ExternalPdbDeterministicAssembly ()
+		{
+			TestModule ("ExternalPdbDeterministic.dll", module => {
+				Assert.IsTrue (module.HasDebugHeader);
+
+				var header = module.GetDebugHeader ();
+
+				Assert.AreEqual (2, header.Entries.Length);
+				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.CodeView));
+				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.Deterministic));
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
+		public void EmbeddedPdbDeterministicAssembly ()
+		{
+			TestModule ("EmbeddedPdbDeterministic.dll", module => {
+				Assert.IsTrue (module.HasDebugHeader);
+
+				var header = module.GetDebugHeader ();
+
+				Assert.AreEqual (3, header.Entries.Length);
+				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.CodeView));
+				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.Deterministic));
+				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.EmbeddedPortablePdb));
+			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 	}
 }
