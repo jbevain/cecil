@@ -341,7 +341,18 @@ namespace Mono.Cecil.Tests {
 		public void EmbeddedCompressedPortablePdb ()
 		{
 			TestModule("EmbeddedCompressedPdbTarget.exe", module => {
+				Assert.IsTrue (module.HasDebugHeader);
 
+				var header = module.GetDebugHeader ();
+
+				Assert.IsNotNull (header);
+				Assert.AreEqual (2, header.Entries.Length);
+
+				var cv = header.Entries [0];
+				Assert.AreEqual (ImageDebugType.CodeView, cv.Directory.Type);
+
+				var eppdb = header.Entries [1];
+				Assert.AreEqual (ImageDebugType.EmbeddedPortablePdb, eppdb.Directory.Type);
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 
