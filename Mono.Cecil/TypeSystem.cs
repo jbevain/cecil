@@ -97,11 +97,15 @@ namespace Mono.Cecil {
 
 				const string mscorlib = "mscorlib";
 				const string system_runtime = "System.Runtime";
+				const string system_private_corelib = "System.Private.CoreLib";
 
 				if (TryLookupReference (mscorlib, out core_library))
 					return core_library;
 
 				if (TryLookupReference (system_runtime, out core_library))
+					return core_library;
+
+				if (TryLookupReference (system_private_corelib, out core_library))
 					return core_library;
 
 				core_library = new AssemblyNameReference {
