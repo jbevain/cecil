@@ -2211,6 +2211,9 @@ namespace Mono.Cecil {
 			case TokenType.MethodSpec:
 				element = GetMethodSpecification (rid);
 				break;
+			case TokenType.Signature:
+				element = GetConstantSignature (rid);
+				break;
 			default:
 				return null;
 			}
@@ -2277,6 +2280,14 @@ namespace Mono.Cecil {
 			var method_spec = ReadMethodSpecSignature (signature, element_method);
 			method_spec.token = new MetadataToken (TokenType.MethodSpec, rid);
 			return method_spec;
+		}
+
+		TypeReference GetConstantSignature(uint signature)
+		{
+			if (!MoveTo(Table.StandAloneSig, signature))
+				return null;
+
+			return ReadFieldType (ReadBlobIndex ());
 		}
 
 		MethodSpecification ReadMethodSpecSignature (uint signature, MethodReference method)
