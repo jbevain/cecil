@@ -40,7 +40,7 @@ namespace Mono.Cecil.Pdb {
 		void DefineField_Placeholder ();
 		void DefineGlobalVariable_Placeholder ();
 		void Close ();
-		void SetSymAttribute_Placeholder ();
+		void SetSymAttribute (uint parent, string name, uint data, IntPtr signature);
 		void OpenNamespace ([In, MarshalAs (UnmanagedType.LPWStr)] string name);
 		void CloseNamespace ();
 		void UsingNamespace ([In, MarshalAs (UnmanagedType.LPWStr)] string fullName);

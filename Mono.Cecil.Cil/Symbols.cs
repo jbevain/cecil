@@ -422,7 +422,7 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	interface ICustomDebugInformationProvider : IMetadataTokenProvider {
+	public interface ICustomDebugInformationProvider : IMetadataTokenProvider {
 		bool HasCustomDebugInformations { get; }
 		Collection<CustomDebugInformation> CustomDebugInformations { get; }
 	}
@@ -503,7 +503,7 @@ namespace Mono.Cecil.Cil {
 
 		public static Guid KindIdentifier = new Guid ("{54FD2AC5-E925-401A-9C2A-F94F171072F8}");
 
-		internal AsyncMethodBodyDebugInformation (int catchHandler)
+		public AsyncMethodBodyDebugInformation (int catchHandler)
 			: base (KindIdentifier)
 		{
 			this.catch_handler = new InstructionOffset (catchHandler);
@@ -548,7 +548,7 @@ namespace Mono.Cecil.Cil {
 			: base (KindIdentifier)
 		{
 			this.start = new InstructionOffset (start);
-			this.end = new InstructionOffset (end);
+			this.end = end != null ? new InstructionOffset (end) : new InstructionOffset ();
 		}
 	}
 
