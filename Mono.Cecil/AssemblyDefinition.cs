@@ -163,9 +163,9 @@ namespace Mono.Cecil {
 			Write (fileName, new WriterParameters ());
 		}
 
-		public void Write (string fileName, WriterParameters parameters)
+		public void Write (string fileName, WriterParameters parameters, FileShare share = FileShare.None)
 		{
-			main_module.Write (fileName, parameters);
+			main_module.Write (fileName, parameters, share);
 		}
 #endif
 
