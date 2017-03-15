@@ -361,7 +361,7 @@ namespace Microsoft.Cci.Pdb {
       bits.Position = savedPosition+(int)numberOfBytesInItem;
     }
 
-    private void ReadForwardIterator(BitAccess bits) { 
+    private void ReadForwardIterator(BitAccess bits) {
       this.iteratorClass = bits.ReadString();
     }
 

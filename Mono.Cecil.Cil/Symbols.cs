@@ -503,7 +503,7 @@ namespace Mono.Cecil.Cil {
 
 		public static Guid KindIdentifier = new Guid ("{54FD2AC5-E925-401A-9C2A-F94F171072F8}");
 
-		public AsyncMethodBodyDebugInformation (int catchHandler)
+		internal AsyncMethodBodyDebugInformation (int catchHandler)
 			: base (KindIdentifier)
 		{
 			this.catch_handler = new InstructionOffset (catchHandler);

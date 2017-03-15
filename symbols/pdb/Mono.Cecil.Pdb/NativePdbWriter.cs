@@ -12,6 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.IO;
+using System.Linq;
+using System.Text;
+
 using Mono.Cecil.Cil;
 using Mono.Cecil.PE;
 using Mono.Collections.Generic;
@@ -25,14 +28,14 @@ namespace Mono.Cecil.Pdb {
 		readonly ModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
-		readonly Dictionary<ImportDebugInformation, uint> importToMethods;
+		readonly Dictionary<ImportDebugInformation, MetadataToken> import_info_to_parent;
 
 		internal NativePdbWriter (ModuleDefinition module, SymWriter writer)
 		{
 			this.module = module;
 			this.writer = writer;
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
-			this.importToMethods = new Dictionary<ImportDebugInformation, uint> ();
+			this.import_info_to_parent = new Dictionary<ImportDebugInformation, MetadataToken> ();
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
@@ -48,7 +51,6 @@ namespace Mono.Cecil.Pdb {
 			var method_token = info.method.MetadataToken;
 			var sym_token = new SymbolToken (method_token.ToInt32 ());
 
-			// Nothing interesting to save
 			if (!info.HasSequencePoints && info.scope == null && !info.HasCustomDebugInformations && info.StateMachineKickOffMethod == null)
 				return;
 
@@ -57,186 +59,115 @@ namespace Mono.Cecil.Pdb {
 			if (!info.sequence_points.IsNullOrEmpty ())
 				DefineSequencePoints (info.sequence_points);
 
-			uint methodWhoseUsingInfoAppliesToThisMethod = 0;
+			var import_parent = new MetadataToken ();
 
 			if (info.scope != null)
-				DefineScope(info.scope, info, out methodWhoseUsingInfoAppliesToThisMethod);
+				DefineScope (info.scope, info, out import_parent);
 
-			DefineCustomMetadata (info, methodWhoseUsingInfoAppliesToThisMethod);
+			DefineCustomMetadata (info, import_parent);
 
 			writer.CloseMethod ();
 		}
 
-		private void DefineCustomMetadata (MethodDebugInformation info, uint methodWhoseUsingInfoAppliesToThisMethod)
+		void IMetadataSymbolWriter.SetMetadata (MetadataBuilder metadata)
 		{
-			// Custom PDB metadata
-			using (var memoryStream = new MemoryStream())
-			{
-				var metadata = new BinaryStreamWriter(memoryStream);
-				metadata.WriteByte(4); // version
-				metadata.WriteByte((byte)1); // count
-				metadata.WriteInt16(0); // padding
+			this.metadata = metadata;
+		}
 
-				var metadataStartPosition = metadata.BaseStream.Position;
-				var customMetadataCount = 0;
+		void DefineCustomMetadata (MethodDebugInformation info, MetadataToken import_parent)
+		{
+			var metadata = new CustomMetadataWriter (this.writer);
 
-				// Using informations
-				if (methodWhoseUsingInfoAppliesToThisMethod != 0)
-				{
-					customMetadataCount++;
-					metadata.WriteByte(4); // version
-					metadata.WriteByte(1); // forward info
-					metadata.Align(4);
-					using (new PdbBinaryStreamWriterSizeHelper(metadata))
-					{
-						metadata.WriteUInt32(methodWhoseUsingInfoAppliesToThisMethod);
-					}
-				}
-				else if (info.scope != null && info.scope.Import != null && info.scope.Import.HasTargets)
-				{
-					customMetadataCount++;
-					metadata.WriteByte(4); // version
-					metadata.WriteByte(0); // using info
-					metadata.Align(4);
-					using (new PdbBinaryStreamWriterSizeHelper(metadata))
-					{
-						metadata.WriteUInt16((ushort)1);
-						metadata.WriteUInt16((ushort)info.scope.Import.Targets.Count);
-						metadata.Align(4);
-					}
-				}
+			if (import_parent.RID != 0) {
+				metadata.WriteForwardInfo (import_parent);
+			} else if (info.scope != null && info.scope.Import != null && info.scope.Import.HasTargets) {
+				metadata.WriteUsingInfo (info.scope.Import);
+			}
 
-				// Note: This code detects state machine attributes automatically (rather than adding an IteratorClassDebugInformation only for Native PDB)
-				if (info.Method.HasCustomAttributes)
-				{
-					foreach (var customAttribute in info.Method.CustomAttributes)
-					{
-						if (customAttribute.AttributeType.FullName == "System.Runtime.CompilerServices.IteratorStateMachineAttribute"
-							|| customAttribute.AttributeType.FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute")
-						{
-							var type = customAttribute.ConstructorArguments[0].Value as TypeReference;
-							if (type == null)
-								continue;
+			if (info.Method.HasCustomAttributes) {
+				foreach (var attribute in info.Method.CustomAttributes) {
+					const string compiler_services = "System.Runtime.CompilerServices";
+					var attribute_type = attribute.AttributeType;
 
-							customMetadataCount++;
-							metadata.WriteByte(4); // version
-							metadata.WriteByte(4); // forward iterator
-							metadata.Align(4);
-							using (new PdbBinaryStreamWriterSizeHelper(metadata))
-							{
-								metadata.WriteString(type.Name);
-								metadata.Align(4);
-							}
-						}
-					}
-				}
+					if (!attribute_type.IsTypeOf (compiler_services, "IteratorStateMachineAttribute") && !attribute_type.IsTypeOf (compiler_services, "AsyncStateMachineAttribute"))
+						continue;
 
-				// StateMachineScopeDebugInformation
-				var stateMachineDebugInformationCount = 0;
-				if (info.HasCustomDebugInformations)
-				{
-					// Count
-					foreach (var customDebugInformation in info.CustomDebugInformations)
-					{
-						if (customDebugInformation is StateMachineScopeDebugInformation)
-							stateMachineDebugInformationCount++;
-					}
+					var type = attribute.ConstructorArguments [0].Value as TypeReference;
+					if (type == null)
+						continue;
 
-					if (stateMachineDebugInformationCount > 0)
-					{
-						customMetadataCount++;
-						metadata.WriteByte(4); // version
-						metadata.WriteByte(3); // iterator scopes
-						metadata.Align(4);
-						using (new PdbBinaryStreamWriterSizeHelper(metadata))
-						{
-							metadata.WriteInt32(stateMachineDebugInformationCount);
-							foreach (var customDebugInformation in info.CustomDebugInformations)
-							{
-								var stateMachineDebugInformation = customDebugInformation as StateMachineScopeDebugInformation;
-								if (stateMachineDebugInformation != null)
-								{
-									var start = stateMachineDebugInformation.Start.Offset;
-									var end = stateMachineDebugInformation.End.IsEndOfMethod ? info.code_size : stateMachineDebugInformation.End.Offset;
-									metadata.WriteInt32(start);
-									metadata.WriteInt32(end - 1);
-								}
-							}
-						}
-					}
-				}
-
-				if (metadata.BaseStream.Position != metadataStartPosition)
-				{
-					// Update number of entries
-					metadata.Flush();
-					metadata.BaseStream.Position = 1;
-					metadata.WriteByte((byte)customMetadataCount);
-					metadata.Flush();
-
-					writer.DefineCustomMetadata("MD2", memoryStream.ToArray());
+					metadata.WriteForwardIterator (type);
 				}
 			}
 
-			foreach (var customDebugInformation in info.CustomDebugInformations)
-			{
-				// Save back asyncMethodInfo
-				var asyncDebugInfo = customDebugInformation as AsyncMethodBodyDebugInformation;
-				if (asyncDebugInfo != null)
-				{
-					using (var asyncMemoryStream = new MemoryStream())
-					{
-						var asyncMetadata = new BinaryStreamWriter(asyncMemoryStream);
-						asyncMetadata.WriteUInt32(info.StateMachineKickOffMethod != null ? info.StateMachineKickOffMethod.MetadataToken.ToUInt32() : 0);
-						asyncMetadata.WriteUInt32((uint)asyncDebugInfo.CatchHandler.Offset);
-						asyncMetadata.WriteUInt32((uint)asyncDebugInfo.Resumes.Count);
-						for (int i = 0; i < asyncDebugInfo.Resumes.Count; ++i)
-						{
-							asyncMetadata.WriteUInt32((uint)asyncDebugInfo.Yields[i].Offset);
-							asyncMetadata.WriteUInt32(asyncDebugInfo.MoveNextMethod != null ? asyncDebugInfo.MoveNextMethod.MetadataToken.ToUInt32() : 0);
-							asyncMetadata.WriteUInt32((uint)asyncDebugInfo.Resumes[i].Offset);
-						}
+			if (info.HasCustomDebugInformations) {
+				var scopes = info.CustomDebugInformations.OfType<StateMachineScopeDebugInformation> ().ToArray ();
 
-						writer.DefineCustomMetadata("asyncMethodInfo", asyncMemoryStream.ToArray());
+				if (scopes.Length > 0)
+					metadata.WriteIteratorScopes (scopes, info);
+			}
+
+			metadata.WriteCustomMetadata ();
+
+			DefineAsyncCustomMetadata (info);
+		}
+
+		void DefineAsyncCustomMetadata (MethodDebugInformation info)
+		{
+			if (!info.HasCustomDebugInformations)
+				return;
+
+			foreach (var custom_info in info.CustomDebugInformations) {
+				var async_debug_info = custom_info as AsyncMethodBodyDebugInformation;
+				if (async_debug_info == null)
+					continue;
+
+				using (var stream = new MemoryStream ()) {
+					var async_metadata = new BinaryStreamWriter (stream);
+					async_metadata.WriteUInt32 (info.StateMachineKickOffMethod != null ? info.StateMachineKickOffMethod.MetadataToken.ToUInt32 () : 0);
+					async_metadata.WriteUInt32 ((uint) async_debug_info.CatchHandler.Offset);
+					async_metadata.WriteUInt32 ((uint) async_debug_info.Resumes.Count);
+					for (int i = 0; i < async_debug_info.Resumes.Count; ++i) {
+						async_metadata.WriteUInt32 ((uint) async_debug_info.Yields [i].Offset);
+						async_metadata.WriteUInt32 (async_debug_info.MoveNextMethod != null ? async_debug_info.MoveNextMethod.MetadataToken.ToUInt32 () : 0);
+						async_metadata.WriteUInt32 ((uint) async_debug_info.Resumes [i].Offset);
 					}
+
+					writer.DefineCustomMetadata ("asyncMethodInfo", stream.ToArray ());
 				}
 			}
 		}
 
-	    void DefineScope (ScopeDebugInformation scope, MethodDebugInformation info, out uint methodWhoseUsingInfoAppliesToThisMethod)
+		void DefineScope (ScopeDebugInformation scope, MethodDebugInformation info, out MetadataToken import_parent)
 		{
 			var start_offset = scope.Start.Offset;
 			var end_offset = scope.End.IsEndOfMethod
 				? info.code_size
 				: scope.End.Offset;
 
-			methodWhoseUsingInfoAppliesToThisMethod = 0;
+			import_parent = new MetadataToken (0u);
 
 			writer.OpenScope (start_offset);
 
-			if (scope.Import != null && scope.Import.HasTargets) {
-				if (!importToMethods.TryGetValue (info.scope.Import, out methodWhoseUsingInfoAppliesToThisMethod)) {
-
-					foreach (var target in scope.Import.Targets) {
-						switch (target.Kind)
-						{
-							case ImportTargetKind.ImportNamespace:
-								writer.UsingNamespace("U" + target.@namespace);
-								break;
-							case ImportTargetKind.ImportType:
-								writer.UsingNamespace("T" + TypeParser.ToParseable(target.type, false));
-								break;
-							case ImportTargetKind.DefineNamespaceAlias:
-								writer.UsingNamespace("A" + target.Alias + " U" + target.@namespace);
-								break;
-							case ImportTargetKind.DefineTypeAlias:
-								writer.UsingNamespace("A" + target.Alias + " T" + TypeParser.ToParseable(target.type, false));
-								break;
-						}
+			if (scope.Import != null && scope.Import.HasTargets && !import_info_to_parent.TryGetValue (info.scope.Import, out import_parent)) {
+				foreach (var target in scope.Import.Targets) {
+					switch (target.Kind) {
+					case ImportTargetKind.ImportNamespace:
+						writer.UsingNamespace ("U" + target.@namespace);
+						break;
+					case ImportTargetKind.ImportType:
+						writer.UsingNamespace ("T" + TypeParser.ToParseable (target.type));
+						break;
+					case ImportTargetKind.DefineNamespaceAlias:
+						writer.UsingNamespace ("A" + target.Alias + " U" + target.@namespace);
+						break;
+					case ImportTargetKind.DefineTypeAlias:
+						writer.UsingNamespace ("A" + target.Alias + " T" + TypeParser.ToParseable (target.type));
+						break;
 					}
-
-					importToMethods.Add (info.scope.Import, info.method.MetadataToken.ToUInt32 ());
 				}
+
+				import_info_to_parent.Add (info.scope.Import, info.method.MetadataToken);
 			}
 
 			var sym_token = new SymbolToken (info.local_var_token.ToInt32 ());
@@ -250,8 +181,8 @@ namespace Mono.Cecil.Pdb {
 
 			if (!scope.scopes.IsNullOrEmpty ()) {
 				for (int i = 0; i < scope.scopes.Count; i++) {
-					uint ignored;
-					DefineScope (scope.scopes [i], info, out ignored);
+					MetadataToken _;
+					DefineScope (scope.scopes [i], info, out _);
 				}
 			}
 
@@ -316,54 +247,102 @@ namespace Mono.Cecil.Pdb {
 		}
 	}
 
-	// Helper that will write back total after dispose
-	struct PdbBinaryStreamWriterSizeHelper : IDisposable
-	{
-		private readonly BinaryStreamWriter streamWriter;
-		private readonly uint startPosition;
-
-		public PdbBinaryStreamWriterSizeHelper(BinaryStreamWriter streamWriter)
-		{
-			this.streamWriter = streamWriter;
-
-			// Remember start position
-			this.startPosition = (uint)streamWriter.BaseStream.Position;
-
-			// Write 0 for now
-			streamWriter.WriteUInt32(0);
-		}
-
-		public void Dispose()
-		{
-			streamWriter.Flush();
-			var endPosition = (uint)streamWriter.BaseStream.Position;
-
-			// Write updated size
-			streamWriter.BaseStream.Position = startPosition;
-			streamWriter.WriteUInt32(endPosition - startPosition + 4); // adds 4 for header
-			streamWriter.Flush();
-
-			streamWriter.BaseStream.Position = endPosition;
-		}
+	enum CustomMetadataType : byte {
+		UsingInfo = 0,
+		ForwardInfo = 1,
+		IteratorScopes = 3,
+		ForwardIterator = 4,
 	}
 
-	static class StreamExtensions
-	{
-		public static void Align(this BinaryStreamWriter streamWriter, int alignment)
+	class CustomMetadataWriter : IDisposable {
+
+		readonly SymWriter sym_writer;
+		readonly MemoryStream stream;
+		readonly BinaryStreamWriter writer;
+
+		int count;
+
+		const byte version = 4;
+
+		public CustomMetadataWriter (SymWriter sym_writer)
 		{
-			var position = (int)streamWriter.BaseStream.Position;
-			var paddingLength = (position + alignment - 1) / alignment * alignment - position;
-			for (var i = 0; i < paddingLength; ++i)
-				streamWriter.Write((byte)0);
+			this.sym_writer = sym_writer;
+			this.stream = new MemoryStream ();
+			this.writer = new BinaryStreamWriter (stream);
+
+			writer.WriteByte (version);
+			writer.WriteByte (0); // count
+			writer.Align (4);
 		}
 
-		public static void WriteString(this BinaryStreamWriter streamWriter, string str)
+		public void WriteUsingInfo (ImportDebugInformation import_info)
 		{
-			foreach (var c in str)
-			{
-				streamWriter.WriteInt16((short)c);
-			}
-			streamWriter.WriteInt16(0);
+			Write (CustomMetadataType.UsingInfo, () => {
+				writer.WriteUInt16 ((ushort) 1);
+				writer.WriteUInt16 ((ushort) import_info.Targets.Count);
+			});
+		}
+
+		public void WriteForwardInfo (MetadataToken import_parent)
+		{
+			Write (CustomMetadataType.ForwardInfo, () => writer.WriteUInt32 (import_parent.ToUInt32 ()));
+		}
+
+		public void WriteIteratorScopes (StateMachineScopeDebugInformation [] scopes, MethodDebugInformation debug_info)
+		{
+			Write (CustomMetadataType.IteratorScopes, () => {
+				writer.WriteInt32 (scopes.Length);
+				foreach (var scope in scopes) {
+					var start = scope.Start.Offset;
+					var end = scope.End.IsEndOfMethod ? debug_info.code_size : scope.End.Offset;
+					writer.WriteInt32 (start);
+					writer.WriteInt32 (end - 1);
+				}
+			});
+		}
+
+		public void WriteForwardIterator (TypeReference type)
+		{
+			Write (CustomMetadataType.ForwardIterator, () => writer.WriteBytes(Encoding.Unicode.GetBytes(type.Name)));
+		}
+
+		void Write (CustomMetadataType type, Action write)
+		{
+			count++;
+			writer.WriteByte (version);
+			writer.WriteByte ((byte) type);
+			writer.Align (4);
+
+			var length_position = writer.Position;
+			writer.WriteUInt32 (0);
+
+			write ();
+			writer.Align (4);
+
+			var end = writer.Position;
+			var length = end - length_position + 4; // header is 4 bytes long
+
+			writer.Position = length_position;
+			writer.WriteInt32 (length);
+
+			writer.Position = end;
+		}
+
+		public void WriteCustomMetadata ()
+		{
+			if (count == 0)
+				return;
+
+			writer.BaseStream.Position = 1;
+			writer.WriteByte ((byte) count);
+			writer.Flush ();
+
+			sym_writer.DefineCustomMetadata ("MD2", stream.ToArray ());
+		}
+
+		public void Dispose ()
+		{
+			stream.Dispose ();
 		}
 	}
 }

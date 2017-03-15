@@ -86,7 +86,6 @@ namespace Mono.Cecil.Tests {
 			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
-
 		[Test]
 		public void Document ()
 		{
@@ -155,210 +154,209 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void LocalVariables()
+		public void LocalVariables ()
 		{
-			TestModule("ComplexPdb.dll", module => {
-				var type = module.GetType("ComplexPdb.Program");
-				var method = type.GetMethod("Bar");
+			TestModule ("ComplexPdb.dll", module => {
+				var type = module.GetType ("ComplexPdb.Program");
+				var method = type.GetMethod ("Bar");
 				var debug_info = method.DebugInformation;
 
-				Assert.IsNotNull(debug_info.Scope);
-				Assert.IsTrue(debug_info.Scope.HasScopes);
-				Assert.AreEqual(2, debug_info.Scope.Scopes.Count);
+				Assert.IsNotNull (debug_info.Scope);
+				Assert.IsTrue (debug_info.Scope.HasScopes);
+				Assert.AreEqual (2, debug_info.Scope.Scopes.Count);
 
-				var scope = debug_info.Scope.Scopes[0];
+				var scope = debug_info.Scope.Scopes [0];
 
-				Assert.IsNotNull(scope);
-				Assert.IsTrue(scope.HasVariables);
-				Assert.AreEqual(1, scope.Variables.Count);
+				Assert.IsNotNull (scope);
+				Assert.IsTrue (scope.HasVariables);
+				Assert.AreEqual (1, scope.Variables.Count);
 
-				var variable = scope.Variables[0];
+				var variable = scope.Variables [0];
 
-				Assert.AreEqual("s", variable.Name);
-				Assert.IsFalse(variable.IsDebuggerHidden);
-				Assert.AreEqual(2, variable.Index);
+				Assert.AreEqual ("s", variable.Name);
+				Assert.IsFalse (variable.IsDebuggerHidden);
+				Assert.AreEqual (2, variable.Index);
 
-				scope = debug_info.Scope.Scopes[1];
+				scope = debug_info.Scope.Scopes [1];
 
-				Assert.IsNotNull(scope);
-				Assert.IsTrue(scope.HasVariables);
-				Assert.AreEqual(1, scope.Variables.Count);
+				Assert.IsNotNull (scope);
+				Assert.IsTrue (scope.HasVariables);
+				Assert.AreEqual (1, scope.Variables.Count);
 
-				variable = scope.Variables[0];
+				variable = scope.Variables [0];
 
-				Assert.AreEqual("s", variable.Name);
-				Assert.IsFalse(variable.IsDebuggerHidden);
-				Assert.AreEqual(3, variable.Index);
+				Assert.AreEqual ("s", variable.Name);
+				Assert.IsFalse (variable.IsDebuggerHidden);
+				Assert.AreEqual (3, variable.Index);
 
-				Assert.IsTrue(scope.HasScopes);
-				Assert.AreEqual(1, scope.Scopes.Count);
+				Assert.IsTrue (scope.HasScopes);
+				Assert.AreEqual (1, scope.Scopes.Count);
 
-				scope = scope.Scopes[0];
+				scope = scope.Scopes [0];
 
-				Assert.IsNotNull(scope);
-				Assert.IsTrue(scope.HasVariables);
-				Assert.AreEqual(1, scope.Variables.Count);
+				Assert.IsNotNull (scope);
+				Assert.IsTrue (scope.HasVariables);
+				Assert.AreEqual (1, scope.Variables.Count);
 
-				variable = scope.Variables[0];
+				variable = scope.Variables [0];
 
-				Assert.AreEqual("u", variable.Name);
-				Assert.IsFalse(variable.IsDebuggerHidden);
-				Assert.AreEqual(5, variable.Index);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+				Assert.AreEqual ("u", variable.Name);
+				Assert.IsFalse (variable.IsDebuggerHidden);
+				Assert.AreEqual (5, variable.Index);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
-		public void LocalConstants()
+		public void LocalConstants ()
 		{
-			TestModule("ComplexPdb.dll", module => {
-				var type = module.GetType("ComplexPdb.Program");
-				var method = type.GetMethod("Bar");
+			TestModule ("ComplexPdb.dll", module => {
+				var type = module.GetType ("ComplexPdb.Program");
+				var method = type.GetMethod ("Bar");
 				var debug_info = method.DebugInformation;
 
-				Assert.IsNotNull(debug_info.Scope);
-				Assert.IsTrue(debug_info.Scope.HasScopes);
-				Assert.AreEqual(2, debug_info.Scope.Scopes.Count);
+				Assert.IsNotNull (debug_info.Scope);
+				Assert.IsTrue (debug_info.Scope.HasScopes);
+				Assert.AreEqual (2, debug_info.Scope.Scopes.Count);
 
-				var scope = debug_info.Scope.Scopes[1];
+				var scope = debug_info.Scope.Scopes [1];
 
-				Assert.IsNotNull(scope);
-				Assert.IsTrue(scope.HasConstants);
-				Assert.AreEqual(2, scope.Constants.Count);
+				Assert.IsNotNull (scope);
+				Assert.IsTrue (scope.HasConstants);
+				Assert.AreEqual (2, scope.Constants.Count);
 
-				var constant = scope.Constants[0];
+				var constant = scope.Constants [0];
 
-				Assert.AreEqual("b", constant.Name);
-				Assert.AreEqual(12, constant.Value);
-				Assert.AreEqual(MetadataType.Int32, constant.ConstantType.MetadataType);
+				Assert.AreEqual ("b", constant.Name);
+				Assert.AreEqual (12, constant.Value);
+				Assert.AreEqual (MetadataType.Int32, constant.ConstantType.MetadataType);
 
-				constant = scope.Constants[1];
-				Assert.AreEqual("c", constant.Name);
-				Assert.AreEqual((decimal)74, constant.Value);
-				Assert.AreEqual(MetadataType.ValueType, constant.ConstantType.MetadataType);
+				constant = scope.Constants [1];
+				Assert.AreEqual ("c", constant.Name);
+				Assert.AreEqual ((decimal) 74, constant.Value);
+				Assert.AreEqual (MetadataType.ValueType, constant.ConstantType.MetadataType);
 
-				method = type.GetMethod("Foo");
+				method = type.GetMethod ("Foo");
 				debug_info = method.DebugInformation;
 
-				Assert.IsNotNull(debug_info.Scope);
-				Assert.IsTrue(debug_info.Scope.HasConstants);
-				Assert.AreEqual(4, debug_info.Scope.Constants.Count);
+				Assert.IsNotNull (debug_info.Scope);
+				Assert.IsTrue (debug_info.Scope.HasConstants);
+				Assert.AreEqual (4, debug_info.Scope.Constants.Count);
 
-				constant = debug_info.Scope.Constants[0];
-				Assert.AreEqual("s", constant.Name);
-				Assert.AreEqual("const string", constant.Value);
-				Assert.AreEqual(MetadataType.String, constant.ConstantType.MetadataType);
+				constant = debug_info.Scope.Constants [0];
+				Assert.AreEqual ("s", constant.Name);
+				Assert.AreEqual ("const string", constant.Value);
+				Assert.AreEqual (MetadataType.String, constant.ConstantType.MetadataType);
 
-				constant = debug_info.Scope.Constants[1];
-				Assert.AreEqual("f", constant.Name);
-				Assert.AreEqual(1, constant.Value);
-				Assert.AreEqual(MetadataType.Int32, constant.ConstantType.MetadataType);
+				constant = debug_info.Scope.Constants [1];
+				Assert.AreEqual ("f", constant.Name);
+				Assert.AreEqual (1, constant.Value);
+				Assert.AreEqual (MetadataType.Int32, constant.ConstantType.MetadataType);
 
-				constant = debug_info.Scope.Constants[2];
-				Assert.AreEqual("o", constant.Name);
-				Assert.AreEqual(null, constant.Value);
-				Assert.AreEqual(MetadataType.Object, constant.ConstantType.MetadataType);
+				constant = debug_info.Scope.Constants [2];
+				Assert.AreEqual ("o", constant.Name);
+				Assert.AreEqual (null, constant.Value);
+				Assert.AreEqual (MetadataType.Object, constant.ConstantType.MetadataType);
 
-				constant = debug_info.Scope.Constants[3];
-				Assert.AreEqual("u", constant.Name);
-				Assert.AreEqual(null, constant.Value);
-				Assert.AreEqual(MetadataType.String, constant.ConstantType.MetadataType);
-			}, readOnly: true, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+				constant = debug_info.Scope.Constants [3];
+				Assert.AreEqual ("u", constant.Name);
+				Assert.AreEqual (null, constant.Value);
+				Assert.AreEqual (MetadataType.String, constant.ConstantType.MetadataType);
+			}, readOnly: true, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
-		public void ImportScope()
+		public void ImportScope ()
 		{
-			TestModule("ComplexPdb.dll", module => {
-				var type = module.GetType("ComplexPdb.Program");
-				var method = type.GetMethod("Bar");
+			TestModule ("ComplexPdb.dll", module => {
+				var type = module.GetType ("ComplexPdb.Program");
+				var method = type.GetMethod ("Bar");
 				var debug_info = method.DebugInformation;
 
-				Assert.IsNotNull(debug_info.Scope);
+				Assert.IsNotNull (debug_info.Scope);
 
 				var import = debug_info.Scope.Import;
-				Assert.IsNotNull(import);
+				Assert.IsNotNull (import);
 
-				Assert.IsTrue(import.HasTargets);
-				Assert.AreEqual(6, import.Targets.Count);
-				var target = import.Targets[0];
+				Assert.IsTrue (import.HasTargets);
+				Assert.AreEqual (6, import.Targets.Count);
+				var target = import.Targets [0];
 
-				Assert.AreEqual(ImportTargetKind.ImportNamespace, target.Kind);
-				Assert.AreEqual("System", target.Namespace);
+				Assert.AreEqual (ImportTargetKind.ImportNamespace, target.Kind);
+				Assert.AreEqual ("System", target.Namespace);
 
-				target = import.Targets[1];
+				target = import.Targets [1];
 
-				Assert.AreEqual(ImportTargetKind.ImportNamespace, target.Kind);
-				Assert.AreEqual("System.Collections.Generic", target.Namespace);
+				Assert.AreEqual (ImportTargetKind.ImportNamespace, target.Kind);
+				Assert.AreEqual ("System.Collections.Generic", target.Namespace);
 
-				target = import.Targets[2];
+				target = import.Targets [2];
 
-				Assert.AreEqual(ImportTargetKind.ImportNamespace, target.Kind);
-				Assert.AreEqual("System.Threading.Tasks", target.Namespace);
+				Assert.AreEqual (ImportTargetKind.ImportNamespace, target.Kind);
+				Assert.AreEqual ("System.Threading.Tasks", target.Namespace);
 
-				target = import.Targets[3];
+				target = import.Targets [3];
 
-				Assert.AreEqual(ImportTargetKind.ImportType, target.Kind);
-				Assert.AreEqual("System.Console", target.Type.FullName);
+				Assert.AreEqual (ImportTargetKind.ImportType, target.Kind);
+				Assert.AreEqual ("System.Console", target.Type.FullName);
 
-				target = import.Targets[4];
+				target = import.Targets [4];
 
-				Assert.AreEqual(ImportTargetKind.DefineTypeAlias, target.Kind);
-				Assert.AreEqual("Foo1", target.Alias);
-				Assert.AreEqual("System.Console", target.Type.FullName);
+				Assert.AreEqual (ImportTargetKind.DefineTypeAlias, target.Kind);
+				Assert.AreEqual ("Foo1", target.Alias);
+				Assert.AreEqual ("System.Console", target.Type.FullName);
 
-				target = import.Targets[5];
+				target = import.Targets [5];
 
-				Assert.AreEqual(ImportTargetKind.DefineNamespaceAlias, target.Kind);
-				Assert.AreEqual("Foo2", target.Alias);
-				Assert.AreEqual("System.Reflection", target.Namespace);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+				Assert.AreEqual (ImportTargetKind.DefineNamespaceAlias, target.Kind);
+				Assert.AreEqual ("Foo2", target.Alias);
+				Assert.AreEqual ("System.Reflection", target.Namespace);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
-		public void StateMachineKickOff()
+		public void StateMachineKickOff ()
 		{
-			TestModule("ComplexPdb.dll", module => {
-				var state_machine = module.GetType("ComplexPdb.Program/<TestAsync>d__2");
-				var move_next = state_machine.GetMethod("MoveNext");
+			TestModule ("ComplexPdb.dll", module => {
+				var state_machine = module.GetType ("ComplexPdb.Program/<TestAsync>d__2");
+				var move_next = state_machine.GetMethod ("MoveNext");
 				var symbol = move_next.DebugInformation;
 
-				Assert.IsNotNull(symbol);
-				Assert.IsNotNull(symbol.StateMachineKickOffMethod);
-				Assert.AreEqual("System.Threading.Tasks.Task ComplexPdb.Program::TestAsync()", symbol.StateMachineKickOffMethod.FullName);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+				Assert.IsNotNull (symbol);
+				Assert.IsNotNull (symbol.StateMachineKickOffMethod);
+				Assert.AreEqual ("System.Threading.Tasks.Task ComplexPdb.Program::TestAsync()", symbol.StateMachineKickOffMethod.FullName);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
-		public void Iterators()
+		public void Iterators ()
 		{
-			TestModule("ComplexPdb.dll", module => {
-				var state_machine = module.GetType("ComplexPdb.Program/<TestAsync>d__2");
-				var move_next = state_machine.GetMethod("MoveNext");
+			TestModule ("ComplexPdb.dll", module => {
+				var state_machine = module.GetType ("ComplexPdb.Program/<TestAsync>d__2");
+				var move_next = state_machine.GetMethod ("MoveNext");
 
-				Assert.IsTrue(move_next.DebugInformation.HasCustomDebugInformations);
-				Assert.AreEqual(2, move_next.DebugInformation.CustomDebugInformations.Count);
+				Assert.IsTrue (move_next.DebugInformation.HasCustomDebugInformations);
+				Assert.AreEqual (2, move_next.DebugInformation.CustomDebugInformations.Count);
 
-				var state_machine_scope = move_next.DebugInformation.CustomDebugInformations[0] as StateMachineScopeDebugInformation;
-				Assert.IsNotNull(state_machine_scope);
-				Assert.AreEqual(142, state_machine_scope.Start.Offset);
-				Assert.AreEqual(319, state_machine_scope.End.Offset);
+				var state_machine_scope = move_next.DebugInformation.CustomDebugInformations [0] as StateMachineScopeDebugInformation;
+				Assert.IsNotNull (state_machine_scope);
+				Assert.AreEqual (142, state_machine_scope.Start.Offset);
+				Assert.AreEqual (319, state_machine_scope.End.Offset);
 
-				var async_body = move_next.DebugInformation.CustomDebugInformations[1] as AsyncMethodBodyDebugInformation;
-				Assert.IsNotNull(async_body);
-				Assert.AreEqual(-1, async_body.CatchHandler.Offset);
+				var async_body = move_next.DebugInformation.CustomDebugInformations [1] as AsyncMethodBodyDebugInformation;
+				Assert.IsNotNull (async_body);
+				Assert.AreEqual (-1, async_body.CatchHandler.Offset);
 
-				Assert.AreEqual(2, async_body.Yields.Count);
-				Assert.AreEqual(68, async_body.Yields[0].Offset);
-				Assert.AreEqual(197, async_body.Yields[1].Offset);
+				Assert.AreEqual (2, async_body.Yields.Count);
+				Assert.AreEqual (68, async_body.Yields [0].Offset);
+				Assert.AreEqual (197, async_body.Yields [1].Offset);
 
-				Assert.AreEqual(2, async_body.Resumes.Count);
-				Assert.AreEqual(98, async_body.Resumes[0].Offset);
-				Assert.AreEqual(227, async_body.Resumes[1].Offset);
+				Assert.AreEqual (2, async_body.Resumes.Count);
+				Assert.AreEqual (98, async_body.Resumes [0].Offset);
+				Assert.AreEqual (227, async_body.Resumes [1].Offset);
 
-				Assert.AreEqual(move_next, async_body.MoveNextMethod);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+				Assert.AreEqual (move_next, async_body.MoveNextMethod);
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
-
 
 		[Test]
 		public void CreateMethodFromScratch ()

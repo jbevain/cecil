@@ -115,15 +115,14 @@ namespace Mono.Cecil.Pdb {
 
 			ReadSequencePoints (function, symbol);
 
-			if (!function.scopes.IsNullOrEmpty())
-				symbol.scope = ReadScopeAndLocals (function.scopes [0], symbol);
-			else
-				symbol.scope = new ScopeDebugInformation { Start = new InstructionOffset(0), End = new InstructionOffset((int)function.length) };
+			symbol.scope = !function.scopes.IsNullOrEmpty ()
+				? ReadScopeAndLocals (function.scopes [0], symbol)
+				: new ScopeDebugInformation { Start = new InstructionOffset (0), End = new InstructionOffset ((int) function.length) };
 
 			if (function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod != method.MetadataToken.ToUInt32 () && function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod != 0) {
-				var methodWhoseUsingInfoAppliesToThisMethod = (MethodDefinition)method.Module.LookupToken((int)function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod);
-				if (methodWhoseUsingInfoAppliesToThisMethod != null && methodWhoseUsingInfoAppliesToThisMethod.DebugInformation.Scope != null)
-					symbol.scope.Import = methodWhoseUsingInfoAppliesToThisMethod.DebugInformation.Scope.Import;
+				var import_parent = (MethodDefinition) method.Module.LookupToken ((int) function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod);
+				if (import_parent != null && import_parent.DebugInformation.Scope != null)
+					symbol.scope.Import = import_parent.DebugInformation.Scope.Import;
 			}
 
 			if (function.scopes.Length > 1) {
@@ -134,24 +133,22 @@ namespace Mono.Cecil.Pdb {
 				}
 			}
 
-			if (function.iteratorScopes != null) {
-				foreach (var iteratorScope in function.iteratorScopes) {
-					symbol.CustomDebugInformations.Add (new StateMachineScopeDebugInformation ((int)iteratorScope.Offset, (int)iteratorScope.Offset + (int)iteratorScope.Length + 1));
-				}
-			}
+			if (function.iteratorScopes != null)
+				foreach (var iterator_scope in function.iteratorScopes)
+					symbol.CustomDebugInformations.Add (new StateMachineScopeDebugInformation ((int) iterator_scope.Offset, (int) (iterator_scope.Offset + iterator_scope.Length + 1)));
 
 			if (function.synchronizationInformation != null) {
-				var asyncDebugInfo = new AsyncMethodBodyDebugInformation ((int)function.synchronizationInformation.GeneratedCatchHandlerOffset);
+				var async_debug_info = new AsyncMethodBodyDebugInformation ((int) function.synchronizationInformation.GeneratedCatchHandlerOffset);
 
-				foreach (var synchronizationPoint in function.synchronizationInformation.synchronizationPoints) {
-					asyncDebugInfo.Yields.Add (new InstructionOffset ((int)synchronizationPoint.SynchronizeOffset));
-					asyncDebugInfo.Resumes.Add (new InstructionOffset ((int)synchronizationPoint.ContinuationOffset));
+				foreach (var synchronization_point in function.synchronizationInformation.synchronizationPoints) {
+					async_debug_info.Yields.Add (new InstructionOffset ((int) synchronization_point.SynchronizeOffset));
+					async_debug_info.Resumes.Add (new InstructionOffset ((int) synchronization_point.ContinuationOffset));
 				}
 
-				symbol.CustomDebugInformations.Add (asyncDebugInfo);
+				symbol.CustomDebugInformations.Add (async_debug_info);
 
-				asyncDebugInfo.MoveNextMethod = method;
-				symbol.StateMachineKickOffMethod = (MethodDefinition)method.Module.LookupToken((int)function.synchronizationInformation.kickoffMethodToken);
+				async_debug_info.MoveNextMethod = method;
+				symbol.StateMachineKickOffMethod = (MethodDefinition) method.Module.LookupToken ((int) function.synchronizationInformation.kickoffMethodToken);
 			}
 
 			return symbol;
@@ -174,7 +171,7 @@ namespace Mono.Cecil.Pdb {
 			parent.Start = new InstructionOffset ((int) scope.offset);
 			parent.End = new InstructionOffset ((int) (scope.offset + scope.length));
 
-			if (!scope.slots.IsNullOrEmpty()) {
+			if (!scope.slots.IsNullOrEmpty ()) {
 				parent.variables = new Collection<VariableDebugInformation> (scope.slots.Length);
 
 				foreach (PdbSlot slot in scope.slots) {
@@ -193,55 +190,52 @@ namespace Mono.Cecil.Pdb {
 				parent.constants = new Collection<ConstantDebugInformation> (scope.constants.Length);
 
 				foreach (var constant in scope.constants) {
-					var type = (TypeReference) info.method.Module.LookupToken ((int) constant.token);
+					var type = info.Method.Module.Read (constant, (c, r) => r.ReadConstantSignature (new MetadataToken (c.token)));
 					var value = constant.value;
 
 					// Object "null" is encoded as integer
-					if (type != null && !type.IsValueType && value is int && (int)value == 0)
+					if (type != null && !type.IsValueType && value is int && (int) value == 0)
 						value = null;
 
-					parent.constants.Add(new ConstantDebugInformation(
-						constant.name,
-						type,
-						value));
+					parent.constants.Add (new ConstantDebugInformation (constant.name, type, value));
 				}
 			}
 
-			if (!scope.usedNamespaces.IsNullOrEmpty()) {
-				parent.import = new ImportDebugInformation();
+			if (!scope.usedNamespaces.IsNullOrEmpty ()) {
+				parent.import = new ImportDebugInformation ();
 
-				foreach (var usedNamespace in scope.usedNamespaces) {
-					var usedNamespaceKind = usedNamespace[0];
-					switch (usedNamespaceKind) {
+				foreach (var used_namespace in scope.usedNamespaces) {
+					ImportTarget target = null;
+					var value = used_namespace.Substring (1);
+					switch (used_namespace [0]) {
+					case 'U':
+						target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = value };
+						break;
+					case 'T': {
+						var type = info.Method.Module.GetType (value, runtimeName: true);
+						if (type != null)
+							target = new ImportTarget (ImportTargetKind.ImportType) { type = type };
+						break;
+					}
+					case 'A':
+						var index = used_namespace.IndexOf(' ');
+						var alias_value = used_namespace.Substring (1, index - 1);
+						var alias_target_value = used_namespace.Substring (index + 2);
+						switch (used_namespace [index + 1]) {
 						case 'U':
-							parent.import.Targets.Add(new ImportTarget(ImportTargetKind.ImportNamespace) { @namespace = usedNamespace.Substring(1) });
+							target = new ImportTarget (ImportTargetKind.DefineNamespaceAlias) { alias = alias_value, @namespace = alias_target_value };
 							break;
 						case 'T':
-						{
-							var type = info.Method.Module.GetType(usedNamespace.Substring(1), true);
+							var type = info.Method.Module.GetType (alias_target_value, runtimeName: true);
 							if (type != null)
-								parent.import.Targets.Add(new ImportTarget(ImportTargetKind.ImportType) {type = type});
+								target = new ImportTarget (ImportTargetKind.DefineTypeAlias) { alias = alias_value, type = type };
 							break;
 						}
-						case 'A':
-						{
-							var aliasSplit = usedNamespace.IndexOf(' ');
-							var alias = usedNamespace.Substring(1, aliasSplit - 1);
-							var aliasTarget = usedNamespace.Substring(aliasSplit + 2);
-							switch (usedNamespace[aliasSplit + 1])
-							{
-								case 'U':
-									parent.import.Targets.Add(new ImportTarget(ImportTargetKind.DefineNamespaceAlias) { alias = alias, @namespace = aliasTarget });
-									break;
-								case 'T':
-									var type = info.Method.Module.GetType(aliasTarget, true);
-									if (type != null)
-										parent.import.Targets.Add(new ImportTarget(ImportTargetKind.DefineTypeAlias) { alias = alias, type = type });
-									break;
-							}
-							break;
-						}
+						break;
 					}
+
+					if (target != null)
+						parent.import.Targets.Add (target);
 				}
 			}
 
