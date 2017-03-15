@@ -873,17 +873,35 @@ namespace Mono.Cecil.Cil {
 
 #if !PCL
 	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
+		SymbolKind? default_reader_kind;
+
+		public DefaultSymbolWriterProvider()
+		{
+		}
+
+		public DefaultSymbolWriterProvider(ISymbolReader symbolReader)
+		{
+			default_reader_kind = SymbolProvider.GetSymbolKind(symbolReader.GetType());
+		}
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
-			var reader = module.SymbolReader;
-			if (reader == null)
-				throw new InvalidOperationException ();
-
 			if (module.Image != null && module.Image.HasDebugTables ())
 				return null;
 
-			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
+			SymbolKind reader_kind;
+			if (default_reader_kind.HasValue)
+			{
+				reader_kind = default_reader_kind.Value;
+			}
+			else
+			{
+				var reader = module.SymbolReader;
+				if (reader == null)
+					throw new InvalidOperationException();
+
+				reader_kind = SymbolProvider.GetSymbolKind(reader.GetType());
+			}
 			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName);
 		}
 
