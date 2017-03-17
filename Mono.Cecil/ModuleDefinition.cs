@@ -1100,7 +1100,7 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			var stream = GetFileStream (fileName, FileMode.Open, parameters.ReadWrite ? FileAccess.ReadWrite : FileAccess.Read, parameters.ReadWrite ? FileShare.ReadWrite : FileShare.Read);
+			var stream = GetFileStream (fileName, FileMode.Open, parameters.ReadWrite ? FileAccess.ReadWrite : FileAccess.Read, FileShare.Read);
 
 			if (parameters.InMemory) {
 				var memory = new MemoryStream (stream.CanSeek ? (int) stream.Length : 0);
