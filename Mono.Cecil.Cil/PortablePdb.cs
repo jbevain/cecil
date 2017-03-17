@@ -65,6 +65,11 @@ namespace Mono.Cecil.Cil {
 			this.debug_reader = new MetadataReader (image, module, this.reader);
 		}
 
+		public ISymbolWriterProvider GetWriterProvider ()
+		{
+			return new PortablePdbWriterProvider ();
+		}
+
 		public bool ProcessDebugHeader (ImageDebugHeader header)
 		{
 			if (image == module.Image)
@@ -192,6 +197,11 @@ namespace Mono.Cecil.Cil {
 			this.reader = reader;
 		}
 
+		public ISymbolWriterProvider GetWriterProvider ()
+		{
+			return new EmbeddedPortablePdbWriterProvider ();
+		}
+
 		public bool ProcessDebugHeader (ImageDebugHeader header)
 		{
 			return reader.ProcessDebugHeader (header);
@@ -273,6 +283,11 @@ namespace Mono.Cecil.Cil {
 
 			if (module_metadata != pdb_metadata)
 				this.pdb_metadata.metadata_builder = metadata;
+		}
+
+		public ISymbolReaderProvider GetReaderProvider ()
+		{
+			return new PortablePdbReaderProvider ();
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
@@ -412,6 +427,11 @@ namespace Mono.Cecil.Cil {
 		{
 			this.stream = stream;
 			this.writer = writer;
+		}
+
+		public ISymbolReaderProvider GetReaderProvider ()
+		{
+			return new EmbeddedPortablePdbReaderProvider ();
 		}
 
 		public ImageDebugHeader GetDebugHeader ()

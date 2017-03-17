@@ -48,6 +48,11 @@ namespace Mono.Cecil.Mdb {
 			this.source_files = new Dictionary<string, SourceFile> ();
 		}
 
+		public ISymbolReaderProvider GetReaderProvider ()
+		{
+			return new MdbReaderProvider ();
+		}
+
 		SourceFile GetSourceFile (Document document)
 		{
 			var url = document.Url;

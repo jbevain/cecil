@@ -678,6 +678,7 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolReader : IDisposable {
 
+		ISymbolWriterProvider GetWriterProvider ();
 		bool ProcessDebugHeader (ImageDebugHeader header);
 		MethodDebugInformation Read (MethodDefinition method);
 	}
@@ -796,11 +797,13 @@ namespace Mono.Cecil.Cil {
 		{
 			if (kind == SymbolKind.PortablePdb)
 				return new PortablePdbReaderProvider ();
+			if (kind == SymbolKind.EmbeddedPortablePdb)
+				return new EmbeddedPortablePdbReaderProvider ();
 
-			var providerName = GetSymbolTypeName (kind, "ReaderProvider");
-			var type = GetSymbolType (kind, providerName);
+			var provider_name = GetSymbolTypeName (kind, "ReaderProvider");
+			var type = GetSymbolType (kind, provider_name);
 			if (type == null)
-				throw new TypeLoadException ("Could not find symbol provider type " + providerName);
+				throw new TypeLoadException ("Could not find symbol provider type " + provider_name);
 
 			return (ISymbolReaderProvider) Activator.CreateInstance (type);
 		}
@@ -822,36 +825,6 @@ namespace Mono.Cecil.Cil {
 
 			throw new ArgumentException ();
 		}
-
-#if !READ_ONLY
-
-		public static ISymbolWriterProvider GetWriterProvider (SymbolKind kind)
-		{
-			if (kind == SymbolKind.PortablePdb)
-				return new PortablePdbWriterProvider ();
-
-			var type = GetSymbolType (kind, GetSymbolTypeName (kind, "WriterProvider"));
-			if (type == null)
-				return null;
-
-			return (ISymbolWriterProvider) Activator.CreateInstance (type);
-		}
-
-		public static SymbolKind GetSymbolKind (Type type)
-		{
-			if (type.Name.Contains (SymbolKind.EmbeddedPortablePdb.ToString ()))
-				return SymbolKind.EmbeddedPortablePdb;
-			if (type.Name.Contains (SymbolKind.PortablePdb.ToString ()))
-				return SymbolKind.PortablePdb;
-			if (type.Name.Contains (SymbolKind.NativePdb.ToString ()))
-				return SymbolKind.NativePdb;
-			if (type.Name.Contains (SymbolKind.Mdb.ToString ()))
-				return SymbolKind.Mdb;
-
-			throw new ArgumentException ();
-		}
-
-#endif
 	}
 #endif
 
@@ -859,6 +832,7 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriter : IDisposable {
 
+		ISymbolReaderProvider GetReaderProvider ();
 		ImageDebugHeader GetDebugHeader ();
 		void Write (MethodDebugInformation info);
 	}
@@ -883,8 +857,7 @@ namespace Mono.Cecil.Cil {
 			if (module.Image != null && module.Image.HasDebugTables ())
 				return null;
 
-			var reader_kind = SymbolProvider.GetSymbolKind (reader.GetType ());
-			return SymbolProvider.GetWriterProvider (reader_kind).GetSymbolWriter (module, fileName);
+			return reader.GetWriterProvider ().GetSymbolWriter (module, fileName);
 		}
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
