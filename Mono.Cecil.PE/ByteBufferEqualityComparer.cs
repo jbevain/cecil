@@ -32,29 +32,17 @@ namespace Mono.Cecil.PE {
 
 		public int GetHashCode (ByteBuffer buffer)
 		{
-#if !BYTE_BUFFER_WELL_DISTRIBUTED_HASH
-			var hash = 0;
+			// See http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+			const int fnv_offset_bias = unchecked((int)2166136261);
+			const int fnv_prime = 16777619;
+
+			var hash_code = fnv_offset_bias;
 			var bytes = buffer.buffer;
+
 			for (int i = 0; i < buffer.length; i++)
-				hash = (hash * 37) ^ bytes [i];
+				hash_code = unchecked ((hash_code ^ bytes [i]) * fnv_prime);
 
-			return hash;
-#else
-			const uint p = 16777619;
-			uint hash = 2166136261;
-
-			var bytes = buffer.buffer;
-			for (int i = 0; i < buffer.length; i++)
-			    hash = (hash ^ bytes [i]) * p;
-
-			hash += hash << 13;
-			hash ^= hash >> 7;
-			hash += hash << 3;
-			hash ^= hash >> 17;
-			hash += hash << 5;
-
-			return (int) hash;
-#endif
-		}
+			return hash_code;
+ 		}
 	}
 }
