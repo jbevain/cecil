@@ -32,6 +32,11 @@ namespace Mono.Cecil.Pdb {
 			this.documents = new Dictionary<string, SymDocumentWriter> ();
 		}
 
+		public ISymbolReaderProvider GetReaderProvider ()
+		{
+			return new NativePdbReaderProvider ();
+		}
+
 		public ImageDebugHeader GetDebugHeader ()
 		{
 			ImageDebugDirectory directory;

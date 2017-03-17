@@ -34,6 +34,11 @@ namespace Mono.Cecil.Pdb {
 			this.pdb_file = file;
 		}
 
+		public ISymbolWriterProvider GetWriterProvider ()
+		{
+			return new NativePdbWriterProvider ();
+		}
+
 		/*
 		uint Magic = 0x53445352;
 		Guid Signature;
