@@ -27,7 +27,7 @@ namespace Mono.Cecil.Cil {
 		readonly RVA code_base;
 		internal readonly MetadataBuilder metadata;
 		readonly Dictionary<uint, MetadataToken> standalone_signatures;
-		readonly Dictionary<byte [], RVA> small_method_bodies;
+		readonly Dictionary<ByteBuffer, RVA> tiny_method_bodies;
 
 		MethodBody body;
 
@@ -37,7 +37,7 @@ namespace Mono.Cecil.Cil {
 			this.code_base = metadata.text_map.GetNextRVA (TextSegment.CLIHeader);
 			this.metadata = metadata;
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
-			this.small_method_bodies = new Dictionary<byte [], RVA> (ByteSequenceComparer.Instance);
+			this.tiny_method_bodies = new Dictionary<ByteBuffer, RVA> (new ByteBufferEqualityComparer ());
 		}
 
 		public RVA WriteMethodBody (MethodDefinition method)
@@ -76,17 +76,15 @@ namespace Mono.Cecil.Cil {
 
 			int code_size;
 			MetadataToken local_var_token;
-			var buffer = code_reader.PatchRawMethodBody (method, this, out code_size, out local_var_token);
-			bool hasFatHeader = (buffer.buffer[0] & 0x3) == 0x3;
-
-			if (hasFatHeader) {
-				// Method bodies with fat headers have to be 4-byte aligned.
+			var raw_body = code_reader.PatchRawMethodBody (method, this, out code_size, out local_var_token);
+			var fat_header = (raw_body.buffer [0] & 0x3) == 0x3;
+			if (fat_header)
 				Align (4);
-			}
+
 			var rva = BeginMethod ();
 
-			if (hasFatHeader || !CanReuseSmallMethodBody (buffer.buffer, ref rva))  {
-				WriteBytes (buffer);
+			if (fat_header || !GetOrMapTinyMethodBody (raw_body, ref rva))  {
+				WriteBytes (raw_body);
 			}
 
 			if (method.debug_info == null)
@@ -109,7 +107,6 @@ namespace Mono.Cecil.Cil {
 			body = method.Body;
 			ComputeHeader ();
 			if (RequiresFatHeader ()) {
-				// Method bodies with fat headers have to be 4-byte aligned.
 				Align (4);
 				rva = BeginMethod ();
 				WriteFatHeader ();
@@ -117,22 +114,19 @@ namespace Mono.Cecil.Cil {
 
 				if (body.HasExceptionHandlers)
 					WriteExceptionHandlers ();
-			}
-			else {
-				// Tiny method headers can start on any byte boundary.
+			} else {
 				rva = BeginMethod ();
-				WriteByte ((byte)(0x2 | (body.CodeSize << 2))); // tiny
+				WriteByte ((byte) (0x2 | (body.CodeSize << 2))); // tiny
 				WriteInstructions ();
 
-				// Check if a body with the same bytes has already been emitted.
-				int start_position = (int)(rva - code_base);
-				int body_byte_size = position - start_position;
-				byte [] body_bytes = new byte [body_byte_size];
-				Array.Copy (buffer, start_position, body_bytes, 0, body_byte_size);
-				if (CanReuseSmallMethodBody (body_bytes, ref rva)) {
-					// Discard the bytes just written.
+				var start_position = (int) (rva - code_base);
+				var body_size = position - start_position;
+				var body_bytes = new byte [body_size];
+
+				Array.Copy (buffer, start_position, body_bytes, 0, body_size);
+
+				if (GetOrMapTinyMethodBody (new ByteBuffer (body_bytes), ref rva))
 					position = start_position;
-				}
 			}
 
 			var symbol_writer = metadata.symbol_writer;
@@ -145,18 +139,16 @@ namespace Mono.Cecil.Cil {
 			return rva;
 		}
 
-		bool CanReuseSmallMethodBody(byte[] body_bytes, ref RVA rva)
+		bool GetOrMapTinyMethodBody (ByteBuffer body, ref RVA rva)
 		{
-			RVA existing_body_rva;
-			if (small_method_bodies.TryGetValue (body_bytes, out existing_body_rva)) {
-				// Reuse an identical body that has already been emitted.
-				rva = existing_body_rva;
+			RVA existing_rva;
+			if (tiny_method_bodies.TryGetValue (body, out existing_rva)) {
+				rva = existing_rva;
 				return true;
 			}
-			else {
-				small_method_bodies.Add (body_bytes, rva);
-				return false;
-			}
+
+			tiny_method_bodies.Add (body, rva);
+			return false;
 		}
 
 		void WriteFatHeader ()
@@ -662,72 +654,6 @@ namespace Mono.Cecil.Cil {
 			WriteBytes (((position + align) & ~align) - position);
 		}
 	}
-
-	internal sealed class ByteSequenceComparer : IEqualityComparer<byte []>
-	{
-		internal static readonly ByteSequenceComparer Instance = new ByteSequenceComparer ();
-
-		private ByteSequenceComparer()
-		{
-		}
-
-		internal static bool Equals(byte [] left, byte [] right)
-		{
-			if (ReferenceEquals (left, right)) {
-				return true;
-			}
-
-			if (left == null || right == null || (left.Length != right.Length)) {
-				return false;
-			}
-
-			for (var i = 0; i < left.Length; i++) {
-				if (left [i] != right [i]) {
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		// Hash computation below uses the FNV-1a algorithm
-		// (http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function).
-
-		internal static int GetHashCode (byte [] x)
-		{
-			return GetFNVHashCode (x);
-		}
-
-		bool IEqualityComparer<byte []>.Equals(byte [] x, byte [] y)
-		{
-			return Equals (x, y);
-		}
-
-		int IEqualityComparer<byte []>.GetHashCode(byte [] x)
-		{
-			return GetHashCode (x);
-		}
-
-		// The offset bias value used in the FNV-1a algorithm
-		// See http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-		internal const int fnv_offset_bias = unchecked((int)2166136261);
-
-		/// The generative factor used in the FNV-1a algorithm
-		/// See http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-		internal const int fnv_prime = 16777619;
-
-		static int GetFNVHashCode(byte [] data)
-		{
-			int hash_code = fnv_offset_bias;
-
-			for (int i = 0; i < data.Length; i++) {
-				hash_code = unchecked((hash_code ^ data [i]) * fnv_prime);
-			}
-
-			return hash_code;
-		}
-	}
-
 }
 
 #endif
