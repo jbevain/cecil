@@ -29,7 +29,7 @@ namespace Mono.Cecil {
 		MethodReference ImportReference (MethodReference method, IGenericParameterProvider context);
 	}
 
-#if !PCL && !NET_CORE
+#if !PCL
 
 	public interface IReflectionImporterProvider {
 		IReflectionImporter GetReflectionImporter (ModuleDefinition module);
@@ -126,7 +126,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-#if !PCL && !NET_CORE
+#if !PCL
 
 	public class ReflectionImporter : IReflectionImporter {
 
@@ -159,7 +159,9 @@ namespace Mono.Cecil {
 			{ typeof (float), ElementType.R4 },
 			{ typeof (double), ElementType.R8 },
 			{ typeof (string), ElementType.String },
+#if !NET_CORE
 			{ typeof (TypedReference), ElementType.TypedByRef },
+#endif
 			{ typeof (IntPtr), ElementType.I },
 			{ typeof (UIntPtr), ElementType.U },
 			{ typeof (object), ElementType.Object },
@@ -179,8 +181,8 @@ namespace Mono.Cecil {
 				string.Empty,
 				type.Name,
 				module,
-				ImportScope (type.Assembly),
-				type.IsValueType);
+				ImportScope (type.Assembly ()),
+				type.IsValueType ());
 
 			reference.etype = ImportElementType (type);
 
@@ -189,7 +191,7 @@ namespace Mono.Cecil {
 			else
 				reference.Namespace = type.Namespace ?? string.Empty;
 
-			if (type.IsGenericType)
+			if (type.IsGenericType ())
 				ImportGenericParameters (reference, type.GetGenericArguments ());
 
 			return reference;
@@ -197,7 +199,7 @@ namespace Mono.Cecil {
 
 		static bool ImportOpenGenericType (Type type, ImportGenericKind import_kind)
 		{
-			return type.IsGenericType && type.IsGenericTypeDefinition && import_kind == ImportGenericKind.Open;
+			return type.IsGenericType () && type.IsGenericTypeDefinition () && import_kind == ImportGenericKind.Open;
 		}
 
 		static bool ImportOpenGenericMethod (SR.MethodBase method, ImportGenericKind import_kind)
@@ -221,7 +223,7 @@ namespace Mono.Cecil {
 			if (type.IsArray)
 				return new ArrayType (ImportType (type.GetElementType (), context), type.GetArrayRank ());
 
-			if (type.IsGenericType)
+			if (type.IsGenericType ())
 				return ImportGenericInstance (type, context);
 
 			if (type.IsGenericParameter)
@@ -235,8 +237,8 @@ namespace Mono.Cecil {
 			if (context.IsEmpty)
 				throw new InvalidOperationException ();
 
-			if (type.DeclaringMethod != null)
-				return context.MethodParameter (NormalizeMethodName (type.DeclaringMethod), type.GenericParameterPosition);
+			if (type.DeclaringMethod () != null)
+				return context.MethodParameter (NormalizeMethodName (type.DeclaringMethod ()), type.GenericParameterPosition);
 
 			if (type.DeclaringType != null)
 				return context.TypeParameter (NormalizeTypeFullName (type.DeclaringType), type.GenericParameterPosition);
@@ -284,7 +286,7 @@ namespace Mono.Cecil {
 
 		static bool IsGenericInstance (Type type)
 		{
-			return type.IsGenericType && !type.IsGenericTypeDefinition;
+			return type.IsGenericType () && !type.IsGenericTypeDefinition ();
 		}
 
 		static ElementType ImportElementType (Type type)
@@ -306,9 +308,11 @@ namespace Mono.Cecil {
 				return scope;
 
 			scope = new AssemblyNameReference (name.Name, name.Version) {
-				Culture = name.CultureInfo.Name,
 				PublicKeyToken = name.GetPublicKeyToken (),
+#if !NET_CORE
+				Culture = name.CultureInfo.Name,
 				HashAlgorithm = (AssemblyHashAlgorithm) name.HashAlgorithm,
+#endif
 			};
 
 			module.AssemblyReferences.Add (scope);
@@ -354,7 +358,20 @@ namespace Mono.Cecil {
 
 		static SR.FieldInfo ResolveFieldDefinition (SR.FieldInfo field)
 		{
+#if NET_CORE
+			throw new NotImplementedException ();
+#else
 			return field.Module.ResolveField (field.MetadataToken);
+#endif
+		}
+
+		static SR.MethodBase ResolveMethodDefinition (SR.MethodBase method)
+		{
+#if NET_CORE
+			throw new NotImplementedException ();
+#else
+			return method.Module.ResolveMethod (method.MetadataToken);
+#endif
 		}
 
 		MethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)
@@ -365,7 +382,7 @@ namespace Mono.Cecil {
 			var declaring_type = ImportType (method.DeclaringType, context);
 
 			if (IsGenericInstance (method.DeclaringType))
-				method = method.Module.ResolveMethod (method.MetadataToken);
+				method = ResolveMethodDefinition (method);
 
 			var reference = new MethodReference {
 				Name = method.Name,
