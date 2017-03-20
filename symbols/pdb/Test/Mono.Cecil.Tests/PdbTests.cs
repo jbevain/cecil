@@ -261,7 +261,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("u", constant.Name);
 				Assert.AreEqual (null, constant.Value);
 				Assert.AreEqual (MetadataType.String, constant.ConstantType.MetadataType);
-			}, readOnly: true, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]

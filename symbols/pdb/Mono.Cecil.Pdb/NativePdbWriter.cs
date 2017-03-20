@@ -23,12 +23,14 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Pdb {
 
-	public class NativePdbWriter : Cil.ISymbolWriter {
+	public class NativePdbWriter : Cil.ISymbolWriter, Cil.IMetadataSymbolWriter {
 
 		readonly ModuleDefinition module;
 		readonly SymWriter writer;
 		readonly Dictionary<string, SymDocumentWriter> documents;
 		readonly Dictionary<ImportDebugInformation, MetadataToken> import_info_to_parent;
+
+		MetadataBuilder metadata;
 
 		internal NativePdbWriter (ModuleDefinition module, SymWriter writer)
 		{
@@ -73,6 +75,7 @@ namespace Mono.Cecil.Pdb {
 		{
 			this.metadata = metadata;
 		}
+
 
 		void DefineCustomMetadata (MethodDebugInformation info, MetadataToken import_parent)
 		{
@@ -175,7 +178,14 @@ namespace Mono.Cecil.Pdb {
 			if (!scope.variables.IsNullOrEmpty ()) {
 				for (int i = 0; i < scope.variables.Count; i++) {
 					var variable = scope.variables [i];
-					CreateLocalVariable (variable, sym_token, start_offset, end_offset);
+					DefineLocalVariable (variable, sym_token, start_offset, end_offset);
+				}
+			}
+
+			if (!scope.constants.IsNullOrEmpty ()) {
+				for (int i = 0; i < scope.constants.Count; i++) {
+					var constant = scope.constants [i];
+					DefineConstant (constant);
 				}
 			}
 
@@ -204,7 +214,7 @@ namespace Mono.Cecil.Pdb {
 			}
 		}
 
-		void CreateLocalVariable (VariableDebugInformation variable, SymbolToken local_var_token, int start_offset, int end_offset)
+		void DefineLocalVariable (VariableDebugInformation variable, SymbolToken local_var_token, int start_offset, int end_offset)
 		{
 			writer.DefineLocalVariable2 (
 				variable.Name,
@@ -216,6 +226,14 @@ namespace Mono.Cecil.Pdb {
 				0,
 				start_offset,
 				end_offset);
+		}
+
+		void DefineConstant (ConstantDebugInformation constant)
+		{
+			var row = metadata.AddStandAloneSignature (metadata.GetConstantTypeBlobIndex (constant.ConstantType));
+			var token = new MetadataToken (TokenType.Signature, row);
+
+			writer.DefineConstant2 (constant.Name, constant.Value, new SymbolToken (token.ToInt32 ()));
 		}
 
 		SymDocumentWriter GetDocument (Document document)
