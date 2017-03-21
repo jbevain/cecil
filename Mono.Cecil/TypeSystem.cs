@@ -95,21 +95,15 @@ namespace Mono.Cecil {
 				if (core_library != null)
 					return core_library;
 
-				const string mscorlib = "mscorlib";
-				const string system_runtime = "System.Runtime";
-				const string system_private_corelib = "System.Private.CoreLib";
+				string [] libraries = { "mscorlib", "System.Runtime", "System.Private.CoreLib", "netstandard" };
 
-				if (TryLookupReference (mscorlib, out core_library))
-					return core_library;
-
-				if (TryLookupReference (system_runtime, out core_library))
-					return core_library;
-
-				if (TryLookupReference (system_private_corelib, out core_library))
-					return core_library;
+				foreach (var library in libraries) {
+					if (TryLookupReference (library, out core_library))
+						return core_library;
+				}
 
 				core_library = new AssemblyNameReference {
-					Name = mscorlib,
+					Name = "mscorlib",
 					Version = GetCorlibVersion (),
 					PublicKeyToken = new byte [] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 },
 				};
