@@ -95,21 +95,11 @@ namespace Mono.Cecil {
 				if (core_library != null)
 					return core_library;
 
-				const string mscorlib = "mscorlib";
-				const string system_runtime = "System.Runtime";
-				const string system_private_corelib = "System.Private.CoreLib";
-
-				if (TryLookupReference (mscorlib, out core_library))
-					return core_library;
-
-				if (TryLookupReference (system_runtime, out core_library))
-					return core_library;
-
-				if (TryLookupReference (system_private_corelib, out core_library))
+				if (module.TryGetCoreLibraryReference (out core_library))
 					return core_library;
 
 				core_library = new AssemblyNameReference {
-					Name = mscorlib,
+					Name = Mixin.mscorlib,
 					Version = GetCorlibVersion (),
 					PublicKeyToken = new byte [] { 0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89 },
 				};
@@ -117,20 +107,6 @@ namespace Mono.Cecil {
 				module.AssemblyReferences.Add (core_library);
 
 				return core_library;
-			}
-
-			bool TryLookupReference (string name, out AssemblyNameReference reference)
-			{
-				var references = module.AssemblyReferences;
-
-				for (int i = 0; i < references.Count; i++) {
-					reference = references [i];
-					if (reference.Name == name)
-						return true;
-				}
-
-				reference = null;
-				return false;
 			}
 
 			Version GetCorlibVersion ()
@@ -298,6 +274,52 @@ namespace Mono.Cecil {
 
 		public TypeReference TypedReference {
 			get { return type_typedref ?? (LookupSystemValueType (ref type_typedref, "TypedReference", ElementType.TypedByRef)); }
+		}
+	}
+
+	static partial class Mixin {
+
+		public const string mscorlib = "mscorlib";
+		public const string system_runtime = "System.Runtime";
+		public const string system_private_corelib = "System.Private.CoreLib";
+		public const string netstandard = "netstandard";
+
+		public static bool TryGetCoreLibraryReference (this ModuleDefinition module, out AssemblyNameReference reference)
+		{
+			var references = module.AssemblyReferences;
+
+			for (int i = 0; i < references.Count; i++) {
+				reference = references [i];
+				if (IsCoreLibrary (reference))
+					return true;
+			}
+
+			reference = null;
+			return false;
+
+		}
+
+		public static bool IsCoreLibrary (this ModuleDefinition module)
+		{
+			if (module.Assembly == null)
+				return false;
+
+			if (!IsCoreLibrary (module.Assembly.Name))
+				return false;
+
+			if (module.HasImage && module.Read (module, (m, reader) => reader.image.GetTableLength (Table.AssemblyRef) > 0))
+				return false;
+
+			return true;
+		}
+
+		static bool IsCoreLibrary (AssemblyNameReference reference)
+		{
+			var name = reference.Name;
+			return name == mscorlib
+				|| name == system_runtime
+				|| name == system_private_corelib
+				|| name == netstandard;
 		}
 	}
 }
