@@ -255,10 +255,24 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void DeferredCorlibTypeDef ()
 		{
-			var module = ModuleDefinition.ReadModule (typeof (object).Assembly.Location, new ReaderParameters (ReadingMode.Deferred));
-			var object_type = module.TypeSystem.Object;
+			using (var module = ModuleDefinition.ReadModule (typeof (object).Assembly.Location, new ReaderParameters (ReadingMode.Deferred))) {
+				var object_type = module.TypeSystem.Object;
+				Assert.IsInstanceOf<TypeDefinition> (object_type);
+			}
+		}
 
-			Assert.IsInstanceOf<TypeDefinition> (object_type);
+		[Test]
+		public void CorlibTypesMetadataType ()
+		{
+			using (var module = ModuleDefinition.ReadModule (typeof (object).Assembly.Location)) {
+				var type = module.GetType ("System.String");
+				Assert.IsNotNull (type);
+				Assert.IsNotNull (type.BaseType);
+				Assert.AreEqual ("System.Object", type.BaseType.FullName);
+				Assert.IsInstanceOf<TypeDefinition> (type.BaseType);
+				Assert.AreEqual (MetadataType.String, type.MetadataType);
+				Assert.AreEqual (MetadataType.Object, type.BaseType.MetadataType);
+			}
 		}
 	}
 }

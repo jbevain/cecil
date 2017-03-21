@@ -421,7 +421,7 @@ namespace Mono.Cecil {
 		public override bool IsPrimitive {
 			get {
 				ElementType primitive_etype;
-				return MetadataSystem.TryGetPrimitiveElementType (this, out primitive_etype);
+				return MetadataSystem.TryGetPrimitiveElementType (this, out primitive_etype) && primitive_etype.IsPrimitive ();
 			}
 		}
 
