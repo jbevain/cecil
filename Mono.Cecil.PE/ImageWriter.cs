@@ -113,7 +113,7 @@ namespace Mono.Cecil.PE {
 
 		public static ImageWriter CreateDebugWriter (ModuleDefinition module, MetadataBuilder metadata, Disposable<Stream> stream)
 		{
-			var writer = new ImageWriter (module, "PDB V1.0", metadata, stream, metadataOnly: true);
+			var writer = new ImageWriter (module, "PDB v1.0", metadata, stream, metadataOnly: true);
 			var length = metadata.text_map.GetLength ();
 			writer.text = new Section { SizeOfRawData = length, VirtualSize = length };
 			return writer;
