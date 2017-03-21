@@ -53,20 +53,13 @@ namespace Mono.Cecil.Cil {
 
 		public MethodBody ReadMethodBody (MethodDefinition method)
 		{
-			// Note: ReadMethodBody needs to be reentrant (i.e. native PDB needs it for getting debug info of other methods for using scopes)
-			var oldMethod = this.method;
 			var position = MoveTo (method);
-
-			var oldBody = this.body;
-			var newBody = new MethodBody(method);
-			this.body = newBody;
+			this.body = new MethodBody (method);
 
 			ReadMethodBody ();
 
 			MoveBackTo (position);
-			this.body = oldBody;
-			this.method = oldMethod;
-			return newBody;
+			return this.body;
 		}
 
 		void ReadMethodBody ()
