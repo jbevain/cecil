@@ -531,7 +531,7 @@ namespace Mono.Cecil.PE {
 				1	// #~
 				+ 1	// #Strings
 				+ (metadata.user_string_heap.IsEmpty ? 0 : 1)	// #US
-				+ 1	// GUID
+				+ (metadata.guid_heap.IsEmpty ? 0 : 1)	// GUID
 				+ (metadata.blob_heap.IsEmpty ? 0 : 1)
 				+ (metadata.pdb_heap == null ? 0 : 1));	// #Blob
 		}
