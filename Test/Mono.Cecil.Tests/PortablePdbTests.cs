@@ -372,6 +372,14 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void EmptyPortablePdb ()
+		{
+			TestModule ("EmptyPdb.dll", module => {
+				Assert.IsTrue (module.HasSymbols);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void PortablePdbLineInfo  ()
 		{
 			TestModule ("line.exe", module => {
