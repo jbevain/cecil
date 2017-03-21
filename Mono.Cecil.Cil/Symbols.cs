@@ -514,6 +514,12 @@ namespace Mono.Cecil.Cil {
 		{
 			this.catch_handler = new InstructionOffset (catchHandler);
 		}
+
+		public AsyncMethodBodyDebugInformation ()
+			: base (KindIdentifier)
+		{
+			this.catch_handler = new InstructionOffset (-1);
+		}
 	}
 
 	public sealed class StateMachineScopeDebugInformation : CustomDebugInformation {
