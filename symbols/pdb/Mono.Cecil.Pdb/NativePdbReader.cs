@@ -28,6 +28,7 @@ namespace Mono.Cecil.Pdb {
 		readonly Disposable<Stream> pdb_file;
 		readonly Dictionary<string, Document> documents = new Dictionary<string, Document> ();
 		readonly Dictionary<uint, PdbFunction> functions = new Dictionary<uint, PdbFunction> ();
+		readonly Dictionary<PdbScope, ImportDebugInformation> imports = new Dictionary<PdbScope, ImportDebugInformation> ();
 
 		internal NativePdbReader (Disposable<Stream> file)
 		{
@@ -120,8 +121,12 @@ namespace Mono.Cecil.Pdb {
 
 			ReadSequencePoints (function, symbol);
 
-			if (!function.scopes.IsNullOrEmpty())
-				symbol.scope = ReadScopeAndLocals (function.scopes [0], symbol);
+			symbol.scope = !function.scopes.IsNullOrEmpty ()
+				? ReadScopeAndLocals (function.scopes [0], symbol)
+				: new ScopeDebugInformation { Start = new InstructionOffset (0), End = new InstructionOffset ((int) function.length) };
+
+			if (function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod != method.MetadataToken.ToUInt32 () && function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod != 0)
+				symbol.scope.import = GetImport (function.tokenOfMethodWhoseUsingInfoAppliesToThisMethod, method.Module);
 
 			if (function.scopes.Length > 1) {
 				for (int i = 1; i < function.scopes.Length; i++) {
@@ -131,10 +136,28 @@ namespace Mono.Cecil.Pdb {
 				}
 			}
 
+			if (function.iteratorScopes != null)
+				foreach (var iterator_scope in function.iteratorScopes)
+					symbol.CustomDebugInformations.Add (new StateMachineScopeDebugInformation ((int) iterator_scope.Offset, (int) (iterator_scope.Offset + iterator_scope.Length + 1)));
+
+			if (function.synchronizationInformation != null) {
+				var async_debug_info = new AsyncMethodBodyDebugInformation ((int) function.synchronizationInformation.GeneratedCatchHandlerOffset);
+
+				foreach (var synchronization_point in function.synchronizationInformation.synchronizationPoints) {
+					async_debug_info.Yields.Add (new InstructionOffset ((int) synchronization_point.SynchronizeOffset));
+					async_debug_info.Resumes.Add (new InstructionOffset ((int) synchronization_point.ContinuationOffset));
+				}
+
+				symbol.CustomDebugInformations.Add (async_debug_info);
+
+				async_debug_info.MoveNextMethod = method;
+				symbol.StateMachineKickOffMethod = (MethodDefinition) method.Module.LookupToken ((int) function.synchronizationInformation.kickoffMethodToken);
+			}
+
 			return symbol;
 		}
 
-		static Collection<ScopeDebugInformation> ReadScopeAndLocals (PdbScope [] scopes, MethodDebugInformation info)
+		Collection<ScopeDebugInformation> ReadScopeAndLocals (PdbScope [] scopes, MethodDebugInformation info)
 		{
 			var symbols = new Collection<ScopeDebugInformation> (scopes.Length);
 
@@ -145,13 +168,13 @@ namespace Mono.Cecil.Pdb {
 			return symbols;
 		}
 
-		static ScopeDebugInformation ReadScopeAndLocals (PdbScope scope, MethodDebugInformation info)
+		ScopeDebugInformation ReadScopeAndLocals (PdbScope scope, MethodDebugInformation info)
 		{
 			var parent = new ScopeDebugInformation ();
 			parent.Start = new InstructionOffset ((int) scope.offset);
 			parent.End = new InstructionOffset ((int) (scope.offset + scope.length));
 
-			if (!scope.slots.IsNullOrEmpty()) {
+			if (!scope.slots.IsNullOrEmpty ()) {
 				parent.variables = new Collection<VariableDebugInformation> (scope.slots.Length);
 
 				foreach (PdbSlot slot in scope.slots) {
@@ -170,10 +193,24 @@ namespace Mono.Cecil.Pdb {
 				parent.constants = new Collection<ConstantDebugInformation> (scope.constants.Length);
 
 				foreach (var constant in scope.constants) {
-					parent.constants.Add (new ConstantDebugInformation (
-						constant.name,
-						(TypeReference) info.method.Module.LookupToken ((int) constant.token),
-						constant.value));
+					var type = info.Method.Module.Read (constant, (c, r) => r.ReadConstantSignature (new MetadataToken (c.token)));
+					var value = constant.value;
+
+					// Object "null" is encoded as integer
+					if (type != null && !type.IsValueType && value is int && (int) value == 0)
+						value = null;
+
+					parent.constants.Add (new ConstantDebugInformation (constant.name, type, value));
+				}
+			}
+
+			if (!scope.usedNamespaces.IsNullOrEmpty ()) {
+				ImportDebugInformation import;
+				if (imports.TryGetValue (scope, out import)) {
+					parent.import = import;
+				} else {
+					import = GetImport (scope, info.Method.Module);
+					imports.Add (scope, import);
 				}
 			}
 
@@ -195,6 +232,70 @@ namespace Mono.Cecil.Pdb {
 			}
 
 			return false;
+		}
+
+		ImportDebugInformation GetImport (uint token, ModuleDefinition module)
+		{
+			PdbFunction function;
+			if (!functions.TryGetValue (token, out function))
+				return null;
+
+			if (function.scopes.Length != 1)
+				return null;
+
+			var scope = function.scopes [0];
+
+			ImportDebugInformation import;
+			if (imports.TryGetValue (scope, out import))
+				return import;
+
+			import = GetImport (scope, module);
+			imports.Add (scope, import);
+			return import;
+		}
+
+		static ImportDebugInformation GetImport (PdbScope scope, ModuleDefinition module)
+		{
+			if (scope.usedNamespaces.IsNullOrEmpty ())
+				return null;
+
+			var import = new ImportDebugInformation ();
+
+			foreach (var used_namespace in scope.usedNamespaces) {
+				ImportTarget target = null;
+				var value = used_namespace.Substring (1);
+				switch (used_namespace [0]) {
+				case 'U':
+					target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = value };
+					break;
+				case 'T': {
+					var type = module.GetType (value, runtimeName: true);
+					if (type != null)
+						target = new ImportTarget (ImportTargetKind.ImportType) { type = type };
+					break;
+				}
+				case 'A':
+					var index = used_namespace.IndexOf(' ');
+					var alias_value = used_namespace.Substring (1, index - 1);
+					var alias_target_value = used_namespace.Substring (index + 2);
+					switch (used_namespace [index + 1]) {
+					case 'U':
+						target = new ImportTarget (ImportTargetKind.DefineNamespaceAlias) { alias = alias_value, @namespace = alias_target_value };
+						break;
+					case 'T':
+						var type = module.GetType (alias_target_value, runtimeName: true);
+						if (type != null)
+							target = new ImportTarget (ImportTargetKind.DefineTypeAlias) { alias = alias_value, type = type };
+						break;
+					}
+					break;
+				}
+
+				if (target != null)
+					import.Targets.Add (target);
+			}
+
+			return import;
 		}
 
 		void ReadSequencePoints (PdbFunction function, MethodDebugInformation info)

@@ -39,6 +39,13 @@ namespace Mono.Cecil.PE {
 			BaseStream.Seek (position, SeekOrigin.Begin);
 		}
 
+		public void Align (int align)
+		{
+			align--;
+			var position = Position;
+			Advance (((position + align) & ~align) - position);
+		}
+
 		public DataDirectory ReadDataDirectory ()
 		{
 			return new DataDirectory (ReadUInt32 (), ReadUInt32 ());

@@ -2433,6 +2433,17 @@ namespace Mono.Cecil {
 			}
 		}
 
+		public TypeReference ReadConstantSignature (MetadataToken token)
+		{
+			if (token.TokenType != TokenType.Signature)
+				throw new NotSupportedException ();
+
+			if (!MoveTo (Table.StandAloneSig, token.RID))
+				return null;
+
+			return ReadFieldType (ReadBlobIndex ());
+		}
+
 		public object ReadConstant (IConstantProvider owner)
 		{
 			InitializeConstants ();

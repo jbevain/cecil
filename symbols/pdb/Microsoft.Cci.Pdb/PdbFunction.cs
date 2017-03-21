@@ -29,7 +29,7 @@ namespace Microsoft.Cci.Pdb {
 
     internal uint segment;
     internal uint address;
-    //internal uint length;
+    internal uint length;
 
     //internal byte[] metadata;
     internal PdbScope[] scopes;
@@ -208,7 +208,7 @@ namespace Microsoft.Cci.Pdb {
       //this.flags = proc.flags;
       this.segment = proc.seg;
       this.address = proc.off;
-      //this.length = proc.len;
+      this.length = proc.len;
 
       if (proc.seg != 1) {
         throw new PdbDebugException("Segment is {0}, not 1.", proc.seg);

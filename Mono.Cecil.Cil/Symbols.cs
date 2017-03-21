@@ -422,7 +422,7 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	interface ICustomDebugInformationProvider : IMetadataTokenProvider {
+	public interface ICustomDebugInformationProvider : IMetadataTokenProvider {
 		bool HasCustomDebugInformations { get; }
 		Collection<CustomDebugInformation> CustomDebugInformations { get; }
 	}
@@ -548,7 +548,7 @@ namespace Mono.Cecil.Cil {
 			: base (KindIdentifier)
 		{
 			this.start = new InstructionOffset (start);
-			this.end = new InstructionOffset (end);
+			this.end = end != null ? new InstructionOffset (end) : new InstructionOffset ();
 		}
 	}
 
