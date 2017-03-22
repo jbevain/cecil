@@ -13,9 +13,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct (Consts.AssemblyName)]
 [assembly: AssemblyCopyright ("Copyright © 2008 - 2015 Jb Evain")]
 
-#if !PCL
 [assembly: ComVisible (false)]
-#endif
 
 [assembly: AssemblyVersion ("0.10.0.0")]
 [assembly: AssemblyFileVersion ("0.10.0.0")]

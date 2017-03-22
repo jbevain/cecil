@@ -11,10 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
-#if !PCL
 using System.IO.Compression;
-#endif
 
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
@@ -23,7 +20,6 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class PortablePdbReaderProvider : ISymbolReaderProvider {
 
-#if !PCL
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
@@ -32,7 +28,6 @@ namespace Mono.Cecil.Cil {
 			var file = File.OpenRead (Mixin.GetPdbFileName (fileName));
 			return GetSymbolReader (module, Disposable.Owned (file as Stream), file.Name);
 		}
-#endif
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
@@ -149,7 +144,6 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class EmbeddedPortablePdbReaderProvider : ISymbolReaderProvider {
 
-#if !PCL
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
@@ -177,7 +171,6 @@ namespace Mono.Cecil.Cil {
 
 			return decompressed_stream;
 		}
-#endif
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
@@ -223,7 +216,6 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class PortablePdbWriterProvider : ISymbolWriterProvider
 	{
-#if !PCL
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
@@ -232,7 +224,6 @@ namespace Mono.Cecil.Cil {
 			var file = File.OpenWrite (Mixin.GetPdbFileName (fileName));
 			return GetSymbolWriter (module, Disposable.Owned (file as Stream));
 		}
-#endif
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
 		{
@@ -399,7 +390,6 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class EmbeddedPortablePdbWriterProvider : ISymbolWriterProvider {
 
-#if !PCL
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
@@ -409,7 +399,6 @@ namespace Mono.Cecil.Cil {
 			var pdb_writer = (PortablePdbWriter) new PortablePdbWriterProvider ().GetSymbolWriter (module, stream);
 			return new EmbeddedPortablePdbWriter (stream, pdb_writer);
 		}
-#endif
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
 		{
@@ -417,7 +406,6 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-#if !PCL
 	public sealed class EmbeddedPortablePdbWriter : ISymbolWriter, IMetadataSymbolWriter {
 
 		readonly Stream stream;
@@ -479,7 +467,6 @@ namespace Mono.Cecil.Cil {
 			((IMetadataSymbolWriter) writer).SetMetadata (metadata);
 		}
 	}
-#endif
 
 #endif
 

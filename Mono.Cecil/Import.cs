@@ -29,8 +29,6 @@ namespace Mono.Cecil {
 		MethodReference ImportReference (MethodReference method, IGenericParameterProvider context);
 	}
 
-#if !PCL
-
 	public interface IReflectionImporterProvider {
 		IReflectionImporter GetReflectionImporter (ModuleDefinition module);
 	}
@@ -40,8 +38,6 @@ namespace Mono.Cecil {
 		FieldReference ImportReference (SR.FieldInfo field, IGenericParameterProvider context);
 		MethodReference ImportReference (SR.MethodBase method, IGenericParameterProvider context);
 	}
-
-#endif
 
 	struct ImportGenericContext {
 
@@ -125,8 +121,6 @@ namespace Mono.Cecil {
 			return context != null ? new ImportGenericContext (context) : default (ImportGenericContext);
 		}
 	}
-
-#if !PCL
 
 	public class ReflectionImporter : IReflectionImporter {
 
@@ -482,8 +476,6 @@ namespace Mono.Cecil {
 				context != null ? ImportGenericKind.Open : ImportGenericKind.Definition);
 		}
 	}
-
-#endif
 
 	public class MetadataImporter : IMetadataImporter {
 

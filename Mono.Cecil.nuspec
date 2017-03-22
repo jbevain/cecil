@@ -16,7 +16,6 @@
     <dependencies>
       <group targetFramework=".NETFramework3.5" />
       <group targetFramework=".NETFramework4.0" />
-      <group targetFramework=".NETPortable4.0-Profile344" />
       <group targetFramework=".NETStandard1.3">
         <dependency id="System.Collections" version="4.0.11" />
         <dependency id="System.IO.FileSystem" version="4.0.1" />
@@ -32,7 +31,6 @@
   <files>
     <file src="bin\net_3_5_Release\*.dll" target="lib/net35" />
     <file src="bin\net_4_0_Release\*.dll" target="lib/net40" />
-    <file src="bin\pcl_Release\*.dll" target="lib/portable-net40+sl5+win8+wp8+wpa" />
     <file src="bin\netstandard_Release\netstandard1.3\*.dll" target="lib/netstandard1.3" />
   </files>
 </package>
