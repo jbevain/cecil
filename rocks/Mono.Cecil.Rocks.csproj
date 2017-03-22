@@ -4,7 +4,6 @@
     <ProjectGuid>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Rocks</RootNamespace>
     <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
-    <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\ProjectInfo.cs" />
@@ -17,5 +16,8 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" />
+  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(Configuration.StartsWith('netstandard')) " />
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
+  </PropertyGroup>
 </Project>

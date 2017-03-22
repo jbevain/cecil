@@ -27,6 +27,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#if !NET_CORE
 
 using System;
 using System.Reflection;
@@ -347,3 +348,5 @@ namespace Mono.CompilerServices.SymbolWriter
 		public ArrayList UsingClauses = new ArrayList ();
 	}
 }
+
+#endif

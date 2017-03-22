@@ -4,14 +4,7 @@
     <ProjectGuid>{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Mdb</RootNamespace>
     <AssemblyName>Mono.Cecil.Mdb</AssemblyName>
-    <DefineConstants>$(DefineConstants);CECIL</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFrameworkVersion)' != 'v2.0' ">
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Mono.Cecil.csproj">
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
@@ -24,5 +17,8 @@
     <Compile Include="Mono.CompilerServices.SymbolWriter\*.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" />
+  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(Configuration.StartsWith('netstandard')) " />
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);CECIL</DefineConstants>
+  </PropertyGroup>
 </Project>

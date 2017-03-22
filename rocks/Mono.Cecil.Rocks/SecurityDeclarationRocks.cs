@@ -8,6 +8,8 @@
 // Licensed under the MIT/X11 license.
 //
 
+#if !NET_CORE
+
 using System;
 using System.Security;
 using SSP = System.Security.Permissions;
@@ -150,3 +152,5 @@ namespace Mono.Cecil.Rocks {
 		}
 	}
 }
+
+#endif

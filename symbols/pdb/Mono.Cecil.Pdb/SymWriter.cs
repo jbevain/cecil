@@ -8,8 +8,6 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
 using System.Runtime.InteropServices;
 
 using Mono.Cecil.Cil;
@@ -60,18 +58,17 @@ namespace Mono.Cecil.Pdb
 		public void DefineLocalVariable2 (
 			string name,
 			VariableAttributes attributes,
-			SymbolToken sigToken,
-			SymAddressKind addrKind,
+			int sigToken,
 			int addr1,
 			int addr2,
 			int addr3,
 			int startOffset,
 			int endOffset)
 		{
-			m_writer.DefineLocalVariable2 (name, (int)attributes, sigToken, (int)addrKind, addr1, addr2, addr3, startOffset, endOffset);
+			m_writer.DefineLocalVariable2 (name, (int)attributes, sigToken, 1 /* ILOffset*/, addr1, addr2, addr3, startOffset, endOffset);
 		}
 
-		public void DefineConstant2 (string name, object value, SymbolToken sigToken)
+		public void DefineConstant2 (string name, object value, int sigToken)
 		{
 			if (value == null) {
 				m_writer.DefineConstant2 (name, 0, sigToken);
@@ -114,11 +111,6 @@ namespace Mono.Cecil.Pdb
 			return new SymDocumentWriter (unmanagedDocumentWriter);
 		}
 
-		public void DefineParameter (string name, ParameterAttributes attributes, int sequence, SymAddressKind addrKind, int addr1, int addr2, int addr3)
-		{
-			throw new Exception ("The method or operation is not implemented.");
-		}
-
 		public void DefineSequencePoints (SymDocumentWriter document, int[] offsets, int[] lines, int[] columns, int[] endLines, int[] endColumns)
 		{
 			m_writer.DefineSequencePoints (document.GetUnmanaged(), offsets.Length, offsets, lines, columns, endLines, endColumns);
@@ -129,14 +121,14 @@ namespace Mono.Cecil.Pdb
 			m_writer.Initialize (emitter, filename, null, fFullBuild);
 		}
 
-		public void SetUserEntryPoint (SymbolToken method)
+		public void SetUserEntryPoint (int methodToken)
 		{
-			m_writer.SetUserEntryPoint (method);
+			m_writer.SetUserEntryPoint (methodToken);
 		}
 
-		public void OpenMethod (SymbolToken method)
+		public void OpenMethod (int methodToken)
 		{
-			m_writer.OpenMethod (method);
+			m_writer.OpenMethod (methodToken);
 		}
 
 		public void OpenNamespace (string name)

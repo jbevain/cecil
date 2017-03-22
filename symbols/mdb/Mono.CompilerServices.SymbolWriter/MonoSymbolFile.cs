@@ -362,6 +362,7 @@ namespace Mono.CompilerServices.SymbolWriter
 			compile_unit_hash = new Dictionary<int, CompileUnitEntry> ();
 		}
 
+#if !NET_CORE
 		public static MonoSymbolFile ReadSymbolFile (Assembly assembly)
 		{
 			string filename = assembly.Location;
@@ -372,6 +373,7 @@ namespace Mono.CompilerServices.SymbolWriter
 
 			return ReadSymbolFile (name, assembly_guid);
 		}
+#endif
 
 		public static MonoSymbolFile ReadSymbolFile (string mdbFilename)
 		{
@@ -628,7 +630,11 @@ namespace Mono.CompilerServices.SymbolWriter
 		{
 			if (disposing) {
 				if (reader != null) {
+#if NET_CORE
+					reader.Dispose ();
+#else
 					reader.Close ();
+#endif
 					reader = null;
 				}
 			}

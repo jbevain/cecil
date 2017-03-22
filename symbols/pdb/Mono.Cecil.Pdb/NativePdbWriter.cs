@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +22,7 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Pdb {
 
-	public class NativePdbWriter : Cil.ISymbolWriter, Cil.IMetadataSymbolWriter {
+	public class NativePdbWriter : ISymbolWriter, IMetadataSymbolWriter {
 
 		readonly ModuleDefinition module;
 		readonly SymWriter writer;
@@ -56,7 +55,7 @@ namespace Mono.Cecil.Pdb {
 		public void Write (MethodDebugInformation info)
 		{
 			var method_token = info.method.MetadataToken;
-			var sym_token = new SymbolToken (method_token.ToInt32 ());
+			var sym_token = method_token.ToInt32 ();
 
 			if (!info.HasSequencePoints && info.scope == null && !info.HasCustomDebugInformations && info.StateMachineKickOffMethod == null)
 				return;
@@ -177,7 +176,7 @@ namespace Mono.Cecil.Pdb {
 				import_info_to_parent.Add (info.scope.Import, info.method.MetadataToken);
 			}
 
-			var sym_token = new SymbolToken (info.local_var_token.ToInt32 ());
+			var sym_token = info.local_var_token.ToInt32 ();
 
 			if (!scope.variables.IsNullOrEmpty ()) {
 				for (int i = 0; i < scope.variables.Count; i++) {
@@ -218,13 +217,12 @@ namespace Mono.Cecil.Pdb {
 			}
 		}
 
-		void DefineLocalVariable (VariableDebugInformation variable, SymbolToken local_var_token, int start_offset, int end_offset)
+		void DefineLocalVariable (VariableDebugInformation variable, int local_var_token, int start_offset, int end_offset)
 		{
 			writer.DefineLocalVariable2 (
 				variable.Name,
 				variable.Attributes,
 				local_var_token,
-				SymAddressKind.ILOffset,
 				variable.Index,
 				0,
 				0,
@@ -237,7 +235,7 @@ namespace Mono.Cecil.Pdb {
 			var row = metadata.AddStandAloneSignature (metadata.GetConstantTypeBlobIndex (constant.ConstantType));
 			var token = new MetadataToken (TokenType.Signature, row);
 
-			writer.DefineConstant2 (constant.Name, constant.Value, new SymbolToken (token.ToInt32 ()));
+			writer.DefineConstant2 (constant.Name, constant.Value, token.ToInt32 ());
 		}
 
 		SymDocumentWriter GetDocument (Document document)
@@ -263,7 +261,7 @@ namespace Mono.Cecil.Pdb {
 		{
 			var entry_point = module.EntryPoint;
 			if (entry_point != null)
-				writer.SetUserEntryPoint (new SymbolToken (entry_point.MetadataToken.ToInt32 ()));
+				writer.SetUserEntryPoint (entry_point.MetadataToken.ToInt32 ());
 
 			writer.Close ();
 		}

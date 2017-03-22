@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26206.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{74E5ECE0-06B4-401C-AEBA-E8DD53E17943}"
 EndProject
@@ -85,7 +85,9 @@ Global
 		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.net_4_5_Release|Any CPU.ActiveCfg = net_4_0_Release|Any CPU
 		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.net_4_5_Release|Any CPU.Build.0 = net_4_0_Release|Any CPU
 		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.netstandard_Debug|Any CPU.ActiveCfg = netstandard_Debug|Any CPU
+		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.netstandard_Debug|Any CPU.Build.0 = netstandard_Debug|Any CPU
 		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.netstandard_Release|Any CPU.ActiveCfg = netstandard_Release|Any CPU
+		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.netstandard_Release|Any CPU.Build.0 = netstandard_Release|Any CPU
 		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.pcl_Debug|Any CPU.ActiveCfg = pcl_Debug|Any CPU
 		{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}.pcl_Release|Any CPU.ActiveCfg = net_4_0_Release|Any CPU
 		{AC71DF9C-99FA-4A63-990A-66C8010355A6}.net_3_5_Debug|Any CPU.ActiveCfg = net_3_5_Debug|Any CPU
@@ -117,7 +119,9 @@ Global
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.net_4_5_Release|Any CPU.ActiveCfg = net_4_0_Release|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.net_4_5_Release|Any CPU.Build.0 = net_4_0_Release|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.netstandard_Debug|Any CPU.ActiveCfg = netstandard_Debug|Any CPU
+		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.netstandard_Debug|Any CPU.Build.0 = netstandard_Debug|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.netstandard_Release|Any CPU.ActiveCfg = netstandard_Release|Any CPU
+		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.netstandard_Release|Any CPU.Build.0 = netstandard_Release|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.pcl_Debug|Any CPU.ActiveCfg = pcl_Debug|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.pcl_Release|Any CPU.ActiveCfg = net_4_0_Release|Any CPU
 		{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}.net_3_5_Debug|Any CPU.ActiveCfg = net_3_5_Debug|Any CPU
@@ -165,7 +169,9 @@ Global
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.net_4_5_Release|Any CPU.ActiveCfg = net_4_0_Release|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.net_4_5_Release|Any CPU.Build.0 = net_4_0_Release|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.netstandard_Debug|Any CPU.ActiveCfg = netstandard_Debug|Any CPU
+		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.netstandard_Debug|Any CPU.Build.0 = netstandard_Debug|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.netstandard_Release|Any CPU.ActiveCfg = netstandard_Release|Any CPU
+		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.netstandard_Release|Any CPU.Build.0 = netstandard_Release|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.pcl_Debug|Any CPU.ActiveCfg = pcl_Debug|Any CPU
 		{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}.pcl_Release|Any CPU.ActiveCfg = pcl_Release|Any CPU
 	EndGlobalSection
