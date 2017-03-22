@@ -110,9 +110,11 @@ namespace Mono.CompilerServices.SymbolWriter
 
 		internal OffsetTable ()
 		{
+#if !NET_CORE
 			int platform = (int) Environment.OSVersion.Platform;
 			if ((platform != 4) && (platform != 128))
 				FileFlags |= Flags.WindowsFileNames;
+#endif
 		}
 
 		internal OffsetTable (BinaryReader reader, int major_version, int minor_version)
