@@ -372,6 +372,14 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void RoundTripLargePortablePdb ()
+		{
+			TestModule ("Mono.Android.dll", module => {
+				Assert.IsTrue (module.HasSymbols);
+			}, verify: false, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void EmptyPortablePdb ()
 		{
 			TestModule ("EmptyPdb.dll", module => {

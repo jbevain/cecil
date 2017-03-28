@@ -2865,10 +2865,15 @@ namespace Mono.Cecil {
 			InitializeDocuments ();
 
 			if (!MoveTo (Table.MethodDebugInformation, method.MetadataToken.RID))
-				return new Collection<SequencePoint> ();
+				return new Collection<SequencePoint> (0);
 
-			var document = metadata.GetDocument (ReadTableIndex (Table.Document));
-			var reader = ReadSignature (ReadBlobIndex ());
+			var document_index = ReadTableIndex (Table.Document);
+			var signature = ReadBlobIndex ();
+			if (signature == 0)
+				return new Collection<SequencePoint> (0);
+
+			var document = metadata.GetDocument (document_index);
+			var reader = ReadSignature (signature);
 
 			return reader.ReadSequencePoints (document);
 		}
@@ -3060,7 +3065,6 @@ namespace Mono.Cecil {
 		{
 			byte [] blob;
 			int index, count;
-
 
 			GetBlobView (signature, out blob, out index, out count);
 			if (count == 0)
