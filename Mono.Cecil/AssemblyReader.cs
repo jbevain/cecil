@@ -71,10 +71,8 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 			if (parameters.metadata_importer_provider != null)
 				module.metadata_importer = parameters.metadata_importer_provider.GetMetadataImporter (module);
-#if !PCL && !NET_CORE
 			if (parameters.reflection_importer_provider != null)
 				module.reflection_importer = parameters.reflection_importer_provider.GetReflectionImporter (module);
-#endif
 #endif
 
 			GetMetadataKind (module, parameters);
@@ -95,23 +93,15 @@ namespace Mono.Cecil {
 		{
 			var symbol_reader_provider = parameters.SymbolReaderProvider;
 
-#if !PCL
 			if (symbol_reader_provider == null && parameters.ReadSymbols)
 				symbol_reader_provider = new DefaultSymbolReaderProvider ();
-#endif
 
 			if (symbol_reader_provider != null) {
 				module.SymbolReaderProvider = symbol_reader_provider;
-#if !PCL
+
 				var reader = parameters.SymbolStream != null
 					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream)
 					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
-#else
-				if (parameters.SymbolStream == null)
-					throw new InvalidOperationException ();
-
-				var reader = symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream);
-#endif
 
 				if (reader != null)
 					module.ReadSymbols (reader);
@@ -661,7 +651,6 @@ namespace Mono.Cecil {
 				if (attributes != FileAttributes.ContainsMetaData)
 					continue;
 
-#if !PCL
 				var parameters = new ReaderParameters {
 					ReadingMode = module.ReadingMode,
 					SymbolReaderProvider = module.SymbolReaderProvider,
@@ -670,15 +659,11 @@ namespace Mono.Cecil {
 
 				modules.Add (ModuleDefinition.ReadModule (
 					GetModuleFileName (name), parameters));
-#else
-				throw new NotSupportedException ();
-#endif
 			}
 
 			return modules;
 		}
 
-#if !PCL
 		string GetModuleFileName (string name)
 		{
 			if (module.FileName == null)
@@ -687,7 +672,6 @@ namespace Mono.Cecil {
 			var path = Path.GetDirectoryName (module.FileName);
 			return Path.Combine (path, name);
 		}
-#endif
 
 		void InitializeModuleReferences ()
 		{

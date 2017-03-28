@@ -10,7 +10,7 @@
 
 #if !READ_ONLY
 
-#if !PCL && !NET_CORE
+#if !NET_CORE
 
 using System;
 using System.IO;

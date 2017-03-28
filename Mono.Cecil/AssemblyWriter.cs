@@ -91,13 +91,13 @@ namespace Mono.Cecil {
 			var name = module.assembly != null ? module.assembly.Name : null;
 			var fq_name = stream.value.GetFileName ();
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
-#if !PCL && !NET_CORE
+
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = new DefaultSymbolWriterProvider ();
-#endif
+
 			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters);
 
-#if !PCL && !NET_CORE
+#if !NET_CORE
 			if (parameters.StrongNameKeyPair != null && name != null) {
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
@@ -117,7 +117,7 @@ namespace Mono.Cecil {
 			if (metadata.symbol_writer != null)
 				metadata.symbol_writer.Dispose ();
 
-#if !PCL && !NET_CORE
+#if !NET_CORE
 			if (parameters.StrongNameKeyPair != null)
 				CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
 
@@ -146,11 +146,7 @@ namespace Mono.Cecil {
 			if (parameters.SymbolStream != null)
 				return symbol_writer_provider.GetSymbolWriter (module, parameters.SymbolStream);
 
-#if !PCL
 			return symbol_writer_provider.GetSymbolWriter (module, fq_name);
-#else
-			return null;
-#endif
 		}
 	}
 
@@ -1083,7 +1079,7 @@ namespace Mono.Cecil {
 				if (module.IsMain)
 					continue;
 
-#if PCL || NET_CORE
+#if NET_CORE
 				throw new NotSupportedException ();
 #else
 				var parameters = new WriterParameters {
@@ -1103,7 +1099,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-#if !PCL && !NET_CORE
+#if !NET_CORE
 		string GetModuleFileName (string name)
 		{
 			if (string.IsNullOrEmpty (name))
@@ -1204,7 +1200,7 @@ namespace Mono.Cecil {
 			var table = GetTable<FileTable> (Table.File);
 			var hash = resource.Hash;
 
-#if !PCL && !NET_CORE
+#if !NET_CORE
 			if (hash.IsNullOrEmpty ())
 				hash = CryptoService.ComputeHash (resource.File);
 #endif

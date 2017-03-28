@@ -14,7 +14,6 @@
     <Compile Include="Mono.Cecil.PE\*.cs" />
     <Compile Include="Mono.Collections.Generic\*.cs" />
     <Compile Include="Mono.Security.Cryptography\*.cs" />
-    <Compile Include="System.Security.Cryptography\*.cs" />
   </ItemGroup>
   <Import Project="Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(Configuration.StartsWith('netstandard')) " />

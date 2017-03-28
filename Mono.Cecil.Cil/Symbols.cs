@@ -690,13 +690,10 @@ namespace Mono.Cecil.Cil {
 	}
 
 	public interface ISymbolReaderProvider {
-#if !PCL
 		ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName);
-#endif
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
 	}
 
-#if !PCL
 	public class DefaultSymbolReaderProvider : ISymbolReaderProvider {
 
 		readonly bool throw_if_no_symbol;
@@ -745,9 +742,7 @@ namespace Mono.Cecil.Cil {
 			throw new NotSupportedException ();
 		}
 	}
-#endif
 
-#if !PCL
 	enum SymbolKind {
 		NativePdb,
 		PortablePdb,
@@ -832,7 +827,6 @@ namespace Mono.Cecil.Cil {
 			throw new ArgumentException ();
 		}
 	}
-#endif
 
 #if !READ_ONLY
 
@@ -845,13 +839,10 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolWriterProvider {
 
-#if !PCL
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
-#endif
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
 	}
 
-#if !PCL
 	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
@@ -871,7 +862,6 @@ namespace Mono.Cecil.Cil {
 			throw new NotSupportedException ();
 		}
 	}
-#endif
 
 #endif
 }
@@ -921,7 +911,6 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-#if !PCL
 		public static string GetPdbFileName (string assemblyFileName)
 		{
 			return Path.ChangeExtension (assemblyFileName, ".pdb");
@@ -950,6 +939,5 @@ namespace Mono.Cecil {
 				stream.Position = position;
 			}
 		}
-#endif
 	}
 }
