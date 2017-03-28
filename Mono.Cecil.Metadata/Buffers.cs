@@ -25,7 +25,8 @@ namespace Mono.Cecil.Metadata {
 		readonly ModuleDefinition module;
 		readonly MetadataBuilder metadata;
 
-		internal MetadataTable [] tables = new MetadataTable [Mixin.TableCount];
+		readonly internal TableInformation [] table_infos = new TableInformation [Mixin.TableCount];
+		readonly internal MetadataTable [] tables = new MetadataTable [Mixin.TableCount];
 
 		bool large_string;
 		bool large_blob;
@@ -50,8 +51,7 @@ namespace Mono.Cecil.Metadata {
 
 		int GetTableLength (Table table)
 		{
-			var md_table = tables [(int) table];
-			return md_table != null ? md_table.Length : 0;
+			return (int) table_infos [(int) table].Length;
 		}
 
 		public TTable GetTable<TTable> (Table table) where TTable : MetadataTable, new ()
@@ -98,8 +98,7 @@ namespace Mono.Cecil.Metadata {
 
 		public void WriteRID (uint rid, Table table)
 		{
-			var md_table = tables [(int) table];
-			WriteBySize (rid, md_table == null ? false : md_table.IsLarge);
+			WriteBySize (rid, table_infos [(int) table].IsLarge);
 		}
 
 		int GetCodedIndexSize (CodedIndex coded_index)
@@ -167,6 +166,24 @@ namespace Mono.Cecil.Metadata {
 			}
 
 			return valid;
+		}
+
+		public void ComputeTableInformations ()
+		{
+			if (metadata.metadata_builder != null)
+				ComputeTableInformations (metadata.metadata_builder.table_heap);
+
+			ComputeTableInformations (metadata.table_heap);
+		}
+
+		void ComputeTableInformations (TableHeapBuffer table_heap)
+		{
+			var tables = table_heap.tables;
+			for (int i = 0; i < tables.Length; i++) {
+				var table = tables [i];
+				if (table != null && table.Length > 0)
+					table_infos [i].Length = (uint) table.Length;
+			}
 		}
 
 		byte GetHeapSizes ()

@@ -74,6 +74,10 @@ namespace Mono.Cecil.Metadata {
 		public uint Offset;
 		public uint Length;
 		public uint RowSize;
+
+		public bool IsLarge {
+			get { return Length > ushort.MaxValue; }
+		}
 	}
 
 	sealed class TableHeap : Heap {
