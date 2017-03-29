@@ -1143,7 +1143,7 @@ namespace Mono.Cecil {
 				throw new InvalidOperationException ();
 
 			var image_stream = Image.Stream.value;
-			image_stream.ZeroStream ();
+			image_stream.Position = 0;
 			Write (image_stream, parameters);
 		}
 
@@ -1336,12 +1336,6 @@ namespace Mono.Cecil {
 				memory.Write (buffer, 0, read);
 
 			return memory.ToArray ();
-		}
-
-		public static void ZeroStream (this Stream self)
-		{
-			self.Position = 0;
-			self.SetLength (0);
 		}
 
 		public static void Read (object o)
