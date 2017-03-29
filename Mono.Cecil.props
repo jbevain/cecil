@@ -12,6 +12,8 @@
     <OutputType>Library</OutputType>
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
     <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>
+    <NetStandard Condition=" $(Configuration.StartsWith('netstandard')) Or '$(NuGetRestoreTargets)' != '' ">true</NetStandard>
+    <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,12 +39,12 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);NET_4_0;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.StartsWith('netstandard')) ">
+  <PropertyGroup Condition=" $(NetStandard) ">
     <TargetFramework>netstandard1.3</TargetFramework>
   </PropertyGroup>
-  <Import Project="NetStandard.props"  Condition=" $(Configuration.StartsWith('netstandard')) " />
+  <Import Project="NetStandard.props"  Condition=" $(NetStandard) " />
   <!-- Shared References -->
-  <ItemGroup Condition=" ! $(Configuration.StartsWith('netstandard')) ">
+  <ItemGroup Condition=" ! $(NetStandard) ">
     <Reference Include="System.Core" />
     <Reference Include="System" />
   </ItemGroup>

@@ -16,7 +16,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(Configuration.StartsWith('netstandard')) " />
+  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
   </PropertyGroup>

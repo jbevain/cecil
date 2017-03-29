@@ -17,7 +17,7 @@
     <Compile Include="Mono.CompilerServices.SymbolWriter\*.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(Configuration.StartsWith('netstandard')) " />
+  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);CECIL</DefineConstants>
   </PropertyGroup>
