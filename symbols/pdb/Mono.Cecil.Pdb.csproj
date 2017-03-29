@@ -18,5 +18,5 @@
     <Compile Include="Mono.Cecil.Pdb\*.cs" />
   </ItemGroup>
   <Import Project="..\..\Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(Configuration.StartsWith('netstandard')) " />
+  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
 </Project>
