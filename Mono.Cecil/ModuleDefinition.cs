@@ -1142,9 +1142,7 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				throw new InvalidOperationException ();
 
-			var image_stream = Image.Stream.value;
-			image_stream.Position = 0;
-			Write (image_stream, parameters);
+			Write (Image.Stream.value, parameters);
 		}
 
 		public void Write (Stream stream)
