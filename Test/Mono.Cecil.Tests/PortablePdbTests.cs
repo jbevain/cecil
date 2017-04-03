@@ -388,6 +388,22 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void NullClassConstant ()
+		{
+			TestModule ("xattr.dll", module => {
+				var type = module.GetType ("Library");
+				var method = type.GetMethod ("NullXAttributeConstant");
+				var symbol = method.DebugInformation;
+
+				Assert.IsNotNull (symbol);
+				Assert.AreEqual(1, symbol.Scope.Constants.Count);
+
+				var a = symbol.Scope.Constants [0];
+				Assert.AreEqual ("a", a.Name);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void PortablePdbLineInfo  ()
 		{
 			TestModule ("line.exe", module => {

@@ -2986,13 +2986,13 @@ namespace Mono.Cecil {
 					value = Encoding.Unicode.GetString (bytes, 0, bytes.Length);
 				} else
 					value = null;
-			} else if (type.etype == ElementType.Object) {
-				value = null;
 			} else if (type.IsTypeOf ("System", "Decimal")) {
 				var b = signature.ReadByte ();
 				value = new decimal (signature.ReadInt32 (), signature.ReadInt32 (), signature.ReadInt32 (), (b & 0x80) != 0, (byte) (b & 0x7f));
 			} else if (type.IsTypeOf ("System", "DateTime")) {
 				value = new DateTime (signature.ReadInt64());
+			} else if (type.etype == ElementType.Object || type.etype == ElementType.None || type.etype == ElementType.Class) {
+				value = null;
 			} else
 				value = signature.ReadConstantSignature (type.etype);
 
