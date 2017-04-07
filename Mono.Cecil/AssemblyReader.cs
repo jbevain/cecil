@@ -1,4 +1,4 @@
-﻿//
+//
 // Author:
 //   Jb Evain (jbevain@gmail.com)
 //
@@ -838,7 +838,7 @@ namespace Mono.Cecil {
 				types [i] = ReadType (i + 1);
 			}
 
-			if (module.IsWindowsMetadata()) {
+			if (module.IsWindowsMetadata ()) {
 				for (uint i = 0; i < length; i++) {
 					WindowsRuntimeProjections.Project (types [i]);
 				}
@@ -1050,9 +1050,8 @@ namespace Mono.Cecil {
 
 			type = ReadTypeDefinition (rid);
 
-			if (module.IsWindowsMetadata()) {
+			if (module.IsWindowsMetadata ())
 				WindowsRuntimeProjections.Project (type);
-			}
 
 			return type;
 		}
