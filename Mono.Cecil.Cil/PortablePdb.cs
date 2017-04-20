@@ -34,7 +34,7 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			return GetSymbolReader (module, Disposable.NotOwned (symbolStream), "");
+			return GetSymbolReader (module, Disposable.NotOwned (symbolStream), symbolStream.GetFileName ());
 		}
 
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Disposable<Stream> symbolStream, string fileName)

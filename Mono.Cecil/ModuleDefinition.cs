@@ -1097,7 +1097,7 @@ namespace Mono.Cecil {
 			Mixin.CheckStream (stream);
 			Mixin.CheckReadSeek (stream);
 
-			return ReadModule (Disposable.NotOwned (stream), "", parameters);
+			return ReadModule (Disposable.NotOwned (stream), stream.GetFileName (), parameters);
 		}
 
 		static ModuleDefinition ReadModule (Disposable<Stream> stream, string fileName, ReaderParameters parameters)
