@@ -122,9 +122,8 @@ namespace Mono.Cecil {
 #if !NET_CORE
 			if (parameters.StrongNameKeyPair != null)
 				CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
-
-			stream.Dispose ();
 #endif
+			stream.Dispose ();
 		}
 
 		static void BuildMetadata (ModuleDefinition module, MetadataBuilder metadata)
