@@ -264,6 +264,20 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void OwnedStreamModuleFileName ()
+		{
+			var path = GetAssemblyResourcePath ("hello.exe", GetType ().Assembly);
+			using (var file = File.Open (path, FileMode.Open))
+			{
+				using (var module = ModuleDefinition.ReadModule (file))
+				{
+					Assert.IsNotNullOrEmpty (module.FileName);
+					Assert.AreEqual (path, module.FileName);
+				}
+			}
+		}
+
+		[Test]
 		public void ReadAndWriteFile ()
 		{
 			var path = Path.GetTempFileName ();
