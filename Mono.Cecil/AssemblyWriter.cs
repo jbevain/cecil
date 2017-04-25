@@ -74,56 +74,59 @@ namespace Mono.Cecil {
 
 		public static void WriteModuleTo (ModuleDefinition module, Disposable<Stream> stream, WriterParameters parameters)
 		{
-			if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
-				throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
+			try {
+				if ((module.Attributes & ModuleAttributes.ILOnly) == 0)
+					throw new NotSupportedException ("Writing mixed-mode assemblies is not supported");
 
-			if (module.HasImage && module.ReadingMode == ReadingMode.Deferred) {
-				var immediate_reader = new ImmediateModuleReader (module.Image);
-				immediate_reader.ReadModule (module, resolve_attributes: false);
-				immediate_reader.ReadSymbols (module);
-			}
+				if (module.HasImage && module.ReadingMode == ReadingMode.Deferred) {
+					var immediate_reader = new ImmediateModuleReader (module.Image);
+					immediate_reader.ReadModule (module, resolve_attributes: false);
+					immediate_reader.ReadSymbols (module);
+				}
 
-			module.MetadataSystem.Clear ();
+				module.MetadataSystem.Clear ();
 
-			if (module.symbol_reader != null)
-				module.symbol_reader.Dispose ();
+				if (module.symbol_reader != null)
+					module.symbol_reader.Dispose ();
 
-			var name = module.assembly != null ? module.assembly.Name : null;
-			var fq_name = stream.value.GetFileName ();
-			var symbol_writer_provider = parameters.SymbolWriterProvider;
+				var name = module.assembly != null ? module.assembly.Name : null;
+				var fq_name = stream.value.GetFileName ();
+				var symbol_writer_provider = parameters.SymbolWriterProvider;
 
-			if (symbol_writer_provider == null && parameters.WriteSymbols)
-				symbol_writer_provider = new DefaultSymbolWriterProvider ();
+				if (symbol_writer_provider == null && parameters.WriteSymbols)
+					symbol_writer_provider = new DefaultSymbolWriterProvider ();
 
-			var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters);
-
-#if !NET_CORE
-			if (parameters.StrongNameKeyPair != null && name != null) {
-				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
-				module.Attributes |= ModuleAttributes.StrongNameSigned;
-			}
-#endif
-
-			var timestamp = parameters.Timestamp ?? module.timestamp;
-
-			var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider, symbol_writer);
-
-			BuildMetadata (module, metadata);
-
-			var writer = ImageWriter.CreateWriter (module, metadata, stream);
-
-			stream.value.SetLength (0);
-
-			writer.WriteImage ();
-
-			if (metadata.symbol_writer != null)
-				metadata.symbol_writer.Dispose ();
+				var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters);
 
 #if !NET_CORE
-			if (parameters.StrongNameKeyPair != null)
-				CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
+				if (parameters.StrongNameKeyPair != null && name != null) {
+					name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
+					module.Attributes |= ModuleAttributes.StrongNameSigned;
+				}
 #endif
-			stream.Dispose ();
+
+				var timestamp = parameters.Timestamp ?? module.timestamp;
+
+				var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider, symbol_writer);
+
+				BuildMetadata (module, metadata);
+
+				var writer = ImageWriter.CreateWriter (module, metadata, stream);
+
+				stream.value.SetLength (0);
+
+				writer.WriteImage ();
+
+				if (metadata.symbol_writer != null)
+					metadata.symbol_writer.Dispose ();
+
+#if !NET_CORE
+				if (parameters.StrongNameKeyPair != null)
+					CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
+#endif
+			} finally {
+				stream.Dispose ();
+			}
 		}
 
 		static void BuildMetadata (ModuleDefinition module, MetadataBuilder metadata)
@@ -2457,7 +2460,7 @@ namespace Mono.Cecil {
 				break;
 			case ImportTargetKind.ImportXmlNamespaceWithAlias:
 				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
-				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));	
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
 				break;
 			case ImportTargetKind.ImportAlias:
 				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
