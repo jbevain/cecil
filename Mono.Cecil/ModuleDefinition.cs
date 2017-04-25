@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using SR = System.Reflection;
@@ -1119,7 +1118,6 @@ namespace Mono.Cecil {
 
 		public void Write (string fileName, WriterParameters parameters)
 		{
-			Debugger.Launch ();
 			Mixin.CheckParameters (parameters);
 			var file = GetFileStream (fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 			ModuleWriter.WriteModuleTo (this, Disposable.Owned (file), parameters);
