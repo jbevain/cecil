@@ -301,11 +301,10 @@ namespace Mono.Cecil.Tests {
 			var path = Path.GetTempFileName ();
 
 			var module = ModuleDefinition.CreateModule ("FooFoo", ModuleKind.Dll);
+			// Mixed mode module that Cecil can not write
+			module.Attributes = (ModuleAttributes) 0;
 
-			// Invalid type to make writing throw
-			module.Types.Add (new TypeDefinition ("Foo", "Foo", (TypeAttributes) 0));
-
-			Assert.Throws<Exception>(() => module.Write (path));
+			Assert.Throws<NotSupportedException>(() => module.Write (path));
 
 			// Ensure you can still delete the file
 			File.Delete (path);

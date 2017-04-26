@@ -1120,7 +1120,7 @@ namespace Mono.Cecil {
 		{
 			Mixin.CheckParameters (parameters);
 			var file = GetFileStream (fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-			ModuleWriter.WriteModuleTo (this, Disposable.Owned (file), parameters);
+			ModuleWriter.WriteModule (this, Disposable.Owned (file), parameters);
 		}
 
 		public void Write ()
@@ -1147,7 +1147,7 @@ namespace Mono.Cecil {
 			Mixin.CheckWriteSeek (stream);
 			Mixin.CheckParameters (parameters);
 
-			ModuleWriter.WriteModuleTo (this, Disposable.NotOwned (stream), parameters);
+			ModuleWriter.WriteModule (this, Disposable.NotOwned (stream), parameters);
 		}
 
 #endif
