@@ -294,5 +294,21 @@ namespace Mono.Cecil.Tests {
 			using (var module = ModuleDefinition.ReadModule (path))
 				Assert.AreEqual ("Foo.Foo", module.Types [1].FullName);
 		}
+
+		[Test]
+		public void ExceptionInWriteDoesNotKeepLockOnFile ()
+		{
+			var path = Path.GetTempFileName ();
+
+			var module = ModuleDefinition.CreateModule ("FooFoo", ModuleKind.Dll);
+
+			// Invalid type to make writing throw
+			module.Types.Add (new TypeDefinition ("Foo", "Foo", (TypeAttributes) 0));
+
+			Assert.Throws<Exception>(() => module.Write (path));
+
+			// Ensure you can still delete the file
+			File.Delete (path);
+		}
 	}
 }
