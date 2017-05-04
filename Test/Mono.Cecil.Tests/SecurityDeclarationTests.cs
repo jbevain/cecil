@@ -93,6 +93,7 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+#if !READ_ONLY
 		[Test]
 		public void DefineSecurityDeclarationByBlob ()
 		{
@@ -125,6 +126,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System.String", argument.Type.FullName);
 			Assert.AreEqual (permission_set, argument.Value);
 		}
+#endif
 
 		[Test]
 		public void SecurityDeclarationWithoutAttributes ()

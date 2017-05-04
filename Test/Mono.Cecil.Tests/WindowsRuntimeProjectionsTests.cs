@@ -63,6 +63,7 @@ namespace Mono.Cecil.Tests {
 			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
 		}
 
+#if !READ_ONLY
 		[Test]
 		public void CanStripType ()
 		{
@@ -90,6 +91,7 @@ namespace Mono.Cecil.Tests {
 				}
 			}, readOnly: true, verify: false, assemblyResolver: assemblyResolver, applyWindowsRuntimeProjections: true);
 		}
+#endif
 	}
 
 	[TestFixture]
