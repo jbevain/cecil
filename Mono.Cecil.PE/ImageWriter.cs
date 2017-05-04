@@ -197,7 +197,7 @@ namespace Mono.Cecil.PE {
 		void WritePEFileHeader ()
 		{
 			WriteUInt32 (0x00004550);		// Magic
-			WriteUInt16 (GetMachine ());	// Machine
+			WriteUInt16 ((ushort) module.Architecture);	// Machine
 			WriteUInt16 (sections);			// NumberOfSections
 			WriteUInt32 (metadata.timestamp);
 			WriteUInt32 (0);	// PointerToSymbolTable
@@ -209,22 +209,6 @@ namespace Mono.Cecil.PE {
 			if (module.Kind == ModuleKind.Dll || module.Kind == ModuleKind.NetModule)
 				characteristics |= 0x2000;
 			WriteUInt16 (characteristics);	// Characteristics
-		}
-
-		ushort GetMachine ()
-		{
-			switch (module.Architecture) {
-			case TargetArchitecture.I386:
-				return 0x014c;
-			case TargetArchitecture.AMD64:
-				return 0x8664;
-			case TargetArchitecture.IA64:
-				return 0x0200;
-			case TargetArchitecture.ARMv7:
-				return 0x01c4;
-			}
-
-			throw new NotSupportedException ();
 		}
 
 		Section LastSection ()
