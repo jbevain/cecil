@@ -301,14 +301,6 @@ namespace Mono.Cecil {
 			if (TryGetAssemblyNameReference (name, out scope))
 				return scope;
 
-			scope = new AssemblyNameReference (name.Name, name.Version) {
-				PublicKeyToken = name.GetPublicKeyToken (),
-#if !NET_CORE
-				Culture = name.CultureInfo.Name,
-				HashAlgorithm = (AssemblyHashAlgorithm) name.HashAlgorithm,
-#endif
-			};
-
 			module.AssemblyReferences.Add (scope);
 
 			return scope;
@@ -317,17 +309,24 @@ namespace Mono.Cecil {
 		bool TryGetAssemblyNameReference (SR.AssemblyName name, out AssemblyNameReference assembly_reference)
 		{
 			var references = module.AssemblyReferences;
+			var test_ref   = new AssemblyNameReference (name.Name, name.Version) {
+				PublicKeyToken = name.GetPublicKeyToken (),
+#if !NET_CORE
+				Culture = name.CultureInfo.Name,
+				HashAlgorithm = (AssemblyHashAlgorithm) name.HashAlgorithm,
+#endif
+			};
 
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
-				if (name.FullName != reference.FullName) // TODO compare field by field
-					continue;
-
-				assembly_reference = reference;
-				return true;
+				if (MetadataComparer.AreSame (test_ref, reference))
+				{
+					assembly_reference = reference;
+					return true;
+				}
 			}
 
-			assembly_reference = null;
+			assembly_reference = test_ref;
 			return false;
 		}
 
@@ -758,7 +757,7 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < references.Count; i++) {
 				var reference = references [i];
-				if (!Equals (name_reference, reference))
+				if (!MetadataComparer.AreSame (name_reference, reference))
 					continue;
 
 				assembly_reference = reference;
@@ -767,44 +766,6 @@ namespace Mono.Cecil {
 
 			assembly_reference = null;
 			return false;
-		}
-
-		static bool Equals (byte [] a, byte [] b)
-		{
-			if (ReferenceEquals (a, b))
-				return true;
-			if (a == null)
-				return false;
-			if (a.Length != b.Length)
-				return false;
-			for (int i = 0; i < a.Length; i++)
-				if (a [i] != b [i])
-					return false;
-			return true;
-		}
-
-		static bool Equals<T> (T a, T b) where T : class, IEquatable<T>
-		{
-			if (ReferenceEquals (a, b))
-				return true;
-			if (a == null)
-				return false;
-			return a.Equals (b);
-		}
-
-		static bool Equals (AssemblyNameReference a, AssemblyNameReference b)
-		{
-			if (ReferenceEquals (a, b))
-				return true;
-			if (a.Name != b.Name)
-				return false;
-			if (!Equals (a.Version, b.Version))
-				return false;
-			if (a.Culture != b.Culture)
-				return false;
-			if (!Equals (a.PublicKeyToken, b.PublicKeyToken))
-				return false;
-			return true;
 		}
 	}
 }
