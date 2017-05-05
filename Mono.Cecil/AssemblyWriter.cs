@@ -2412,6 +2412,9 @@ namespace Mono.Cecil {
 
 		uint AddImportScope (ImportDebugInformation import)
 		{
+			if (import == null)
+				return 0;
+
 			uint parent = 0;
 			if (import.Parent != null)
 				parent = AddImportScope (import.Parent);
