@@ -169,11 +169,11 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (2, array.Rank);
 				Assert.IsTrue (array.Dimensions [0].IsSized);
-				Assert.AreEqual (0, array.Dimensions [0].LowerBound);
-				Assert.AreEqual (null, array.Dimensions [0].UpperBound);
+				Assert.AreEqual (0, array.Dimensions [0].lower_bound);
+				Assert.AreEqual (null, array.Dimensions [0].upper_bound);
 				Assert.IsTrue (array.Dimensions [1].IsSized);
-				Assert.AreEqual (0, array.Dimensions [1].LowerBound);
-				Assert.AreEqual (null, array.Dimensions [1].UpperBound);
+				Assert.AreEqual (0, array.Dimensions [1].lower_bound);
+				Assert.AreEqual (null, array.Dimensions [1].upper_bound);
 
 				var rank_one_low_bound_m1 = types.GetField ("rank_one_low_bound_m1");
 				array = rank_one_low_bound_m1.FieldType as ArrayType;
@@ -181,8 +181,8 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (1, array.Rank);
 				Assert.IsTrue (array.Dimensions [0].IsSized);
-				Assert.AreEqual (-1, array.Dimensions [0].LowerBound);
-				Assert.AreEqual (4, array.Dimensions [0].UpperBound);
+				Assert.AreEqual (-1, array.Dimensions [0].lower_bound);
+				Assert.AreEqual (4, array.Dimensions [0].upper_bound);
 			});
 		}
 
