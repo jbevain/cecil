@@ -124,6 +124,25 @@ namespace Mono.Cecil.Tests {
 			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate))
 				runner.RunTest ();
 		}
+
+		public static void SaveModuleAndRun (ModuleDefinition module, Action<string> action)
+		{
+			var filename = Path.GetTempFileName ();
+			var domain   = AppDomain.CreateDomain ("test", null, AppDomain.CurrentDomain.SetupInformation);
+			try
+			{
+				using (var stream = File.Create (filename))
+					module.Write (stream);
+
+				domain.DoCallBack ((CrossAppDomainDelegate) Delegate.CreateDelegate (typeof (CrossAppDomainDelegate),
+					filename, action.Method));
+			}
+			finally
+			{
+				AppDomain.Unload (domain);
+				File.Delete (filename);
+			}
+		}
 	}
 
 	abstract class TestCase {

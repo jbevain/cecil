@@ -77,6 +77,65 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		[ExpectedException (typeof (OverflowException))]
+		public void BranchOffsetTruncation ()
+		{
+			TestModule ("libhello.dll", module => {
+				var lib = module.GetType ("Library");
+				Assert.IsNotNull (lib);
+
+				var method = lib.GetMethod ("GetHelloString");
+				Assert.IsNotNull (method);
+
+				// insert some valid IL
+				// truncated offset will branch between Ldnull and Ret
+				var insn = method.Body.Instructions.First (_ => _.OpCode == OpCodes.Ldloc_0);
+				var il   = method.Body.GetILProcessor ();
+				for (int i = 0 ; i < 128 ; ++i)
+				{
+					il.InsertBefore (insn, il.Create (OpCodes.Ldnull));
+					il.InsertBefore (insn, il.Create (OpCodes.Ret));
+				}
+
+				il.InsertBefore (insn, il.Create (OpCodes.Nop));
+			});
+		}
+
+		[Test]
+		[ExpectedException (typeof (OverflowException))]
+		public void BranchOffsetTruncation2 ()
+		{
+			TestModule ("libhello.dll", module => {
+				var lib = module.GetType ("Library");
+				Assert.IsNotNull (lib);
+
+				var method = lib.GetMethod ("GetHelloString");
+				Assert.IsNotNull (method);
+
+				// insert some valid IL
+				// truncated offset will branch before Ldnull
+				var insn = method.Body.Instructions.First (_ => _.OpCode == OpCodes.Ldloc_0);
+				var il   = method.Body.GetILProcessor ();
+				for (int i = 0 ; i < 128 ; ++i)
+				{
+					il.InsertBefore (insn, il.Create (OpCodes.Ldnull));
+					il.InsertBefore (insn, il.Create (OpCodes.Ret));
+				}
+
+				SaveModuleAndRun (module, BranchOffsetTruncation2Delegate);
+			});
+		}
+
+		static void BranchOffsetTruncation2Delegate (string filename)
+		{
+			var obj = Activator.CreateInstanceFrom (filename, "Library").Unwrap ();
+
+			// should be equal because inserted instructions never execute,
+			// but is null without the truncation check
+			Assert.AreEqual ("hello world of tomorrow", obj.GetType ().GetMethod ("GetHelloString").Invoke (obj, null));
+		}
+
+		[Test]
 		public void Switch ()
 		{
 			TestModule ("switch.exe", module => {
