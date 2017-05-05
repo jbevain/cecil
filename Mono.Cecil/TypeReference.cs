@@ -100,7 +100,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		internal new TypeReferenceProjection WindowsRuntimeProjection {
+		internal TypeReferenceProjection WindowsRuntimeProjection {
 			get { return (TypeReferenceProjection) projection; }
 			set { projection = value; }
 		}
