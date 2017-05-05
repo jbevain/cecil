@@ -18,8 +18,60 @@ namespace Mono.Cecil.Rocks {
 	public
 #endif
 	static class TypeReferenceRocks {
+        public static bool AreSame(TypeReference a, TypeReference b, bool? useAssemblyFullName = null)
+        {
+            var aIsNull = a == null;
+            var bIsNull = b == null;
 
-		public static ArrayType MakeArrayType (this TypeReference self)
+            if (aIsNull)
+            {
+                if (bIsNull)
+                    return true;
+                return false;
+            }
+            if (bIsNull)
+                return false;
+
+            if (a == b)
+                return true;
+
+            if (a.FullName != b.FullName)
+                return false;
+
+            if (!useAssemblyFullName.HasValue)
+                return true;
+
+            var _a = a.Resolve().Module.Assembly;
+            var _b = b.Resolve().Module.Assembly;
+            if (useAssemblyFullName.Value)
+                return _a.FullName == _b.FullName;
+            return _a.Name.Name == _b.Name.Name;
+        }
+
+        public static bool IsSameAs(this TypeReference a, TypeReference b, bool? useAssemblyFullName = null)
+        {
+            if (a == null)
+                throw new NullReferenceException();
+            if (b == null)
+                throw new ArgumentNullException();
+
+            if (a == b)
+                return true;
+
+            if (a.FullName != b.FullName)
+                return false;
+
+            if (!useAssemblyFullName.HasValue)
+                return true;
+
+            var _a = a.Resolve().Module.Assembly;
+            var _b = b.Resolve().Module.Assembly;
+            if (useAssemblyFullName.Value)
+                return _a.FullName == _b.FullName;
+            return _a.Name.Name == _b.Name.Name;
+        }
+
+        public static ArrayType MakeArrayType (this TypeReference self)
 		{
 			return new ArrayType (self);
 		}
