@@ -683,8 +683,9 @@ namespace Mono.Cecil.Cil {
 	}
 
 	public interface ISymbolReader : IDisposable {
-
+#if !READ_ONLY
 		ISymbolWriterProvider GetWriterProvider ();
+#endif
 		bool ProcessDebugHeader (ImageDebugHeader header);
 		MethodDebugInformation Read (MethodDefinition method);
 	}

@@ -12,6 +12,7 @@ namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class ModuleTests : BaseTestFixture {
 
+#if !READ_ONLY
 		[Test]
 		public void CreateModuleEscapesAssemblyName ()
 		{
@@ -21,6 +22,7 @@ namespace Mono.Cecil.Tests {
 			module = ModuleDefinition.CreateModule ("Test.exe", ModuleKind.Console);
 			Assert.AreEqual ("Test", module.Assembly.Name.Name);
 		}
+#endif
 
 		[Test]
 		public void SingleModule ()
@@ -277,6 +279,7 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
+#if !READ_ONLY
 		[Test]
 		public void ReadAndWriteFile ()
 		{
@@ -309,5 +312,6 @@ namespace Mono.Cecil.Tests {
 			// Ensure you can still delete the file
 			File.Delete (path);
 		}
+#endif
 	}
 }

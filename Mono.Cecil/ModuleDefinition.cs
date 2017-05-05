@@ -1217,8 +1217,6 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 		}
 
-#if !READ_ONLY
-
 		public static void CheckType (object type)
 		{
 			if (type == null)
@@ -1242,8 +1240,6 @@ namespace Mono.Cecil {
 			if (method == null)
 				throw new ArgumentNullException (Argument.method.ToString ());
 		}
-
-#endif
 
 		public static void CheckParameters (object parameters)
 		{

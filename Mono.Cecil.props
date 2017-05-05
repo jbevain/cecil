@@ -15,7 +15,7 @@
     <NetStandard Condition=" $(Configuration.StartsWith('netstandard')) Or '$(NuGetRestoreTargets)' != '' ">true</NetStandard>
     <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.EndsWith('Debug')) ">
+  <PropertyGroup Condition=" $(Configuration.Contains('Debug')) ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,13 +23,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(Configuration.EndsWith('Release')) ">
+  <PropertyGroup Condition=" $(Configuration.Contains('Release')) ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <DefineConstants>$(DefineConstants);TRACE;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
+    <DefineConstants>$(DefineConstants);READ_ONLY;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_3_5')) ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
@@ -49,18 +52,18 @@
     <Reference Include="System" />
   </ItemGroup>
   <!-- The following keeps Visual Studio happy; let's keep Visual Studio happy -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Release' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Debug' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Release' ">
-  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Debug_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Release' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_3_5_Release_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Debug' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Debug_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Release' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Release_ReadOnly' "/>
   <!-- This optional import allows products that distribute Cecil to tweak settings that will affect its 
        build, without having to fork the project unnecessarily. The Mono.Cecil.overrides file is a plain 
        MSBuild file with additional properties, and can exist anywhere upwards from the current Cecil repo 

@@ -1,4 +1,4 @@
-
+#if !READ_ONLY
 using Mono.Cecil.Mdb;
 
 using NUnit.Framework;
@@ -83,3 +83,4 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 }
+#endif
