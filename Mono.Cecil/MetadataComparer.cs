@@ -51,7 +51,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		public static bool AreSame (MethodReference a, MethodReference b, bool compareDeclaringType)
+		public static bool AreSame (MethodReference a, MethodReference b, bool compare_declaring_type)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -68,7 +68,7 @@ namespace Mono.Cecil {
 			if (a.HasGenericParameters && a.GenericParameters.Count != b.GenericParameters.Count)
 				return false;
 
-			if (compareDeclaringType && !AreSame (a.DeclaringType, b.DeclaringType))
+			if (compare_declaring_type && !AreSame (a.DeclaringType, b.DeclaringType))
 				return false;
 
 			if (!AreSame (a.ReturnType, b.ReturnType))

@@ -240,7 +240,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 
-				if (MetadataComparer.AreSame (method, reference, compareDeclaringType: false))
+				if (MetadataComparer.AreSame (method, reference, compare_declaring_type: false))
 					return method;
 			}
 
