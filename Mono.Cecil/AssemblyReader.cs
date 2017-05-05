@@ -278,14 +278,6 @@ namespace Mono.Cecil {
 			}
 		}
 
-		private void ReadInterfaces (TypeDefinition type)
-		{
-			var interfaces = type.Interfaces;
-			for (int i = 0; i < interfaces.Count; i++) {
-				ReadCustomAttributes (interfaces[i]);
-			}
-		}
-
 		void ReadFields (TypeDefinition type)
 		{
 			var fields = type.Fields;
