@@ -61,5 +61,44 @@ namespace Mono.Cecil.Rocks {
 
 			return Mixin.GetEnumUnderlyingType (self);
 		}
-	}
+
+        public static bool IsEventuallyAccessible(this TypeDefinition type)
+        {
+            if (type.IsPublic)
+                return true;
+
+            if (type.IsNested && type.DeclaringType.IsEventuallyAccessible())
+            {
+                if (type.IsNestedPublic)
+                    return true;
+                if (type.IsNestedFamily)
+                    return true;
+                if (type.IsNestedFamilyOrAssembly)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsSubclassOf(this TypeDefinition type, TypeDefinition test, bool? useAssemblyFullName = null)
+        {
+            if (type == null)
+                throw new NullReferenceException();
+            if (test == null)
+                throw new ArgumentNullException();
+
+            if (test.IsInterface)
+                return test.IsAssignableFrom(type, useAssemblyFullName);
+
+            var baseType = type.BaseType;
+            if (baseType == null)
+                return false;
+            type = baseType.Resolve();
+
+            if (type.IsSameAs(test, useAssemblyFullName))
+                return true;
+
+            return type.IsSubclassOf(test, useAssemblyFullName);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 #if !READ_ONLY
 using System;
+using System.Linq;
 
 using Mono.Cecil.Rocks;
 
@@ -9,8 +10,70 @@ namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class TypeReferenceRocksTests {
+        interface IFoo { }
+        interface IBar : IFoo { }
 
-		[Test]
+        interface IFooBar : IBar { }
+        class FooBar : IFooBar { }
+
+        [Test]
+        public void AreSame()
+        {
+            var ifoo = typeof(IFoo).ToDefinition();
+            var ibar = typeof(IBar).ToDefinition();
+            var ibarfoo = ibar.Interfaces.Single();
+
+            // for reasons, TypeDefinitions got from ToDefinition() are not same as their "nature" equivalent
+            // this makes testing code involves TypeDefinition relations hard
+
+            Assert.AreNotEqual(typeof(object).ToDefinition(), typeof(object).ToDefinition());
+            Assert.AreNotEqual(ifoo, ibarfoo);
+
+            Assert.IsTrue(TypeReferenceRocks.AreSame(typeof(object).ToDefinition(), typeof(object).ToDefinition()));
+            Assert.IsTrue(TypeReferenceRocks.AreSame(ibarfoo, ifoo));
+            Assert.IsFalse(TypeReferenceRocks.AreSame(ifoo, null));
+            Assert.IsFalse(TypeReferenceRocks.AreSame(null, ibar));
+
+            Assert.IsTrue(typeof(object).ToDefinition().IsSameAs(typeof(object).ToDefinition()));
+            Assert.IsTrue(ibarfoo.IsSameAs(ifoo));
+            Assert.Throws<ArgumentNullException>(() => ifoo.IsSameAs(null));
+            Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(ibar));
+            Assert.Throws<NullReferenceException>(() => ((TypeReference)null).IsSameAs(null));
+
+            var actual = new[] { ifoo, ibar };
+            Assert.IsTrue(TypeReferenceRocks.AreMatch(actual, actual));
+            Assert.IsTrue(TypeReferenceRocks.AreMatch(actual, new[] { ifoo, ibar }));
+            Assert.IsTrue(TypeReferenceRocks.AreMatch(actual, 
+                new[] { typeof(IFoo).ToDefinition(), typeof(IBar).ToDefinition() }));
+            Assert.IsFalse(TypeReferenceRocks.AreMatch(actual, new[] { ifoo }));
+            Assert.IsFalse(TypeReferenceRocks.AreMatch(actual, new[] { ifoo, null }));
+            Assert.IsFalse(TypeReferenceRocks.AreMatch(actual, new[] { ifoo, ibar, ibar }));
+        }
+
+        [Test]
+        public void Assignable()
+        {
+            var foobar = typeof(FooBar).ToDefinition();
+            var ifoobar = typeof(IFooBar).ToDefinition();
+
+            Assert.Throws<ArgumentNullException>(() => foobar.IsAssignableFrom(null));
+            Assert.Throws<ArgumentNullException>(() => foobar.IsSubclassOf(null));
+
+            Assert.IsTrue(foobar.IsAssignableFrom(foobar));
+            Assert.IsFalse(foobar.IsSubclassOf(foobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(ifoobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(ifoobar));
+
+            Assert.IsTrue(ifoobar.IsAssignableFrom(foobar));
+            Assert.IsTrue(foobar.IsSubclassOf(ifoobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(ifoobar));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(ifoobar));
+
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsAssignableFrom(null));
+            Assert.Throws<NullReferenceException>(() => ((TypeDefinition)null).IsSubclassOf(null));
+        }
+
+        [Test]
 		public void MakeArrayType ()
 		{
 			var @string = GetTypeReference (typeof (string));
