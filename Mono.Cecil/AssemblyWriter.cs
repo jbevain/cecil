@@ -2745,10 +2745,10 @@ namespace Mono.Cecil {
 			for (int i = 0; i < rank; i++) {
 				var dimension = dimensions [i];
 
-				if (dimension.UpperBound.HasValue) {
+				if (dimension.upper_bound.HasValue) {
 					sized++;
 					lbounds++;
-				} else if (dimension.LowerBound.HasValue)
+				} else if (dimension.lower_bound.HasValue)
 					lbounds++;
 			}
 
@@ -2757,9 +2757,9 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < lbounds; i++) {
 				var dimension = dimensions [i];
-				low_bounds [i] = dimension.LowerBound.GetValueOrDefault ();
-				if (dimension.UpperBound.HasValue)
-					sizes [i] = dimension.UpperBound.Value - low_bounds [i] + 1;
+				low_bounds [i] = dimension.lower_bound.GetValueOrDefault ();
+				if (dimension.upper_bound.HasValue)
+					sizes [i] = dimension.upper_bound.Value - low_bounds [i] + 1;
 			}
 
 			WriteCompressedUInt32 ((uint) sized);

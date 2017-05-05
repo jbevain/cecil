@@ -17,18 +17,8 @@ namespace Mono.Cecil {
 
 	public struct ArrayDimension {
 
-		int? lower_bound;
-		int? upper_bound;
-
-		public int? LowerBound {
-			get { return lower_bound; }
-			set { lower_bound = value; }
-		}
-
-		public int? UpperBound {
-			get { return upper_bound; }
-			set { upper_bound = value; }
-		}
+		public int? lower_bound { set; get; }
+		public int? upper_bound { set; get; }
 
 		public bool IsSized {
 			get { return lower_bound.HasValue || upper_bound.HasValue; }

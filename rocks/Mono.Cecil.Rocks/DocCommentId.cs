@@ -175,13 +175,13 @@ namespace Mono.Cecil.Rocks {
 			id.Append ("[");
 
 			WriteList (type.Dimensions, dimension => {
-				if (dimension.LowerBound.HasValue)
-					id.Append (dimension.LowerBound.Value);
+				if (dimension.lower_bound.HasValue)
+					id.Append (dimension.lower_bound.Value);
 
 				id.Append (':');
 
-				if (dimension.UpperBound.HasValue)
-					id.Append (dimension.UpperBound.Value - (dimension.LowerBound.GetValueOrDefault () + 1));
+				if (dimension.upper_bound.HasValue)
+					id.Append (dimension.upper_bound.Value - (dimension.lower_bound.GetValueOrDefault () + 1));
 			});
 
 			id.Append ("]");
