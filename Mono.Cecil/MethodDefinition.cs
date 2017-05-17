@@ -171,10 +171,10 @@ namespace Mono.Cecil {
 
 		public MethodDebugInformation DebugInformation {
 			get {
+				Mixin.Read (Body);
+
 				if (debug_info != null)
 					return debug_info;
-
-				Mixin.Read (Body);
 
 				return debug_info ?? (debug_info = new MethodDebugInformation (this));
 			}
