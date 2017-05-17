@@ -212,6 +212,7 @@ namespace Mono.Cecil.Pdb {
 				} else {
 					import = GetImport (scope, info.Method.Module);
 					imports.Add (scope, import);
+					parent.import = import;
 				}
 			}
 
