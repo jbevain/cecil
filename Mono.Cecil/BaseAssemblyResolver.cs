@@ -123,9 +123,12 @@ namespace Mono.Cecil {
 			}
 
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
+			var framework_dirs = on_mono
+				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
+				: new [] { framework_dir };
 
 			if (IsZero (name.Version)) {
-				assembly = SearchDirectory (name, new [] { framework_dir }, parameters);
+				assembly = SearchDirectory (name, framework_dirs, parameters);
 				if (assembly != null)
 					return assembly;
 			}
@@ -140,7 +143,7 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 
-			assembly = SearchDirectory (name, new [] { framework_dir }, parameters);
+			assembly = SearchDirectory (name, framework_dirs, parameters);
 			if (assembly != null)
 				return assembly;
 
