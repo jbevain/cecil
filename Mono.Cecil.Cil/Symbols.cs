@@ -931,6 +931,7 @@ namespace Mono.Cecil {
 		{
 			const uint ppdb_signature = 0x424a5342;
 
+			if (stream.Length < 4) return false;
 			var position = stream.Position;
 			try {
 				var reader = new BinaryReader (stream);
