@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using NUnit.Framework;
 
 using Mono.Cecil.Cil;
@@ -403,6 +404,115 @@ namespace Mono.Cecil.Tests {
 				var a = symbol.Scope.Constants [0];
 				Assert.AreEqual ("a", a.Name);
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
+		public void SourceLink ()
+		{
+			TestModule ("TargetLib.dll", module => {
+				Assert.IsTrue (module.HasCustomDebugInformations);
+				Assert.AreEqual (1, module.CustomDebugInformations.Count);
+
+				var source_link = module.CustomDebugInformations [0] as SourceLinkDebugInformation;
+				Assert.IsNotNull (source_link);
+				Assert.AreEqual ("{\"documents\":{\"C:\\\\tmp\\\\SourceLinkProblem\\\\*\":\"https://raw.githubusercontent.com/bording/SourceLinkProblem/197d965ee7f1e7f8bd3cea55b5f904aeeb8cd51e/*\"}}", source_link.Content);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
+		public void EmbeddedSource ()
+		{
+			TestModule ("embedcs.exe", module => {
+				var program = GetDocument (module.GetType ("Program"));
+				var program_src = GetSourceDebugInfo (program);
+				Assert.IsTrue (program_src.compress);
+				var program_src_content = Encoding.UTF8.GetString (program_src.Content);
+				Assert.AreEqual (Normalize (@"using System;
+
+class Program
+{
+    static void Main()
+    {
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        Console.WriteLine(B.Do());
+        Console.WriteLine(A.Do());
+    }
+}
+"), Normalize (program_src_content));
+
+				var a = GetDocument (module.GetType ("A"));
+				var a_src = GetSourceDebugInfo (a);
+				Assert.IsFalse (a_src.compress);
+				var a_src_content = Encoding.UTF8.GetString (a_src.Content);
+				Assert.AreEqual (Normalize (@"class A
+{
+    public static string Do()
+    {
+        return ""A::Do"";
+    }
+}"), Normalize (a_src_content));
+
+				var b = GetDocument(module.GetType ("B"));
+				var b_src = GetSourceDebugInfo (b);
+				Assert.IsFalse (b_src.compress);
+				var b_src_content = Encoding.UTF8.GetString (b_src.Content);
+				Assert.AreEqual (Normalize (@"class B
+{
+    public static string Do()
+    {
+        return ""B::Do"";
+    }
+}"), Normalize (b_src_content));
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		static Document GetDocument (TypeDefinition type)
+		{
+			foreach (var method in type.Methods) {
+				if (!method.HasBody)
+					continue;
+
+				foreach (var instruction in method.Body.Instructions) {
+					var sp = method.DebugInformation.GetSequencePoint (instruction);
+					if (sp != null && sp.Document != null)
+						return sp.Document;
+				}
+			}
+
+			return null;
+		}
+
+		static EmbeddedSourceDebugInformation GetSourceDebugInfo (Document document)
+		{
+			Assert.IsTrue (document.HasCustomDebugInformations);
+			Assert.AreEqual (1, document.CustomDebugInformations.Count);
+
+			var source = document.CustomDebugInformations [0] as EmbeddedSourceDebugInformation;
+			Assert.IsNotNull (source);
+			return source;
 		}
 
 		[Test]

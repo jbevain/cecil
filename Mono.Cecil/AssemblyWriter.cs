@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 
 using Mono;
@@ -1044,6 +1045,10 @@ namespace Mono.Cecil {
 
 			if (module.EntryPoint != null)
 				entry_point = LookupToken (module.EntryPoint);
+
+			var pdb_writer = symbol_writer as IMetadataSymbolWriter;
+			if (pdb_writer != null)
+				pdb_writer.WriteModule ();
 		}
 
 		void BuildAssembly ()
@@ -2339,7 +2344,7 @@ namespace Mono.Cecil {
 			return signature;
 		}
 
-		void AddCustomDebugInformations (ICustomDebugInformationProvider provider)
+		public void AddCustomDebugInformations (ICustomDebugInformationProvider provider)
 		{
 			if (!provider.HasCustomDebugInformations)
 				return;
@@ -2358,6 +2363,12 @@ namespace Mono.Cecil {
 					break;
 				case CustomDebugInformationKind.StateMachineScope:
 					AddStateMachineScopeDebugInformation (provider, (StateMachineScopeDebugInformation) custom_info);
+					break;
+				case CustomDebugInformationKind.EmbeddedSource:
+					AddEmbeddedSourceDebugInformation (provider, (EmbeddedSourceDebugInformation) custom_info);
+					break;
+				case CustomDebugInformationKind.SourceLink:
+					AddSourceLinkDebugInformation (provider, (SourceLinkDebugInformation) custom_info);
 					break;
 				default:
 					throw new NotImplementedException ();
@@ -2393,6 +2404,36 @@ namespace Mono.Cecil {
 			}
 
 			AddCustomDebugInformation (provider, async_method, signature);
+		}
+
+		void AddEmbeddedSourceDebugInformation (ICustomDebugInformationProvider provider, EmbeddedSourceDebugInformation embedded_source)
+		{
+			var signature = CreateSignatureWriter ();
+			var content = embedded_source.content ?? Empty<byte>.Array;
+			if (embedded_source.compress) {
+				signature.WriteInt32 (content.Length);
+
+				var decompressed_stream = new MemoryStream (content);
+				var content_stream = new MemoryStream ();
+
+				using (var compress_stream = new DeflateStream (content_stream, CompressionMode.Compress, leaveOpen: true))
+					decompressed_stream.CopyTo (compress_stream);
+
+				signature.WriteBytes (content_stream.ToArray ());
+			} else {
+				signature.WriteInt32 (0);
+				signature.WriteBytes (content);
+			}
+
+			AddCustomDebugInformation (provider, embedded_source, signature);
+		}
+
+		void AddSourceLinkDebugInformation (ICustomDebugInformationProvider provider, SourceLinkDebugInformation source_link)
+		{
+			var signature = CreateSignatureWriter ();
+			signature.WriteBytes (Encoding.UTF8.GetBytes (source_link.content));
+
+			AddCustomDebugInformation (provider, source_link, signature);
 		}
 
 		void AddCustomDebugInformation (ICustomDebugInformationProvider provider, CustomDebugInformation custom_info, SignatureWriter signature)
@@ -2498,6 +2539,8 @@ namespace Mono.Cecil {
 				GetGuidIndex (document.Language.ToGuid ()))));
 
 			document.token = token;
+
+			AddCustomDebugInformations (document);
 
 			document_map.Add (document.Url, token);
 

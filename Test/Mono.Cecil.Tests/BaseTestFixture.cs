@@ -87,7 +87,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (Normalize (expected), Normalize (Formatter.FormatMethodBody (method)));
 		}
 
-		static string Normalize (string str)
+		public static string Normalize (string str)
 		{
 			return str.Trim ().Replace ("\r\n", "\n");
 		}

@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -2856,10 +2857,20 @@ namespace Mono.Cecil {
 			if (signature == 0)
 				return new Collection<SequencePoint> (0);
 
-			var document = metadata.GetDocument (document_index);
+			var document = GetDocument (document_index);
 			var reader = ReadSignature (signature);
 
 			return reader.ReadSequencePoints (document);
+		}
+
+		public Document GetDocument (uint rid)
+		{
+			var document = metadata.GetDocument (rid);
+			if (document == null)
+				return null;
+
+			document.custom_infos = GetCustomDebugInformation (document);
+			return document;
 		}
 
 		void InitializeLocalScopes ()
@@ -3187,6 +3198,30 @@ namespace Mono.Cecil {
 					async_body.move_next = GetMethodDefinition (move_next_rid);
 
 					infos.Add (async_body);
+				} else if (rows [i].Col1 == EmbeddedSourceDebugInformation.KindIdentifier) {
+					var signature = ReadSignature (rows [i].Col2);
+					var format = signature.ReadInt32 ();
+					var length = signature.sig_length - 4;
+
+					var info = null as CustomDebugInformation;
+
+					if (format == 0) {
+						info = new EmbeddedSourceDebugInformation (signature.ReadBytes ((int) length), compress: false);
+					} else if (format > 0) {
+						var compressed_stream = new MemoryStream (signature.ReadBytes ((int) length));
+						var decompressed_stream = new MemoryStream (format);
+
+						using (var deflate_stream = new DeflateStream (compressed_stream, CompressionMode.Decompress, leaveOpen: true))
+							deflate_stream.CopyTo (decompressed_stream);
+
+						info = new EmbeddedSourceDebugInformation (decompressed_stream.GetBuffer (), compress: true);
+					} else if (format < 0) {
+						info = new BinaryCustomDebugInformation (rows [i].Col1, ReadBlob (rows [i].Col2));
+					}
+
+					infos.Add (info);
+				} else if (rows [i].Col1 == SourceLinkDebugInformation.KindIdentifier) {
+					infos.Add (new SourceLinkDebugInformation (Encoding.UTF8.GetString (ReadBlob (rows [i].Col2))));
 				} else {
 					infos.Add (new BinaryCustomDebugInformation (rows [i].Col1, ReadBlob (rows [i].Col2)));
 				}
@@ -3759,7 +3794,7 @@ namespace Mono.Cecil {
 			ReadCompressedUInt32 (); // local_sig_token
 
 			if (document == null)
-				document = reader.metadata.GetDocument (ReadCompressedUInt32 ());
+				document = reader.GetDocument (ReadCompressedUInt32 ());
 
 			var offset = 0;
 			var start_line = 0;
@@ -3769,7 +3804,7 @@ namespace Mono.Cecil {
 			for (var i = 0; CanReadMore (); i++) {
 				var delta_il = (int) ReadCompressedUInt32 ();
 				if (i > 0 && delta_il == 0) {
-					document = reader.metadata.GetDocument (ReadCompressedUInt32 ());
+					document = reader.GetDocument (ReadCompressedUInt32 ());
 					continue;
 				}
 

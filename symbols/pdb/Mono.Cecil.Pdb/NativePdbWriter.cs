@@ -80,6 +80,10 @@ namespace Mono.Cecil.Pdb {
 			this.metadata = metadata;
 		}
 
+		void IMetadataSymbolWriter.WriteModule ()
+		{
+		}
+
 		void DefineCustomMetadata (MethodDebugInformation info, MetadataToken import_parent)
 		{
 			var metadata = new CustomMetadataWriter (this.writer);
