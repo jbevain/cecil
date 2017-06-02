@@ -238,7 +238,7 @@ namespace Mono.Cecil {
 
 #endif
 
-	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider, IDisposable {
+	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider, ICustomDebugInformationProvider, IDisposable {
 
 		internal Image Image;
 		internal MetadataSystem MetadataSystem;
@@ -276,6 +276,8 @@ namespace Mono.Cecil {
 		Collection<Resource> resources;
 		Collection<ExportedType> exported_types;
 		TypeDefinitionCollection types;
+
+		internal Collection<CustomDebugInformation> custom_infos;
 
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
@@ -549,6 +551,18 @@ namespace Mono.Cecil {
 				return entry_point = null;
 			}
 			set { entry_point = value; }
+		}
+
+		public bool HasCustomDebugInformations {
+			get {
+				return custom_infos != null && custom_infos.Count > 0;
+			}
+		}
+
+		public Collection<CustomDebugInformation> CustomDebugInformations {
+			get {
+				return custom_infos ?? (custom_infos = new Collection<CustomDebugInformation> ());
+			}
 		}
 
 		internal ModuleDefinition ()

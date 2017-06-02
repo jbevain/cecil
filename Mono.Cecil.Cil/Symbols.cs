@@ -433,6 +433,8 @@ namespace Mono.Cecil.Cil {
 		DynamicVariable,
 		DefaultNamespace,
 		AsyncMethodBody,
+		EmbeddedSource,
+		SourceLink,
 	}
 
 	public abstract class CustomDebugInformation : DebugInformation {
@@ -555,6 +557,57 @@ namespace Mono.Cecil.Cil {
 		{
 			this.start = new InstructionOffset (start);
 			this.end = end != null ? new InstructionOffset (end) : new InstructionOffset ();
+		}
+	}
+
+	public sealed class EmbeddedSourceDebugInformation : CustomDebugInformation {
+
+		internal byte [] content;
+		internal bool compress;
+
+		public byte [] Content {
+			get { return content; }
+			set { content = value; }
+		}
+
+		public bool Compress {
+			get { return compress; }
+			set { compress = value; }
+		}
+
+		public override CustomDebugInformationKind Kind {
+			get { return CustomDebugInformationKind.EmbeddedSource; }
+		}
+
+		public static Guid KindIdentifier = new Guid ("{0E8A571B-6926-466E-B4AD-8AB04611F5FE}");
+
+		public EmbeddedSourceDebugInformation (byte [] content, bool compress)
+			: base (KindIdentifier)
+		{
+			this.content = content;
+			this.compress = compress;
+		}
+	}
+
+	public sealed class SourceLinkDebugInformation : CustomDebugInformation {
+
+		internal string content;
+
+		public string Content {
+			get { return content; }
+			set { content = value; }
+		}
+
+		public override CustomDebugInformationKind Kind {
+			get { return CustomDebugInformationKind.SourceLink; }
+		}
+
+		public static Guid KindIdentifier = new Guid ("{CC110556-A091-4D38-9FEC-25AB9A351A6A}");
+
+		public SourceLinkDebugInformation (string content)
+			: base (KindIdentifier)
+		{
+			this.content = content;
 		}
 	}
 
