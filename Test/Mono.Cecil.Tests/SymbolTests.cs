@@ -25,6 +25,17 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void NoRoot()
+		{
+			IgnoreOnMono ();
+
+			TestModule ("NoRoot.dll", module => {
+				Assert.IsTrue (module.HasSymbols);
+				Assert.AreEqual (typeof (NativePdbReader), module.SymbolReader.GetType ());
+			}, symbolReaderProvider: typeof (DefaultSymbolReaderProvider), symbolWriterProvider: typeof (DefaultSymbolWriterProvider));
+		}
+
+		[Test]
 		public void DefaultMdb ()
 		{
 			TestModule ("libmdb.dll", module => {
