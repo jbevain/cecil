@@ -1,7 +1,15 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
 namespace Mono.Cecil {
 	internal sealed class MethodReferenceComparer : EqualityComparer<MethodReference> {
+		// Initialized lazily for each thread
+		[ThreadStatic]
+		static List<MethodReference> xComparisonStack = null;
+
+		[ThreadStatic]
+		static List<MethodReference> yComparisonStack = null;
+
 		public override bool Equals (MethodReference x, MethodReference y)
 		{
 			return AreEqual (x, y);
@@ -49,8 +57,48 @@ namespace Mono.Cecil {
 						return false;
 			}
 
-			if (x.Resolve () != y.Resolve ())
+			var xResolved = x.Resolve ();
+			var yResolved = y.Resolve ();
+
+			if (xResolved != yResolved)
 				return false;
+
+			if (xResolved == null)
+			{
+				// We couldn't resolve either method. In order for them to be equal, their parameter types _must_ match. But wait, there's a twist!
+				// There exists a situation where we might get into a recursive state: parameter type comparison might lead to comparing the same
+				// methods again if the parameter types are generic parameters whose owners are these methods. We guard against these by using a
+				// thread static list of all our comparisons carried out in the stack so far, and if we're in progress of comparing them already,
+				// we'll just say that they match.
+
+				if (xComparisonStack == null)
+					xComparisonStack = new List<MethodReference> ();
+
+				if (yComparisonStack == null)
+					yComparisonStack = new List<MethodReference> ();
+
+				for (int i = 0; i < xComparisonStack.Count; i++) {
+					if (xComparisonStack[i] == x && yComparisonStack[i] == y)
+						return true;
+				}
+
+				xComparisonStack.Add (x);
+
+				try {
+					yComparisonStack.Add (y);
+
+					try {
+						for (int i = 0; i < x.Parameters.Count; i++) {
+							if (!TypeReferenceEqualityComparer.AreEqual (x.Parameters[i].ParameterType, y.Parameters[i].ParameterType))
+								return false;
+						}
+					} finally {
+						yComparisonStack.RemoveAt (yComparisonStack.Count - 1);
+					}
+				} finally {
+					xComparisonStack.RemoveAt (xComparisonStack.Count - 1);
+				}
+			}
 
 			return true;
 		}
