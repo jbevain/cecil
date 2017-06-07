@@ -1222,7 +1222,7 @@ namespace Mono.Cecil {
 		public static void CheckWriteSeek (Stream stream)
 		{
 			if (!stream.CanWrite || !stream.CanSeek)
-				throw new ArgumentException("Stream must be writable and seekable.");
+				throw new ArgumentException ("Stream must be writable and seekable.");
 		}
 
 		public static void CheckReadSeek (Stream stream)
