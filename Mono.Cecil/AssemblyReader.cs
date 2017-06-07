@@ -3209,12 +3209,13 @@ namespace Mono.Cecil {
 						info = new EmbeddedSourceDebugInformation (signature.ReadBytes ((int) length), compress: false);
 					} else if (format > 0) {
 						var compressed_stream = new MemoryStream (signature.ReadBytes ((int) length));
-						var decompressed_stream = new MemoryStream (format);
+						var decompressed_document = new byte [format]; // if positive, format is the decompressed length of the document
+						var decompressed_stream = new MemoryStream (decompressed_document);
 
 						using (var deflate_stream = new DeflateStream (compressed_stream, CompressionMode.Decompress, leaveOpen: true))
 							deflate_stream.CopyTo (decompressed_stream);
 
-						info = new EmbeddedSourceDebugInformation (decompressed_stream.GetBuffer (), compress: true);
+						info = new EmbeddedSourceDebugInformation (decompressed_document, compress: true);
 					} else if (format < 0) {
 						info = new BinaryCustomDebugInformation (rows [i].Col1, ReadBlob (rows [i].Col2));
 					}
