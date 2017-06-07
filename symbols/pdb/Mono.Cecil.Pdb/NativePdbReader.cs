@@ -264,6 +264,9 @@ namespace Mono.Cecil.Pdb {
 			var import = new ImportDebugInformation ();
 
 			foreach (var used_namespace in scope.usedNamespaces) {
+				if (string.IsNullOrEmpty (used_namespace))
+					continue;
+
 				ImportTarget target = null;
 				var value = used_namespace.Substring (1);
 				switch (used_namespace [0]) {

@@ -154,6 +154,13 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void EmptyRootNamespace ()
+		{
+			TestModule ("EmptyRootNamespace.dll", module => {
+			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+		}
+
+		[Test]
 		public void LocalVariables ()
 		{
 			TestModule ("ComplexPdb.dll", module => {
