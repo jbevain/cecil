@@ -25,7 +25,7 @@ namespace Mono.Cecil {
 		ManagedWindowsMetadata,
 	}
 
-	public enum TargetArchitecture {
+	public enum ProcessorArchitecture {
 		I386 = 0x014c,
 		AMD64 = 0x8664,
 		IA64 = 0x0200,
@@ -34,12 +34,23 @@ namespace Mono.Cecil {
 		ARM64 = 0xaa64,
 	}
 
-	[Flags]
+    public enum TargetArchitecture {
+        Any = 0,
+        x86,
+        x64,
+	    ILOnly,
+	    x86Only,
+		x64Only,
+		ARM,
+		ARMOnly
+	}
+
+    [Flags]
 	public enum ModuleAttributes {
 		ILOnly = 1,
 		Required32Bit = 2,
 		StrongNameSigned = 8,
-		Preferred32Bit = 0x00020000,
+		Preferred32Bit = 0x20000,
 	}
 
 	[Flags]

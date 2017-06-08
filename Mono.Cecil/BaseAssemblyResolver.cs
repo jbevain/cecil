@@ -11,19 +11,21 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 
 using Mono.Collections.Generic;
 
-namespace Mono.Cecil {
-
+namespace Mono.Cecil
+{
 	public delegate AssemblyDefinition AssemblyResolveEventHandler (object sender, AssemblyNameReference reference);
 
-	public sealed class AssemblyResolveEventArgs : EventArgs {
-
+	public sealed class AssemblyResolveEventArgs : EventArgs
+	{
 		readonly AssemblyNameReference reference;
 
-		public AssemblyNameReference AssemblyReference {
+		public AssemblyNameReference AssemblyReference
+		{
 			get { return reference; }
 		}
 
@@ -36,124 +38,190 @@ namespace Mono.Cecil {
 #if !NET_CORE
 	[Serializable]
 #endif
-	public sealed class AssemblyResolutionException : FileNotFoundException {
-
+	public sealed class AssemblyResolutionException : FileNotFoundException
+	{
 		readonly AssemblyNameReference reference;
 
-		public AssemblyNameReference AssemblyReference {
+		public AssemblyNameReference AssemblyReference
+		{
 			get { return reference; }
 		}
 
-		public AssemblyResolutionException (AssemblyNameReference reference)
-			: this (reference, null)
+		public AssemblyResolutionException(AssemblyNameReference reference) : this (reference, null)
 		{
 		}
 
-		public AssemblyResolutionException (AssemblyNameReference reference, Exception innerException)
-			: base (string.Format ("Failed to resolve assembly: '{0}'", reference), innerException)
+		public AssemblyResolutionException(AssemblyNameReference reference, Exception innerException)
+			: base (string.Format("Failed to resolve assembly: '{0}'", reference), innerException)
 		{
 			this.reference = reference;
 		}
 
 #if !NET_CORE
-		AssemblyResolutionException (
-			System.Runtime.Serialization.SerializationInfo info,
-			System.Runtime.Serialization.StreamingContext context)
-			: base (info, context)
+		AssemblyResolutionException(SerializationInfo info, StreamingContext context) : base (info, context)
 		{
 		}
 #endif
 	}
 
 #if !NET_CORE
-	public abstract class BaseAssemblyResolver : IAssemblyResolver {
-
-		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
-
+	public abstract class BaseAssemblyResolver : IAssemblyResolver
+	{
+		static readonly bool on_mono = Type.GetType("Mono.Runtime") != null;
 		readonly Collection<string> directories;
-
 		Collection<string> gac_paths;
 
-		public void AddSearchDirectory (string directory)
+		public void AddSearchDirectory(string directory)
 		{
 			directories.Add (directory);
 		}
 
-		public void RemoveSearchDirectory (string directory)
+		public void RemoveSearchDirectory(string directory)
 		{
 			directories.Remove (directory);
 		}
 
-		public string [] GetSearchDirectories ()
+		public string [] GetSearchDirectories()
 		{
 			var directories = new string [this.directories.size];
+
 			Array.Copy (this.directories.items, directories, directories.Length);
+
 			return directories;
 		}
 
 		public event AssemblyResolveEventHandler ResolveFailure;
 
-		protected BaseAssemblyResolver ()
+		protected BaseAssemblyResolver()
 		{
-			directories = new Collection<string> (2) { ".", "bin" };
+			directories = new Collection<string>(2) { ".", "bin" };
 		}
 
-		AssemblyDefinition GetAssembly (string file, ReaderParameters parameters)
+		AssemblyDefinition GetAssembly(string file, ReaderParameters parameters)
 		{
 			if (parameters.AssemblyResolver == null)
 				parameters.AssemblyResolver = this;
 
-			return ModuleDefinition.ReadModule (file, parameters).Assembly;
+			var assemblyDef = ModuleDefinition.ReadModule(file, parameters).Assembly;
+
+			if (assemblyDef == null || parameters.TargetArchitecture == TargetArchitecture.Any)
+				return assemblyDef;
+
+			switch (parameters.TargetArchitecture)
+			{
+				case TargetArchitecture.ILOnly:
+				{
+					var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+					var is32BitRequired = (assemblyDef.MainModule.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit;
+					var ilOnly = (assemblyDef.MainModule.Attributes & ModuleAttributes.ILOnly) == ModuleAttributes.ILOnly;
+
+					if (!(ilOnly && !is32BitRequired && !is64Bit))
+						assemblyDef = null;
+
+					break;
+				}
+				case TargetArchitecture.x86:
+				{
+					var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+					var is32Bit = !is64Bit;
+
+					if (!is32Bit)
+						assemblyDef = null;
+
+					break;
+				}
+				case TargetArchitecture.x86Only:
+				{
+					var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+					var is32Bit = !is64Bit;
+					var is32BitRequired = (assemblyDef.MainModule.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit;
+
+					if (!(is32Bit && is32BitRequired))
+						assemblyDef = null;
+
+					break;
+				}
+				case TargetArchitecture.x64:
+				{
+					var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+					var is32BitRequired = (assemblyDef.MainModule.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit;
+					var ilOnly = (assemblyDef.MainModule.Attributes & ModuleAttributes.ILOnly) == ModuleAttributes.ILOnly;
+
+					if (!(is64Bit || (ilOnly && !is32BitRequired)))
+						assemblyDef = null;
+
+					break;
+				}
+				case TargetArchitecture.x64Only:
+				{
+					var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+
+					if (!is64Bit)
+						assemblyDef = null;
+
+					break;
+				}
+			}
+
+			return assemblyDef;
 		}
 
 		public virtual AssemblyDefinition Resolve (AssemblyNameReference name)
 		{
-			return Resolve (name, new ReaderParameters ());
+			return Resolve(name, new ReaderParameters());
 		}
 
-		public virtual AssemblyDefinition Resolve (AssemblyNameReference name, ReaderParameters parameters)
+		public virtual AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters)
 		{
-			Mixin.CheckName (name);
-			Mixin.CheckParameters (parameters);
+			Mixin.CheckName(name);
+			Mixin.CheckParameters(parameters);
 
-			var assembly = SearchDirectory (name, directories, parameters);
+			var assembly = SearchDirectory(name, directories, parameters);
+
 			if (assembly != null)
 				return assembly;
 
-			if (name.IsRetargetable) {
+			if (name.IsRetargetable)
+			{
 				// if the reference is retargetable, zero it
 				name = new AssemblyNameReference (name.Name, Mixin.ZeroVersion) {
 					PublicKeyToken = Empty<byte>.Array,
 				};
 			}
 
-			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
-			var framework_dirs = on_mono
-				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
-				: new [] { framework_dir };
+			var framework_dir = Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName);
+			var framework_dirs = (on_mono ? new [] { framework_dir, Path.Combine (framework_dir, "Facades") } : new [] { framework_dir });
 
-			if (IsZero (name.Version)) {
-				assembly = SearchDirectory (name, framework_dirs, parameters);
+			if (IsZero (name.Version))
+			{
+				assembly = SearchDirectory(name, framework_dirs, parameters);
+
 				if (assembly != null)
 					return assembly;
 			}
 
-			if (name.Name == "mscorlib") {
-				assembly = GetCorlib (name, parameters);
+			if (name.Name == "mscorlib")
+			{
+				assembly = GetCorlib(name, parameters);
+
 				if (assembly != null)
 					return assembly;
 			}
 
-			assembly = GetAssemblyInGac (name, parameters);
+			assembly = GetAssemblyInGac(name, parameters);
+
 			if (assembly != null)
 				return assembly;
 
-			assembly = SearchDirectory (name, framework_dirs, parameters);
+			assembly = SearchDirectory(name, framework_dirs, parameters);
+
 			if (assembly != null)
 				return assembly;
 
-			if (ResolveFailure != null) {
-				assembly = ResolveFailure (this, name);
+			if (ResolveFailure != null)
+			{
+				assembly = ResolveFailure(this, name);
+
 				if (assembly != null)
 					return assembly;
 			}
@@ -161,17 +229,28 @@ namespace Mono.Cecil {
 			throw new AssemblyResolutionException (name);
 		}
 
-		AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
+		AssemblyDefinition SearchDirectory(AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
 		{
 			var extensions = name.IsWindowsRuntime ? new [] { ".winmd", ".dll" } : new [] { ".exe", ".dll" };
-			foreach (var directory in directories) {
-				foreach (var extension in extensions) {
-					string file = Path.Combine (directory, name.Name + extension);
-					if (!File.Exists (file))
+
+			foreach (var directory in directories)
+			{
+				foreach (var extension in extensions)
+				{
+					var fileName = Path.Combine(directory, name.Name + extension);
+
+					if (!File.Exists(fileName))
 						continue;
-					try {
-						return GetAssembly (file, parameters);
-					} catch (System.BadImageFormatException) {
+
+					try
+					{
+						var assemblyDef = GetAssembly(fileName, parameters);
+
+						if (assemblyDef != null)
+							return assemblyDef;
+					}
+					catch (BadImageFormatException)
+					{
 						continue;
 					}
 				}
@@ -180,94 +259,112 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static bool IsZero (Version version)
+		static bool IsZero(Version version)
 		{
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
-		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
+		AssemblyDefinition GetCorlib(AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
-			var corlib = typeof (object).Assembly.GetName ();
+			var corlib = typeof(object).Assembly.GetName();
 
-			if (corlib.Version == version || IsZero (version))
-				return GetAssembly (typeof (object).Module.FullyQualifiedName, parameters);
+		    if (corlib.Version == version || IsZero(version))
+		    {
+		        var gacAssembly = GetAssemblyInGac(reference, parameters);
 
-			var path = Directory.GetParent (
-				Directory.GetParent (
-					typeof (object).Module.FullyQualifiedName).FullName
-				).FullName;
+		        if (gacAssembly != null)
+		            return gacAssembly;
 
-			if (on_mono) {
+				if (parameters.AllowAnyCorlib)
+					return GetAssemblyFromFile(typeof(object).Module.FullyQualifiedName, parameters);
+		    }
+
+		    var path = Directory.GetParent(Directory.GetParent(typeof(object).Module.FullyQualifiedName).FullName).FullName;
+
+			if (on_mono)
+			{
 				if (version.Major == 1)
 					path = Path.Combine (path, "1.0");
-				else if (version.Major == 2) {
+				else if (version.Major == 2)
+				{
 					if (version.MajorRevision == 5)
 						path = Path.Combine (path, "2.1");
 					else
 						path = Path.Combine (path, "2.0");
-				} else if (version.Major == 4)
+				}
+				else if (version.Major == 4)
 					path = Path.Combine (path, "4.0");
 				else
 					throw new NotSupportedException ("Version not supported: " + version);
-			} else {
-				switch (version.Major) {
-				case 1:
-					if (version.MajorRevision == 3300)
-						path = Path.Combine (path, "v1.0.3705");
-					else
-						path = Path.Combine (path, "v1.0.5000.0");
-					break;
-				case 2:
-					path = Path.Combine (path, "v2.0.50727");
-					break;
-				case 4:
-					path = Path.Combine (path, "v4.0.30319");
-					break;
-				default:
-					throw new NotSupportedException ("Version not supported: " + version);
+			}
+			else
+			{
+				switch (version.Major)
+				{
+					case 1:
+						if (version.MajorRevision == 3300)
+							path = Path.Combine(path, "v1.0.3705");
+						else
+							path = Path.Combine(path, "v1.0.5000.0");
+						break;
+					case 2:
+						path = Path.Combine(path, "v2.0.50727");
+						break;
+					case 4:
+						path = Path.Combine(path, "v4.0.30319");
+						break;
+					default:
+						throw new NotSupportedException("Version not supported: " + version);
 				}
 			}
 
 			var file = Path.Combine (path, "mscorlib.dll");
-			if (File.Exists (file))
+
+			if (File.Exists(file))
 				return GetAssembly (file, parameters);
 
 			return null;
 		}
 
-		static Collection<string> GetGacPaths ()
+		static Collection<string> GetGacPaths()
 		{
 			if (on_mono)
 				return GetDefaultMonoGacPaths ();
 
 			var paths = new Collection<string> (2);
 			var windir = Environment.GetEnvironmentVariable ("WINDIR");
+
 			if (windir == null)
 				return paths;
 
 			paths.Add (Path.Combine (windir, "assembly"));
 			paths.Add (Path.Combine (windir, Path.Combine ("Microsoft.NET", "assembly")));
+
 			return paths;
 		}
 
-		static Collection<string> GetDefaultMonoGacPaths ()
+		static Collection<string> GetDefaultMonoGacPaths()
 		{
 			var paths = new Collection<string> (1);
 			var gac = GetCurrentMonoGac ();
+
 			if (gac != null)
 				paths.Add (gac);
 
 			var gac_paths_env = Environment.GetEnvironmentVariable ("MONO_GAC_PREFIX");
+
 			if (string.IsNullOrEmpty (gac_paths_env))
 				return paths;
 
 			var prefixes = gac_paths_env.Split (Path.PathSeparator);
+
 			foreach (var prefix in prefixes) {
 				if (string.IsNullOrEmpty (prefix))
 					continue;
 
 				var gac_path = Path.Combine (Path.Combine (Path.Combine (prefix, "lib"), "mono"), "gac");
+
 				if (Directory.Exists (gac_path) && !paths.Contains (gac))
 					paths.Add (gac_path);
 			}
@@ -275,12 +372,9 @@ namespace Mono.Cecil {
 			return paths;
 		}
 
-		static string GetCurrentMonoGac ()
+		static string GetCurrentMonoGac()
 		{
-			return Path.Combine (
-				Directory.GetParent (
-					Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName)).FullName,
-				"gac");
+			return Path.Combine(Directory.GetParent(Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)).FullName, "gac");
 		}
 
 		AssemblyDefinition GetAssemblyInGac (AssemblyNameReference reference, ReaderParameters parameters)
@@ -289,57 +383,171 @@ namespace Mono.Cecil {
 				return null;
 
 			if (gac_paths == null)
-				gac_paths = GetGacPaths ();
+				gac_paths = GetGacPaths();
 
-			if (on_mono)
-				return GetAssemblyInMonoGac (reference, parameters);
-
-			return GetAssemblyInNetGac (reference, parameters);
+			return (on_mono ? GetAssemblyInMonoGac(reference, parameters) : GetAssemblyInNetGac(reference, parameters));
 		}
 
 		AssemblyDefinition GetAssemblyInMonoGac (AssemblyNameReference reference, ReaderParameters parameters)
 		{
-			for (int i = 0; i < gac_paths.Count; i++) {
-				var gac_path = gac_paths [i];
-				var file = GetAssemblyFile (reference, string.Empty, gac_path);
-				if (File.Exists (file))
-					return GetAssembly (file, parameters);
-			}
+			var assemblies = new List<AssemblyDefinition>();
 
-			return null;
-		}
+			for (var i = 0; i < gac_paths.Count; i++) {
+				var gac_path = gac_paths[i];
+				var file = GetAssemblyFile(reference, string.Empty, gac_path);
 
-		AssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference, ReaderParameters parameters)
-		{
-			var gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
-			var prefixes = new [] { string.Empty, "v4.0_" };
+				if (File.Exists(file))
+				{
+					var assemblyDef = GetAssemblyFromFile(file, parameters);
 
-			for (int i = 0; i < 2; i++) {
-				for (int j = 0; j < gacs.Length; j++) {
-					var gac = Path.Combine (gac_paths [i], gacs [j]);
-					var file = GetAssemblyFile (reference, prefixes [i], gac);
-					if (Directory.Exists (gac) && File.Exists (file))
-						return GetAssembly (file, parameters);
+					if (assemblyDef != null)
+						assemblies.Add(assemblyDef);
 				}
 			}
 
-			return null;
+			return GetAssemblyByTargetArchitecture(assemblies, parameters);
 		}
 
-		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
+		AssemblyDefinition GetAssemblyInNetGac(AssemblyNameReference reference, ReaderParameters parameters)
+		{			
+			var gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
+			var prefixes = new [] { string.Empty, "v4.0_" };
+			var assemblies = new List<AssemblyDefinition>();
+
+			for (var i = 0; i < 2; i++)
+            {
+				for (var j = 0; j < gacs.Length; j++)
+                {
+					var gac = Path.Combine (gac_paths[i], gacs[j]);
+					var file = GetAssemblyFile (reference, prefixes [i], gac);
+
+                    if (Directory.Exists(gac) && File.Exists(file))
+                    {
+                        var assemblyDef = GetAssemblyFromFile(file, parameters);
+
+	                    if (assemblyDef != null)
+		                    assemblies.Add(assemblyDef);
+                    }
+				}
+			}
+
+			return GetAssemblyByTargetArchitecture(assemblies, parameters);
+		}
+
+		AssemblyDefinition GetAssemblyByTargetArchitecture(List<AssemblyDefinition> assemblies, ReaderParameters parameters)
 		{
-			var gac_folder = new StringBuilder ()
-				.Append (prefix)
-				.Append (reference.Version)
-				.Append ("__");
+			if (assemblies.Count == 0)
+				return null;
 
-			for (int i = 0; i < reference.PublicKeyToken.Length; i++)
-				gac_folder.Append (reference.PublicKeyToken [i].ToString ("x2"));
+			var compatibleAssemblies = new List<AssemblyDefinition>();
 
-			return Path.Combine (
-				Path.Combine (
-					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
-				reference.Name + ".dll");
+			switch (parameters.TargetArchitecture)
+			{
+				case TargetArchitecture.ILOnly:
+				{
+					for (var i = assemblies.Count - 1; i >= 0; i--)
+					{
+						var assemblyDef = assemblies[i];
+
+						var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+						var is32BitRequired = (assemblyDef.MainModule.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit;
+						var ilOnly = (assemblyDef.MainModule.Attributes & ModuleAttributes.ILOnly) == ModuleAttributes.ILOnly;
+
+						if (ilOnly && !is32BitRequired && !is64Bit)
+							compatibleAssemblies.Add(assemblyDef);
+					}
+
+					break;
+				}
+				case TargetArchitecture.x86:
+				{
+					for (var i = 0; i < assemblies.Count; i++)
+					{
+						var assemblyDef = assemblies[i];
+
+						var is32Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.I386);
+
+						if (is32Bit)
+							compatibleAssemblies.Add(assemblyDef);
+					}
+
+					break;
+				}
+				case TargetArchitecture.x86Only:
+				{
+					for (var i = 0; i < assemblies.Count; i++)
+					{
+						var assemblyDef = assemblies[i];
+
+						var is32Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.I386);
+						var is32BitRequired = (assemblyDef.MainModule.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit;
+
+						if (is32Bit && is32BitRequired)
+							compatibleAssemblies.Add(assemblyDef);
+					}
+
+					break;
+				}
+				case TargetArchitecture.x64:
+				{
+					for (var i = 0; i < assemblies.Count; i++)
+					{
+						var assemblyDef = assemblies[i];
+
+						var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+						var is32BitRequired = (assemblyDef.MainModule.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit;
+						var ilOnly = (assemblyDef.MainModule.Attributes & ModuleAttributes.ILOnly) == ModuleAttributes.ILOnly;
+
+						if (is64Bit || (ilOnly && !is32BitRequired))
+							compatibleAssemblies.Add(assemblyDef);
+					}
+
+					break;
+				}
+				case TargetArchitecture.x64Only:
+				{
+					for (var i = 0; i < assemblies.Count; i++)
+					{
+						var assemblyDef = assemblies[i];	
+											
+						var is64Bit = (assemblyDef.MainModule.Architecture == ProcessorArchitecture.AMD64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.IA64 || assemblyDef.MainModule.Architecture == ProcessorArchitecture.ARM64);
+
+						if (is64Bit)
+							compatibleAssemblies.Add(assemblyDef);
+					}
+
+					break;
+				}
+				default:
+					compatibleAssemblies.AddRange(assemblies);
+					break;
+			}
+
+			if (compatibleAssemblies.Count == 0)
+				return null;
+
+			return compatibleAssemblies[0];
+		}
+
+		static string GetAssemblyFile(AssemblyNameReference reference, string prefix, string gac)
+		{
+			var gac_folder = new StringBuilder()
+				.Append(prefix)
+				.Append(reference.Version)
+				.Append("__");
+
+			for (var i = 0; i < reference.PublicKeyToken.Length; i++)
+				gac_folder.Append(reference.PublicKeyToken[i].ToString("x2"));
+
+			return Path.Combine(Path.Combine(Path.Combine(gac, reference.Name), gac_folder.ToString()), reference.Name + ".dll");
+		}
+
+		AssemblyDefinition GetAssemblyFromFile(string file, ReaderParameters parameters)
+		{
+			if (parameters.AssemblyResolver == null)
+				parameters.AssemblyResolver = this;
+
+			return ModuleDefinition.ReadModule(file, parameters).Assembly;
 		}
 
 		public void Dispose ()

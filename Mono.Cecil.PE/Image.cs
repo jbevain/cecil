@@ -26,7 +26,7 @@ namespace Mono.Cecil.PE {
 
 		public ModuleKind Kind;
 		public string RuntimeVersion;
-		public TargetArchitecture Architecture;
+		public ProcessorArchitecture Architecture;
 		public ModuleCharacteristics Characteristics;
 
 		public ImageDebugHeader DebugHeader;

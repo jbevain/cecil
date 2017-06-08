@@ -41,8 +41,22 @@ namespace Mono.Cecil {
 		bool projections;
 		bool in_memory;
 		bool read_write;
+		bool allow_any_corlib;
+		TargetArchitecture target_architecture;
 
-		public ReadingMode ReadingMode {
+		public bool AllowAnyCorlib
+		{
+			get { return allow_any_corlib; }
+			set { allow_any_corlib = value; }
+		}
+
+		public TargetArchitecture TargetArchitecture
+		{
+			get { return target_architecture; }
+			set { target_architecture = value; }
+		}
+
+        public ReadingMode ReadingMode {
 			get { return reading_mode; }
 			set { reading_mode = value; }
 		}
@@ -99,14 +113,14 @@ namespace Mono.Cecil {
 			set { projections = value; }
 		}
 
-		public ReaderParameters ()
-			: this (ReadingMode.Deferred)
+		public ReaderParameters() : this(ReadingMode.Deferred)
 		{
 		}
 
-		public ReaderParameters (ReadingMode readingMode)
+		public ReaderParameters(ReadingMode readingMode)
 		{
 			this.reading_mode = readingMode;
+			this.allow_any_corlib = true;
 		}
 	}
 
@@ -117,7 +131,7 @@ namespace Mono.Cecil {
 		ModuleKind kind;
 		TargetRuntime runtime;
 		uint? timestamp;
-		TargetArchitecture architecture;
+		ProcessorArchitecture architecture;
 		IAssemblyResolver assembly_resolver;
 		IMetadataResolver metadata_resolver;
 #if !READ_ONLY
@@ -140,7 +154,7 @@ namespace Mono.Cecil {
 			set { timestamp = value; }
 		}
 
-		public TargetArchitecture Architecture {
+		public ProcessorArchitecture Architecture {
 			get { return architecture; }
 			set { architecture = value; }
 		}
@@ -171,7 +185,7 @@ namespace Mono.Cecil {
 		{
 			this.kind = ModuleKind.Dll;
 			this.Runtime = GetCurrentRuntime ();
-			this.architecture = TargetArchitecture.I386;
+			this.architecture = ProcessorArchitecture.I386;
 		}
 
 		static TargetRuntime GetCurrentRuntime ()
@@ -257,7 +271,7 @@ namespace Mono.Cecil {
 		WindowsRuntimeProjections projections;
 		MetadataKind metadata_kind;
 		TargetRuntime runtime;
-		TargetArchitecture architecture;
+		ProcessorArchitecture architecture;
 		ModuleAttributes attributes;
 		ModuleCharacteristics characteristics;
 		Guid mvid;
@@ -318,7 +332,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public TargetArchitecture Architecture {
+		public ProcessorArchitecture Architecture {
 			get { return architecture; }
 			set { architecture = value; }
 		}
