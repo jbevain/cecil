@@ -95,7 +95,7 @@ namespace Mono.Cecil.Tests {
 		public void X64Module ()
 		{
 			TestModule ("hello.x64.exe", module => {
-				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
+				Assert.AreEqual (ProcessorArchitecture.AMD64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			}, verify: !Platform.OnMono);
 		}
@@ -104,7 +104,7 @@ namespace Mono.Cecil.Tests {
 		public void X64ModuleTextOnlySection ()
 		{
 			TestModule ("hello.textonly.x64.exe", module => {
-				Assert.AreEqual (TargetArchitecture.AMD64, module.Image.Architecture);
+				Assert.AreEqual (ProcessorArchitecture.AMD64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			}, verify: !Platform.OnMono);
 		}
@@ -113,7 +113,7 @@ namespace Mono.Cecil.Tests {
 		public void IA64Module ()
 		{
 			TestModule ("hello.ia64.exe", module => {
-				Assert.AreEqual (TargetArchitecture.IA64, module.Image.Architecture);
+				Assert.AreEqual (ProcessorArchitecture.IA64, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			}, verify: !Platform.OnMono);
 		}
@@ -122,7 +122,7 @@ namespace Mono.Cecil.Tests {
 		public void X86Module ()
 		{
 			TestModule ("hello.x86.exe", module => {
-				Assert.AreEqual (TargetArchitecture.I386, module.Image.Architecture);
+				Assert.AreEqual (ProcessorArchitecture.I386, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly | ModuleAttributes.Required32Bit, module.Image.Attributes);
 			});
 		}
@@ -131,7 +131,7 @@ namespace Mono.Cecil.Tests {
 		public void AnyCpuModule ()
 		{
 			TestModule ("hello.anycpu.exe", module => {
-				Assert.AreEqual (TargetArchitecture.I386, module.Image.Architecture);
+				Assert.AreEqual (ProcessorArchitecture.I386, module.Image.Architecture);
 				Assert.AreEqual (ModuleAttributes.ILOnly, module.Image.Attributes);
 			});
 		}
