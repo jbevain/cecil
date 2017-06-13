@@ -13,7 +13,7 @@ namespace Mono.Cecil {
 			return GetHashCodeFor (obj);
 		}
 
-		public static bool AreEqual (TypeReference a, TypeReference b)
+		public static bool AreEqual (TypeReference a, TypeReference b, TypeComparisonMode comparisonMode = TypeComparisonMode.Exact)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -28,7 +28,7 @@ namespace Mono.Cecil {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual ((GenericInstanceType)a, (GenericInstanceType)b);
+				return AreEqual ((GenericInstanceType)a, (GenericInstanceType)b, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.Array || bMetadataType == MetadataType.Array) {
@@ -40,35 +40,35 @@ namespace Mono.Cecil {
 				if (a1.Rank != b1.Rank)
 					return false;
 
-				return AreEqual (a1.ElementType, b1.ElementType);
+				return AreEqual (a1.ElementType, b1.ElementType, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.Var || bMetadataType == MetadataType.Var) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual ((GenericParameter)a, (GenericParameter)b);
+				return AreEqual ((GenericParameter)a, (GenericParameter)b, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.MVar || bMetadataType == MetadataType.MVar) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual ((GenericParameter)a, (GenericParameter)b);
+				return AreEqual ((GenericParameter)a, (GenericParameter)b, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.ByReference || bMetadataType == MetadataType.ByReference) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual (((ByReferenceType)a).ElementType, ((ByReferenceType)b).ElementType);
+				return AreEqual (((ByReferenceType)a).ElementType, ((ByReferenceType)b).ElementType, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.Pointer || bMetadataType == MetadataType.Pointer) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual (((PointerType)a).ElementType, ((PointerType)b).ElementType);
+				return AreEqual (((PointerType)a).ElementType, ((PointerType)b).ElementType, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.RequiredModifier || bMetadataType == MetadataType.RequiredModifier) {
@@ -78,7 +78,7 @@ namespace Mono.Cecil {
 				var a1 = (RequiredModifierType)a;
 				var b1 = (RequiredModifierType)b;
 
-				return AreEqual (a1.ModifierType, b1.ModifierType) && AreEqual (a1.ElementType, b1.ElementType);
+				return AreEqual (a1.ModifierType, b1.ModifierType, comparisonMode) && AreEqual (a1.ElementType, b1.ElementType, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.OptionalModifier || bMetadataType == MetadataType.OptionalModifier) {
@@ -88,21 +88,21 @@ namespace Mono.Cecil {
 				var a1 = (OptionalModifierType)a;
 				var b1 = (OptionalModifierType)b;
 
-				return AreEqual (a1.ModifierType, b1.ModifierType) && AreEqual (a1.ElementType, b1.ElementType);
+				return AreEqual (a1.ModifierType, b1.ModifierType, comparisonMode) && AreEqual (a1.ElementType, b1.ElementType, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.Pinned || bMetadataType == MetadataType.Pinned) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual (((PinnedType)a).ElementType, ((PinnedType)b).ElementType);
+				return AreEqual (((PinnedType)a).ElementType, ((PinnedType)b).ElementType, comparisonMode);
 			}
 
 			if (aMetadataType == MetadataType.Sentinel || bMetadataType == MetadataType.Sentinel) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
-				return AreEqual (((SentinelType)a).ElementType, ((SentinelType)b).ElementType);
+				return AreEqual (((SentinelType)a).ElementType, ((SentinelType)b).ElementType, comparisonMode);
 			}
 
 			if (!a.Name.Equals (b.Name) || !a.Namespace.Equals (b.Namespace))
@@ -111,10 +111,21 @@ namespace Mono.Cecil {
 			var xDefinition = a.Resolve ();
 			var yDefinition = b.Resolve ();
 
+			// For loose signature the types could be in different assemblies, as long as the type names match we will consider them equal
+			if (comparisonMode == TypeComparisonMode.SignatureOnlyLoose) {
+				if (xDefinition.Module.Name != yDefinition.Module.Name)
+					return false;
+
+				if (xDefinition.Module.Assembly.Name.Name != yDefinition.Module.Assembly.Name.Name)
+					return false;
+
+				return xDefinition.FullName == yDefinition.FullName;
+			}
+
 			return xDefinition == yDefinition;
 		}
 
-		static bool AreEqual (GenericParameter a, GenericParameter b)
+		static bool AreEqual (GenericParameter a, GenericParameter b, TypeComparisonMode comparisonMode = TypeComparisonMode.Exact)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -126,17 +137,17 @@ namespace Mono.Cecil {
 				return false;
 
 			var aOwnerType = a.Owner as TypeReference;
-			if (aOwnerType != null && AreEqual (aOwnerType, b.Owner as TypeReference))
+			if (aOwnerType != null && AreEqual (aOwnerType, b.Owner as TypeReference, comparisonMode))
 				return true;
 
 			var aOwnerMethod = a.Owner as MethodReference;
-			if (aOwnerMethod != null && MethodReferenceComparer.AreEqual (aOwnerMethod, b.Owner as MethodReference))
+			if (aOwnerMethod != null && comparisonMode != TypeComparisonMode.SignatureOnlyLoose && MethodReferenceComparer.AreEqual (aOwnerMethod, b.Owner as MethodReference))
 				return true;
 
-			return false;
+			return comparisonMode == TypeComparisonMode.SignatureOnly || comparisonMode == TypeComparisonMode.SignatureOnlyLoose;
 		}
 
-		static bool AreEqual (GenericInstanceType a, GenericInstanceType b)
+		static bool AreEqual (GenericInstanceType a, GenericInstanceType b, TypeComparisonMode comparisonMode = TypeComparisonMode.Exact)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
@@ -145,11 +156,11 @@ namespace Mono.Cecil {
 			if (aGenericArgumentsCount != b.GenericArguments.Count)
 				return false;
 
-			if (!AreEqual (a.ElementType, b.ElementType))
+			if (!AreEqual (a.ElementType, b.ElementType, comparisonMode))
 				return false;
 
 			for (int i = 0; i < aGenericArgumentsCount; i++)
-				if (!AreEqual (a.GenericArguments[i], b.GenericArguments[i]))
+				if (!AreEqual (a.GenericArguments[i], b.GenericArguments[i], comparisonMode))
 					return false;
 
 			return true;

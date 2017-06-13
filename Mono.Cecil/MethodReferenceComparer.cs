@@ -103,7 +103,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		public static bool AreSignaturesEqual (MethodReference x, MethodReference y)
+		public static bool AreSignaturesEqual (MethodReference x, MethodReference y, TypeComparisonMode comparisonMode = TypeComparisonMode.Exact)
 		{
 			if (x.HasThis != y.HasThis)
 				return false;
@@ -115,10 +115,10 @@ namespace Mono.Cecil {
 				return false;
 
 			for (var i = 0; i < x.Parameters.Count; i++)
-				if (!TypeReferenceEqualityComparer.AreEqual (x.Parameters[i].ParameterType, y.Parameters[i].ParameterType))
+				if (!TypeReferenceEqualityComparer.AreEqual (x.Parameters[i].ParameterType, y.Parameters[i].ParameterType, comparisonMode))
 					return false;
 
-			if (!TypeReferenceEqualityComparer.AreEqual (x.ReturnType, y.ReturnType))
+			if (!TypeReferenceEqualityComparer.AreEqual (x.ReturnType, y.ReturnType, comparisonMode))
 				return false;
 
 			return true;
