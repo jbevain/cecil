@@ -776,10 +776,16 @@ namespace Mono.Cecil.Cil {
 
 			var pdb_file_name = Mixin.GetPdbFileName (fileName);
 
-			if (File.Exists (pdb_file_name))
-				return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
-					? new PortablePdbReaderProvider ().GetSymbolReader (module, fileName)
-					: SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, fileName);
+			if (File.Exists (pdb_file_name)) {
+				if (Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName)))
+					return new PortablePdbReaderProvider ().GetSymbolReader (module, fileName);
+
+				try {
+					return SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, fileName);
+				} catch (TypeLoadException) {
+					// We might not include support for native pdbs.
+				}
+			}
 
 			var mdb_file_name = Mixin.GetMdbFileName (fileName);
 			if (File.Exists (mdb_file_name))
