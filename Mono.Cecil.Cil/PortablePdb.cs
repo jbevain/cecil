@@ -311,23 +311,12 @@ namespace Mono.Cecil.Cil {
 				TimeDateStamp = (int) module.timestamp,
 			};
 
-			var buffer = new ByteBuffer ();
-			// RSDS
-			buffer.WriteUInt32 (0x53445352);
-			// Module ID
-			buffer.WriteBytes (module.Mvid.ToByteArray ());
-			// PDB Age
-			buffer.WriteUInt32 (1);
-			// PDB Path
 			var filename = writer.BaseStream.GetFileName ();
 			if (!string.IsNullOrEmpty (filename))
 				filename = Path.GetFileName (filename);
 
-			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (filename));
-			buffer.WriteByte (0);
+			var data = Mixin.GetCodeViewData (module.Mvid, filename, age: 1);
 
-			var data = new byte [buffer.length];
-			Buffer.BlockCopy (buffer.buffer, 0, data, 0, buffer.length);
 			directory.SizeOfData = data.Length;
 
 			return new ImageDebugHeader (new ImageDebugHeaderEntry (directory, data));

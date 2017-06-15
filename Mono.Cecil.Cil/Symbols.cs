@@ -16,6 +16,7 @@ using SR = System.Reflection;
 
 using Mono.Collections.Generic;
 using Mono.Cecil.Cil;
+using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Cil {
 
@@ -938,6 +939,27 @@ namespace Mono.Cecil {
 		{
 			return GetEntry (header, ImageDebugType.CodeView);
 		}
+
+#if !READ_ONLY
+
+		public static byte[] GetCodeViewData (Guid pdb_id, string pdb_path, int age) 
+		{
+			var buffer = new ByteBuffer ();
+			// RSDS
+			buffer.WriteUInt32 (0x53445352);
+			// Module ID
+			buffer.WriteBytes (pdb_id.ToByteArray ());
+			// PDB Age
+			buffer.WriteInt32 (age);
+			// PDB Path
+			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (pdb_path));
+			buffer.WriteByte (0);
+
+			var data = new byte[buffer.length];
+			Buffer.BlockCopy (buffer.buffer, 0, data, 0, buffer.length);
+			return data;
+		}
+#endif
 
 		public static ImageDebugHeaderEntry GetDeterministicEntry (this ImageDebugHeader header)
 		{
