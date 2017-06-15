@@ -788,8 +788,13 @@ namespace Mono.Cecil.Cil {
 			}
 
 			var mdb_file_name = Mixin.GetMdbFileName (fileName);
-			if (File.Exists (mdb_file_name))
-				return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, fileName);
+			if (File.Exists (mdb_file_name)) {
+				try {
+					return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, fileName);
+				} catch (TypeLoadException) {
+					// We might not include support for mdbs.
+				}
+			}
 
 			if (throw_if_no_symbol)
 				throw new FileNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
