@@ -7,6 +7,14 @@
     <AssemblyName>Mono.Cecil.WindowsPdb</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <Authors>Microsoft</Authors>
+    <Owners>Microsoft</Owners>
+    <Description>Mono.Cecil symbol provider for Windows PDBs</Description>
+    <PackageReleaseNotes>Mono.Cecil symbol provider for Windows PDBs</PackageReleaseNotes>
+    <PackageTags>Mono.Cecil symbol provider Windows PDBs</PackageTags>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Mono.Cecil.csproj">
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>

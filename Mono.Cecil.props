@@ -13,7 +13,7 @@
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
     <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>
     <NetStandard Condition=" $(Configuration.StartsWith('netstandard')) Or '$(NuGetRestoreTargets)' != '' ">true</NetStandard>
-    <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>
+    <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>    
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.Contains('Debug')) ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,6 +45,12 @@
   <PropertyGroup Condition="'$(NetStandard)' == 'true'">
     <TargetFrameworks Condition="'$(IsTestProject)' == 'true'">net462;netcoreapp1.1</TargetFrameworks>
     <TargetFramework Condition="'$(IsTestProject)' != 'true'">netstandard1.3</TargetFramework>
+    <!-- Common NuGet package settings -->
+    <PackageVersion>0.10.0.0-beta6</PackageVersion>
+    <Language>en-US</Language>
+    <LicenseUrl>http://opensource.org/licenses/mit-license.php</LicenseUrl>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <ProjectUrl>http://github.com/jbevain/cecil/</ProjectUrl>
   </PropertyGroup>
   <Import Project="NetStandard.props"  Condition="'$(NetStandard)' == 'true'" />
   <!-- Shared References -->
