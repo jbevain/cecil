@@ -234,10 +234,9 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		[ExpectedException (typeof (BadImageFormatException))]
 		public void OpenIrrelevantFile ()
 		{
-			GetResourceModule ("text_file.txt");
+			Assert.Throws<BadImageFormatException> (() => GetResourceModule ("text_file.txt"));
 		}
 
 		[Test]
@@ -268,12 +267,13 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void OwnedStreamModuleFileName ()
 		{
-			var path = GetAssemblyResourcePath ("hello.exe", GetType ().Assembly);
+			var path = GetAssemblyResourcePath ("hello.exe", GetType ().GetTypeInfo().Assembly);
 			using (var file = File.Open (path, FileMode.Open))
 			{
 				using (var module = ModuleDefinition.ReadModule (file))
 				{
-					Assert.IsNotNullOrEmpty (module.FileName);
+					Assert.IsNotNull (module.FileName);
+					Assert.IsNotEmpty (module.FileName);
 					Assert.AreEqual (path, module.FileName);
 				}
 			}

@@ -255,7 +255,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void DeferredCorlibTypeDef ()
 		{
-			using (var module = ModuleDefinition.ReadModule (typeof (object).Assembly.Location, new ReaderParameters (ReadingMode.Deferred))) {
+			using (var module = ModuleDefinition.ReadModule (typeof (object).GetTypeInfo ().Assembly.Location, new ReaderParameters (ReadingMode.Deferred))) {
 				var object_type = module.TypeSystem.Object;
 				Assert.IsInstanceOf<TypeDefinition> (object_type);
 			}
@@ -264,7 +264,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CorlibTypesMetadataType ()
 		{
-			using (var module = ModuleDefinition.ReadModule (typeof (object).Assembly.Location)) {
+			using (var module = ModuleDefinition.ReadModule (typeof (object).GetTypeInfo ().Assembly.Location)) {
 				var type = module.GetType ("System.String");
 				Assert.IsNotNull (type);
 				Assert.IsNotNull (type.BaseType);

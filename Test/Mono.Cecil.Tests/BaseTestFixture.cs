@@ -38,38 +38,38 @@ namespace Mono.Cecil.Tests {
 
 		public ModuleDefinition GetResourceModule (string name)
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().GetTypeInfo().Assembly));
 		}
 
 		public ModuleDefinition GetResourceModule (string name, ReaderParameters parameters)
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), parameters);
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().GetTypeInfo ().Assembly), parameters);
 		}
 
 		public ModuleDefinition GetResourceModule (string name, ReadingMode mode)
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), new ReaderParameters (mode));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().GetTypeInfo ().Assembly), new ReaderParameters (mode));
 		}
 
 		internal Image GetResourceImage (string name)
 		{
-			var file = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read);
+			var file = new FileStream (GetAssemblyResourcePath (name, GetType ().GetTypeInfo ().Assembly), FileMode.Open, FileAccess.Read);
 			return ImageReader.ReadImage (Disposable.Owned (file as Stream), file.Name);
 		}
 
 		public ModuleDefinition GetCurrentModule ()
 		{
-			return ModuleDefinition.ReadModule (GetType ().Module.FullyQualifiedName);
+			return ModuleDefinition.ReadModule (GetType ().GetTypeInfo ().Module.FullyQualifiedName);
 		}
 
 		public ModuleDefinition GetCurrentModule (ReaderParameters parameters)
 		{
-			return ModuleDefinition.ReadModule (GetType ().Module.FullyQualifiedName, parameters);
+			return ModuleDefinition.ReadModule (GetType ().GetTypeInfo().Module.FullyQualifiedName, parameters);
 		}
 
 		public static string FindResourcesDirectory (Assembly assembly)
 		{
-			var path = Path.GetDirectoryName (new Uri (assembly.CodeBase).LocalPath);
+			var path = Path.GetDirectoryName (assembly.ManifestModule.FullyQualifiedName);
 			while (!Directory.Exists (Path.Combine (path, "Resources"))) {
 				var old = path;
 				path = Path.GetDirectoryName (path);
@@ -140,7 +140,7 @@ namespace Mono.Cecil.Tests {
 
 		public abstract string ModuleLocation { get; }
 
-		protected Assembly Assembly { get { return Test.Method.Module.Assembly; } }
+		protected Assembly Assembly { get { return Test.GetMethodInfo().Module.Assembly; } }
 
 		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
 		{

@@ -76,7 +76,7 @@ namespace Mono.Cecil.Tests {
 		{
 			var get_empty = Compile<Func<string>> ((module, body) => {
 				var il = body.GetILProcessor ();
-				il.Emit (OpCodes.Ldsfld, module.ImportReference (typeof (string).GetField ("Empty").ToDefinition ()));
+				il.Emit (OpCodes.Ldsfld, module.ImportReference (typeof (string).GetTypeInfo().GetField ("Empty").ToDefinition ()));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -90,7 +90,7 @@ namespace Mono.Cecil.Tests {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Call, module.ImportReference (typeof (string).GetMethod ("Concat", new [] { typeof (string), typeof (string) }).ToDefinition ()));
+				il.Emit (OpCodes.Call, module.ImportReference (typeof (string).GetTypeInfo ().GetMethod ("Concat", new [] { typeof (string), typeof (string) }).ToDefinition ()));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -255,31 +255,31 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ContextGenericTest ()
 		{
-			var module = ModuleDefinition.ReadModule (typeof (ContextGeneric1Method2<>).Module.FullyQualifiedName);
+			var module = ModuleDefinition.ReadModule (typeof (ContextGeneric1Method2<>).GetTypeInfo ().Module.FullyQualifiedName);
 			// by mixing open generics with 2 & 1 parameters, we make sure the right context is used (because otherwise, an exception will be thrown)
 			var type = typeof (ContextGeneric1Method2<>).MakeGenericType (typeof (ContextGeneric2Method1<,>));
-			var meth = type.GetMethod ("GenericMethod");
+			var meth = type.GetTypeInfo ().GetMethod ("GenericMethod");
 			var imported_type = module.ImportReference (type);
 			var method = module.ImportReference (meth, imported_type);
 			Assert.AreEqual ("G1 Mono.Cecil.Tests.ImportCecilTests/ContextGeneric1Method2`1<Mono.Cecil.Tests.ImportCecilTests/ContextGeneric2Method1`2<G2,H2>>::GenericMethod<R1,S1>(R1,S1)", method.FullName);
 
 			// and the other way around
 			type = typeof (ContextGeneric2Method1<,>).MakeGenericType (typeof (ContextGeneric1Method2<>), typeof (IList<>));
-			meth = type.GetMethod ("GenericMethod");
+			meth = type.GetTypeInfo ().GetMethod ("GenericMethod");
 			imported_type = module.ImportReference (type);
 			method = module.ImportReference (meth, imported_type);
 			Assert.AreEqual ("R2 Mono.Cecil.Tests.ImportCecilTests/ContextGeneric2Method1`2<Mono.Cecil.Tests.ImportCecilTests/ContextGeneric1Method2`1<G1>,System.Collections.Generic.IList`1<T>>::GenericMethod<R2>(G2,H2)", method.FullName);
 
 			// not sure about this one
 			type = typeof (NestedGenericsA<string>.NestedGenericsB<int>.NestedGenericsC<float>);
-			meth = type.GetMethod ("GenericMethod");
+			meth = type.GetTypeInfo().GetMethod ("GenericMethod");
 			imported_type = module.ImportReference (type);
 			method = module.ImportReference (meth, imported_type);
 			Assert.AreEqual ("A Mono.Cecil.Tests.ImportCecilTests/NestedGenericsA`1/NestedGenericsB`1/NestedGenericsC`1<System.String,System.Int32,System.Single>::GenericMethod(B,C)", method.FullName);
 
 			// We need both the method & type !
 			type = typeof (Generic<>).MakeGenericType (typeof (string));
-			meth = type.GetMethod ("ComplexGenericMethod");
+			meth = type.GetTypeInfo ().GetMethod ("ComplexGenericMethod");
 			imported_type = module.ImportReference (type);
 			method = module.ImportReference (meth, imported_type);
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportCecilTests/Generic`1<TS> Mono.Cecil.Tests.ImportCecilTests/Generic`1<System.String>::ComplexGenericMethod<TS>(T,TS)", method.FullName);
@@ -287,11 +287,10 @@ namespace Mono.Cecil.Tests {
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		static TDelegate Compile<TDelegate> (Emitter emitter)
+		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName]string testMethodName = null)
 			where TDelegate : class
 		{
-			var name = GetTestCaseName ();
+			var name = "ImportCecil_" + testMethodName;
 
 			var module = CreateTestModule<TDelegate> (name, emitter);
 			var assembly = LoadTestModule (module);
@@ -302,7 +301,7 @@ namespace Mono.Cecil.Tests {
 		static TDelegate CreateRunDelegate<TDelegate> (Type type)
 			where TDelegate : class
 		{
-			return (TDelegate) (object) Delegate.CreateDelegate (typeof (TDelegate), type.GetMethod ("Run"));
+			return (TDelegate) (object)type.GetTypeInfo ().GetMethod ("Run").CreateDelegate (typeof (TDelegate));
 		}
 
 		static Type GetTestCase (string name, SR.Assembly assembly)
@@ -315,7 +314,7 @@ namespace Mono.Cecil.Tests {
 			using (var stream = new MemoryStream ()) {
 				module.Write (stream);
 				File.WriteAllBytes (Path.Combine (Path.Combine (Path.GetTempPath (), "cecil"), module.Name + ".dll"), stream.ToArray ());
-				return SR.Assembly.Load (stream.ToArray ());
+				return Extensions.LoadAssembly (stream);
 			}
 		}
 
@@ -331,7 +330,7 @@ namespace Mono.Cecil.Tests {
 
 			module.Types.Add (type);
 
-			var method = CreateMethod (type, typeof (TDelegate).GetMethod ("Invoke"));
+			var method = CreateMethod (type, typeof (TDelegate).GetTypeInfo ().GetMethod ("Invoke"));
 
 			emitter (module, method.Body);
 
@@ -361,15 +360,6 @@ namespace Mono.Cecil.Tests {
 		static ModuleDefinition CreateModule (string name)
 		{
 			return ModuleDefinition.CreateModule (name, ModuleKind.Dll);
-		}
-
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		static string GetTestCaseName ()
-		{
-			var stack_trace = new StackTrace ();
-			var stack_frame = stack_trace.GetFrame (2);
-
-			return "ImportCecil_" + stack_frame.GetMethod ().Name;
 		}
 	}
 }

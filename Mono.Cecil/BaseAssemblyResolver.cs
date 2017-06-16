@@ -65,15 +65,15 @@ namespace Mono.Cecil {
 #endif
 	}
 
-#if !NET_CORE
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
 
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
 
 		readonly Collection<string> directories;
 
+#if !NET_CORE
 		Collection<string> gac_paths;
-
+#endif
 		public void AddSearchDirectory (string directory)
 		{
 			directories.Add (directory);
@@ -120,6 +120,7 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 
+#if !NET_CORE
 			if (name.IsRetargetable) {
 				// if the reference is retargetable, zero it
 				name = new AssemblyNameReference (name.Name, Mixin.ZeroVersion) {
@@ -151,6 +152,7 @@ namespace Mono.Cecil {
 			assembly = SearchDirectory (name, framework_dirs, parameters);
 			if (assembly != null)
 				return assembly;
+#endif
 
 			if (ResolveFailure != null) {
 				assembly = ResolveFailure (this, name);
@@ -185,6 +187,7 @@ namespace Mono.Cecil {
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
+#if !NET_CORE
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
@@ -325,7 +328,7 @@ namespace Mono.Cecil {
 
 			return null;
 		}
-
+#endif
 		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ()
@@ -352,5 +355,4 @@ namespace Mono.Cecil {
 		{
 		}
 	}
-#endif
 }
