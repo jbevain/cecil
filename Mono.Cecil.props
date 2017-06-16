@@ -43,7 +43,7 @@
     <DefineConstants>$(DefineConstants);NET_4_0;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(NetStandard)' == 'true'">
-    <TargetFramework Condition="'$(IsTestProject)' == 'true'">netstandard1.5</TargetFramework>
+    <TargetFrameworks Condition="'$(IsTestProject)' == 'true'">net462;netcoreapp1.1</TargetFrameworks>
     <TargetFramework Condition="'$(IsTestProject)' != 'true'">netstandard1.3</TargetFramework>
   </PropertyGroup>
   <Import Project="NetStandard.props"  Condition="'$(NetStandard)' == 'true'" />
