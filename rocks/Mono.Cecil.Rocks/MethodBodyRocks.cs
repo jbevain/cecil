@@ -8,6 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
+#if !READ_ONLY
 using System;
 
 using Mono.Cecil.Cil;
@@ -410,3 +411,5 @@ namespace Mono.Cecil.Rocks {
 		}
 	}
 }
+
+#endif

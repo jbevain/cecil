@@ -322,6 +322,7 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+#if !READ_ONLY
 		[Test]
 		public void UnattachedMethodBody ()
 		{
@@ -449,5 +450,6 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (first, third.Previous);
 			Assert.IsNull (third.Next);
 		}
+#endif
 	}
 }
