@@ -216,8 +216,10 @@ namespace Mono.Cecil.Tests {
 	IL_0005: ret
 ", method);
 
-				Assert.AreEqual (method.Body.ThisParameter.ParameterType, type);
-				Assert.AreEqual (method.Body.ThisParameter, method.Body.Instructions [0].Operand);
+				var body = method.Body.AsILMethodBody();
+
+				Assert.AreEqual (body.ThisParameter.ParameterType, type);
+				Assert.AreEqual (body.ThisParameter, body.Instructions [0].Operand);
 			});
 		}
 
@@ -225,7 +227,9 @@ namespace Mono.Cecil.Tests {
 		public void ThisParameterStaticMethod ()
 		{
 			var static_method = typeof (ModuleDefinition).ToDefinition ().Methods.Where (m => m.IsStatic).First ();
-			Assert.IsNull (static_method.Body.ThisParameter);
+			var body = static_method.Body.AsILMethodBody();
+
+			Assert.IsNull (body.ThisParameter);
 		}
 
 		[Test]
@@ -235,7 +239,8 @@ namespace Mono.Cecil.Tests {
 			var int_to_string = int32.Methods.Where (m => m.Name == "ToString" && m.Parameters.Count == 0).First();
 			Assert.IsNotNull (int_to_string);
 
-			var this_parameter_type = int_to_string.Body.ThisParameter.ParameterType;
+			var body = int_to_string.Body.AsILMethodBody();
+			var this_parameter_type = body.ThisParameter.ParameterType;
 			Assert.IsTrue (this_parameter_type.IsByReference);
 
 			var element_type = ((ByReferenceType) this_parameter_type).ElementType;
@@ -249,7 +254,8 @@ namespace Mono.Cecil.Tests {
 			var token_to_string = token.Methods.Where (m => m.Name == "ToString" && m.Parameters.Count == 0).First ();
 			Assert.IsNotNull (token_to_string);
 
-			var this_parameter_type = token_to_string.Body.ThisParameter.ParameterType;
+			var body = token_to_string.Body.AsILMethodBody();
+			var this_parameter_type = body.ThisParameter.ParameterType;
 			Assert.IsTrue (this_parameter_type.IsByReference);
 
 			var element_type = ((ByReferenceType) this_parameter_type).ElementType;
@@ -262,8 +268,9 @@ namespace Mono.Cecil.Tests {
 			var module = typeof (MethodBodyTests).ToDefinition ().Module;
 			var @object = module.TypeSystem.Object.Resolve ();
 			var method = @object.Methods.Where (m => m.HasBody).First ();
+			var body = method.Body.AsILMethodBody();
 
-			var type = method.Body.ThisParameter.ParameterType;
+			var type = body.ThisParameter.ParameterType;
 			Assert.IsFalse (type.IsValueType);
 			Assert.IsFalse (type.IsPrimitive);
 			Assert.IsFalse (type.IsPointer);
@@ -275,9 +282,10 @@ namespace Mono.Cecil.Tests {
 			TestIL ("hello.il", module => {
 				var type = module.GetType ("Foo");
 				var method = type.GetMethod ("TestFilter");
-
 				Assert.IsNotNull (method);
-				Assert.AreEqual (2, method.Body.MaxStackSize);
+
+				var body = method.Body.AsILMethodBody();
+				Assert.AreEqual (2, body.MaxStackSize);
 			});
 		}
 
@@ -293,7 +301,8 @@ namespace Mono.Cecil.Tests {
 				Assert.IsNotNull (method);
 				Assert.IsNotNull (method.Body);
 
-				var leave = method.Body.Instructions [0];
+				var body = method.Body.AsILMethodBody();
+				var leave = body.Instructions [0];
 				Assert.AreEqual (OpCodes.Leave, leave.OpCode);
 				Assert.IsNull (leave.Operand);
 				Assert.AreEqual ("IL_0000: leave", leave.ToString ());
@@ -317,7 +326,8 @@ namespace Mono.Cecil.Tests {
 				var get_fiou = type.GetMethod ("get_Fiou");
 				Assert.IsNotNull (get_fiou);
 
-				var ldstr = get_fiou.Body.Instructions.Where (i => i.OpCode == OpCodes.Ldstr).First ();
+				var body = get_fiou.Body.AsILMethodBody();
+				var ldstr = body.Instructions.Where (i => i.OpCode == OpCodes.Ldstr).First ();
 				Assert.AreEqual ("fiou", ldstr.Operand);
 			});
 		}

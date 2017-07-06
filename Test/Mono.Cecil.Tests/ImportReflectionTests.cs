@@ -60,7 +60,8 @@ namespace Mono.Cecil.Tests {
 				method_by_ref.Parameters.Add (new ParameterDefinition (module.ImportReference (typeof (string))));
 				method_by_ref.Parameters.Add (new ParameterDefinition (module.ImportReference (typeof (string).MakeByRefType ())));
 
-				var m_il = method_by_ref.Body.GetILProcessor ();
+				var method_by_ref_body = method_by_ref.Body.AsILMethodBody();
+				var m_il = method_by_ref_body.GetILProcessor ();
 				m_il.Emit (OpCodes.Ldarg_1);
 				m_il.Emit (OpCodes.Ldarg_0);
 				m_il.Emit (OpCodes.Stind_Ref);
@@ -380,7 +381,7 @@ namespace Mono.Cecil.Tests {
 
 			var method = CreateMethod (type, typeof (TDelegate).GetMethod ("Invoke"));
 
-			emitter (module, method.Body);
+			emitter (module, method.Body.AsILMethodBody());
 
 			return module;
 		}

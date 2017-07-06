@@ -413,7 +413,7 @@ namespace Mono.Cecil.Tests {
 			var method = new MethodDefinition ("Pang", MethodAttributes.Public | MethodAttributes.Static, module.ImportReference (typeof (string)));
 			type.Methods.Add (method);
 
-			var body = method.Body;
+			var body = (MethodBody)method.Body;
 
 			body.InitLocals = true;
 

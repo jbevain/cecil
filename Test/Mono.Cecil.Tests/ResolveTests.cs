@@ -244,7 +244,8 @@ namespace Mono.Cecil.Tests {
 		{
 			Assert.IsTrue (method.HasBody);
 
-			var instruction = method.Body.Instructions [method.Body.Instructions.Count - 1];
+			var body = method.Body.AsILMethodBody();
+			var instruction = body.Instructions [body.Instructions.Count - 1];
 
 			Assert.IsNotNull (instruction);
 

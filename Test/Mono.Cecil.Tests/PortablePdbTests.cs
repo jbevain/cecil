@@ -495,7 +495,9 @@ class Program
 				if (!method.HasBody)
 					continue;
 
-				foreach (var instruction in method.Body.Instructions) {
+				var body = method.Body.AsILMethodBody();
+
+				foreach (var instruction in body.Instructions) {
 					var sp = method.DebugInformation.GetSequencePoint (instruction);
 					if (sp != null && sp.Document != null)
 						return sp.Document;

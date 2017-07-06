@@ -50,7 +50,7 @@ namespace Mono.Cecil.Cil {
 
 				rva = WriteUnresolvedMethodBody (method);
 			} else {
-				if (IsEmptyMethodBody (method.Body))
+				if (IsEmptyMethodBody (method.Body.AsILMethodBody()))
 					return 0;
 
 				rva = WriteResolvedMethodBody (method);
@@ -104,7 +104,7 @@ namespace Mono.Cecil.Cil {
 		{
 			RVA rva;
 
-			body = method.Body;
+			body = method.Body.AsILMethodBody();
 			ComputeHeader ();
 			if (RequiresFatHeader ()) {
 				Align (4);
