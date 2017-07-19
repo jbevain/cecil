@@ -775,7 +775,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class CustomDebugInformationTable : MetadataTable<CustomDebugInformationRow> {
+	sealed class CustomDebugInformationTable : SortedTable<CustomDebugInformationRow> {
 
 		public override void Write (TableHeapBuffer buffer)
 		{
@@ -784,6 +784,11 @@ namespace Mono.Cecil {
 				buffer.WriteGuid (rows [i].Col2);	// Kind
 				buffer.WriteBlob (rows [i].Col3);	// Value
 			}
+		}
+
+		public override int Compare (CustomDebugInformationRow x, CustomDebugInformationRow y)
+		{
+			return Compare(x.Col1, y.Col1);
 		}
 	}
 
