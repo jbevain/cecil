@@ -58,10 +58,5 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (Normalize (permission_set_value), Normalize (permission_set.ToXml ().ToString ()));
 			});
 		}
-
-		static string Normalize (string s)
-		{
-			return s.Replace ("\n", "").Replace ("\r", "");
-		}
 	}
 }
