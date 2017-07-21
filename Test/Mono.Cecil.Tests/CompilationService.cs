@@ -251,6 +251,10 @@ namespace Mono.Cecil.Tests {
 		static string WinSdkTool (string tool)
 		{
 			var sdks = new [] {
+				@"Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7 Tools",
+				@"Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools",
+				@"Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools",
+				@"Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6 Tools",
 				@"Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools",
 				@"Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools",
 				@"Microsoft SDKs\Windows\v7.0A\Bin",
