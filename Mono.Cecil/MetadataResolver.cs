@@ -194,7 +194,7 @@ namespace Mono.Cecil {
 				if (field.Name != reference.Name)
 					continue;
 
-				if (!AreSame (field.FieldType, reference.FieldType))
+				if (!MetadataComparer.AreSame (field.FieldType, reference.FieldType))
 					continue;
 
 				return field;
@@ -240,143 +240,11 @@ namespace Mono.Cecil {
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 
-				if (method.Name != reference.Name)
-					continue;
-
-				if (method.HasGenericParameters != reference.HasGenericParameters)
-					continue;
-
-				if (method.HasGenericParameters && method.GenericParameters.Count != reference.GenericParameters.Count)
-					continue;
-
-				if (!AreSame (method.ReturnType, reference.ReturnType))
-					continue;
-
-				if (method.IsVarArg () != reference.IsVarArg ())
-					continue;
-
-				if (method.IsVarArg () && IsVarArgCallTo (method, reference))
+				if (MetadataComparer.AreSame (method, reference, compare_declaring_type: false))
 					return method;
-
-				if (method.HasParameters != reference.HasParameters)
-					continue;
-
-				if (!method.HasParameters && !reference.HasParameters)
-					return method;
-
-				if (!AreSame (method.Parameters, reference.Parameters))
-					continue;
-
-				return method;
 			}
 
 			return null;
-		}
-
-		static bool AreSame (Collection<ParameterDefinition> a, Collection<ParameterDefinition> b)
-		{
-			var count = a.Count;
-
-			if (count != b.Count)
-				return false;
-
-			if (count == 0)
-				return true;
-
-			for (int i = 0; i < count; i++)
-				if (!AreSame (a [i].ParameterType, b [i].ParameterType))
-					return false;
-
-			return true;
-		}
-
-		static bool IsVarArgCallTo (MethodDefinition method, MethodReference reference)
-		{
-			if (method.Parameters.Count >= reference.Parameters.Count)
-				return false;
-
-			if (reference.GetSentinelPosition () != method.Parameters.Count)
-				return false;
-
-			for (int i = 0; i < method.Parameters.Count; i++)
-				if (!AreSame (method.Parameters [i].ParameterType, reference.Parameters [i].ParameterType))
-					return false;
-
-			return true;
-		}
-
-		static bool AreSame (TypeSpecification a, TypeSpecification b)
-		{
-			if (!AreSame (a.ElementType, b.ElementType))
-				return false;
-
-			if (a.IsGenericInstance)
-				return AreSame ((GenericInstanceType) a, (GenericInstanceType) b);
-
-			if (a.IsRequiredModifier || a.IsOptionalModifier)
-				return AreSame ((IModifierType) a, (IModifierType) b);
-
-			if (a.IsArray)
-				return AreSame ((ArrayType) a, (ArrayType) b);
-
-			return true;
-		}
-
-		static bool AreSame (ArrayType a, ArrayType b)
-		{
-			if (a.Rank != b.Rank)
-				return false;
-
-			// TODO: dimensions
-
-			return true;
-		}
-
-		static bool AreSame (IModifierType a, IModifierType b)
-		{
-			return AreSame (a.ModifierType, b.ModifierType);
-		}
-
-		static bool AreSame (GenericInstanceType a, GenericInstanceType b)
-		{
-			if (a.GenericArguments.Count != b.GenericArguments.Count)
-				return false;
-
-			for (int i = 0; i < a.GenericArguments.Count; i++)
-				if (!AreSame (a.GenericArguments [i], b.GenericArguments [i]))
-					return false;
-
-			return true;
-		}
-
-		static bool AreSame (GenericParameter a, GenericParameter b)
-		{
-			return a.Position == b.Position;
-		}
-
-		static bool AreSame (TypeReference a, TypeReference b)
-		{
-			if (ReferenceEquals (a, b))
-				return true;
-
-			if (a == null || b == null)
-				return false;
-
-			if (a.etype != b.etype)
-				return false;
-
-			if (a.IsGenericParameter)
-				return AreSame ((GenericParameter) a, (GenericParameter) b);
-
-			if (a.IsTypeSpecification ())
-				return AreSame ((TypeSpecification) a, (TypeSpecification) b);
-
-			if (a.Name != b.Name || a.Namespace != b.Namespace)
-				return false;
-
-			//TODO: check scope
-
-			return AreSame (a.DeclaringType, b.DeclaringType);
 		}
 	}
 }
