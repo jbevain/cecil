@@ -126,7 +126,7 @@ namespace Mono.Cecil {
 
 	public class DefaultReflectionImporter : IReflectionImporter {
 
-		readonly ModuleDefinition module;
+		readonly protected ModuleDefinition module;
 
 		public DefaultReflectionImporter (ModuleDefinition module)
 		{
@@ -486,7 +486,7 @@ namespace Mono.Cecil {
 
 	public class DefaultMetadataImporter : IMetadataImporter {
 
-		readonly ModuleDefinition module;
+		readonly protected ModuleDefinition module;
 
 		public DefaultMetadataImporter (ModuleDefinition module)
 		{
