@@ -299,7 +299,7 @@ namespace Mono.Cecil {
 			return ImportReference (assembly.GetName ());
 		}
 
-		public AssemblyNameReference ImportReference (SR.AssemblyName name)
+		public virtual AssemblyNameReference ImportReference (SR.AssemblyName name)
 		{
 			Mixin.CheckName (name);
 
@@ -533,7 +533,7 @@ namespace Mono.Cecil {
 			throw new NotSupportedException ();
 		}
 
-		public AssemblyNameReference ImportReference (AssemblyNameReference name)
+		public virtual AssemblyNameReference ImportReference (AssemblyNameReference name)
 		{
 			Mixin.CheckName (name);
 
