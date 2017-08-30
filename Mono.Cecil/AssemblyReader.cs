@@ -2954,14 +2954,20 @@ namespace Mono.Cecil {
 
 			if (record.Col2.Length > 0) {
 				scope.variables = new Collection<VariableDebugInformation> ((int) record.Col2.Length);
-				for (uint i = 0; i < record.Col2.Length; i++)
-					scope.variables.Add (ReadLocalVariable (record.Col2.Start + i));
+				for (uint i = 0; i < record.Col2.Length; i++) {
+					var variable = ReadLocalVariable (record.Col2.Start + i);
+					if (variable != null)
+						scope.variables.Add (variable);
+				}
 			}
 
 			if (record.Col3.Length > 0) {
 				scope.constants = new Collection<ConstantDebugInformation> ((int) record.Col3.Length);
-				for (uint i = 0; i < record.Col3.Length; i++)
-					scope.constants.Add (ReadLocalConstant (record.Col3.Start + i));
+				for (uint i = 0; i < record.Col3.Length; i++) {
+					var constant = ReadLocalConstant (record.Col3.Start + i);
+					if (constant != null)
+						scope.constants.Add (constant);
+				}
 			}
 
 			return scope;
