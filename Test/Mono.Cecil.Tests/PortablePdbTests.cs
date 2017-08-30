@@ -409,14 +409,14 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InvalidConstantRecord ()
 		{
-			TestModule ("mylib.dll", module => {
+			using (var module = GetResourceModule ("mylib.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
 				var type = module.GetType ("mylib.Say");
 				var method = type.GetMethod ("hello");
 				var symbol = method.DebugInformation;
 
 				Assert.IsNotNull (symbol);
 				Assert.AreEqual (0, symbol.Scope.Constants.Count);
-			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+			}
 		}
 
 		[Test]
