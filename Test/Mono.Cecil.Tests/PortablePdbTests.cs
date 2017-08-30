@@ -399,10 +399,23 @@ namespace Mono.Cecil.Tests {
 				var symbol = method.DebugInformation;
 
 				Assert.IsNotNull (symbol);
-				Assert.AreEqual(1, symbol.Scope.Constants.Count);
+				Assert.AreEqual (1, symbol.Scope.Constants.Count);
 
 				var a = symbol.Scope.Constants [0];
 				Assert.AreEqual ("a", a.Name);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
+		public void InvalidConstantRecord ()
+		{
+			TestModule ("mylib.dll", module => {
+				var type = module.GetType ("mylib.Say");
+				var method = type.GetMethod ("hello");
+				var symbol = method.DebugInformation;
+
+				Assert.IsNotNull (symbol);
+				Assert.AreEqual (0, symbol.Scope.Constants.Count);
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
