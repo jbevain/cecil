@@ -943,8 +943,8 @@ namespace Mono.Cecil {
 
 			type.BaseType = GetTypeDefOrRef (ReadMetadataToken (CodedIndex.TypeDefOrRef));
 
-			type.fields_range = ReadFieldsRange (rid);
-			type.methods_range = ReadMethodsRange (rid);
+			type.fields_range = ReadListRange (rid, Table.TypeDef, Table.Field);
+			type.methods_range = ReadListRange (rid, Table.TypeDef, Table.Method);
 
 			if (IsNested (attributes))
 				type.DeclaringType = GetNestedTypeDeclaringType (type);
@@ -965,21 +965,13 @@ namespace Mono.Cecil {
 			return GetTypeDefinition (declaring_rid);
 		}
 
-		Range ReadFieldsRange (uint type_index)
-		{
-			return ReadListRange (type_index, Table.TypeDef, Table.Field);
-		}
-
-		Range ReadMethodsRange (uint type_index)
-		{
-			return ReadListRange (type_index, Table.TypeDef, Table.Method);
-		}
-
 		Range ReadListRange (uint current_index, Table current, Table target)
 		{
 			var list = new Range ();
 
-			list.Start = ReadTableIndex (target);
+			var start = ReadTableIndex (target);
+			if (start == 0)
+				return list;
 
 			uint next_index;
 			var current_table = image.TableHeap [current];
@@ -993,7 +985,8 @@ namespace Mono.Cecil {
 				this.position = position;
 			}
 
-			list.Length = next_index - list.Start;
+			list.Start = start;
+			list.Length = next_index - start;
 
 			return list;
 		}
@@ -1496,14 +1489,9 @@ namespace Mono.Cecil {
 
 			for (uint i = 1; i <= length; i++) {
 				var type_rid = ReadTableIndex (Table.TypeDef);
-				Range events_range = ReadEventsRange (i);
+				Range events_range = ReadListRange (i, Table.EventMap, Table.Event);
 				metadata.AddEventsRange (type_rid, events_range);
 			}
-		}
-
-		Range ReadEventsRange (uint rid)
-		{
-			return ReadListRange (rid, Table.EventMap, Table.Event);
 		}
 
 		public bool HasProperties (TypeDefinition type)
@@ -1585,14 +1573,9 @@ namespace Mono.Cecil {
 
 			for (uint i = 1; i <= length; i++) {
 				var type_rid = ReadTableIndex (Table.TypeDef);
-				var properties_range = ReadPropertiesRange (i);
+				var properties_range = ReadListRange (i, Table.PropertyMap, Table.Property);
 				metadata.AddPropertiesRange (type_rid, properties_range);
 			}
-		}
-
-		Range ReadPropertiesRange (uint rid)
-		{
-			return ReadListRange (rid, Table.PropertyMap, Table.Property);
 		}
 
 		MethodSemanticsAttributes ReadMethodSemantics (MethodDefinition method)
@@ -1729,11 +1712,6 @@ namespace Mono.Cecil {
 			}
 		}
 
-		Range ReadParametersRange (uint method_rid)
-		{
-			return ReadListRange (method_rid, Table.Method, Table.Param);
-		}
-
 		public Collection<MethodDefinition> ReadMethods (TypeDefinition type)
 		{
 			var methods_range = type.methods_range;
@@ -1794,7 +1772,7 @@ namespace Mono.Cecil {
 			methods.Add (method); // attach method
 
 			var signature = ReadBlobIndex ();
-			var param_range = ReadParametersRange (method_rid);
+			var param_range = ReadListRange (method_rid, Table.Method, Table.Param);
 
 			this.context = method;
 
