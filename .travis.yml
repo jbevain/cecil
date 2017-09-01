@@ -1,8 +1,9 @@
 language: csharp
 solution: Mono.Cecil.sln
+dotnet: 2.0.0
 install:
-  - nuget restore Mono.Cecil.sln
+  - dotnet restore Mono.Cecil.sln
   - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=net_4_0_Debug Mono.Cecil.sln
+  - msbuild /p:Configuration=Debug /v:minimal Mono.Cecil.sln
   - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe Mono.Cecil.nunit

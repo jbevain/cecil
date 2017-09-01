@@ -1,5 +1,8 @@
 version: 0.9.6.{build}
-configuration: net_4_0_Debug
+image: Visual Studio 2017
+configuration: Debug
+before_build:
+- nuget restore Mono.Cecil.sln
 build:
   project: Mono.Cecil.sln
   verbosity: minimal

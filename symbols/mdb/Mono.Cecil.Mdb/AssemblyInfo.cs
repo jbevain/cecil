@@ -9,8 +9,5 @@
 //
 
 using System;
-using System.Reflection;
-
-[assembly: AssemblyTitle ("Mono.Cecil.Mdb")]
 
 [assembly: CLSCompliant (false)]

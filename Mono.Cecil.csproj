@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <ProjectGuid>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</ProjectGuid>
-    <RootNamespace>Mono.Cecil</RootNamespace>
-    <AssemblyName>Mono.Cecil</AssemblyName>
+    <TargetFrameworks>net35;net40;netstandard1.3</TargetFrameworks>
+
+    <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="ProjectInfo.cs" />
     <Compile Include="Mono\*.cs" />
@@ -15,6 +17,5 @@
     <Compile Include="Mono.Collections.Generic\*.cs" />
     <Compile Include="Mono.Security.Cryptography\*.cs" />
   </ItemGroup>
-  <Import Project="Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
+
 </Project>

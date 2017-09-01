@@ -8,11 +8,8 @@
 // Licensed under the MIT/X11 license.
 //
 
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
-[assembly: AssemblyTitle (Consts.AssemblyName)]
 
 #if !NET_CORE
 [assembly: Guid ("fd225bb4-fa53-44b2-a6db-85f5e48dcb54")]

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <Configurations>Debug;Release;Debug_ReadOnly;Release_ReadOnly</Configurations>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\cecil.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Copyright>Copyright © 2008 - 2015 Jb Evain</Copyright>
+    <AssemblyVersion>0.10.0.0</AssemblyVersion>
+    <FileVersion>0.10.0.0</FileVersion>
+    <InformationalVersion>0.10.0.0-beta6</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.StartsWith('Debug'))">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.EndsWith('_ReadOnly'))">
+    <DefineConstants>$(DefineConstants);READ_ONLY</DefineConstants>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="'$(TargetFramework)' == 'net40'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);NET_4_0</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <When Condition="$(TargetFramework.StartsWith('netstandard'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);NET_4_0;NET_CORE</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+</Project>

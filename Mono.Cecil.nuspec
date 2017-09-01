@@ -29,8 +29,20 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\net_3_5_Release\*.dll" target="lib/net35" />
-    <file src="bin\net_4_0_Release\*.dll" target="lib/net40" />
-    <file src="bin\netstandard_Release\netstandard1.3\*.dll" target="lib/netstandard1.3" />
+    <file src="bin\Release\net35\Mono.Cecil.dll" target="lib/net35" />
+    <file src="bin\Release\net40\Mono.Cecil.dll" target="lib/net40" />
+    <file src="bin\Release\netstandard1.3\Mono.Cecil.dll" target="lib/netstandard1.3" />
+
+    <file src="rocks\bin\Release\net35\Mono.Cecil.Rocks.dll" target="lib/net35" />
+    <file src="rocks\bin\Release\net40\Mono.Cecil.Rocks.dll" target="lib/net40" />
+    <file src="rocks\bin\Release\netstandard1.3\Mono.Cecil.Rocks.dll" target="lib/netstandard1.3" />
+
+    <file src="symbols\mdb\bin\Release\net35\Mono.Cecil.Mdb.dll" target="lib/net35" />
+    <file src="symbols\mdb\bin\Release\net40\Mono.Cecil.Mdb.dll" target="lib/net40" />
+    <file src="symbols\mdb\bin\Release\netstandard1.3\Mono.Cecil.Mdb.dll" target="lib/netstandard1.3" />
+
+    <file src="symbols\pdb\bin\Release\net35\Mono.Cecil.Pdb.dll" target="lib/net35" />
+    <file src="symbols\pdb\bin\Release\net40\Mono.Cecil.Pdb.dll" target="lib/net40" />
+    <file src="symbols\pdb\bin\Release\netstandard1.3\Mono.Cecil.Pdb.dll" target="lib/netstandard1.3" />
   </files>
 </package>

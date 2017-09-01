@@ -9,3 +9,7 @@ csharp_space_before_open_square_brackets = true
 csharp_new_line_before_open_brace = methods
 csharp_new_line_before_else = false
 csharp_indent_switch_labels = false
+
+[*.csproj]
+indent_style = space
+indent_size = 2

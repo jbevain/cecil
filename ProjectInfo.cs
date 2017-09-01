@@ -7,14 +7,6 @@
 // Licensed under the MIT/X11 license.
 //
 
-using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyProduct (Consts.AssemblyName)]
-[assembly: AssemblyCopyright ("Copyright © 2008 - 2015 Jb Evain")]
-
 [assembly: ComVisible (false)]
-
-[assembly: AssemblyVersion ("0.10.0.0")]
-[assembly: AssemblyFileVersion ("0.10.0.0")]
-[assembly: AssemblyInformationalVersion ("0.10.0.0-beta6")]

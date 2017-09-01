@@ -1,31 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <ProjectGuid>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Tests</RootNamespace>
-    <AssemblyName>Mono.Cecil.Tests</AssemblyName>
+    <TargetFrameworks>net40</TargetFrameworks>
+
+    <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Mono.Cecil.csproj">
-      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
-      <Name>Mono.Cecil</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\symbols\mdb\Mono.Cecil.Mdb.csproj">
-      <Project>{8559dd7f-a16f-46d0-a05a-9139faeba8fd}</Project>
-      <Name>Mono.Cecil.Mdb</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\symbols\pdb\Mono.Cecil.Pdb.csproj">
-      <Project>{63e6915c-7ea4-4d76-ab28-0d7191eea626}</Project>
-      <Name>Mono.Cecil.Pdb</Name>
-    </ProjectReference>
+    <PackageReference Include="NUnit" Version="2.6.2" />
+    <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil.csproj" />
+    <ProjectReference Include="..\symbols\mdb\Mono.Cecil.Mdb.csproj" />
+    <ProjectReference Include="..\symbols\pdb\Mono.Cecil.Pdb.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\ProjectInfo.cs" />
     <Compile Include="Mono.Cecil.Tests\*.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <None Include="Resources\**\*" />
   </ItemGroup>
-  <Import Project="..\Mono.Cecil.Tests.props" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>
