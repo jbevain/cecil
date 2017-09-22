@@ -234,7 +234,7 @@ namespace Mono.CompilerServices.SymbolWriter
 
 		public override string ToString ()
 		{
-			return String.Format ("[Line {0}:{1,2}-{3,4}:{5}]", File, Row, Column, EndRow, EndColumn, Offset);
+			return String.Format ("[Line {0}:{1},{2}-{3},{4}:{5}]", File, Row, Column, EndRow, EndColumn, Offset);
 		}
 	}
 
