@@ -92,9 +92,9 @@ namespace Mono.Cecil.PE {
 			image.Characteristics = (ModuleCharacteristics) dll_characteristics;
 		}
 
-		TargetArchitecture ReadArchitecture ()
+		ProcessorArchitecture ReadArchitecture ()
 		{
-			return (TargetArchitecture) ReadUInt16 ();
+			return (ProcessorArchitecture) ReadUInt16 ();
 		}
 
 		static ModuleKind GetModuleKind (ushort characteristics, ushort subsystem)
