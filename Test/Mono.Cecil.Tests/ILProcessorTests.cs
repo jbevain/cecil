@@ -68,12 +68,13 @@ namespace Mono.Cecil.Tests {
 				Name = "function",
 			};
 
-			var il = method.Body.GetILProcessor ();
+			var body = method.Body.AsILMethodBody();
+			var il = body.GetILProcessor ();
 
 			foreach (var opcode in opcodes)
 				il.Emit (opcode);
 
-			return method.Body;
+			return body;
 		}
 	}
 }

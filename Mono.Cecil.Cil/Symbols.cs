@@ -676,7 +676,8 @@ namespace Mono.Cecil.Cil {
 					offset_mapping.Add (sequence_points [i].Offset, sequence_points [i]);
 			}
 
-			var instructions = method.Body.Instructions;
+			var body = method.Body.AsILMethodBody();
+			var instructions = body.Instructions;
 
 			for (int i = 0; i < instructions.Count; i++) {
 				SequencePoint sequence_point;

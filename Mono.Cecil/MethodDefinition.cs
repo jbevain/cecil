@@ -29,7 +29,7 @@ namespace Mono.Cecil {
 		internal PInvokeInfo pinvoke;
 		Collection<MethodReference> overrides;
 
-		internal MethodBody body;
+		internal IMethodBody body;
 		internal MethodDebugInformation debug_info;
 		internal Collection<CustomDebugInformation> custom_infos;
 
@@ -141,9 +141,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public MethodBody Body {
+		public IMethodBody Body {
 			get {
-				MethodBody localBody = this.body;
+				IMethodBody localBody = this.body;
 				if (localBody != null)
 					return localBody;
 

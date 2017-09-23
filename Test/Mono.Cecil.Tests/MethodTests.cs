@@ -157,14 +157,15 @@ namespace Mono.Cecil.Tests {
 
 				Assert.IsTrue (foo.IsVarArg ());
 
-				var foo_reference = (MethodReference) baz.Body.Instructions.First (i => i.Offset == 0x000a).Operand;
+				var bazBody = baz.Body.AsILMethodBody();
+				var foo_reference = (MethodReference) bazBody.Instructions.First (i => i.Offset == 0x000a).Operand;
 
 				Assert.IsTrue (foo_reference.IsVarArg ());
 				Assert.AreEqual (0, foo_reference.GetSentinelPosition ());
 
 				Assert.AreEqual (foo, foo_reference.Resolve ());
 
-				var bar_reference = (MethodReference) baz.Body.Instructions.First (i => i.Offset == 0x0023).Operand;
+				var bar_reference = (MethodReference) bazBody.Instructions.First (i => i.Offset == 0x0023).Operand;
 
 				Assert.IsTrue (bar_reference.IsVarArg ());
 
@@ -180,10 +181,11 @@ namespace Mono.Cecil.Tests {
 			TestCSharp ("Generics.cs", module => {
 				var type = module.GetType ("It");
 				var method = type.GetMethod ("ReadPwow");
+				var body = method.Body.AsILMethodBody();
 
 				GenericInstanceMethod instance = null;
 
-				foreach (var instruction in method.Body.Instructions) {
+				foreach (var instruction in body.Instructions) {
 					instance = instruction.Operand as GenericInstanceMethod;
 					if (instance != null)
 						break;
@@ -204,8 +206,10 @@ namespace Mono.Cecil.Tests {
 				var beta = type.GetMethod ("Beta");
 				var charlie = type.GetMethod ("Charlie");
 
-				var new_list_beta = (MethodReference) beta.Body.Instructions [0].Operand;
-				var new_list_charlie = (MethodReference) charlie.Body.Instructions [0].Operand;
+				var betaBody = beta.Body.AsILMethodBody();
+				var charlieBody = charlie.Body.AsILMethodBody();
+				var new_list_beta = (MethodReference) betaBody.Instructions [0].Operand;
+				var new_list_charlie = (MethodReference) charlieBody.Instructions [0].Operand;
 
 				Assert.AreEqual ("System.Collections.Generic.List`1<TBeta>", new_list_beta.DeclaringType.FullName);
 				Assert.AreEqual ("System.Collections.Generic.List`1<TCharlie>", new_list_charlie.DeclaringType.FullName);

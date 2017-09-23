@@ -23,7 +23,7 @@ namespace Mono.Cecil.Tests {
 
 		public static void WriteMethodBody (TextWriter writer, MethodDefinition method)
 		{
-			var body = method.Body;
+			var body = method.Body.AsILMethodBody();
 
 			WriteVariables (writer, body);
 

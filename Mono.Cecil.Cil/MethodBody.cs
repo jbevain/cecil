@@ -15,7 +15,12 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil.Cil {
 
-	public sealed class MethodBody {
+	public interface IMethodBody {
+
+		MethodDefinition Method { get; }
+	}
+
+	public sealed class MethodBody : IMethodBody {
 
 		readonly internal MethodDefinition method;
 
@@ -243,6 +248,26 @@ namespace Mono.Cecil.Cil {
 					return;
 				}
 			}
+		}
+	}
+}
+
+namespace Mono.Cecil
+{
+	using Mono.Cecil.Cil;
+
+	static partial class Mixin
+	{
+
+		public static MethodBody AsILMethodBody(this IMethodBody self)
+		{
+			return self.As<MethodBody>();
+		}
+
+		public static T As<T>(this IMethodBody self)
+			where T : class, IMethodBody
+		{
+			return self == null ? null : (T)self;
 		}
 	}
 }

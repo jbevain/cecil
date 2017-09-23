@@ -167,7 +167,8 @@ namespace Mono.Cecil.Tests {
 				var baz = module.GetType ("Baz");
 				var method = baz.GetMethod ("PrintAnswer");
 
-				var box = method.Body.Instructions.Where (i => i.OpCode == OpCodes.Box).First ();
+				var body = method.Body.AsILMethodBody();
+				var box = body.Instructions.Where (i => i.OpCode == OpCodes.Box).First ();
 				var int32 = (TypeReference) box.Operand;
 
 				Assert.IsTrue (int32.IsValueType);
@@ -211,7 +212,8 @@ namespace Mono.Cecil.Tests {
 				var type = module.GetType ("LaMatrix");
 				var method = type.GetMethod ("At");
 
-				var call = method.Body.Instructions.Where (i => i.Operand is MethodReference).First ();
+				var body = method.Body.AsILMethodBody();
+				var call = body.Instructions.Where (i => i.Operand is MethodReference).First ();
 				var get = (MethodReference) call.Operand;
 
 				Assert.IsNotNull (get);
