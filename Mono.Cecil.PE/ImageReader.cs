@@ -160,12 +160,18 @@ namespace Mono.Cecil.PE {
 
 			// ExportTable			8
 			// ImportTable			8
+
+			Advance (pe64 ? 56 : 40);
+
 			// ResourceTable		8
+
+			image.Win32Resources = ReadDataDirectory ();
+
 			// ExceptionTable		8
 			// CertificateTable		8
 			// BaseRelocationTable	8
 
-			Advance (pe64 ? 88 : 72);
+			Advance (24);
 
 			// Debug				8
 			image.Debug = ReadDataDirectory ();
