@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 using Mono.Collections.Generic;
@@ -65,15 +66,19 @@ namespace Mono.Cecil {
 #endif
 	}
 
-#if !NET_CORE
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
 
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
 
 		readonly Collection<string> directories;
 
+#if NET_CORE
+		// Maps file names of available trusted platform assemblies to their full paths.
+		// Internal for testing.
+		internal static readonly Lazy<Dictionary<string, string>> TrustedPlatformAssemblies = new Lazy<Dictionary<string, string>> (CreateTrustedPlatformAssemblyMap);
+#else
 		Collection<string> gac_paths;
-
+#endif
 		public void AddSearchDirectory (string directory)
 		{
 			directories.Add (directory);
@@ -127,6 +132,12 @@ namespace Mono.Cecil {
 				};
 			}
 
+#if NET_CORE
+			assembly = SearchTrustedPlatformAssemblies (name, parameters);
+			if (assembly != null) {
+				return assembly;
+			}
+#else
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
 			var framework_dirs = on_mono
 				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
@@ -137,7 +148,7 @@ namespace Mono.Cecil {
 				if (assembly != null)
 					return assembly;
 			}
-
+			
 			if (name.Name == "mscorlib") {
 				assembly = GetCorlib (name, parameters);
 				if (assembly != null)
@@ -151,7 +162,7 @@ namespace Mono.Cecil {
 			assembly = SearchDirectory (name, framework_dirs, parameters);
 			if (assembly != null)
 				return assembly;
-
+#endif
 			if (ResolveFailure != null) {
 				assembly = ResolveFailure (this, name);
 				if (assembly != null)
@@ -161,6 +172,49 @@ namespace Mono.Cecil {
 			throw new AssemblyResolutionException (name);
 		}
 
+#if NET_CORE
+		AssemblyDefinition SearchTrustedPlatformAssemblies (AssemblyNameReference name, ReaderParameters parameters)
+		{
+			if (name.IsWindowsRuntime) {
+				return null;
+			}
+
+			if (TrustedPlatformAssemblies.Value.TryGetValue(name.Name, out string path)) {
+				return GetAssembly (path, parameters);
+			}
+
+			return null;
+		}
+
+		private static Dictionary<string, string> CreateTrustedPlatformAssemblyMap ()
+		{
+			var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+			string paths;
+
+			try {
+				// AppContext is only available on platforms that implement .NET Standard 1.6
+				var appContextType = Type.GetType ("System.AppContext, System.AppContext, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
+				var getData = appContextType?.GetTypeInfo ().GetDeclaredMethod ("GetData");
+				paths = (string)getData?.Invoke (null, new [] { "TRUSTED_PLATFORM_ASSEMBLIES" });
+			}
+			catch {
+				paths = null;
+			}
+
+			if (paths == null) {
+				return result;
+			}
+
+			foreach (var path in paths.Split (Path.PathSeparator)) {
+				if (string.Equals(Path.GetExtension (path), ".dll", StringComparison.OrdinalIgnoreCase)) {
+					result [Path.GetFileNameWithoutExtension (path)] = path;
+				}
+			}
+
+			return result;
+		}
+#endif
 		AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
 		{
 			var extensions = name.IsWindowsRuntime ? new [] { ".winmd", ".dll" } : new [] { ".exe", ".dll" };
@@ -185,11 +239,11 @@ namespace Mono.Cecil {
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
+#if !NET_CORE
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
 			var corlib = typeof (object).Assembly.GetName ();
-
 			if (corlib.Version == version || IsZero (version))
 				return GetAssembly (typeof (object).Module.FullyQualifiedName, parameters);
 
@@ -232,7 +286,7 @@ namespace Mono.Cecil {
 			var file = Path.Combine (path, "mscorlib.dll");
 			if (File.Exists (file))
 				return GetAssembly (file, parameters);
-
+		
 			return null;
 		}
 
@@ -325,7 +379,7 @@ namespace Mono.Cecil {
 
 			return null;
 		}
-
+#endif
 		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ()
@@ -352,5 +406,4 @@ namespace Mono.Cecil {
 		{
 		}
 	}
-#endif
 }

@@ -826,7 +826,7 @@ namespace Mono.Cecil.Cil {
 
 			var suffix = GetSymbolNamespace (kind);
 
-			var cecil_name = typeof (SymbolProvider).Assembly ().GetName ();
+			var cecil_name = typeof (SymbolProvider).GetTypeInfo ().Assembly.GetName ();
 
 			var name = new SR.AssemblyName {
 				Name = cecil_name.Name + "." + suffix,

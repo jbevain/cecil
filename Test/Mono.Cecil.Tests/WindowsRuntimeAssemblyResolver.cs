@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if !NET_CORE
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Win32;
@@ -91,3 +93,4 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 }
+#endif

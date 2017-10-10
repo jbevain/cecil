@@ -179,7 +179,7 @@ namespace Mono.Cecil {
 #if !NET_CORE
 			return typeof (object).Assembly.ImageRuntimeVersion.ParseRuntime ();
 #else
-			var corlib_name = AssemblyNameReference.Parse (typeof (object).Assembly ().FullName);
+			var corlib_name = AssemblyNameReference.Parse (typeof (object).GetTypeInfo ().Assembly.FullName);
 			var corlib_version = corlib_name.Version;
 
 			switch (corlib_version.Major) {
@@ -389,13 +389,11 @@ namespace Mono.Cecil {
 
 		public IAssemblyResolver AssemblyResolver {
 			get {
-#if !NET_CORE
 				if (assembly_resolver.value == null) {
 					lock (module_lock) {
 						assembly_resolver = Disposable.Owned (new DefaultAssemblyResolver () as IAssemblyResolver);
 					}
 				}
-#endif
 
 				return assembly_resolver.value;
 			}
@@ -725,28 +723,16 @@ namespace Mono.Cecil {
 
 		internal FieldDefinition Resolve (FieldReference field)
 		{
-#if NET_CORE
-			if (MetadataResolver == null)
-				throw new NotSupportedException ();
-#endif
 			return MetadataResolver.Resolve (field);
 		}
 
 		internal MethodDefinition Resolve (MethodReference method)
 		{
-#if NET_CORE
-			if (MetadataResolver == null)
-				throw new NotSupportedException ();
-#endif
 			return MetadataResolver.Resolve (method);
 		}
 
 		internal TypeDefinition Resolve (TypeReference type)
 		{
-#if NET_CORE
-			if (MetadataResolver == null)
-				throw new NotSupportedException ();
-#endif
 			return MetadataResolver.Resolve (type);
 		}
 

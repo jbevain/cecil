@@ -177,8 +177,8 @@ namespace Mono.Cecil {
 				string.Empty,
 				type.Name,
 				module,
-				ImportScope (type.Assembly ()),
-				type.IsValueType ());
+				ImportScope (type.GetTypeInfo ().Assembly),
+				type.GetTypeInfo ().IsValueType);
 
 			reference.etype = ImportElementType (type);
 
@@ -187,7 +187,7 @@ namespace Mono.Cecil {
 			else
 				reference.Namespace = type.Namespace ?? string.Empty;
 
-			if (type.IsGenericType ())
+			if (type.GetTypeInfo ().IsGenericType)
 				ImportGenericParameters (reference, type.GetGenericArguments ());
 
 			return reference;
@@ -195,7 +195,7 @@ namespace Mono.Cecil {
 
 		static bool ImportOpenGenericType (Type type, ImportGenericKind import_kind)
 		{
-			return type.IsGenericType () && type.IsGenericTypeDefinition () && import_kind == ImportGenericKind.Open;
+			return type.GetTypeInfo ().IsGenericType && type.GetTypeInfo ().IsGenericTypeDefinition && import_kind == ImportGenericKind.Open;
 		}
 
 		static bool ImportOpenGenericMethod (SR.MethodBase method, ImportGenericKind import_kind)
@@ -219,7 +219,7 @@ namespace Mono.Cecil {
 			if (type.IsArray)
 				return new ArrayType (ImportType (type.GetElementType (), context), type.GetArrayRank ());
 
-			if (type.IsGenericType ())
+			if (type.GetTypeInfo ().IsGenericType)
 				return ImportGenericInstance (type, context);
 
 			if (type.IsGenericParameter)
@@ -233,8 +233,8 @@ namespace Mono.Cecil {
 			if (context.IsEmpty)
 				throw new InvalidOperationException ();
 
-			if (type.DeclaringMethod () != null)
-				return context.MethodParameter (NormalizeMethodName (type.DeclaringMethod ()), type.GenericParameterPosition);
+			if (type.GetTypeInfo ().DeclaringMethod != null)
+				return context.MethodParameter (NormalizeMethodName (type.GetTypeInfo ().DeclaringMethod), type.GenericParameterPosition);
 
 			if (type.DeclaringType != null)
 				return context.TypeParameter (NormalizeTypeFullName (type.DeclaringType), type.GenericParameterPosition);
@@ -282,7 +282,7 @@ namespace Mono.Cecil {
 
 		static bool IsGenericInstance (Type type)
 		{
-			return type.IsGenericType () && !type.IsGenericTypeDefinition ();
+			return type.GetTypeInfo ().IsGenericType && !type.GetTypeInfo ().IsGenericTypeDefinition;
 		}
 
 		static ElementType ImportElementType (Type type)
