@@ -6,7 +6,7 @@
     <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\ProjectInfo.cs" />
+    <Compile Include="..\ProjectInfo.cs" />
     <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>

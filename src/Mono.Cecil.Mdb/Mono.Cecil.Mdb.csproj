@@ -12,7 +12,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\ProjectInfo.cs" />
+    <Compile Include="..\ProjectInfo.cs" />
     <Compile Include="Mono.Cecil.Mdb\*.cs" />
     <Compile Include="Mono.CompilerServices.SymbolWriter\*.cs" />
   </ItemGroup>

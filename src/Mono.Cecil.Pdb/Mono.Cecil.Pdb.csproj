@@ -13,7 +13,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\ProjectInfo.cs" />
+    <Compile Include="..\ProjectInfo.cs" />
     <Compile Include="Microsoft.Cci.Pdb\*.cs" />
     <Compile Include="Mono.Cecil.Pdb\*.cs" />
   </ItemGroup>
