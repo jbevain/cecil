@@ -6,7 +6,7 @@
     <AssemblyName>Mono.Cecil.Rocks.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Mono.Cecil.csproj">
+    <ProjectReference Include="..\..\src\Mono.Cecil\Mono.Cecil.csproj">
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
