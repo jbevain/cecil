@@ -2,18 +2,12 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</ProjectGuid>
-    <RootNamespace>Mono.Cecil</RootNamespace>
+    <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Cecil</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\ProjectInfo.cs" />
-    <Compile Include="Mono\*.cs" />
-    <Compile Include="Mono.Cecil\*.cs" />
-    <Compile Include="Mono.Cecil.Cil\*.cs" />
-    <Compile Include="Mono.Cecil.Metadata\*.cs" />
-    <Compile Include="Mono.Cecil.PE\*.cs" />
-    <Compile Include="Mono.Collections.Generic\*.cs" />
-    <Compile Include="Mono.Security.Cryptography\*.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <Import Project="..\Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />

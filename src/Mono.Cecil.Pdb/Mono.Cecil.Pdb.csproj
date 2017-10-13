@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{63E6915C-7EA4-4D76-AB28-0D7191EEA626}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Pdb</RootNamespace>
+    <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Cecil.Pdb</AssemblyName>
     <NoWarn>0649</NoWarn>
   </PropertyGroup>
@@ -14,8 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\ProjectInfo.cs" />
-    <Compile Include="Microsoft.Cci.Pdb\*.cs" />
-    <Compile Include="Mono.Cecil.Pdb\*.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <Import Project="..\Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
