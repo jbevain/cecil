@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{74E5ECE0-0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Tests", "test\Mono.Cecil.Tests\Mono.Cecil.Tests.csproj", "{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Mdb.Tests", "symbols\mdb\Test\Mono.Cecil.Mdb.Tests.csproj", "{AC71DF9C-99FA-4A63-990A-66C8010355A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Mdb.Tests", "test\Mono.Cecil.Mdb.Tests\Mono.Cecil.Mdb.Tests.csproj", "{AC71DF9C-99FA-4A63-990A-66C8010355A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Pdb.Tests", "symbols\pdb\Test\Mono.Cecil.Pdb.Tests.csproj", "{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}"
 EndProject
