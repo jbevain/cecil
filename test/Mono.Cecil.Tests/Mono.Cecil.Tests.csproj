@@ -20,7 +20,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\ProjectInfo.cs" />
     <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>
