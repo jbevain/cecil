@@ -14,7 +14,7 @@
       <Project>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</Project>
       <Name>Mono.Cecil.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\symbols\mdb\Mono.Cecil.Mdb.csproj">
+    <ProjectReference Include="..\..\src\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj">
       <Project>{8559DD7F-A16F-46D0-A05A-9139FAEBA8FD}</Project>
       <Name>Mono.Cecil.Mdb</Name>
     </ProjectReference>

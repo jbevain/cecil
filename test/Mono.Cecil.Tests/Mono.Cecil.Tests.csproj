@@ -10,7 +10,7 @@
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\symbols\mdb\Mono.Cecil.Mdb.csproj">
+    <ProjectReference Include="..\..\src\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj">
       <Project>{8559dd7f-a16f-46d0-a05a-9139faeba8fd}</Project>
       <Name>Mono.Cecil.Mdb</Name>
     </ProjectReference>
