@@ -10,7 +10,7 @@
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Test\Mono.Cecil.Tests.csproj">
+    <ProjectReference Include="..\..\test\Mono.Cecil.Tests\Mono.Cecil.Tests.csproj">
       <Project>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</Project>
       <Name>Mono.Cecil.Tests</Name>
     </ProjectReference>
