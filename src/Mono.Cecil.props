@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">net_4_0_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <BuildDirectory Condition=" '$(BuildDirectory)' == '' ">$(MSBuildThisFileDirectory)</BuildDirectory>
+    <BuildDirectory Condition=" '$(BuildDirectory)' == '' ">$(MSBuildThisFileDirectory)..\</BuildDirectory>
     <FileAlignment>512</FileAlignment>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\cecil.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\..\cecil.snk</AssemblyOriginatorKeyFile>
     <OutputType>Library</OutputType>
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
     <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>

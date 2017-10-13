@@ -15,6 +15,6 @@
     <Compile Include="Mono.Collections.Generic\*.cs" />
     <Compile Include="Mono.Security.Cryptography\*.cs" />
   </ItemGroup>
-  <Import Project="..\..\Mono.Cecil.props" />
+  <Import Project="..\Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
 </Project>
