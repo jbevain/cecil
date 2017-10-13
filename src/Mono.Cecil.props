@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">net_4_0_Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +9,9 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\..\cecil.snk</AssemblyOriginatorKeyFile>
     <OutputType>Library</OutputType>
-    <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
+    <BaseIntermediateOutputPath>$(BuildDirectory)\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <OutputPath>$(BuildDirectory)\bin\$(Configuration)\$(MSBuildProjectName)</OutputPath>
     <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>
     <NetStandard Condition=" $(Configuration.StartsWith('netstandard')) Or '$(NuGetRestoreTargets)' != '' ">true</NetStandard>
     <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>
