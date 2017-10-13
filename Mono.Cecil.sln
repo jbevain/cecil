@@ -22,7 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Mdb.Tests", "sym
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Pdb.Tests", "symbols\pdb\Test\Mono.Cecil.Pdb.Tests.csproj", "{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Rocks.Tests", "rocks\Test\Mono.Cecil.Rocks.Tests.csproj", "{C6CFD7E1-B855-44DC-B4CE-9CD72984AF52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Rocks.Tests", "test\Mono.Cecil.Rocks.Tests\Mono.Cecil.Rocks.Tests.csproj", "{C6CFD7E1-B855-44DC-B4CE-9CD72984AF52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
