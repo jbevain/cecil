@@ -14,7 +14,7 @@
       <Project>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</Project>
       <Name>Mono.Cecil.Tests</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\rocks\Mono.Cecil.Rocks.csproj">
+    <ProjectReference Include="..\..\src\Mono.Cecil.Rocks\Mono.Cecil.Rocks.csproj">
       <Project>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</Project>
       <Name>Mono.Cecil.Rocks</Name>
     </ProjectReference>

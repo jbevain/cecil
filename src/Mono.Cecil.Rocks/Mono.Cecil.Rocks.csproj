@@ -6,16 +6,16 @@
     <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\ProjectInfo.cs" />
-    <Compile Include="Mono.Cecil.Rocks\*.cs" />
+    <Compile Include="..\..\ProjectInfo.cs" />
+    <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mono.Cecil.csproj">
+    <ProjectReference Include="..\..\Mono.Cecil.csproj">
       <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\Mono.Cecil.props" />
+  <Import Project="..\..\Mono.Cecil.props" />
   <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
