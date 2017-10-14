@@ -1,22 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  
   <PropertyGroup>
     <TargetFrameworks>net40</TargetFrameworks>
     <ProjectGuid>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</ProjectGuid>
     <Configurations>net_3_5_Debug;net_3_5_Debug_ReadOnly;net_3_5_Release;net_3_5_Release_ReadOnly;net_4_0_Debug;net_4_0_Debug_ReadOnly;net_4_0_Release;net_4_0_Release_ReadOnly;netstandard_Debug;netstandard_Debug_ReadOnly;netstandard_Release;netstandard_Release_ReadOnly</Configurations>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mono.Cecil\Mono.Cecil.csproj" />
     <ProjectReference Include="..\..\src\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj" />
     <ProjectReference Include="..\..\src\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Compile Remove="Resources\**\*.cs" />
-    <None Include="Resources\**\*" />
+    <None Include="Resources\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="2.6.4" />
+    <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
-  <Import Project="..\Mono.Cecil.Tests.props" />
-
+  <Import Project="..\..\src\Mono.Cecil.props" />
+  
 </Project>
