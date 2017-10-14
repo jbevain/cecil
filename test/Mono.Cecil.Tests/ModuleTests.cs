@@ -234,10 +234,11 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		[ExpectedException (typeof (BadImageFormatException))]
 		public void OpenIrrelevantFile ()
 		{
-			GetResourceModule ("text_file.txt");
+			Assert.Throws<BadImageFormatException> (() => {
+				GetResourceModule ("text_file.txt");
+			});
 		}
 
 		[Test]
@@ -273,7 +274,8 @@ namespace Mono.Cecil.Tests {
 			{
 				using (var module = ModuleDefinition.ReadModule (file))
 				{
-					Assert.IsNotNullOrEmpty (module.FileName);
+					Assert.IsNotNull (module.FileName);
+					Assert.IsNotEmpty (module.FileName);
 					Assert.AreEqual (path, module.FileName);
 				}
 			}

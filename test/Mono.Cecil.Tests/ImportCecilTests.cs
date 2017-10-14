@@ -16,6 +16,13 @@ namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class ImportCecilTests : BaseTestFixture {
 
+		[OneTimeSetUp]
+		public void OntTimeSetUp ()
+		{
+			// Newer versions of NUnit don't set the current directory to the path of the testing assembly. This is needed for some tests.
+			Environment.CurrentDirectory = TestContext.CurrentContext.TestDirectory;
+		}
+
 		[Test]
 		public void ImportStringByRef ()
 		{
