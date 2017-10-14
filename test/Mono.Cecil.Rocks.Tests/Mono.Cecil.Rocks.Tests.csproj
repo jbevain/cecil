@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net40</TargetFrameworks>
     <ProjectGuid>{C6CFD7E1-B855-44DC-B4CE-9CD72984AF52}</ProjectGuid>
+    <Configurations>net_3_5_Debug;net_3_5_Debug_ReadOnly;net_3_5_Release;net_3_5_Release_ReadOnly;net_4_0_Debug;net_4_0_Debug_ReadOnly;net_4_0_Release;net_4_0_Release_ReadOnly;netstandard_Debug;netstandard_Debug_ReadOnly;netstandard_Release;netstandard_Release_ReadOnly</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
