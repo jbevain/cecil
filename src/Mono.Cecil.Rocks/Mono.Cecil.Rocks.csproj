@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>net40</TargetFrameworks>
+    <TargetFrameworks>$(NetFrameworkTargets)</TargetFrameworks>
     <ProjectGuid>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</ProjectGuid>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Configurations>net_3_5_Debug;net_3_5_Debug_ReadOnly;net_3_5_Release;net_3_5_Release_ReadOnly;net_4_0_Debug;net_4_0_Debug_ReadOnly;net_4_0_Release;net_4_0_Release_ReadOnly;netstandard_Debug;netstandard_Debug_ReadOnly;netstandard_Release;netstandard_Release_ReadOnly</Configurations>
   </PropertyGroup>
   
   <ItemGroup>
@@ -17,10 +16,10 @@
     <Compile Include="..\ProjectInfo.cs" />
   </ItemGroup>
   
-  <Import Project="..\Mono.Cecil.props" />
-  
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
   </PropertyGroup>
-  
+
+  <Import Project="..\Mono.Cecil.props" />
+
 </Project>

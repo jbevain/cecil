@@ -1,0 +1,39 @@
+<Project>
+  
+  <PropertyGroup>
+    <!-- We need configuration defined for paths. -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configurations>Debug;Release;Debug_ReadOnly;Release_ReadOnly;netstandard_Debug;netstandard_Debug_ReadOnly;netstandard_Release;netstandard_Release_ReadOnly</Configurations>
+    
+    <!-- Path definitions. -->
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(MSBuildProjectName)</OutputPath>
+    
+    <!-- Sign information. -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\cecil.snk</AssemblyOriginatorKeyFile>
+    
+    <!-- Misc. -->
+    <NetFrameworkTargets>net40;net35</NetFrameworkTargets>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
+    <DefineConstants>$(DefineConstants);READ_ONLY</DefineConstants>
+  </PropertyGroup>
+  
+  <!-- Split debug and release information. -->
+  <PropertyGroup Condition=" $(Configuration.Contains('Debug')) ">
+    <DefineDebug>true</DefineDebug>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.Contains('Release')) ">
+    <DefineDebug>false</DefineDebug>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+</Project>
