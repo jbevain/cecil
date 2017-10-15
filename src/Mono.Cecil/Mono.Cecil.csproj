@@ -1,14 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
+    <TargetFrameworks>net40</TargetFrameworks>
     <ProjectGuid>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</ProjectGuid>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Cecil</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>net_3_5_Debug;net_3_5_Debug_ReadOnly;net_3_5_Release;net_3_5_Release_ReadOnly;net_4_0_Debug;net_4_0_Debug_ReadOnly;net_4_0_Release;net_4_0_Release_ReadOnly;netstandard_Debug;netstandard_Debug_ReadOnly;netstandard_Release;netstandard_Release_ReadOnly</Configurations>
   </PropertyGroup>
+  
   <ItemGroup>
     <Compile Include="..\ProjectInfo.cs" />
-    <Compile Include="**\*.cs" />
   </ItemGroup>
+  
   <Import Project="..\Mono.Cecil.props" />
-  <Import Project="$(MSBuildCSharpTargets)" Condition=" ! $(NetStandard) " />
+  
 </Project>
