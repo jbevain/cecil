@@ -22,9 +22,9 @@
     </None>
   </ItemGroup>
   
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="2.4.0" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.4.0" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " >
+    <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.4.0" />
   </ItemGroup>
   
   <ItemGroup>

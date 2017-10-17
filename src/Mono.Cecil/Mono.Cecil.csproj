@@ -4,12 +4,6 @@
     <TargetFrameworks>$(ProjectTargetFrameworks)</TargetFrameworks>
     <ProjectGuid>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</ProjectGuid>
     <RootNamespace>Mono</RootNamespace>
-    <AssemblyName>Mono.Cecil</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <Compile Include="..\ProjectInfo.cs" />
-  </ItemGroup>
   
 </Project>
