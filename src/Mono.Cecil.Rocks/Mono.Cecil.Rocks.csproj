@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>$(NetFrameworkTargets)</TargetFrameworks>
+    <TargetFrameworks>$(ProjectTargetFrameworks)</TargetFrameworks>
     <ProjectGuid>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</ProjectGuid>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
@@ -19,7 +19,5 @@
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
   </PropertyGroup>
-
-  <Import Project="..\Mono.Cecil.props" />
-
+  
 </Project>

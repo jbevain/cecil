@@ -1,14 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>$(NetFrameworkTargets)</TargetFrameworks>
-    <ProjectGuid>{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}</ProjectGuid>
+    <TargetFrameworks>$(TestProjectTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil.Tests\Mono.Cecil.Tests.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != '$(TestProjectTargetFrameworkForNetStandard)' ">
     <ProjectReference Include="..\..\src\Mono.Cecil\Mono.Cecil.csproj" />
     <ProjectReference Include="..\..\src\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj" />
-    <ProjectReference Include="..\..\test\Mono.Cecil.Tests\Mono.Cecil.Tests.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' ">
+    <ProjectReference Include="..\..\src\Mono.Cecil\Mono.Cecil.csproj" Properties="TargetFramework=$(ProjectTargetFrameworkForNetStandard)" />
+    <ProjectReference Include="..\..\src\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj" Properties="TargetFramework=$(ProjectTargetFrameworkForNetStandard)" />
   </ItemGroup>
   
   <ItemGroup>
@@ -17,16 +22,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
+  
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' " />
     <PackageReference Include="NUnit" Version="3.8.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-
-  <Import Project="..\..\src\Mono.Cecil.props" />
-
+  
 </Project>

@@ -1,11 +1,19 @@
+using NUnit.Framework;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-using NUnit.Framework;
+#if NETCOREAPP
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.VisualBasic;
+#else
+using System.CodeDom.Compiler;
+#endif
 
 namespace Mono.Cecil.Tests {
 
@@ -68,7 +76,11 @@ namespace Mono.Cecil.Tests {
 				return IlasmCompilationService.Instance.Compile (name);
 
 			if (extension == ".cs" || extension == ".vb")
+#if NETCOREAPP
+				return RoslynCompilationService.Instance.Compile (name);
+#else
 				return CodeDomCompilationService.Instance.Compile (name);
+#endif
 
 			throw new NotSupportedException (extension);
 		}
@@ -111,6 +123,135 @@ namespace Mono.Cecil.Tests {
 				Assert.Fail (output.ToString ());
 		}
 	}
+
+#if NETCOREAPP
+
+	/// <summary>
+	/// Roslyn implementation for a <see cref="CompilationService"/>.
+	/// </summary>
+	class RoslynCompilationService : CompilationService {
+
+		/// <summary>
+		/// Global instance of the compilation service.
+		/// </summary>
+		public static readonly RoslynCompilationService Instance = new RoslynCompilationService ();
+
+		/// <summary>
+		/// Compiles a source code file.
+		/// </summary>
+		/// <param name="sourceCodeFilePath">Path to the source code file to be compiled.</param>
+		/// <returns>Path to the compiled assembly file.</returns>
+		protected override string CompileFile (string sourceCodeFilePath)
+		{
+			string fileExtension = Path.GetExtension (sourceCodeFilePath);
+			string assemblyFilePath = GetCompiledFilePath (sourceCodeFilePath);
+
+			EmitResult results;
+			switch (fileExtension) {
+			case ".cs":
+				results = CompileCSharp (sourceCodeFilePath, assemblyFilePath);
+				break;
+
+			case ".vb":
+				results = CompileVisualBasic (sourceCodeFilePath, assemblyFilePath);
+				break;
+
+			default:
+				throw new NotSupportedException ($"Cannot compile file '{sourceCodeFilePath}'.");
+			}
+
+			AssertCompilerResults (results);
+
+			return assemblyFilePath;
+		}
+
+		/// <summary>
+		/// Asserts the result of a compilation.
+		/// </summary>
+		/// <param name="results">Result of a compilation.</param>
+		static void AssertCompilerResults (EmitResult results)
+		{
+			Assert.IsTrue (results.Success, GetErrorMessage (results));
+		}
+
+		/// <summary>
+		/// Compiles a C# source code file.
+		/// </summary>
+		/// <param name="sourceCodeFilePath">Path to the source code file.</param>
+		/// <param name="assemblyFilePath">Path to the destination compiled assembly file.</param>
+		/// <returns>Result of the compilation.</returns>
+		static EmitResult CompileCSharp (string sourceCodeFilePath, string assemblyFilePath)
+		{
+			string assemblyName = Path.GetFileNameWithoutExtension (assemblyFilePath);
+			MetadataReference [] references = GetAssemblyReferences ();
+			CSharpCompilationOptions options = new CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary);
+
+			SyntaxTree [] syntaxTree;
+			using (Stream stream = File.OpenRead (sourceCodeFilePath)) {
+				syntaxTree = new SyntaxTree [] { CSharpSyntaxTree.ParseText (SourceText.From (stream)) };
+			}
+
+			CSharpCompilation compilation = CSharpCompilation.Create (assemblyName, syntaxTree, references, options);
+
+			using (Stream output = File.Create (assemblyFilePath)) {
+				return compilation.Emit (output);
+			}
+		}
+
+		/// <summary>
+		/// Compiles a Visual Basic source code file.
+		/// </summary>
+		/// <param name="sourceCodeFilePath">Path to the source code file.</param>
+		/// <param name="assemblyFilePath">Path to the destination compiled file.</param>
+		/// <returns>Result of the compilation.</returns>
+		static EmitResult CompileVisualBasic (string sourceCodeFilePath, string assemblyFilePath)
+		{
+			string assemblyName = Path.GetFileNameWithoutExtension (assemblyFilePath);
+			MetadataReference [] references = GetAssemblyReferences ();
+			VisualBasicCompilationOptions options = new VisualBasicCompilationOptions (OutputKind.DynamicallyLinkedLibrary);
+
+			SyntaxTree [] syntaxTree;
+			using (Stream stream = File.OpenRead (sourceCodeFilePath)) {
+				syntaxTree = new SyntaxTree [] { VisualBasicSyntaxTree.ParseText (SourceText.From (stream)) };
+			}
+
+			VisualBasicCompilation compilation = VisualBasicCompilation.Create (assemblyName, syntaxTree, references, options);
+
+			using (Stream output = File.Create (assemblyFilePath)) {
+				return compilation.Emit (output);
+			}
+		}
+
+		/// <summary>
+		/// Gets a list of assembly references.
+		/// </summary>
+		/// <returns>List of assembly references.</returns>
+		static MetadataReference [] GetAssemblyReferences ()
+		{
+			return new MetadataReference []
+			{
+				MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
+			};
+		}
+
+		/// <summary>
+		/// Gets the error message for a compilation.
+		/// </summary>
+		/// <param name="results">Result of a compilation.</param>
+		/// <returns>Error message for the compilation results.</returns>
+		static string GetErrorMessage (EmitResult results)
+		{
+			if (results.Success)
+				return string.Empty;
+
+			var builder = new StringBuilder ();
+			foreach (Diagnostic error in results.Diagnostics)
+				builder.AppendLine (error.ToString ());
+			return builder.ToString ();
+		}
+	}
+
+#else
 
 	class CodeDomCompilationService : CompilationService {
 
@@ -165,6 +306,8 @@ namespace Mono.Cecil.Tests {
 				CodeDomProvider.GetLanguageFromExtension (Path.GetExtension (name)));
 		}
 	}
+
+#endif
 
 	class ShellService {
 

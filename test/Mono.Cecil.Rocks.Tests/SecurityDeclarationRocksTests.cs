@@ -4,6 +4,8 @@ using NUnit.Framework;
 
 using Mono.Cecil.Rocks;
 
+#if !NETSTANDARD
+
 namespace Mono.Cecil.Tests {
 
 	[TestFixture]
@@ -60,3 +62,5 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 }
+
+#endif

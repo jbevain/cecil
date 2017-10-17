@@ -1,9 +1,9 @@
 <Project>
   
   <PropertyGroup>
-    <!-- We need configuration defined for paths. -->
+    <!-- Configuration definitions. -->
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Configurations>Debug;Release;Debug_ReadOnly;Release_ReadOnly;netstandard_Debug;netstandard_Debug_ReadOnly;netstandard_Release;netstandard_Release_ReadOnly</Configurations>
+    <Configurations>Debug;Release;Debug_ReadOnly;Release_ReadOnly</Configurations>
     
     <!-- Path definitions. -->
     <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
@@ -13,9 +13,21 @@
     <!-- Sign information. -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\cecil.snk</AssemblyOriginatorKeyFile>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     
-    <!-- Misc. -->
-    <NetFrameworkTargets>net40;net35</NetFrameworkTargets>
+    <!-- Target framework definitions. -->
+    <ProjectTargetFrameworkForNetStandard>netstandard2.0</ProjectTargetFrameworkForNetStandard>
+    <ProjectTargetFrameworks>$(ProjectTargetFrameworkForNetStandard);net40;net35</ProjectTargetFrameworks>
+    <TestProjectTargetFrameworkForNetStandard>net462</TestProjectTargetFrameworkForNetStandard>
+    <TestProjectTargetFrameworks>$(TestProjectTargetFrameworkForNetStandard);net40;net35</TestProjectTargetFrameworks>
+    
+    <!-- Compile-time constant for the target framework moniker. -->
+    <DefineConstants>$(DefineConstants);$(TargetFramework.TrimEnd('.0123456789').ToUpper())</DefineConstants>
+  </PropertyGroup>
+
+  <!-- This indicates to test projects that the current target is .Net Standard. -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' " >
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
   
   <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
@@ -36,4 +48,39 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
+  <!-- This optional import allows products that distribute Cecil to tweak settings that will affect its 
+       build, without having to fork the project unnecessarily. The Mono.Cecil.overrides file is a plain 
+       MSBuild file with additional properties, and can exist anywhere upwards from the current Cecil repo 
+       clone path, making it very flexible even if the project is submoduled. 
+  -->
+  <PropertyGroup>
+    <CecilOverrides Condition="'$(CecilOverrides)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Mono.Cecil.overrides))\Mono.Cecil.overrides</CecilOverrides>
+  </PropertyGroup>  
+  <Import Project="$(CecilOverrides)" Condition="Exists('$(CecilOverrides)')" />
+  
+  <!-- This is an example of a custom override file -->
+  <!--
+	<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	  <PropertyGroup>
+		<AssemblyName>$(AssemblyName.Replace('Mono', 'MyCompany'))</AssemblyName>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)MyCompany.snk</AssemblyOriginatorKeyFile>
+	  </PropertyGroup>
+		<ItemGroup>
+			<Compile Include="$(MSBuildThisFileDirectory)MyCompany.AssemblyInfo.cs" />
+		</ItemGroup>
+	</Project>
+	
+	The additional AssemblyInfo.cs added to the Compile group provides the InternalsVisibleTo so that 
+	the Mdb/Pdb projects can compile successfully:
+	
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+[assembly: InternalsVisibleTo ("MyCompany.Cecil.Pdb, PublicKey=....")]
+[assembly: InternalsVisibleTo ("MyCompany.Cecil.Mdb, PublicKey=...")]
+[assembly: InternalsVisibleTo ("MyCompany.Cecil.Rocks, PublicKey=...")]
+[assembly: InternalsVisibleTo ("MyCompany.Cecil.Tests, PublicKey=...")]	
+  -->
+  
 </Project>
