@@ -212,6 +212,10 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (resolver.Resolve (reference));
 		}
 
+#if !NET35
+		/// <summary>
+		/// PortableClassLibrary.dll references System.Core.dll that doesn't exist in .Net 3.5.
+		/// </summary>
 		[Test]
 		public void ResolvePortableClassLibraryReference ()
 		{
@@ -226,6 +230,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (typeof (object).Assembly.GetName ().Version, assembly.Name.Version);
 			}
 		}
+#endif
 
 		TRet GetReference<TDel, TRet> (TDel code)
 		{
