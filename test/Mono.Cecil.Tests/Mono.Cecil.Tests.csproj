@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFrameworks>$(TestProjectTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' != '$(TestProjectTargetFrameworkForNetStandard)' ">
+    <ProjectReference Include="..\..\src\Mono.Cecil\Mono.Cecil.csproj" />
+    <ProjectReference Include="..\..\src\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj" />
+    <ProjectReference Include="..\..\src\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' ">
+    <ProjectReference Include="..\..\src\Mono.Cecil\Mono.Cecil.csproj" Properties="TargetFramework=$(ProjectTargetFrameworkForNetStandard)" />
+    <ProjectReference Include="..\..\src\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj" Properties="TargetFramework=$(ProjectTargetFrameworkForNetStandard)" />
+    <ProjectReference Include="..\..\src\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj" Properties="TargetFramework=$(ProjectTargetFrameworkForNetStandard)" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Resources\**\*.cs" />
+    <None Include="Resources\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">
+    <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.4.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' " />
+    <PackageReference Include="NUnit" Version="3.8.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+  
+</Project>

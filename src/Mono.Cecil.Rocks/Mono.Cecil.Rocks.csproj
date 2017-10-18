@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFrameworks>$(ProjectTargetFrameworks)</TargetFrameworks>
+    <ProjectGuid>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</ProjectGuid>
+    <RootNamespace>Mono</RootNamespace>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil\Mono.Cecil.csproj" />
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);INSIDE_ROCKS</DefineConstants>
+  </PropertyGroup>
+  
+</Project>

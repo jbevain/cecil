@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(ProjectTargetFrameworks)</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+  </PropertyGroup>
+  
+  <!-- Package information. -->
+  <PropertyGroup>
+    <PackageId>$(Product)</PackageId>
+    <PackageLicenseUrl>http://opensource.org/licenses/mit-license.php</PackageLicenseUrl>
+    <PackageProjectUrl>http://github.com/jbevain/cecil/</PackageProjectUrl>
+    <PackageTags>assembly assemblies module modules il cil msil bytecode reflection injection cecil mono aop</PackageTags>
+    <Title>$(Product)</Title>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil\Mono.Cecil.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Mono.Cecil.Mdb\Mono.Cecil.Mdb.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Mono.Cecil.Pdb\Mono.Cecil.Pdb.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Mono.Cecil.Rocks\Mono.Cecil.Rocks.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Include assemblies in the package. -->
+  <Target Name="IncludePackageAssemblies" AfterTargets="Build">
+    <ItemGroup>
+      <Content Include="$(OutputPath)\**\*.dll" Exclude="$(OutputPath)\**\*NuGet.dll">
+        <PackagePath>lib\</PackagePath>
+      </Content>
+    </ItemGroup>
+  </Target>
+
+</Project>

@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFrameworks>$(ProjectTargetFrameworks)</TargetFrameworks>
+    <ProjectGuid>{63E6915C-7EA4-4D76-AB28-0D7191EEA626}</ProjectGuid>
+    <RootNamespace>Mono</RootNamespace>
+    <NoWarn>$(NoWarn);0649</NoWarn>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Mono.Cecil\Mono.Cecil.csproj" />
+  </ItemGroup>
+  
+</Project>
