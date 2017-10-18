@@ -22,13 +22,13 @@
     </None>
   </ItemGroup>
   
-  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " >
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' ">
     <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="2.4.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.4.0" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' " />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" Condition=" '$(TargetFramework)' == '$(TestProjectTargetFrameworkForNetStandard)' " />
     <PackageReference Include="NUnit" Version="3.8.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
   </ItemGroup>
