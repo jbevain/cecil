@@ -35,15 +35,12 @@
     <Product>Mono.Cecil</Product>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
     <AssemblyTitle>$(MSBuildProjectName)</AssemblyTitle>
-    <Description>Cecil is a library written by Jb Evain to generate and inspect programs and libraries in the ECMA CIL format. It has full support for generics, and support some debugging symbol format. In simple English, with Cecil, you can load existing managed assemblies, browse all the contained types, modify them on the fly and save back to the disk the modified assembly.</Description>
+    <Description>Cecil is a library written by Jb Evain to generate and inspect programs and libraries in the ECMA CIL format.</Description>
     <Authors>Jb Evain</Authors>
     <Copyright>Copyright © 2008 - 2015 Jb Evain</Copyright>
     <VersionPrefix>0.10.0.0</VersionPrefix>
     <VersionSuffix>beta6</VersionSuffix>
-    <PackageLicenseUrl>http://opensource.org/licenses/mit-license.php</PackageLicenseUrl>
-    <PackageProjectUrl>http://github.com/jbevain/cecil/</PackageProjectUrl>
-    <PackageTags>assembly assemblies module modules il cil msil bytecode reflection injection cecil mono aop</PackageTags>
-    <Title>$(Product)</Title>
+    <PackageId>$(MSBuildProjectName).NotPackage</PackageId>
   </PropertyGroup>
   
   <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
