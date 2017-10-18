@@ -14,5 +14,6 @@ abstract class Bar {
 
 class Baz {
 
-	public string Bingo { get; set; }
+	public string Bingo { get { return this.bingo; } set { this.bingo = value; } }
+    private string bingo;
 }
