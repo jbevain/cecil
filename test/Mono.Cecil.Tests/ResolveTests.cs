@@ -205,7 +205,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ResolveNullVersionAssembly ()
 		{
-			var reference = AssemblyNameReference.Parse ("System.Core");
+			var reference = AssemblyNameReference.Parse ("System");
 			reference.Version = null;
 
 			var resolver = new DefaultAssemblyResolver ();
