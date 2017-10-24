@@ -49,7 +49,10 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MultiModules ()
 		{
-			TestModule ("mma.exe", module => {
+			if (Platform.OnCoreClr)
+				return;
+
+			TestModule("mma.exe", module => {
 				var assembly = module.Assembly;
 
 				Assert.AreEqual (3, assembly.Modules.Count);
@@ -157,6 +160,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ExportedTypeFromNetModule ()
 		{
+			if (Platform.OnCoreClr)
+				return;
+
 			TestModule ("mma.exe", module => {
 				Assert.IsTrue (module.HasExportedTypes);
 				Assert.AreEqual (2, module.ExportedTypes.Count);
@@ -183,14 +189,14 @@ namespace Mono.Cecil.Tests {
 				var exported_type = module.ExportedTypes [0];
 
 				Assert.AreEqual ("System.Diagnostics.DebuggableAttribute", exported_type.FullName);
-				Assert.AreEqual ("mscorlib", exported_type.Scope.Name);
+				Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", exported_type.Scope.Name);
 				Assert.IsTrue (exported_type.IsForwarder);
 
 				var nested_exported_type = module.ExportedTypes [1];
 
 				Assert.AreEqual ("System.Diagnostics.DebuggableAttribute/DebuggingModes", nested_exported_type.FullName);
 				Assert.AreEqual (exported_type, nested_exported_type.DeclaringType);
-				Assert.AreEqual ("mscorlib", nested_exported_type.Scope.Name);
+				Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", nested_exported_type.Scope.Name);
 			});
 		}
 
@@ -199,7 +205,7 @@ namespace Mono.Cecil.Tests {
 		{
 			TestCSharp ("CustomAttributes.cs", module => {
 				Assert.IsTrue (module.HasTypeReference ("System.Attribute"));
-				Assert.IsTrue (module.HasTypeReference ("mscorlib", "System.Attribute"));
+				Assert.IsTrue (module.HasTypeReference (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", "System.Attribute"));
 
 				Assert.IsFalse (module.HasTypeReference ("System.Core", "System.Attribute"));
 				Assert.IsFalse (module.HasTypeReference ("System.Linq.Enumerable"));
@@ -234,10 +240,9 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		[ExpectedException (typeof (BadImageFormatException))]
 		public void OpenIrrelevantFile ()
 		{
-			GetResourceModule ("text_file.txt");
+			Assert.Throws<BadImageFormatException> (() => GetResourceModule ("text_file.txt"));
 		}
 
 		[Test]
@@ -273,7 +278,8 @@ namespace Mono.Cecil.Tests {
 			{
 				using (var module = ModuleDefinition.ReadModule (file))
 				{
-					Assert.IsNotNullOrEmpty (module.FileName);
+					Assert.IsNotNull (module.FileName);
+					Assert.IsNotEmpty (module.FileName);
 					Assert.AreEqual (path, module.FileName);
 				}
 			}

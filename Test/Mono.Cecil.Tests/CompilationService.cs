@@ -4,8 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-
+using System.Reflection;
 using NUnit.Framework;
+
+#if NET_CORE
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
+using CS = Microsoft.CodeAnalysis.CSharp;
+using VB = Microsoft.CodeAnalysis.VisualBasic;
+#endif
 
 namespace Mono.Cecil.Tests {
 
@@ -22,7 +29,23 @@ namespace Mono.Cecil.Tests {
 
 	public static class Platform {
 
-		public static bool OnMono { get { return typeof (object).Assembly.GetType ("Mono.Runtime") != null; } }
+		public static bool OnMono {
+			get { return TryGetType ("Mono.Runtime") != null; }
+		}
+
+		public static bool OnCoreClr {
+			get { return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
+		}
+
+		static Type TryGetType (string assemblyQualifiedName)
+		{
+			try {
+				// Note that throwOnError=false only suppresses some exceptions, not all.
+				return Type.GetType(assemblyQualifiedName, throwOnError: false);
+			} catch {
+				return null;
+			}
+		}
 	}
 
 	abstract class CompilationService {
@@ -68,8 +91,11 @@ namespace Mono.Cecil.Tests {
 				return IlasmCompilationService.Instance.Compile (name);
 
 			if (extension == ".cs" || extension == ".vb")
+#if NET_CORE
+				return RoslynCompilationService.Instance.Compile (name);
+#else
 				return CodeDomCompilationService.Instance.Compile (name);
-
+#endif
 			throw new NotSupportedException (extension);
 		}
 
@@ -84,9 +110,11 @@ namespace Mono.Cecil.Tests {
 
 		public static void Verify (string name)
 		{
+#if !NET_CORE
 			var output = Platform.OnMono ? ShellService.PEDump (name) : ShellService.PEVerify (name);
 			if (output.ExitCode != 0)
 				Assert.Fail (output.ToString ());
+#endif
 		}
 	}
 
@@ -111,6 +139,76 @@ namespace Mono.Cecil.Tests {
 				Assert.Fail (output.ToString ());
 		}
 	}
+
+#if NET_CORE
+
+	class RoslynCompilationService : CompilationService {
+
+		public static readonly RoslynCompilationService Instance = new RoslynCompilationService ();
+
+		protected override string CompileFile (string name)
+		{
+			var compilation = GetCompilation (name);
+			var outputName = GetCompiledFilePath (name);
+
+			var result = compilation.Emit (outputName);
+			Assert.IsTrue (result.Success, GetErrorMessage (result));
+
+			return outputName;
+		}
+
+		static Compilation GetCompilation (string name)
+		{
+			var assemblyName = Path.GetFileNameWithoutExtension (name);
+			var source = File.ReadAllText (name);
+
+			var tpa = BaseAssemblyResolver.TrustedPlatformAssemblies.Value;
+			
+			var references = new [] 
+			{
+				MetadataReference.CreateFromFile (tpa ["netstandard"]),
+				MetadataReference.CreateFromFile (tpa ["mscorlib"]),
+				MetadataReference.CreateFromFile (tpa ["System.Private.CoreLib"]),
+				MetadataReference.CreateFromFile (tpa ["System.Runtime"]),
+				MetadataReference.CreateFromFile (tpa ["System.Console"]),
+				MetadataReference.CreateFromFile (tpa ["System.Security.AccessControl"]),
+			};
+
+			var extension = Path.GetExtension (name);
+			switch (extension) {
+			case ".cs":
+				return CS.CSharpCompilation.Create (
+					assemblyName, 
+					new [] { CS.SyntaxFactory.ParseSyntaxTree (source) },
+					references, 
+					new CS.CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
+
+			case ".vb":
+				return VB.VisualBasicCompilation.Create (
+					assemblyName,
+					new [] { VB.SyntaxFactory.ParseSyntaxTree (source) },
+					references,
+					new VB.VisualBasicCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
+
+			default:
+				throw new NotSupportedException ();
+			}
+		}
+
+		static string GetErrorMessage (EmitResult result)
+		{
+			if (result.Success)
+				return string.Empty;
+
+			var builder = new StringBuilder ();
+			foreach (var diagnostic in result.Diagnostics)
+				builder.AppendLine (diagnostic.ToString ());
+
+			return builder.ToString ();
+		}
+	}
+
+#else
 
 	class CodeDomCompilationService : CompilationService {
 
@@ -165,6 +263,8 @@ namespace Mono.Cecil.Tests {
 				CodeDomProvider.GetLanguageFromExtension (Path.GetExtension (name)));
 		}
 	}
+
+#endif
 
 	class ShellService {
 
@@ -243,9 +343,13 @@ namespace Mono.Cecil.Tests {
 
 		static string NetFrameworkTool (string tool)
 		{
+#if NET_CORE
+			return Path.Combine (Environment.GetFolderPath (Environment.SpecialFolder.Windows), "Microsoft.NET", "Framework", "v4.0.30319", tool + ".exe");
+#else
 			return Path.Combine (
 				Path.GetDirectoryName (typeof (object).Assembly.Location),
 				tool + ".exe");
+#endif
 		}
 
 		static string WinSdkTool (string tool)

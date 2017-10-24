@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿#if !NET_CORE
+
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -141,3 +143,4 @@ namespace Mono.Cecil.Tests {
 		protected override string [] CustomListTypeNames { get { return new [] { "CustomList" }; } }
 	}
 }
+#endif

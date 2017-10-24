@@ -100,7 +100,8 @@ namespace Mono {
 		public static Type [] GetGenericArguments (this Type type)
 		{
 #if NET_CORE
-			return type.GetTypeInfo ().GenericTypeArguments;
+			var info = type.GetTypeInfo ();
+			return info.IsGenericTypeDefinition ? info.GenericTypeParameters : info.GenericTypeArguments;
 #else
 			return type.GetGenericArguments ();
 #endif

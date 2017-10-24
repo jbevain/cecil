@@ -1,7 +1,6 @@
 #if !READ_ONLY
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using SR = System.Reflection;
@@ -255,6 +254,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ContextGenericTest ()
 		{
+			if (Platform.OnCoreClr)
+				return;
+
 			var module = ModuleDefinition.ReadModule (typeof (ContextGeneric1Method2<>).Module.FullyQualifiedName);
 			// by mixing open generics with 2 & 1 parameters, we make sure the right context is used (because otherwise, an exception will be thrown)
 			var type = typeof (ContextGeneric1Method2<>).MakeGenericType (typeof (ContextGeneric2Method1<,>));
@@ -287,11 +289,10 @@ namespace Mono.Cecil.Tests {
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		static TDelegate Compile<TDelegate> (Emitter emitter)
+		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName] string testMethodName = null)
 			where TDelegate : class
 		{
-			var name = GetTestCaseName ();
+			var name = "ImportCecil_" + testMethodName;
 
 			var module = CreateTestModule<TDelegate> (name, emitter);
 			var assembly = LoadTestModule (module);
@@ -361,15 +362,6 @@ namespace Mono.Cecil.Tests {
 		static ModuleDefinition CreateModule (string name)
 		{
 			return ModuleDefinition.CreateModule (name, ModuleKind.Dll);
-		}
-
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		static string GetTestCaseName ()
-		{
-			var stack_trace = new StackTrace ();
-			var stack_frame = stack_trace.GetFrame (2);
-
-			return "ImportCecil_" + stack_frame.GetMethod ().Name;
 		}
 	}
 }
