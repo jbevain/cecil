@@ -45,7 +45,7 @@ namespace Mono.Cecil.Cil {
 			return position;
 		}
 
-		void MoveBackTo (int position)
+		public void MoveBackTo (int position)
 		{
 			this.reader.context = null;
 			this.Position = position;
