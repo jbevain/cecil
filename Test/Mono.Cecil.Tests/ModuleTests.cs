@@ -49,7 +49,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MultiModules ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			TestModule("mma.exe", module => {
 				var assembly = module.Assembly;
@@ -159,7 +160,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ExportedTypeFromNetModule ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			TestModule ("mma.exe", module => {
 				Assert.IsTrue (module.HasExportedTypes);

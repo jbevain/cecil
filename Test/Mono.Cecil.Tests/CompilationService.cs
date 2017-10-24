@@ -27,21 +27,22 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 
-	public static class Platform
-	{
+	public static class Platform {
 
-		public static bool OnMono { get { return TryGetType("Mono.Runtime") != null; } }
-		public static bool OnCoreClr { get { return TryGetType("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; } }
+		public static bool OnMono {
+			get { return TryGetType ("Mono.Runtime") != null; }
+		}
 
-		private static Type TryGetType(string assemblyQualifiedName)
+		public static bool OnCoreClr {
+			get { return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
+		}
+
+		static Type TryGetType (string assemblyQualifiedName)
 		{
-			try
-			{
+			try {
 				// Note that throwOnError=false only suppresses some exceptions, not all.
 				return Type.GetType(assemblyQualifiedName, throwOnError: false);
-			}
-			catch
-			{
+			} catch {
 				return null;
 			}
 		}
@@ -138,15 +139,17 @@ namespace Mono.Cecil.Tests {
 				Assert.Fail (output.ToString ());
 		}
 	}
+
 #if NET_CORE
+
 	class RoslynCompilationService : CompilationService {
 
 		public static readonly RoslynCompilationService Instance = new RoslynCompilationService ();
 
 		protected override string CompileFile (string name)
 		{
-			Compilation compilation = GetCompilation (name);
-			string outputName = GetCompiledFilePath (name);
+			var compilation = GetCompilation (name);
+			var outputName = GetCompiledFilePath (name);
 
 			var result = compilation.Emit (outputName);
 			Assert.IsTrue (result.Success, GetErrorMessage (result));
@@ -154,10 +157,10 @@ namespace Mono.Cecil.Tests {
 			return outputName;
 		}
 
-		private static Compilation GetCompilation (string name)
+		static Compilation GetCompilation (string name)
 		{
-			string assemblyName = Path.GetFileNameWithoutExtension (name);
-			string source = File.ReadAllText (name);
+			var assemblyName = Path.GetFileNameWithoutExtension (name);
+			var source = File.ReadAllText (name);
 
 			var tpa = BaseAssemblyResolver.TrustedPlatformAssemblies.Value;
 			
@@ -176,14 +179,14 @@ namespace Mono.Cecil.Tests {
 			case ".cs":
 				return CS.CSharpCompilation.Create (
 					assemblyName, 
-					new [] { CS.SyntaxFactory.ParseSyntaxTree(source) },
+					new [] { CS.SyntaxFactory.ParseSyntaxTree (source) },
 					references, 
-					new CS.CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
+					new CS.CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
 
 			case ".vb":
 				return VB.VisualBasicCompilation.Create (
 					assemblyName,
-					new [] { VB.SyntaxFactory.ParseSyntaxTree(source) },
+					new [] { VB.SyntaxFactory.ParseSyntaxTree (source) },
 					references,
 					new VB.VisualBasicCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
 
@@ -198,12 +201,15 @@ namespace Mono.Cecil.Tests {
 				return string.Empty;
 
 			var builder = new StringBuilder ();
-			foreach (Diagnostic diagnostic in result.Diagnostics)
+			foreach (var diagnostic in result.Diagnostics)
 				builder.AppendLine (diagnostic.ToString ());
+
 			return builder.ToString ();
 		}
 	}
+
 #else
+
 	class CodeDomCompilationService : CompilationService {
 
 		public static readonly CodeDomCompilationService Instance = new CodeDomCompilationService ();
@@ -257,7 +263,9 @@ namespace Mono.Cecil.Tests {
 				CodeDomProvider.GetLanguageFromExtension (Path.GetExtension (name)));
 		}
 	}
+
 #endif
+
 	class ShellService {
 
 		public class ProcessOutput {

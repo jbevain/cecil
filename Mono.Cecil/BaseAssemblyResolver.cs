@@ -79,6 +79,7 @@ namespace Mono.Cecil {
 #else
 		Collection<string> gac_paths;
 #endif
+
 		public void AddSearchDirectory (string directory)
 		{
 			directories.Add (directory);
@@ -134,9 +135,8 @@ namespace Mono.Cecil {
 
 #if NET_CORE
 			assembly = SearchTrustedPlatformAssemblies (name, parameters);
-			if (assembly != null) {
+			if (assembly != null)
 				return assembly;
-			}
 #else
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
 			var framework_dirs = on_mono
@@ -148,7 +148,7 @@ namespace Mono.Cecil {
 				if (assembly != null)
 					return assembly;
 			}
-			
+
 			if (name.Name == "mscorlib") {
 				assembly = GetCorlib (name, parameters);
 				if (assembly != null)
@@ -175,20 +175,18 @@ namespace Mono.Cecil {
 #if NET_CORE
 		AssemblyDefinition SearchTrustedPlatformAssemblies (AssemblyNameReference name, ReaderParameters parameters)
 		{
-			if (name.IsWindowsRuntime) {
+			if (name.IsWindowsRuntime)
 				return null;
-			}
 
-			if (TrustedPlatformAssemblies.Value.TryGetValue(name.Name, out string path)) {
+			if (TrustedPlatformAssemblies.Value.TryGetValue (name.Name, out string path))
 				return GetAssembly (path, parameters);
-			}
 
 			return null;
 		}
 
-		private static Dictionary<string, string> CreateTrustedPlatformAssemblyMap ()
+		static Dictionary<string, string> CreateTrustedPlatformAssemblyMap ()
 		{
-			var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+			var result = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase);
 
 			string paths;
 
@@ -196,21 +194,17 @@ namespace Mono.Cecil {
 				// AppContext is only available on platforms that implement .NET Standard 1.6
 				var appContextType = Type.GetType ("System.AppContext, System.AppContext, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
 				var getData = appContextType?.GetTypeInfo ().GetDeclaredMethod ("GetData");
-				paths = (string)getData?.Invoke (null, new [] { "TRUSTED_PLATFORM_ASSEMBLIES" });
-			}
-			catch {
+				paths = (string) getData?.Invoke (null, new [] { "TRUSTED_PLATFORM_ASSEMBLIES" });
+			} catch {
 				paths = null;
 			}
 
-			if (paths == null) {
+			if (paths == null)
 				return result;
-			}
 
-			foreach (var path in paths.Split (Path.PathSeparator)) {
-				if (string.Equals(Path.GetExtension (path), ".dll", StringComparison.OrdinalIgnoreCase)) {
+			foreach (var path in paths.Split (Path.PathSeparator))
+				if (string.Equals (Path.GetExtension (path), ".dll", StringComparison.OrdinalIgnoreCase))
 					result [Path.GetFileNameWithoutExtension (path)] = path;
-				}
-			}
 
 			return result;
 		}
@@ -287,7 +281,7 @@ namespace Mono.Cecil {
 			var file = Path.Combine (path, "mscorlib.dll");
 			if (File.Exists (file))
 				return GetAssembly (file, parameters);
-		
+
 			return null;
 		}
 

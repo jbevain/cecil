@@ -233,7 +233,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void GenericInstanceExternArguments ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var module = GetCurrentModule ();
 

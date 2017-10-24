@@ -1,7 +1,6 @@
 #if !READ_ONLY
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using SR = System.Reflection;
@@ -255,7 +254,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ContextGenericTest ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var module = ModuleDefinition.ReadModule (typeof (ContextGeneric1Method2<>).Module.FullyQualifiedName);
 			// by mixing open generics with 2 & 1 parameters, we make sure the right context is used (because otherwise, an exception will be thrown)
@@ -289,7 +289,7 @@ namespace Mono.Cecil.Tests {
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
-		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName]string testMethodName = null)
+		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName] string testMethodName = null)
 			where TDelegate : class
 		{
 			var name = "ImportCecil_" + testMethodName;

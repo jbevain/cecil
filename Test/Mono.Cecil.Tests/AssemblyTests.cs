@@ -59,7 +59,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void Retargetable ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			TestModule ("RetargetableExample.dll", module => {
 				var type = module.Types [1];
@@ -78,7 +79,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void SystemRuntime ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			TestModule("System.Runtime.dll", module => {
 				Assert.AreEqual ("System.Runtime", module.Assembly.Name.Name);

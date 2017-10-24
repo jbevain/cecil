@@ -1,7 +1,6 @@
 #if !READ_ONLY
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using SR = System.Reflection;
 using System.Runtime.CompilerServices;
@@ -156,7 +155,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericField ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var get_field = Compile<Func<Generic<string>, string>> ((module, body) => {
 				var il = body.GetILProcessor ();
@@ -175,7 +175,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericMethod ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var generic_identity = Compile<Func<Generic<int>, int, int>> ((module, body) => {
 				var il = body.GetILProcessor ();
@@ -191,7 +192,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericMethodSpec ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var gen_spec_id = Compile<Func<Generic<string>, int, int>> ((module, body) => {
 				var il = body.GetILProcessor ();
@@ -208,7 +210,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportComplexGenericMethodSpec ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var gen_spec_id = Compile<Func<Generic<string>, int, int>> ((module, body) => {
 				var il = body.GetILProcessor ();
@@ -287,7 +290,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericFieldFromContext ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
 			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
@@ -305,7 +309,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericMethodFromContext ()
 		{
-			if (Platform.OnCoreClr) return;
+			if (Platform.OnCoreClr)
+				return;
 
 			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
 			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
