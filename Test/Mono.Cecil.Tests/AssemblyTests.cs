@@ -82,7 +82,7 @@ namespace Mono.Cecil.Tests {
 			if (Platform.OnCoreClr)
 				return;
 
-			TestModule("System.Runtime.dll", module => {
+			TestModule ("System.Runtime.dll", module => {
 				Assert.AreEqual ("System.Runtime", module.Assembly.Name.Name);
 				Assert.AreEqual (1, module.AssemblyReferences.Count);
 				Assert.AreNotEqual (module, module.TypeSystem.CoreLibrary);

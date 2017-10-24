@@ -79,16 +79,6 @@ namespace Mono {
 #endif
 		}
 
-		public static Type [] GetGenericArguments (this Type type)
-		{
-#if NET_CORE
-			var info = type.GetTypeInfo ();
-			return info.IsGenericTypeDefinition ? info.GenericTypeParameters : info.GenericTypeArguments;
-#else
-			return type.GetGenericArguments ();
-#endif
-		}
-
 		public static Assembly Assembly (this Type type)
 		{
 #if NET_CORE
@@ -104,6 +94,16 @@ namespace Mono {
 			return type.GetTypeInfo ().DeclaringMethod;
 #else
 			return type.DeclaringMethod;
+#endif
+		}
+
+		public static Type [] GetGenericArguments (this Type type)
+		{
+#if NET_CORE
+			var info = type.GetTypeInfo ();
+			return info.IsGenericTypeDefinition ? info.GenericTypeParameters : info.GenericTypeArguments;
+#else
+			return type.GetGenericArguments ();
 #endif
 		}
 
@@ -132,6 +132,6 @@ namespace Mono {
 #else
 			return type.IsValueType;
 #endif
-}
+		}
 	}
 }
