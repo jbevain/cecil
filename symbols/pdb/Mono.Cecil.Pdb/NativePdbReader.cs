@@ -280,7 +280,11 @@ namespace Mono.Cecil.Pdb {
 					break;
 				}
 				case 'A':
-					var index = used_namespace.IndexOf(' ');
+					var index = used_namespace.IndexOf (' ');
+					if (index < 0) {
+						target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = used_namespace };
+						break;
+					}
 					var alias_value = used_namespace.Substring (1, index - 1);
 					var alias_target_value = used_namespace.Substring (index + 2);
 					switch (used_namespace [index + 1]) {
@@ -293,6 +297,15 @@ namespace Mono.Cecil.Pdb {
 							target = new ImportTarget (ImportTargetKind.DefineTypeAlias) { alias = alias_value, type = type };
 						break;
 					}
+					break;
+				case '*':
+					target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = value };
+					break;
+				case '@':
+					if (!value.StartsWith ("P:"))
+						continue;
+
+					target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = value.Substring (2) };
 					break;
 				}
 

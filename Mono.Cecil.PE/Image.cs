@@ -39,6 +39,7 @@ namespace Mono.Cecil.PE {
 		public uint Timestamp;
 		public ModuleAttributes Attributes;
 
+		public DataDirectory Win32Resources;
 		public DataDirectory Debug;
 		public DataDirectory Resources;
 		public DataDirectory StrongName;
