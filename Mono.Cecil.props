@@ -13,7 +13,7 @@
     <OutputPath>$(BuildDirectory)\bin\$(Configuration)\</OutputPath>
     <MSBuildCSharpTargets>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildCSharpTargets>
     <NetStandard Condition=" $(Configuration.StartsWith('netstandard')) Or '$(NuGetRestoreTargets)' != '' ">true</NetStandard>
-    <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>
+    <NetStandard Condition=" '$(NetStandard)' == '' ">false</NetStandard>    
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.Contains('Debug')) ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,18 +36,25 @@
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_3_5')) ">
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <DefineConstants>$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_3_5;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.StartsWith('net_4_0')) ">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);NET_4_0;</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(NetStandard) ">
-    <TargetFramework>netstandard1.3</TargetFramework>
+  <PropertyGroup Condition="'$(NetStandard)' == 'true'">
+    <TargetFrameworks Condition="'$(IsTestProject)' == 'true'">net462;netcoreapp1.1</TargetFrameworks>
+    <TargetFramework Condition="'$(IsTestProject)' != 'true'">netstandard1.3</TargetFramework>
+    <!-- Common NuGet package settings -->
+    <PackageVersion>0.10.0.0-beta6</PackageVersion>
+    <Language>en-US</Language>
+    <LicenseUrl>http://opensource.org/licenses/mit-license.php</LicenseUrl>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <ProjectUrl>http://github.com/jbevain/cecil/</ProjectUrl>
   </PropertyGroup>
-  <Import Project="NetStandard.props"  Condition=" $(NetStandard) " />
+  <Import Project="NetStandard.props"  Condition="'$(NetStandard)' == 'true'" />
   <!-- Shared References -->
-  <ItemGroup Condition=" ! $(NetStandard) ">
+  <ItemGroup Condition="'$(NetStandard)' != 'true'">
     <Reference Include="System.Core" />
     <Reference Include="System" />
   </ItemGroup>

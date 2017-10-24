@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\..\Mono.Cecil.Tests.props" />
+  <PropertyGroup>
+    <ProjectGuid>{77E8A7D2-4DC4-43E1-94FF-002B33FF2397}</ProjectGuid>
+    <RootNamespace>Mono.Cecil.WindowsPdb.Tests</RootNamespace>
+    <AssemblyName>Mono.Cecil.WindowsPdb.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Mono.Cecil.csproj">
+      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mono.Cecil.WindowsPdb.csproj">
+      <Project>{1a7f5b01-f15f-4943-8af5-cb736c60b1be}</Project>
+      <Name>Mono.Cecil.WindowsPdb</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="**\*.cs" />
+  </ItemGroup>
+</Project>

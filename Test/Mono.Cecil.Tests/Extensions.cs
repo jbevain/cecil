@@ -3,11 +3,56 @@ using System.IO;
 using System.Linq;
 using SR = System.Reflection;
 
-using Mono.Cecil;
-
 namespace Mono.Cecil.Tests {
 
 	public static class Extensions {
+
+#if NET_CORE
+		public static SR.Assembly LoadAssembly (MemoryStream stream)
+		{
+			return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream (stream);
+		}
+
+		public static SR.TypeInfo GetTypeInfo (this Type self)
+		{
+			return SR.IntrospectionExtensions.GetTypeInfo(self);
+		}
+
+		public static SR.MethodInfo GetMethodInfo (this Delegate self)
+		{
+			return SR.RuntimeReflectionExtensions.GetMethodInfo (self);
+		}
+
+		public static string GetCultureName(this SR.AssemblyName self)
+		{
+			return self.CultureName;
+		}
+#else
+		public static SR.Assembly LoadAssembly (MemoryStream stream)
+		{
+			return SR.Assembly.Load(stream.ToArray ());
+		}
+
+		public static Type GetTypeInfo (this Type self)
+		{
+			return self;
+		}
+
+		public static SR.MethodInfo GetMethodInfo (this Delegate self)
+		{
+			return self.Method;
+		}
+
+		public static Delegate CreateDelegate (this SR.MethodInfo self, Type type)
+		{
+			return Delegate.CreateDelegate (type, self);
+		}
+
+		public static string GetCultureName(this SR.AssemblyName self)
+		{
+			return self.CultureInfo.Name;
+		}
+#endif
 
 		public static MethodDefinition GetMethod (this TypeDefinition self, string name)
 		{
@@ -21,8 +66,8 @@ namespace Mono.Cecil.Tests {
 
 		public static TypeDefinition ToDefinition (this Type self)
 		{
-			var module = ModuleDefinition.ReadModule (new MemoryStream (File.ReadAllBytes (self.Module.FullyQualifiedName)));
-			return (TypeDefinition) module.LookupToken (self.MetadataToken);
+			var module = ModuleDefinition.ReadModule (new MemoryStream (File.ReadAllBytes (self.GetTypeInfo().Module.FullyQualifiedName)));
+			return (TypeDefinition) module.LookupToken (self.GetTypeInfo().MetadataToken);
 		}
 
 		public static MethodDefinition ToDefinition (this SR.MethodBase method)

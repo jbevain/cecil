@@ -236,7 +236,7 @@ namespace Mono.Cecil.Tests {
 			var module = GetCurrentModule ();
 
 			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[[System.Int32, {0}],[System.String, {0}]]",
-				typeof (object).Assembly.FullName);
+				typeof (object).GetTypeInfo ().Assembly.FullName);
 
 			var type = TypeParser.ParseType (module, fullname);
 
@@ -273,7 +273,7 @@ namespace Mono.Cecil.Tests {
 			var module = GetCurrentModule ();
 
 			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[Mono.Cecil.Tests.TypeParserTests,[System.String, {0}]]",
-				typeof (object).Assembly.FullName);
+				typeof (object).GetTypeInfo ().Assembly.FullName);
 
 			var type = TypeParser.ParseType (module, fullname);
 
@@ -312,7 +312,7 @@ namespace Mono.Cecil.Tests {
 		{
 			var module = GetCurrentModule ();
 
-			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[Mono.Cecil.Tests.TypeParserTests+Bar,Mono.Cecil.Tests.TypeParserTests+Bar], {0}", typeof (object).Assembly.FullName);
+			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[Mono.Cecil.Tests.TypeParserTests+Bar,Mono.Cecil.Tests.TypeParserTests+Bar], {0}", typeof (object).GetTypeInfo ().Assembly.FullName);
 
 			var type = TypeParser.ParseType (module, fullname);
 
@@ -347,7 +347,7 @@ namespace Mono.Cecil.Tests {
 			var module = GetCurrentModule ();
 
 			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[[System.String, {0}],Mono.Cecil.Tests.TypeParserTests+Foo`2[Mono.Cecil.Tests.TypeParserTests,[System.Int32, {0}]]]",
-				typeof (object).Assembly.FullName);
+				typeof (object).GetTypeInfo ().Assembly.FullName);
 
 			var type = TypeParser.ParseType (module, fullname);
 

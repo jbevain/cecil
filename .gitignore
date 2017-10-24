@@ -1,5 +1,6 @@
 bin
 obj
+packages
 *.suo
 *.iml
 *.user

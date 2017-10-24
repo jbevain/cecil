@@ -456,7 +456,7 @@ namespace Mono.Cecil.Tests {
 			var file = Path.Combine (Path.GetTempPath (), "CaBlob.dll");
 
 			var module = ModuleDefinition.CreateModule ("CaBlob.dll", new ModuleParameters { Kind = ModuleKind.Dll, Runtime = TargetRuntime.Net_2_0 });
-			var assembly_title_ctor = module.ImportReference (typeof (System.Reflection.AssemblyTitleAttribute).GetConstructor (new [] {typeof (string)}));
+			var assembly_title_ctor = module.ImportReference (typeof (System.Reflection.AssemblyTitleAttribute).GetTypeInfo().GetConstructor (new [] {typeof (string)}));
 
 			Assert.IsNotNull (assembly_title_ctor);
 
@@ -558,14 +558,12 @@ namespace Mono.Cecil.Tests {
 				return;
 			}
 
-			switch (Type.GetTypeCode (value.GetType ())) {
-			case TypeCode.String:
-				signature.AppendFormat ("\"{0}\"", value);
-				break;
-			case TypeCode.Char:
-				signature.AppendFormat ("'{0}'", (char) value);
-				break;
-			default:
+			string str;
+            if ((str = value as string) != null) {
+                signature.AppendFormat("\"{0}\"", str);
+            } else if (value is char) {
+				signature.AppendFormat ("'{0}'", (char)value);
+            } else {
 				var formattable = value as IFormattable;
 				if (formattable != null) {
 					signature.Append (formattable.ToString (null, CultureInfo.InvariantCulture));
@@ -576,7 +574,6 @@ namespace Mono.Cecil.Tests {
 					PrettyPrint ((CustomAttributeArgument) value, signature);
 					return;
 				}
-				break;
 			}
 		}
 

@@ -22,7 +22,7 @@ namespace Mono.Cecil.Tests {
 
 	public static class Platform {
 
-		public static bool OnMono { get { return typeof (object).Assembly.GetType ("Mono.Runtime") != null; } }
+		public static bool OnMono { get { return typeof (object).GetTypeInfo().Assembly.GetType ("Mono.Runtime") != null; } }
 	}
 
 	abstract class CompilationService {
@@ -64,12 +64,13 @@ namespace Mono.Cecil.Tests {
 		public static string CompileResource (string name)
 		{
 			var extension = Path.GetExtension (name);
+#if !NET_CORE
 			if (extension == ".il")
 				return IlasmCompilationService.Instance.Compile (name);
 
 			if (extension == ".cs" || extension == ".vb")
 				return CodeDomCompilationService.Instance.Compile (name);
-
+#endif
 			throw new NotSupportedException (extension);
 		}
 
@@ -84,12 +85,15 @@ namespace Mono.Cecil.Tests {
 
 		public static void Verify (string name)
 		{
+#if !NET_CORE
 			var output = Platform.OnMono ? ShellService.PEDump (name) : ShellService.PEVerify (name);
 			if (output.ExitCode != 0)
 				Assert.Fail (output.ToString ());
+#endif
 		}
 	}
 
+#if !NET_CORE
 	class IlasmCompilationService : CompilationService {
 
 		public static readonly IlasmCompilationService Instance = new IlasmCompilationService ();
@@ -276,4 +280,5 @@ namespace Mono.Cecil.Tests {
 			return tool;
 		}
 	}
+#endif
 }

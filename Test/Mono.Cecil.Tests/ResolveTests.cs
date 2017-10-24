@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -129,7 +128,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { AssemblyResolver = resolver };
 
 			var types = ModuleDefinition.ReadModule (
-				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).GetTypeInfo ().Assembly)),
 				parameters);
 
 			resolver.Register (types.Assembly);
@@ -150,7 +149,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { AssemblyResolver = resolver };
 
 			var types = ModuleDefinition.ReadModule (
-				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).GetTypeInfo ().Assembly)),
 				parameters);
 
 			resolver.Register (types.Assembly);
@@ -223,7 +222,7 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (reference.IsRetargetable);
 				var assembly = resolver.Resolve (reference);
 				Assert.IsNotNull (assembly);
-				Assert.AreEqual (typeof (object).Assembly.GetName ().Version, assembly.Name.Version);
+				Assert.AreEqual (typeof (object).GetTypeInfo ().Assembly.GetName ().Version, assembly.Name.Version);
 			}
 		}
 
@@ -267,7 +266,7 @@ namespace Mono.Cecil.Tests {
 
 		MethodDefinition GetMethodFromDelegate (Delegate @delegate)
 		{
-			var method = @delegate.Method;
+			var method = @delegate.GetMethodInfo();
 			var type = (TypeDefinition) TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);
 
 			Assert.IsNotNull (type);

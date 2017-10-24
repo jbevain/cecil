@@ -101,7 +101,7 @@ namespace Mono.Cecil.Tests {
 		{
 			var get_empty = Compile<Func<string>> ((module, body) => {
 				var il = body.GetILProcessor ();
-				il.Emit (OpCodes.Ldsfld, module.ImportReference (typeof (string).GetField ("Empty")));
+				il.Emit (OpCodes.Ldsfld, module.ImportReference (typeof (string).GetTypeInfo ().GetField ("Empty")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -115,7 +115,7 @@ namespace Mono.Cecil.Tests {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Call, module.ImportReference (typeof (string).GetMethod ("Concat", new [] { typeof (string), typeof (string) })));
+				il.Emit (OpCodes.Call, module.ImportReference (typeof (string).GetTypeInfo ().GetMethod ("Concat", new [] { typeof (string), typeof (string) })));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -131,7 +131,7 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ret);
 			});
 
-			Assert.AreEqual ("", id.Method.DeclaringType.Assembly.GetName ().CultureInfo.Name);
+			Assert.AreEqual ("", id.GetMethodInfo().DeclaringType.GetTypeInfo().Assembly.GetName ().GetCultureName());
 		}
 
 		public class Generic<T> {
@@ -159,7 +159,7 @@ namespace Mono.Cecil.Tests {
 			var get_field = Compile<Func<Generic<string>, string>> ((module, body) => {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
-				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<string>).GetField ("Field")));
+				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<string>).GetTypeInfo ().GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -177,7 +177,7 @@ namespace Mono.Cecil.Tests {
 				var il = body.GetILProcessor ();
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<int>).GetMethod ("Method")));
+				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<int>).GetTypeInfo ().GetMethod ("Method")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -192,7 +192,7 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetMethod ("GenericMethod").MakeGenericMethod (typeof (int))));
+				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetTypeInfo ().GetMethod ("GenericMethod").MakeGenericMethod (typeof (int))));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -207,8 +207,8 @@ namespace Mono.Cecil.Tests {
 				il.Emit (OpCodes.Ldarg_0);
 				il.Emit (OpCodes.Ldnull);
 				il.Emit (OpCodes.Ldarg_1);
-				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
-				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<int>).GetField ("Field")));
+				il.Emit (OpCodes.Callvirt, module.ImportReference (typeof (Generic<string>).GetTypeInfo ().GetMethod ("ComplexGenericMethod").MakeGenericMethod (typeof (int))));
+				il.Emit (OpCodes.Ldfld, module.ImportReference (typeof (Generic<int>).GetTypeInfo ().GetField ("Field")));
 				il.Emit (OpCodes.Ret);
 			});
 
@@ -234,7 +234,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericTypeFromContext ()
 		{
-			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
+			var list_foo = typeof (Foo<>).GetTypeInfo ().GetField ("list").FieldType;
 			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
 
 			var foo_def = typeof (Foo<>).ToDefinition ();
@@ -279,9 +279,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericFieldFromContext ()
 		{
-			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
+			var list_foo = typeof (Foo<>).GetTypeInfo ().GetField ("list").FieldType;
 			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
-			var generic_list_foo_open_field = generic_list_foo_open.GetField ("Field");
+			var generic_list_foo_open_field = generic_list_foo_open.GetTypeInfo ().GetField ("Field");
 
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			using (var module = foo_def.Module) {
@@ -295,9 +295,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ImportGenericMethodFromContext ()
 		{
-			var list_foo = typeof (Foo<>).GetField ("list").FieldType;
+			var list_foo = typeof (Foo<>).GetTypeInfo ().GetField ("list").FieldType;
 			var generic_list_foo_open = typeof (Generic<>).MakeGenericType (list_foo);
-			var generic_list_foo_open_method = generic_list_foo_open.GetMethod ("Method");
+			var generic_list_foo_open_method = generic_list_foo_open.GetTypeInfo ().GetMethod ("Method");
 
 			var foo_def = typeof (Foo<>).ToDefinition ();
 			using (var module = foo_def.Module) {
@@ -312,7 +312,7 @@ namespace Mono.Cecil.Tests {
 		public void ImportMethodOnOpenGenericType ()
 		{
 			using (var module = typeof (Generic<>).ToDefinition ().Module) {
-				var method = module.ImportReference (typeof (Generic<>).GetMethod ("Method"));
+				var method = module.ImportReference (typeof (Generic<>).GetTypeInfo ().GetMethod ("Method"));
 
 				Assert.AreEqual ("T Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::Method(T)", method.FullName);
 			}
@@ -322,11 +322,11 @@ namespace Mono.Cecil.Tests {
 		public void ImportGenericMethodOnOpenGenericType ()
 		{
 			using (var module = typeof (Generic<>).ToDefinition ().Module) {
-				var generic_method = module.ImportReference (typeof (Generic<>).GetMethod ("GenericMethod"));
+				var generic_method = module.ImportReference (typeof (Generic<>).GetTypeInfo ().GetMethod ("GenericMethod"));
 
 				Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod(T,TS)", generic_method.FullName);
 
-				generic_method = module.ImportReference (typeof (Generic<>).GetMethod ("GenericMethod"), generic_method);
+				generic_method = module.ImportReference (typeof (Generic<>).GetTypeInfo ().GetMethod ("GenericMethod"), generic_method);
 
 				Assert.AreEqual ("TS Mono.Cecil.Tests.ImportReflectionTests/Generic`1<T>::GenericMethod<TS>(T,TS)", generic_method.FullName);
 			}
@@ -334,11 +334,10 @@ namespace Mono.Cecil.Tests {
 
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		static TDelegate Compile<TDelegate> (Emitter emitter)
+		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName] string testMethodName = null)
 			where TDelegate : class
 		{
-			var name = GetTestCaseName ();
+			var name = "ImportReflection_" + testMethodName;
 
 			var module = CreateTestModule<TDelegate> (name, emitter);
 			var assembly = LoadTestModule (module);
@@ -349,7 +348,7 @@ namespace Mono.Cecil.Tests {
 		static TDelegate CreateRunDelegate<TDelegate> (Type type)
 			where TDelegate : class
 		{
-			return (TDelegate) (object) Delegate.CreateDelegate (typeof (TDelegate), type.GetMethod ("Run"));
+			return (TDelegate) (object) type.GetTypeInfo().GetMethod ("Run").CreateDelegate(typeof (TDelegate));
 		}
 
 		static Type GetTestCase (string name, SR.Assembly assembly)
@@ -362,7 +361,7 @@ namespace Mono.Cecil.Tests {
 			using (var stream = new MemoryStream ()) {
 				module.Write (stream);
 				File.WriteAllBytes (Path.Combine (Path.Combine (Path.GetTempPath (), "cecil"), module.Name + ".dll"), stream.ToArray ());
-				return SR.Assembly.Load (stream.ToArray ());
+				return Extensions.LoadAssembly (stream);
 			}
 		}
 
@@ -378,7 +377,7 @@ namespace Mono.Cecil.Tests {
 
 			module.Types.Add (type);
 
-			var method = CreateMethod (type, typeof (TDelegate).GetMethod ("Invoke"));
+			var method = CreateMethod (type, typeof (TDelegate).GetTypeInfo ().GetMethod ("Invoke"));
 
 			emitter (module, method.Body);
 
@@ -408,15 +407,6 @@ namespace Mono.Cecil.Tests {
 		static ModuleDefinition CreateModule (string name)
 		{
 			return ModuleDefinition.CreateModule (name, ModuleKind.Dll);
-		}
-
-		[MethodImpl (MethodImplOptions.NoInlining)]
-		static string GetTestCaseName ()
-		{
-			var stack_trace = new StackTrace ();
-			var stack_frame = stack_trace.GetFrame (2);
-
-			return "ImportReflection_" + stack_frame.GetMethod ().Name;
 		}
 	}
 }

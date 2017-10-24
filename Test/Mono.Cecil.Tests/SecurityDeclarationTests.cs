@@ -248,14 +248,12 @@ namespace Mono.Cecil.Tests {
 				return;
 			}
 
-			switch (Type.GetTypeCode (value.GetType ())) {
-			case TypeCode.String:
-				signature.AppendFormat ("\"{0}\"", value);
-				break;
-			case TypeCode.Char:
-				signature.AppendFormat ("'{0}'", (char) value);
-				break;
-			default:
+            string str;
+            if ((str = value as string) != null) {
+                signature.AppendFormat("\"{0}\"", str);
+            } else if (value is char) {
+				signature.AppendFormat ("'{0}'", (char)value);
+            } else {
 				var formattable = value as IFormattable;
 				if (formattable != null) {
 					signature.Append (formattable.ToString (null, CultureInfo.InvariantCulture));
@@ -266,7 +264,6 @@ namespace Mono.Cecil.Tests {
 					PrettyPrint ((CustomAttributeArgument) value, signature);
 					return;
 				}
-				break;
 			}
 		}
 
