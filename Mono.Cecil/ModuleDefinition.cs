@@ -1278,6 +1278,9 @@ namespace Mono.Cecil {
 
 		public static TargetRuntime ParseRuntime (this string self)
 		{
+			if (string.IsNullOrEmpty (self))
+				return TargetRuntime.Net_4_0;
+
 			switch (self [1]) {
 			case '1':
 				return self [3] == '0'
