@@ -416,6 +416,9 @@ namespace Mono.Cecil {
 
 				return base_type.IsTypeOf ("System", "Enum") || (base_type.IsTypeOf ("System", "ValueType") && !this.IsTypeOf ("System", "Enum"));
 			}
+			set {
+				throw new NotSupportedException ();
+			}
 		}
 
 		public override bool IsPrimitive {
