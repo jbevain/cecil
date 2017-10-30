@@ -3348,7 +3348,7 @@ namespace Mono.Cecil {
 			switch (etype) {
 			case ElementType.ValueType: {
 				var value_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
-				value_type.IsValueType = true;
+				value_type.KnownValueType ();
 				return value_type;
 			}
 			case ElementType.Class:
@@ -3388,8 +3388,8 @@ namespace Mono.Cecil {
 				ReadGenericInstanceSignature (element_type, generic_instance);
 
 				if (is_value_type) {
-					generic_instance.IsValueType = true;
-					element_type.GetElementType ().IsValueType = true;
+					generic_instance.KnownValueType ();
+					element_type.GetElementType ().KnownValueType ();
 				}
 
 				return generic_instance;
