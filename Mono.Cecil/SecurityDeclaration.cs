@@ -70,6 +70,14 @@ namespace Mono.Cecil {
 		{
 			this.attribute_type = attributeType;
 		}
+
+		bool ICustomAttribute.HasConstructorArguments {
+			get { return false; }
+		}
+
+		Collection<CustomAttributeArgument> ICustomAttribute.ConstructorArguments {
+			get { return new Collection<CustomAttributeArgument> (); }
+		}
 	}
 
 	public sealed class SecurityDeclaration {

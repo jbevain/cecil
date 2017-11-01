@@ -62,8 +62,10 @@ namespace Mono.Cecil {
 
 		bool HasFields { get; }
 		bool HasProperties { get; }
+		bool HasConstructorArguments { get; }
 		Collection<CustomAttributeNamedArgument> Fields { get; }
 		Collection<CustomAttributeNamedArgument> Properties { get; }
+		Collection<CustomAttributeArgument> ConstructorArguments { get; }
 	}
 
 	public sealed class CustomAttribute : ICustomAttribute {
