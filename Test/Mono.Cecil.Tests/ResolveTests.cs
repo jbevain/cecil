@@ -181,6 +181,19 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void GenericRectangularArrayGetMethodInMemberReferences ()
+		{
+			using (var module = GetResourceModule ("FSharp.Core.dll")) {
+				foreach (var member in module.GetMemberReferences ()) {
+					if (!member.DeclaringType.IsArray)
+						continue;
+
+					Assert.IsNull (member.Resolve ());
+				}
+			}
+		}
+
+		[Test]
 		public void ResolveFunctionPointer ()
 		{
 			var module = GetResourceModule ("cppcli.dll");

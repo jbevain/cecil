@@ -2365,8 +2365,8 @@ namespace Mono.Cecil {
 
 			var type_system = module.TypeSystem;
 
-			var context = new MethodReference (string.Empty, type_system.Void);
-			context.DeclaringType = new TypeReference (string.Empty, string.Empty, module, type_system.CoreLibrary);
+			var context = new MethodDefinition (string.Empty, MethodAttributes.Static, type_system.Void);
+			context.DeclaringType = new TypeDefinition (string.Empty, string.Empty, TypeAttributes.Public);
 
 			var member_references = new MemberReference [length];
 
