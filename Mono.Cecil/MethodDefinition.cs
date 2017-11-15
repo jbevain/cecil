@@ -143,15 +143,17 @@ namespace Mono.Cecil {
 
 		public MethodBody Body {
 			get {
-				MethodBody localBody = this.body;
-				if (localBody != null)
-					return localBody;
+				var local = this.body;
+				if (local != null)
+					return local;
 
 				if (!HasBody)
 					return null;
 
-				if (HasImage && rva != 0)
-					return Module.Read (ref body, this, (method, reader) => reader.ReadMethodBody (method));
+				if (HasImage && rva != 0) {
+					Module.Read (this, (method, reader) => reader.ReadMethodBody (method));
+					return this.body;
+				}
 
 				return body = new MethodBody (this);
 			}

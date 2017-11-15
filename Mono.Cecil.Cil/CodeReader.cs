@@ -51,15 +51,14 @@ namespace Mono.Cecil.Cil {
 			this.Position = position;
 		}
 
-		public MethodBody ReadMethodBody (MethodDefinition method)
+		public void ReadMethodBody (MethodDefinition method)
 		{
 			var position = MoveTo (method);
-			this.body = new MethodBody (method);
+			this.body = method.body = new MethodBody (method);
 
 			ReadMethodBody ();
 
 			MoveBackTo (position);
-			return this.body;
 		}
 
 		void ReadMethodBody ()

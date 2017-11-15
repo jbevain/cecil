@@ -649,6 +649,9 @@ namespace Mono.Cecil.Cil {
 
 			this.method = method;
 			this.token = new MetadataToken (TokenType.MethodDebugInformation, method.MetadataToken.RID);
+
+			if (method.body != null)
+				this.code_size = method.body.code_size;
 		}
 
 		public SequencePoint GetSequencePoint (Instruction instruction)

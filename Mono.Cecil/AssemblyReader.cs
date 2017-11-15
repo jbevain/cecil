@@ -2094,9 +2094,9 @@ namespace Mono.Cecil {
 				AddMapping (metadata.Overrides, method_rid, @override));
 		}
 
-		public MethodBody ReadMethodBody (MethodDefinition method)
+		public void ReadMethodBody (MethodDefinition method)
 		{
-			return code.ReadMethodBody (method);
+			code.ReadMethodBody (method);
 		}
 
 		public CallSite ReadCallSite (MetadataToken token)

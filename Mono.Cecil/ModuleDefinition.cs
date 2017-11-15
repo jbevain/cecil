@@ -927,6 +927,19 @@ namespace Mono.Cecil {
 			get { return module_lock; }
 		}
 
+		internal void Read<TItem> (TItem item, Action<TItem, MetadataReader> read)
+		{
+			lock (module_lock) {
+				var position = reader.position;
+				var context = reader.context;
+
+				read (item, reader);
+
+				reader.position = position;
+				reader.context = context;
+			}
+		}
+
 		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
 		{
 			lock (module_lock) {
