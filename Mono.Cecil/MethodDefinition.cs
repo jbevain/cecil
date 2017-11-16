@@ -150,10 +150,8 @@ namespace Mono.Cecil {
 				if (!HasBody)
 					return null;
 
-				if (HasImage && rva != 0) {
-					Module.Read (this, (method, reader) => reader.ReadMethodBody (method));
-					return this.body;
-				}
+				if (HasImage && rva != 0)
+					return Module.Read (ref body, this, (method, reader) => reader.ReadMethodBody (method));
 
 				return body = new MethodBody (this);
 			}

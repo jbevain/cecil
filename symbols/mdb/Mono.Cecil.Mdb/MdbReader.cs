@@ -78,12 +78,18 @@ namespace Mono.Cecil.Mdb {
 				return null;
 
 			var info = new MethodDebugInformation (method);
+			info.code_size = ReadCodeSize (method);
 
 			var scopes = ReadScopes (entry, info);
 			ReadLineNumbers (entry, info);
 			ReadLocalVariables (entry, scopes);
 
 			return info;
+		}
+
+		static int ReadCodeSize (MethodDefinition method)
+		{
+			return method.Module.Read (method, (m, reader) => reader.ReadCodeSize (m));
 		}
 
 		static void ReadLocalVariables (MethodEntry entry, ScopeDebugInformation [] scopes)
