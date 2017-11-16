@@ -354,8 +354,9 @@ namespace Mono.Cecil.Tests {
 
 				var state_machine_scope = move_next.DebugInformation.CustomDebugInformations [0] as StateMachineScopeDebugInformation;
 				Assert.IsNotNull (state_machine_scope);
-				Assert.AreEqual (142, state_machine_scope.Start.Offset);
-				Assert.AreEqual (319, state_machine_scope.End.Offset);
+				Assert.AreEqual (1, state_machine_scope.Scopes.Count);
+				Assert.AreEqual (142, state_machine_scope.Scopes [0].Start.Offset);
+				Assert.AreEqual (319, state_machine_scope.Scopes [0].End.Offset);
 
 				var async_body = move_next.DebugInformation.CustomDebugInformations [1] as AsyncMethodBodyDebugInformation;
 				Assert.IsNotNull (async_body);

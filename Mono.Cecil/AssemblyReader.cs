@@ -3158,7 +3158,18 @@ namespace Mono.Cecil {
 			for (int i = 0; i < rows.Length; i++) {
 				if (rows [i].Col1 == StateMachineScopeDebugInformation.KindIdentifier) {
 					var signature = ReadSignature (rows [i].Col2);
-					infos.Add (new StateMachineScopeDebugInformation (signature.ReadInt32 (), signature.ReadInt32 ()));
+					var scopes = new Collection<StateMachineScope> ();
+
+					while (signature.CanReadMore ()) {
+						var start = signature.ReadInt32 ();
+						var end = start + signature.ReadInt32 ();
+						scopes.Add (new StateMachineScope (start, end));
+					}
+
+					var state_machine = new StateMachineScopeDebugInformation ();
+					state_machine.scopes = scopes;
+
+					infos.Add (state_machine);
 				} else if (rows [i].Col1 == AsyncMethodBodyDebugInformation.KindIdentifier) {
 					var signature = ReadSignature (rows [i].Col2);
 

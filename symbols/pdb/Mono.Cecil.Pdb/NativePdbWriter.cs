@@ -111,10 +111,10 @@ namespace Mono.Cecil.Pdb {
 			}
 
 			if (info.HasCustomDebugInformations) {
-				var scopes = info.CustomDebugInformations.OfType<StateMachineScopeDebugInformation> ().ToArray ();
+				var state_machine = info.CustomDebugInformations.FirstOrDefault (cdi => cdi.Kind == CustomDebugInformationKind.StateMachineScope) as StateMachineScopeDebugInformation;
 
-				if (scopes.Length > 0)
-					metadata.WriteIteratorScopes (scopes, info);
+				if (state_machine != null)
+					metadata.WriteIteratorScopes (state_machine, info);
 			}
 
 			metadata.WriteCustomMetadata ();
@@ -312,10 +312,11 @@ namespace Mono.Cecil.Pdb {
 			Write (CustomMetadataType.ForwardInfo, () => writer.WriteUInt32 (import_parent.ToUInt32 ()));
 		}
 
-		public void WriteIteratorScopes (StateMachineScopeDebugInformation [] scopes, MethodDebugInformation debug_info)
+		public void WriteIteratorScopes (StateMachineScopeDebugInformation state_machine, MethodDebugInformation debug_info)
 		{
 			Write (CustomMetadataType.IteratorScopes, () => {
-				writer.WriteInt32 (scopes.Length);
+				var scopes = state_machine.Scopes;
+				writer.WriteInt32 (scopes.Count);
 				foreach (var scope in scopes) {
 					var start = scope.Start.Offset;
 					var end = scope.End.IsEndOfMethod ? debug_info.code_size : scope.End.Offset;

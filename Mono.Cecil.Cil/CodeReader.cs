@@ -416,12 +416,17 @@ namespace Mono.Cecil.Cil {
 
 		void ReadStateMachineScope (StateMachineScopeDebugInformation state_machine_scope)
 		{
-			state_machine_scope.start = new InstructionOffset (GetInstruction (state_machine_scope.start.Offset));
+			if (state_machine_scope.scopes.IsNullOrEmpty ())
+				return;
 
-			var end_instruction = GetInstruction (state_machine_scope.end.Offset);
-			state_machine_scope.end = end_instruction == null
-				? new InstructionOffset ()
-				: new InstructionOffset (end_instruction);
+			foreach (var scope in state_machine_scope.scopes) {
+				scope.start = new InstructionOffset (GetInstruction (scope.start.Offset));
+
+				var end_instruction = GetInstruction (scope.end.Offset);
+				scope.end = end_instruction == null
+					? new InstructionOffset ()
+					: new InstructionOffset (end_instruction);
+			}
 		}
 
 		void ReadSequencePoints ()

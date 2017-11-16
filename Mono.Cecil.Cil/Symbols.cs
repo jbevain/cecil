@@ -523,7 +523,7 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	public sealed class StateMachineScopeDebugInformation : CustomDebugInformation {
+	public sealed class StateMachineScope {
 
 		internal InstructionOffset start;
 		internal InstructionOffset end;
@@ -538,24 +538,36 @@ namespace Mono.Cecil.Cil {
 			set { end = value; }
 		}
 
+		internal StateMachineScope (int start, int end)
+		{
+			this.start = new InstructionOffset (start);
+			this.end = new InstructionOffset (end);
+		}
+
+		public StateMachineScope (Instruction start, Instruction end)
+		{
+			this.start = new InstructionOffset (start);
+			this.end = end != null ? new InstructionOffset (end) : new InstructionOffset ();
+		}
+	}
+
+	public sealed class StateMachineScopeDebugInformation : CustomDebugInformation {
+
+		internal Collection<StateMachineScope> scopes;
+
+		public Collection<StateMachineScope> Scopes {
+			get { return scopes ?? (scopes = new Collection<StateMachineScope> ()); }
+		}
+
 		public override CustomDebugInformationKind Kind {
 			get { return CustomDebugInformationKind.StateMachineScope; }
 		}
 
 		public static Guid KindIdentifier = new Guid ("{6DA9A61E-F8C7-4874-BE62-68BC5630DF71}");
 
-		internal StateMachineScopeDebugInformation (int start, int end)
+		public StateMachineScopeDebugInformation ()
 			: base (KindIdentifier)
 		{
-			this.start = new InstructionOffset (start);
-			this.end = new InstructionOffset (end);
-		}
-
-		public StateMachineScopeDebugInformation (Instruction start, Instruction end)
-			: base (KindIdentifier)
-		{
-			this.start = new InstructionOffset (start);
-			this.end = end != null ? new InstructionOffset (end) : new InstructionOffset ();
 		}
 	}
 

@@ -137,9 +137,15 @@ namespace Mono.Cecil.Pdb {
 				}
 			}
 
-			if (function.iteratorScopes != null)
-				foreach (var iterator_scope in function.iteratorScopes)
-					symbol.CustomDebugInformations.Add (new StateMachineScopeDebugInformation ((int) iterator_scope.Offset, (int) (iterator_scope.Offset + iterator_scope.Length + 1)));
+			if (function.iteratorScopes != null) {
+				var state_machine = new StateMachineScopeDebugInformation ();
+
+				foreach (var iterator_scope in function.iteratorScopes) {
+					state_machine.Scopes.Add (new StateMachineScope ((int) iterator_scope.Offset, (int) (iterator_scope.Offset + iterator_scope.Length + 1)));
+				}
+
+				symbol.CustomDebugInformations.Add (state_machine);
+			}
 
 			if (function.synchronizationInformation != null) {
 				var async_debug_info = new AsyncMethodBodyDebugInformation ((int) function.synchronizationInformation.GeneratedCatchHandlerOffset);
