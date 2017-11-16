@@ -143,9 +143,9 @@ namespace Mono.Cecil {
 
 		public MethodBody Body {
 			get {
-				MethodBody localBody = this.body;
-				if (localBody != null)
-					return localBody;
+				var local = this.body;
+				if (local != null)
+					return local;
 
 				if (!HasBody)
 					return null;

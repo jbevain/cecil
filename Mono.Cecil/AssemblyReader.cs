@@ -2099,6 +2099,11 @@ namespace Mono.Cecil {
 			return code.ReadMethodBody (method);
 		}
 
+		public int ReadCodeSize (MethodDefinition method)
+		{
+			return code.ReadCodeSize (method);
+		}
+
 		public CallSite ReadCallSite (MetadataToken token)
 		{
 			if (!MoveTo (Table.StandAloneSig, token.RID))
