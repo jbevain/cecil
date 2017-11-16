@@ -112,99 +112,6 @@ namespace Mono.Cecil.Cil {
 				ReadDebugInfo ();
 		}
 
-		void ReadDebugInfo ()
-		{
-			if (method.debug_info.sequence_points != null)
-				ReadSequencePoints ();
-
-			if (method.debug_info.scope != null)
-				ReadScope (method.debug_info.scope);
-
-			if (method.custom_infos != null)
-				ReadCustomDebugInformations (method);
-		}
-
-		void ReadCustomDebugInformations (MethodDefinition method)
-		{
-			var custom_infos = method.custom_infos;
-
-			for (int i = 0; i < custom_infos.Count; i++) {
-				var state_machine_scope = custom_infos [i] as StateMachineScopeDebugInformation;
-				if (state_machine_scope != null)
-					ReadStateMachineScope (state_machine_scope);
-
-				var async_method = custom_infos [i] as AsyncMethodBodyDebugInformation;
-				if (async_method != null)
-					ReadAsyncMethodBody (async_method);
-			}
-		}
-
-		void ReadAsyncMethodBody (AsyncMethodBodyDebugInformation async_method)
-		{
-			if (async_method.catch_handler.Offset > -1)
-				async_method.catch_handler = new InstructionOffset (GetInstruction (async_method.catch_handler.Offset));
-
-			if (!async_method.yields.IsNullOrEmpty ())
-				for (int i = 0; i < async_method.yields.Count; i++)
-					async_method.yields [i] = new InstructionOffset (GetInstruction (async_method.yields [i].Offset));
-
-			if (!async_method.resumes.IsNullOrEmpty ())
-				for (int i = 0; i < async_method.resumes.Count; i++)
-					async_method.resumes [i] = new InstructionOffset (GetInstruction (async_method.resumes [i].Offset));
-		}
-
-		void ReadStateMachineScope (StateMachineScopeDebugInformation state_machine_scope)
-		{
-			state_machine_scope.start = new InstructionOffset (GetInstruction (state_machine_scope.start.Offset));
-
-			var end_instruction = GetInstruction (state_machine_scope.end.Offset);
-			state_machine_scope.end = end_instruction == null
-				? new InstructionOffset ()
-				: new InstructionOffset (end_instruction);
-		}
-
-		void ReadSequencePoints ()
-		{
-			var symbol = method.debug_info;
-
-			for (int i = 0; i < symbol.sequence_points.Count; i++) {
-				var sequence_point = symbol.sequence_points [i];
-				var instruction = GetInstruction (sequence_point.Offset);
-				if (instruction != null)
-					sequence_point.offset = new InstructionOffset (instruction);
-			}
-		}
-
-		void ReadScopes (Collection<ScopeDebugInformation> scopes)
-		{
-			for (int i = 0; i < scopes.Count; i++)
-				ReadScope (scopes [i]);
-		}
-
-		void ReadScope (ScopeDebugInformation scope)
-		{
-			var start_instruction = GetInstruction (scope.Start.Offset);
-			if (start_instruction != null)
-				scope.Start = new InstructionOffset (start_instruction);
-
-			var end_instruction = GetInstruction (scope.End.Offset);
-			scope.End = end_instruction != null
-				? new InstructionOffset (end_instruction)
-				: new InstructionOffset ();
-
-			if (!scope.variables.IsNullOrEmpty ()) {
-				for (int i = 0; i < scope.variables.Count; i++) {
-					var variable_info = scope.variables [i];
-					var variable = GetVariable (variable_info.Index);
-					if (variable != null)
-						variable_info.index = new VariableIndex (variable);
-				}
-			}
-
-			if (!scope.scopes.IsNullOrEmpty ())
-				ReadScopes (scope.scopes);
-		}
-
 		void ReadFatMethod ()
 		{
 			var flags = ReadUInt16 ();
@@ -464,6 +371,99 @@ namespace Mono.Cecil.Cil {
 		public MetadataToken ReadToken ()
 		{
 			return new MetadataToken (ReadUInt32 ());
+		}
+
+		void ReadDebugInfo ()
+		{
+			if (method.debug_info.sequence_points != null)
+				ReadSequencePoints ();
+
+			if (method.debug_info.scope != null)
+				ReadScope (method.debug_info.scope);
+
+			if (method.custom_infos != null)
+				ReadCustomDebugInformations (method);
+		}
+
+		void ReadCustomDebugInformations (MethodDefinition method)
+		{
+			var custom_infos = method.custom_infos;
+
+			for (int i = 0; i < custom_infos.Count; i++) {
+				var state_machine_scope = custom_infos [i] as StateMachineScopeDebugInformation;
+				if (state_machine_scope != null)
+					ReadStateMachineScope (state_machine_scope);
+
+				var async_method = custom_infos [i] as AsyncMethodBodyDebugInformation;
+				if (async_method != null)
+					ReadAsyncMethodBody (async_method);
+			}
+		}
+
+		void ReadAsyncMethodBody (AsyncMethodBodyDebugInformation async_method)
+		{
+			if (async_method.catch_handler.Offset > -1)
+				async_method.catch_handler = new InstructionOffset (GetInstruction (async_method.catch_handler.Offset));
+
+			if (!async_method.yields.IsNullOrEmpty ())
+				for (int i = 0; i < async_method.yields.Count; i++)
+					async_method.yields [i] = new InstructionOffset (GetInstruction (async_method.yields [i].Offset));
+
+			if (!async_method.resumes.IsNullOrEmpty ())
+				for (int i = 0; i < async_method.resumes.Count; i++)
+					async_method.resumes [i] = new InstructionOffset (GetInstruction (async_method.resumes [i].Offset));
+		}
+
+		void ReadStateMachineScope (StateMachineScopeDebugInformation state_machine_scope)
+		{
+			state_machine_scope.start = new InstructionOffset (GetInstruction (state_machine_scope.start.Offset));
+
+			var end_instruction = GetInstruction (state_machine_scope.end.Offset);
+			state_machine_scope.end = end_instruction == null
+				? new InstructionOffset ()
+				: new InstructionOffset (end_instruction);
+		}
+
+		void ReadSequencePoints ()
+		{
+			var symbol = method.debug_info;
+
+			for (int i = 0; i < symbol.sequence_points.Count; i++) {
+				var sequence_point = symbol.sequence_points [i];
+				var instruction = GetInstruction (sequence_point.Offset);
+				if (instruction != null)
+					sequence_point.offset = new InstructionOffset (instruction);
+			}
+		}
+
+		void ReadScopes (Collection<ScopeDebugInformation> scopes)
+		{
+			for (int i = 0; i < scopes.Count; i++)
+				ReadScope (scopes [i]);
+		}
+
+		void ReadScope (ScopeDebugInformation scope)
+		{
+			var start_instruction = GetInstruction (scope.Start.Offset);
+			if (start_instruction != null)
+				scope.Start = new InstructionOffset (start_instruction);
+
+			var end_instruction = GetInstruction (scope.End.Offset);
+			scope.End = end_instruction != null
+				? new InstructionOffset (end_instruction)
+				: new InstructionOffset ();
+
+			if (!scope.variables.IsNullOrEmpty ()) {
+				for (int i = 0; i < scope.variables.Count; i++) {
+					var variable_info = scope.variables [i];
+					var variable = GetVariable (variable_info.Index);
+					if (variable != null)
+						variable_info.index = new VariableIndex (variable);
+				}
+			}
+
+			if (!scope.scopes.IsNullOrEmpty ())
+				ReadScopes (scope.scopes);
 		}
 
 #if !READ_ONLY
