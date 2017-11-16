@@ -479,7 +479,7 @@ namespace Mono.Cecil.Cil {
 		internal InstructionOffset catch_handler;
 		internal Collection<InstructionOffset> yields;
 		internal Collection<InstructionOffset> resumes;
-		internal MethodDefinition move_next;
+		internal Collection<MethodDefinition> resume_methods;
 
 		public InstructionOffset CatchHandler {
 			get { return catch_handler; }
@@ -494,9 +494,8 @@ namespace Mono.Cecil.Cil {
 			get { return resumes ?? (resumes = new Collection<InstructionOffset> ()); }
 		}
 
-		public MethodDefinition MoveNextMethod {
-			get { return move_next; }
-			set { move_next = value; }
+		public Collection<MethodDefinition> ResumeMethods {
+			get { return resume_methods ?? (resume_methods = new Collection<MethodDefinition> ()); }
 		}
 
 		public override CustomDebugInformationKind Kind {

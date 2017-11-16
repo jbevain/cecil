@@ -369,7 +369,8 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (98, async_body.Resumes [0].Offset);
 				Assert.AreEqual (227, async_body.Resumes [1].Offset);
 
-				Assert.AreEqual (move_next, async_body.MoveNextMethod);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [0]);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [1]);
 			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 

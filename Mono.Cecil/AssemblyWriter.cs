@@ -2405,7 +2405,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < async_method.yields.Count; i++) {
 				signature.WriteUInt32 ((uint) async_method.yields [i].Offset);
 				signature.WriteUInt32 ((uint) async_method.resumes [i].Offset);
-				signature.WriteCompressedUInt32 (async_method.move_next.MetadataToken.RID);
+				signature.WriteCompressedUInt32 (async_method.resume_methods [i].MetadataToken.RID);
 			}
 
 			AddCustomDebugInformation (provider, async_method, signature);

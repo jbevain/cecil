@@ -3165,18 +3165,18 @@ namespace Mono.Cecil {
 					var catch_offset = signature.ReadInt32 () - 1;
 					var yields = new Collection<InstructionOffset> ();
 					var resumes = new Collection<InstructionOffset> ();
-					uint move_next_rid = 0;
+					var resume_methods = new Collection<MethodDefinition> ();
 
 					while (signature.CanReadMore ()) {
 						yields.Add (new InstructionOffset (signature.ReadInt32 ()));
 						resumes.Add (new InstructionOffset (signature.ReadInt32 ()));
-						move_next_rid = signature.ReadCompressedUInt32 ();
+						resume_methods.Add (GetMethodDefinition (signature.ReadCompressedUInt32 ()));
 					}
 
 					var async_body = new AsyncMethodBodyDebugInformation (catch_offset);
 					async_body.yields = yields;
 					async_body.resumes = resumes;
-					async_body.move_next = GetMethodDefinition (move_next_rid);
+					async_body.resume_methods = resume_methods;
 
 					infos.Add (async_body);
 				} else if (rows [i].Col1 == EmbeddedSourceDebugInformation.KindIdentifier) {

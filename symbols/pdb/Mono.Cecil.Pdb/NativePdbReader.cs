@@ -147,11 +147,11 @@ namespace Mono.Cecil.Pdb {
 				foreach (var synchronization_point in function.synchronizationInformation.synchronizationPoints) {
 					async_debug_info.Yields.Add (new InstructionOffset ((int) synchronization_point.SynchronizeOffset));
 					async_debug_info.Resumes.Add (new InstructionOffset ((int) synchronization_point.ContinuationOffset));
+					async_debug_info.ResumeMethods.Add (method);
 				}
 
 				symbol.CustomDebugInformations.Add (async_debug_info);
 
-				async_debug_info.MoveNextMethod = method;
 				symbol.StateMachineKickOffMethod = (MethodDefinition) method.Module.LookupToken ((int) function.synchronizationInformation.kickoffMethodToken);
 			}
 

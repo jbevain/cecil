@@ -139,7 +139,7 @@ namespace Mono.Cecil.Pdb {
 					async_metadata.WriteUInt32 ((uint) async_debug_info.Resumes.Count);
 					for (int i = 0; i < async_debug_info.Resumes.Count; ++i) {
 						async_metadata.WriteUInt32 ((uint) async_debug_info.Yields [i].Offset);
-						async_metadata.WriteUInt32 (async_debug_info.MoveNextMethod != null ? async_debug_info.MoveNextMethod.MetadataToken.ToUInt32 () : 0);
+						async_metadata.WriteUInt32 (async_debug_info.resume_methods [i].MetadataToken.ToUInt32 ());
 						async_metadata.WriteUInt32 ((uint) async_debug_info.Resumes [i].Offset);
 					}
 
