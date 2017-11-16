@@ -784,7 +784,7 @@ namespace Mono.Cecil.Cil {
 
 				try {
 					return SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, fileName);
-				} catch (TypeLoadException) {
+				} catch (Exception) {
 					// We might not include support for native pdbs.
 				}
 			}
@@ -793,7 +793,7 @@ namespace Mono.Cecil.Cil {
 			if (File.Exists (mdb_file_name)) {
 				try {
 					return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, fileName);
-				} catch (TypeLoadException) {
+				} catch (Exception) {
 					// We might not include support for mdbs.
 				}
 			}
