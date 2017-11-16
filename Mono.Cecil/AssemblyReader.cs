@@ -156,7 +156,6 @@ namespace Mono.Cecil {
 			this.module.Read (this.module, (module, reader) => {
 				ReadModuleManifest (reader);
 				ReadModule (module, resolve_attributes: true);
-				return module;
 			});
 		}
 
@@ -422,10 +421,7 @@ namespace Mono.Cecil {
 
 		protected override void ReadModule ()
 		{
-			this.module.Read (this.module, (module, reader) => {
-				ReadModuleManifest (reader);
-				return module;
-			});
+			this.module.Read (this.module, (_, reader) => ReadModuleManifest (reader));
 		}
 
 		public override void ReadSymbols (ModuleDefinition module)
@@ -1680,23 +1676,19 @@ namespace Mono.Cecil {
 			}
 		}
 
-		public PropertyDefinition ReadMethods (PropertyDefinition property)
+		public void ReadMethods (PropertyDefinition property)
 		{
 			ReadAllSemantics (property.DeclaringType);
-			return property;
 		}
 
-		public EventDefinition ReadMethods (EventDefinition @event)
+		public void ReadMethods (EventDefinition @event)
 		{
 			ReadAllSemantics (@event.DeclaringType);
-			return @event;
 		}
 
-		public MethodSemanticsAttributes ReadAllSemantics (MethodDefinition method)
+		public void ReadAllSemantics (MethodDefinition method)
 		{
 			ReadAllSemantics (method.DeclaringType);
-
-			return method.SemanticsAttributes;
 		}
 
 		void ReadAllSemantics (TypeDefinition type)

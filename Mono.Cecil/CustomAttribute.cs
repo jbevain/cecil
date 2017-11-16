@@ -196,7 +196,6 @@ namespace Mono.Cecil {
 
 					resolved = false;
 				}
-				return this;
 			});
 		}
 	}

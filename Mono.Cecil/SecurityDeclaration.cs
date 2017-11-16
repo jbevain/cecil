@@ -143,11 +143,7 @@ namespace Mono.Cecil {
 			if (resolved || !HasImage)
 				return;
 
-			module.Read (this, (declaration, reader) => {
-				reader.ReadSecurityDeclarationSignature (declaration);
-				return this;
-			});
-
+			module.Read (this, (declaration, reader) => reader.ReadSecurityDeclarationSignature (declaration));
 			resolved = true;
 		}
 	}
