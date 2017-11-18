@@ -190,7 +190,7 @@ namespace Mono.Cecil.Mdb {
 			var source = symbol_file.GetSourceFile (line.File);
 			return new SequencePoint (line.Offset, GetDocument (source)) {
 				StartLine = line.Row,
-				EndLine = line.EndRow,
+				EndLine = line.EndRow != -1 ? line.EndRow : line.Row,
 				StartColumn = line.Column,
 				EndColumn = line.EndColumn,
 			};
