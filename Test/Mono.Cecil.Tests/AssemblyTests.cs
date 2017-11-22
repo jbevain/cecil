@@ -89,5 +89,17 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (module.AssemblyReferences [0], module.TypeSystem.CoreLibrary);
 			}, verify: !Platform.OnMono);
 		}
+
+		[Test]
+		public void MismatchedLibraryAndSymbols_DoNotThrow ()
+		{
+			// SQLite-net.dll (from nuget) shiped with mismatched symbol files, but throwIfNoSymbol did not prevent it from throwing
+			string assemblyPath = BaseTestFixture.GetAssemblyResourcePath ("SQLite-net.dll", typeof (AssemblyTests).Assembly ());
+
+			AssemblyDefinition.ReadAssembly (assemblyPath, new ReaderParameters {
+				ReadSymbols = true,
+				SymbolReaderProvider = new Cil.DefaultSymbolReaderProvider (throwIfNoSymbol: false)
+			});
+		}
 	}
 }
