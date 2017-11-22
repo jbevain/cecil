@@ -49,8 +49,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\**\*" />
-    <None Include="Resources\assemblies\SQLite-net.dll.mdb" />
-    <None Include="Resources\assemblies\SQLite-net.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(NetStandard)' != 'true'" />
 </Project>
