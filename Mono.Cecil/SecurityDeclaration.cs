@@ -76,7 +76,7 @@ namespace Mono.Cecil {
 		}
 
 		Collection<CustomAttributeArgument> ICustomAttribute.ConstructorArguments {
-			get { return new Collection<CustomAttributeArgument> (); }
+			get { throw new NotSupportedException (); }
 		}
 	}
 
