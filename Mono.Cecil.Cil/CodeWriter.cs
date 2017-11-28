@@ -243,9 +243,9 @@ namespace Mono.Cecil.Cil {
 				break;
 			case OperandType.ShortInlineI:
 				if (opcode == OpCodes.Ldc_I4_S)
-					WriteSByte (checked ((sbyte) operand));
+					WriteSByte ((sbyte) operand);
 				else
-					WriteByte (checked ((byte) operand));
+					WriteByte ((byte) operand);
 				break;
 			case OperandType.InlineI:
 				WriteInt32 ((int) operand);
