@@ -177,7 +177,7 @@ namespace Mono.Cecil {
 				string.Empty,
 				type.Name,
 				module,
-				ImportScope (type.Assembly ()),
+				ImportReference (GetAssemblyNameForImport (type)),
 				type.IsValueType ());
 
 			reference.etype = ImportElementType (type);
@@ -294,9 +294,9 @@ namespace Mono.Cecil {
 			return etype;
 		}
 
-		AssemblyNameReference ImportScope (SR.Assembly assembly)
+		protected virtual SR.AssemblyName GetAssemblyNameForImport (Type type)
 		{
-			return ImportReference (assembly.GetName ());
+			return type.Assembly ().GetName ();
 		}
 
 		public virtual AssemblyNameReference ImportReference (SR.AssemblyName name)
