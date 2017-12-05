@@ -1,8 +1,4 @@
 version: 0.9.6.{build}
-configuration: net_4_0_Debug
-build:
-  project: Mono.Cecil.sln
-  verbosity: minimal
 test_script:
 - nunit-console.exe Mono.Cecil.nunit
 notifications:
@@ -11,3 +7,41 @@ notifications:
   on_build_success: false
   on_build_failure: false
   on_build_status_changed: true
+image: Visual Studio 2017
+install:
+- cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
+build_script:
+- ps: >-
+    dotnet restore
+
+    dotnet clean Mono.Cecil.sln
+
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release
+
+    dotnet clean Mono.Cecil.sln
+
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release
+
+    dotnet clean Mono.Cecil.sln
+
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=netstandard_Release
+
+
+    dotnet clean Mono.Cecil.sln
+
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release_ReadOnly
+    
+    dotnet clean Mono.Cecil.sln
+
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release_ReadOnly
+
+    dotnet clean Mono.Cecil.sln
+
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=netstandard_Release_ReadOnly
+
+
+    7z a all.zip -r bin\
+artifacts:
+- path: bin/**/*.dll
+- path: bin/**/*.pdb
+- path: all.zip
