@@ -8,6 +8,9 @@
   <PropertyGroup Condition="$(NetStandard)">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
+  <PropertyGroup Condition="!$(NetStandard)">
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+  </PropertyGroup>
   <ItemGroup Condition="$(NetStandard)">
     <PackageReference Include="NUnit">
       <Version>3.7.1</Version>
