@@ -2,8 +2,12 @@
   <Settings activeconfig="Default" domainUsage="Multiple" />
   <Config name="Default" binpathtype="Auto" runtimeFramework="v4.0.21006">
     <assembly path="Test/bin/net_4_0_Release/Mono.Cecil.Tests.dll" />
+    <assembly path="Test/bin/net_4_0_Release_ReadOnly/Mono.Cecil.Tests.dll" />
     <assembly path="rocks/Test/bin/net_4_0_Release/Mono.Cecil.Rocks.Tests.dll" />
+    <assembly path="rocks/Test/bin/net_4_0_Release_ReadOnly/Mono.Cecil.Rocks.Tests.dll" />
     <assembly path="symbols/mdb/Test/bin/net_4_0_Release/Mono.Cecil.Mdb.Tests.dll" />
+    <assembly path="symbols/mdb/Test/bin/net_4_0_Release_ReadOnly/Mono.Cecil.Mdb.Tests.dll" />
     <assembly path="symbols/pdb/Test/bin/net_4_0_Release/Mono.Cecil.Pdb.Tests.dll" />
+    <assembly path="symbols/pdb/Test/bin/net_4_0_Release_ReadOnly/Mono.Cecil.Pdb.Tests.dll" />
   </Config>
 </NUnitProject>
