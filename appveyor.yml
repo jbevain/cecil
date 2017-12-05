@@ -1,6 +1,9 @@
 version: 0.9.6.{build}
 test_script:
-- nunit-console.exe Mono.Cecil.nunit
+- ps: >-
+    nunit-console.exe Mono.Cecil.nunit
+
+    dotnet test "Test\Mono.Cecil.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/925de8a68a6d8d3ce68e
@@ -30,7 +33,7 @@ build_script:
     dotnet clean Mono.Cecil.sln
 
     dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release_ReadOnly
-    
+
     dotnet clean Mono.Cecil.sln
 
     dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release_ReadOnly
