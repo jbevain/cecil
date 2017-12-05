@@ -6,7 +6,7 @@
     <RootNamespace>Mono.Cecil.Tests</RootNamespace>
     <AssemblyName>Mono.Cecil.Tests</AssemblyName>
   </PropertyGroup>
-  <ItemGroup Condition="'$(NetStandard)' == 'true'">
+  <ItemGroup Condition="$(NetStandard)">
     <PackageReference Include="System.Reflection.TypeExtensions">
       <Version>4.3.0</Version>
     </PackageReference>
@@ -50,5 +50,5 @@
   <ItemGroup>
     <None Include="Resources\**\*" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="'$(NetStandard)' != 'true'" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="!$(NetStandard)" />
 </Project>
