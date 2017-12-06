@@ -22,32 +22,32 @@ install:
 - cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
 build_script:
 - ps: >-
-    dotnet restore
+    dotnet restore | Out-Null
 
-    dotnet clean Mono.Cecil.sln
+    dotnet clean Mono.Cecil.sln | Out-Null
 
-    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release | Out-Null
 
-    dotnet clean Mono.Cecil.sln
+    dotnet clean Mono.Cecil.sln | Out-Null
 
-    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release | Out-Null
 
-    dotnet clean Mono.Cecil.sln
+    dotnet clean Mono.Cecil.sln | Out-Null
 
-    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=netstandard_Release
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=netstandard_Release | Out-Null
 
 
-    dotnet clean Mono.Cecil.sln
+    dotnet clean Mono.Cecil.sln | Out-Null
 
-    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release_ReadOnly
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_3_5_Release_ReadOnly | Out-Null
 
-    dotnet clean Mono.Cecil.sln
+    dotnet clean Mono.Cecil.sln | Out-Null
 
-    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release_ReadOnly
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=net_4_0_Release_ReadOnly | Out-Null
 
-    dotnet clean Mono.Cecil.sln
+    dotnet clean Mono.Cecil.sln | Out-Null
 
-    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=netstandard_Release_ReadOnly
+    dotnet build Mono.Cecil.sln /verbosity:quiet /p:Configuration=netstandard_Release_ReadOnly | Out-Null
 
 
     7z a all.zip -r bin\
