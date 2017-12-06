@@ -3,14 +3,14 @@ test_script:
 - ps: >-
     nunit-console.exe Mono.Cecil.nunit
 
-    dotnet test "Test\Mono.Cecil.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0
-    dotnet test "Test\Mono.Cecil.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0
-    dotnet test "rocks\Test\Mono.Cecil.Rocks.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0
-    dotnet test "rocks\Test\Mono.Cecil.Rocks.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0
-    dotnet test "symbols\mdb\Test\Mono.Cecil.Mdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0
-    dotnet test "symbols\mdb\Test\Mono.Cecil.Mdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0
-    dotnet test "symbols\pdb\Test\Mono.Cecil.Pdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0
-    dotnet test "symbols\pdb\Test\Mono.Cecil.Pdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0
+    dotnet test "Test\Mono.Cecil.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0 | Out-Null
+    dotnet test "Test\Mono.Cecil.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0 | Out-Null
+    dotnet test "rocks\Test\Mono.Cecil.Rocks.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0 | Out-Null
+    dotnet test "rocks\Test\Mono.Cecil.Rocks.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0 | Out-Null
+    dotnet test "symbols\mdb\Test\Mono.Cecil.Mdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0 | Out-Null
+    dotnet test "symbols\mdb\Test\Mono.Cecil.Mdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0 | Out-Null
+    dotnet test "symbols\pdb\Test\Mono.Cecil.Pdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release --no-build --output bin\netstandard_Release\netcoreapp2.0 | Out-Null
+    dotnet test "symbols\pdb\Test\Mono.Cecil.Pdb.Tests.csproj" --framework netcoreapp2.0 --configuration netstandard_Release_ReadOnly --no-build --output bin\netstandard_Release_ReadOnly\netcoreapp2.0 | Out-Null
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/925de8a68a6d8d3ce68e
