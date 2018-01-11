@@ -9,7 +9,7 @@
 //
 
 using System;
-
+using System.Diagnostics;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -38,6 +38,7 @@ namespace Mono.Cecil {
 		Collection<SecurityDeclaration> SecurityDeclarations { get; }
 	}
 
+	[DebuggerDisplay ("{AttributeType}")]
 	public sealed class SecurityAttribute : ICustomAttribute {
 
 		TypeReference attribute_type;
