@@ -1000,7 +1000,7 @@ namespace Mono.Cecil {
 
 		public static bool IsPortablePdb (string fileName)
 		{
-			using (var file = new FileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+			using (var file = new FileStream (fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				return IsPortablePdb (file);
 		}
 
