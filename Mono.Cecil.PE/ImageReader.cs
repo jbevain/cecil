@@ -81,8 +81,8 @@ namespace Mono.Cecil.PE {
 			// Characteristics		2
 			ushort characteristics = ReadUInt16 ();
 
-			ushort subsystem, dll_characteristics, linker;
-			ReadOptionalHeaders (out subsystem, out dll_characteristics, out linker);
+			ushort subsystem, dll_characteristics, linker_version;
+			ReadOptionalHeaders (out subsystem, out dll_characteristics, out linker_version);
 			ReadSections (sections);
 			ReadCLIHeader ();
 			ReadMetadata ();
@@ -90,7 +90,7 @@ namespace Mono.Cecil.PE {
 
 			image.Kind = GetModuleKind (characteristics, subsystem);
 			image.Characteristics = (ModuleCharacteristics) dll_characteristics;
-			image.Linker = linker;
+			image.LinkerVersion = linker_version;
 		}
 
 		TargetArchitecture ReadArchitecture ()

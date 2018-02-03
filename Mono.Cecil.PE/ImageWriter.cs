@@ -219,7 +219,7 @@ namespace Mono.Cecil.PE {
 		void WriteOptionalHeaders ()
 		{
 			WriteUInt16 ((ushort) (!pe64 ? 0x10b : 0x20b)); // Magic
-			WriteUInt16 (module.Linker);
+			WriteUInt16 (module.linker_version);
 			WriteUInt32 (text.SizeOfRawData);	// CodeSize
 			WriteUInt32 ((reloc != null ? reloc.SizeOfRawData : 0)
 				+ (rsrc != null ? rsrc.SizeOfRawData : 0));	// InitializedDataSize

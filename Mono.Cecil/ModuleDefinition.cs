@@ -240,8 +240,6 @@ namespace Mono.Cecil {
 
 	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider, ICustomDebugInformationProvider, IDisposable {
 
-		private static ushort defaultLinkerValue = 0; // or 8 to retain previous default behaviour
-
 		internal Image Image;
 		internal MetadataSystem MetadataSystem;
 		internal ReadingMode ReadingMode;
@@ -262,7 +260,7 @@ namespace Mono.Cecil {
 		TargetArchitecture architecture;
 		ModuleAttributes attributes;
 		ModuleCharacteristics characteristics;
-		ushort linker;
+		internal ushort linker_version = 8;
 		Guid mvid;
 		internal uint timestamp;
 
@@ -334,11 +332,6 @@ namespace Mono.Cecil {
 		public ModuleCharacteristics Characteristics {
 			get { return characteristics; }
 			set { characteristics = value; }
-		}
-
-		public ushort Linker {
-			get { return linker; }
-			set { linker = value; }
 		}
 
 		[Obsolete ("Use FileName")]
@@ -575,7 +568,6 @@ namespace Mono.Cecil {
 		{
 			this.MetadataSystem = new MetadataSystem ();
 			this.token = new MetadataToken (TokenType.Module, 1);
-			this.linker = defaultLinkerValue;
 		}
 
 		internal ModuleDefinition (Image image)
@@ -587,7 +579,7 @@ namespace Mono.Cecil {
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
 			this.characteristics = image.Characteristics;
-			this.linker = image.Linker;
+			this.linker_version = image.LinkerVersion;
 			this.file_name = image.FileName;
 			this.timestamp = image.Timestamp;
 

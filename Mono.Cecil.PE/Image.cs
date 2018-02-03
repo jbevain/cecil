@@ -28,7 +28,7 @@ namespace Mono.Cecil.PE {
 		public string RuntimeVersion;
 		public TargetArchitecture Architecture;
 		public ModuleCharacteristics Characteristics;
-		public ushort Linker;
+		public ushort LinkerVersion;
 
 		public ImageDebugHeader DebugHeader;
 
@@ -59,7 +59,6 @@ namespace Mono.Cecil.PE {
 		public Image ()
 		{
 			counter = GetTableLength;
-			Linker = 0;
 		}
 
 		public bool HasTable (Table table)
