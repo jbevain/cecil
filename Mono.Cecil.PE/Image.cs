@@ -28,6 +28,7 @@ namespace Mono.Cecil.PE {
 		public string RuntimeVersion;
 		public TargetArchitecture Architecture;
 		public ModuleCharacteristics Characteristics;
+		public ushort LinkerVersion;
 
 		public ImageDebugHeader DebugHeader;
 
