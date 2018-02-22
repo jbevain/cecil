@@ -281,6 +281,13 @@ namespace Mono.Cecil {
 			var file = Path.Combine (path, "mscorlib.dll");
 			if (File.Exists (file))
 				return GetAssembly (file, parameters);
+			else if (on_mono && Directory.Exists(path + "-api"))
+			{
+				path = path + "-api";
+				file = Path.Combine (path, "mscorlib.dll");
+				if (File.Exists (file))
+					return GetAssembly (file, parameters);
+			}
 
 			return null;
 		}
