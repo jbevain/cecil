@@ -55,6 +55,7 @@ namespace Mono.Cecil.Cil {
 		Guid language_vendor;
 
 		byte [] hash;
+		byte [] embedded_source;
 
 		public string Url {
 			get { return url; }
@@ -106,10 +107,16 @@ namespace Mono.Cecil.Cil {
 			set { hash = value; }
 		}
 
+		public byte[] EmbeddedSource {
+			get { return embedded_source; }
+			set { embedded_source = value; }
+		}
+
 		public Document (string url)
 		{
 			this.url = url;
 			this.hash = Empty<byte>.Array;
+			this.embedded_source = Empty<byte>.Array;
 			this.token = new MetadataToken (TokenType.Document);
 		}
 	}
