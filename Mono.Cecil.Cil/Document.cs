@@ -49,10 +49,10 @@ namespace Mono.Cecil.Cil {
 
 		string url;
 
-		byte type;
-		byte hash_algorithm;
-		byte language;
-		byte language_vendor;
+		Guid type;
+		Guid hash_algorithm;
+		Guid language;
+		Guid language_vendor;
 
 		byte [] hash;
 
@@ -62,23 +62,43 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public DocumentType Type {
-			get { return (DocumentType) type; }
-			set { type = (byte) value; }
+			get { return type.ToType (); }
+			set { type = value.ToGuid (); }
+		}
+
+		public Guid TypeGuid {
+			get { return type; }
+			set { type = value; }
 		}
 
 		public DocumentHashAlgorithm HashAlgorithm {
-			get { return (DocumentHashAlgorithm) hash_algorithm; }
-			set { hash_algorithm = (byte) value; }
+			get { return hash_algorithm.ToHashAlgorithm (); }
+			set { hash_algorithm = value.ToGuid (); }
+		}
+
+		public Guid HashAlgorithmGuid {
+			get { return hash_algorithm; }
+			set { hash_algorithm = value; }
 		}
 
 		public DocumentLanguage Language {
-			get { return (DocumentLanguage) language; }
-			set { language = (byte) value; }
+			get { return language.ToLanguage (); }
+			set { language = value.ToGuid (); }
+		}
+
+		public Guid LanguageGuid {
+			get { return language; }
+			set { language = value; }
 		}
 
 		public DocumentLanguageVendor LanguageVendor {
-			get { return (DocumentLanguageVendor) language_vendor; }
-			set { language_vendor = (byte) value; }
+			get { return language_vendor.ToVendor (); }
+			set { language_vendor = value.ToGuid (); }
+		}
+
+		public Guid LanguageVendorGuid {
+			get { return language_vendor; }
+			set { language_vendor = value; }
 		}
 
 		public byte [] Hash {
