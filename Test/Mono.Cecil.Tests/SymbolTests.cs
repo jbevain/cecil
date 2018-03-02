@@ -50,6 +50,21 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (typeof (PortablePdbReader), module.SymbolReader.GetType ());
 			}, symbolReaderProvider: typeof (DefaultSymbolReaderProvider), symbolWriterProvider: typeof (DefaultSymbolWriterProvider), verify: !Platform.OnMono);
 		}
+
+		[Test]
+		public void MdbMismatch ()
+		{
+			Assert.Throws<SymbolNotMatchingException> (() => GetResourceModule ("mdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider () }));
+		}
+
+		[Test]
+		public void MdbIgnoreMismatch()
+		{
+			using (var module = GetResourceModule ("mdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider (), ThrowIfSymbolsAreNotMatching = false })) {
+				Assert.IsNull (module.SymbolReader);
+				Assert.IsFalse (module.HasSymbols);
+			}
+		}
 	}
 }
 #endif

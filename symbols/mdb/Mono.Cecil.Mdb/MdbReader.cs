@@ -25,7 +25,7 @@ namespace Mono.Cecil.Mdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (Mixin.GetMdbFileName (fileName), module.Mvid));
+			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (Mixin.GetMdbFileName (fileName)));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
