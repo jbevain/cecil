@@ -834,6 +834,12 @@ namespace Mono.Cecil {
 
 				types [i] = ReadType (i + 1);
 			}
+
+			if (module.IsWindowsMetadata ()) {
+				for (uint i = 0; i < length; i++) {
+					WindowsRuntimeProjections.Project (types [i]);
+				}
+			}
 		}
 
 		static bool IsNested (TypeAttributes attributes)
@@ -945,9 +951,6 @@ namespace Mono.Cecil {
 			if (IsNested (attributes))
 				type.DeclaringType = GetNestedTypeDeclaringType (type);
 
-			if (module.IsWindowsMetadata ())
-				WindowsRuntimeProjections.Project (type);
-
 			return type;
 		}
 
@@ -1035,7 +1038,12 @@ namespace Mono.Cecil {
 			if (type != null)
 				return type;
 
-			return ReadTypeDefinition (rid);
+			type = ReadTypeDefinition (rid);
+
+			if (module.IsWindowsMetadata ())
+				WindowsRuntimeProjections.Project (type);
+
+			return type;
 		}
 
 		TypeDefinition ReadTypeDefinition (uint rid)
