@@ -34,13 +34,13 @@ namespace Mono.Cecil {
 #if !READ_ONLY
 		internal IMetadataImporterProvider metadata_importer_provider;
 		internal IReflectionImporterProvider reflection_importer_provider;
+		bool read_write;
 #endif
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
 		bool projections;
 		bool in_memory;
-		bool read_write;
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
@@ -72,6 +72,11 @@ namespace Mono.Cecil {
 			get { return reflection_importer_provider; }
 			set { reflection_importer_provider = value; }
 		}
+
+		public bool ReadWrite {
+			get { return read_write; }
+			set { read_write = value; }
+		}
 #endif
 
 		public Stream SymbolStream {
@@ -87,11 +92,6 @@ namespace Mono.Cecil {
 		public bool ReadSymbols {
 			get { return read_symbols; }
 			set { read_symbols = value; }
-		}
-
-		public bool ReadWrite {
-			get { return read_write; }
-			set { read_write = value; }
 		}
 
 		public bool ApplyWindowsRuntimeProjections {
@@ -1076,7 +1076,12 @@ namespace Mono.Cecil {
 
 		public static ModuleDefinition ReadModule (string fileName, ReaderParameters parameters)
 		{
-			var stream = GetFileStream (fileName, FileMode.Open, parameters.ReadWrite ? FileAccess.ReadWrite : FileAccess.Read, FileShare.Read);
+#if READ_ONLY
+			var file_access = FileAccess.Read;
+#else
+			var file_access = parameters.ReadWrite ? FileAccess.ReadWrite : FileAccess.Read;
+#endif
+			var stream = GetFileStream (fileName, FileMode.Open, file_access, FileShare.Read);
 
 			if (parameters.InMemory) {
 				var memory = new MemoryStream (stream.CanSeek ? (int) stream.Length : 0);

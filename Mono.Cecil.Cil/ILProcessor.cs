@@ -8,6 +8,7 @@
 // Licensed under the MIT/X11 license.
 //
 
+#if !READ_ONLY
 using System;
 
 using Mono.Collections.Generic;
@@ -258,3 +259,4 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 }
+#endif

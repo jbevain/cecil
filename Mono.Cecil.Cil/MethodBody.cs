@@ -111,10 +111,12 @@ namespace Mono.Cecil.Cil {
 			this.method = method;
 		}
 
+#if !READ_ONLY
 		public ILProcessor GetILProcessor ()
 		{
 			return new ILProcessor (this);
 		}
+#endif
 	}
 
 	sealed class VariableDefinitionCollection : Collection<VariableDefinition> {

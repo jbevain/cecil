@@ -139,6 +139,7 @@ namespace Mono.Cecil.Cil {
 			builder.Append (instruction.offset.ToString ("x4"));
 		}
 
+#if !READ_ONLY
 		public static Instruction Create (OpCode opcode)
 		{
 			if (opcode.OperandType != OperandType.InlineNone)
@@ -292,5 +293,6 @@ namespace Mono.Cecil.Cil {
 
 			return new Instruction (opcode, parameter);
 		}
+#endif
 	}
 }
