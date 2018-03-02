@@ -38,6 +38,7 @@ namespace Mono.Cecil {
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
+		bool throw_symbols_mismatch;
 		bool projections;
 		bool in_memory;
 		bool read_write;
@@ -89,6 +90,11 @@ namespace Mono.Cecil {
 			set { read_symbols = value; }
 		}
 
+		public bool ThrowIfSymbolsAreNotMatching {
+			get { return throw_symbols_mismatch; }
+			set { throw_symbols_mismatch = value; }
+		}
+
 		public bool ReadWrite {
 			get { return read_write; }
 			set { read_write = value; }
@@ -107,6 +113,7 @@ namespace Mono.Cecil {
 		public ReaderParameters (ReadingMode readingMode)
 		{
 			this.reading_mode = readingMode;
+			this.throw_symbols_mismatch = true;
 		}
 	}
 
@@ -1048,10 +1055,15 @@ namespace Mono.Cecil {
 				throw new InvalidOperationException ();
 
 			var provider = new DefaultSymbolReaderProvider (throwIfNoSymbol: true);
-			ReadSymbols (provider.GetSymbolReader (this, file_name));
+			ReadSymbols (provider.GetSymbolReader (this, file_name), throwIfSymbolsAreNotMaching: true);
 		}
 
 		public void ReadSymbols (ISymbolReader reader)
+		{
+			ReadSymbols(reader, throwIfSymbolsAreNotMaching: true);
+		}
+
+		public void ReadSymbols (ISymbolReader reader, bool throwIfSymbolsAreNotMaching)
 		{
 			if (reader == null)
 				throw new ArgumentNullException ("reader");
@@ -1060,7 +1072,11 @@ namespace Mono.Cecil {
 
 			if (!symbol_reader.ProcessDebugHeader (GetDebugHeader ())) {
 				symbol_reader = null;
-				throw new InvalidOperationException ();
+
+				if (throwIfSymbolsAreNotMaching)
+					throw new SymbolNotMatchingException ("Symbols were found but are not matching the assembly");
+
+				return;
 			}
 
 			if (HasImage && ReadingMode == ReadingMode.Immediate) {

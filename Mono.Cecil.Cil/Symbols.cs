@@ -761,6 +761,44 @@ namespace Mono.Cecil.Cil {
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
 	}
 
+#if !NET_CORE
+	[Serializable]
+#endif
+	public sealed class SymbolNotFoundException : FileNotFoundException {
+
+		public SymbolNotFoundException (string message) : base (message)
+		{
+		}
+
+#if !NET_CORE
+		SymbolNotFoundException (
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+			: base (info, context)
+		{
+		}
+#endif
+	}
+
+#if !NET_CORE
+	[Serializable]
+#endif
+	public sealed class SymbolNotMatchingException : InvalidOperationException {
+
+		public SymbolNotMatchingException (string message) : base (message)
+		{
+		}
+
+#if !NET_CORE
+		SymbolNotMatchingException (
+			System.Runtime.Serialization.SerializationInfo info,
+			System.Runtime.Serialization.StreamingContext context)
+			: base (info, context)
+		{
+		}
+#endif
+	}
+
 	public class DefaultSymbolReaderProvider : ISymbolReaderProvider {
 
 		readonly bool throw_if_no_symbol;
@@ -810,7 +848,7 @@ namespace Mono.Cecil.Cil {
 			}
 
 			if (throw_if_no_symbol)
-				throw new FileNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
+				throw new SymbolNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
 
 			return null;
 		}
