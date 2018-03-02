@@ -253,9 +253,9 @@ namespace Mono.Cecil.Pdb {
 
 			doc_writer = writer.DefineDocument (
 				document.Url,
-				document.Language.ToGuid (),
-				document.LanguageVendor.ToGuid (),
-				document.Type.ToGuid ());
+				document.LanguageGuid,
+				document.LanguageVendorGuid,
+				document.TypeGuid);
 
 			documents [document.Url] = doc_writer;
 			return doc_writer;
