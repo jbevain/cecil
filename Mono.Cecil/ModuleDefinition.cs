@@ -280,6 +280,10 @@ namespace Mono.Cecil {
 
 		internal Collection<CustomDebugInformation> custom_infos;
 
+		public uint RelativeSize {
+			get { return Image.MetadataSection.SizeOfRawData; }
+		}
+
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
 		}
