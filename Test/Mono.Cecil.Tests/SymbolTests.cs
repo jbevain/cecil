@@ -65,6 +65,21 @@ namespace Mono.Cecil.Tests {
 				Assert.IsFalse (module.HasSymbols);
 			}
 		}
+
+		[Test]
+		public void PortablePdbMismatch ()
+		{
+			Assert.Throws<SymbolNotMatchingException> (() => GetResourceModule ("pdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () }));
+		}
+
+		[Test]
+		public void PortablePdbIgnoreMismatch()
+		{
+			using (var module = GetResourceModule ("pdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider (), ThrowIfSymbolsAreNotMatching = false })) {
+				Assert.IsNull (module.SymbolReader);
+				Assert.IsFalse (module.HasSymbols);
+			}
+		}
 	}
 }
 #endif
