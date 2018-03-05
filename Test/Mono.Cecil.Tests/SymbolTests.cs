@@ -54,7 +54,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MdbMismatch ()
 		{
-			Assert.Throws<SymbolNotMatchingException> (() => GetResourceModule ("mdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider () }));
+			Assert.Throws<SymbolsNotMatchingException> (() => GetResourceModule ("mdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider () }));
 		}
 
 		[Test]
@@ -69,7 +69,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void PortablePdbMismatch ()
 		{
-			Assert.Throws<SymbolNotMatchingException> (() => GetResourceModule ("pdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () }));
+			Assert.Throws<SymbolsNotMatchingException> (() => GetResourceModule ("pdb-mismatch.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () }));
 		}
 
 		[Test]

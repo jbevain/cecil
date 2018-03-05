@@ -1074,7 +1074,7 @@ namespace Mono.Cecil {
 				symbol_reader = null;
 
 				if (throwIfSymbolsAreNotMaching)
-					throw new SymbolNotMatchingException ("Symbols were found but are not matching the assembly");
+					throw new SymbolsNotMatchingException ("Symbols were found but are not matching the assembly");
 
 				return;
 			}

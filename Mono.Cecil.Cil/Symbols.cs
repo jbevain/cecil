@@ -764,14 +764,14 @@ namespace Mono.Cecil.Cil {
 #if !NET_CORE
 	[Serializable]
 #endif
-	public sealed class SymbolNotFoundException : FileNotFoundException {
+	public sealed class SymbolsNotFoundException : FileNotFoundException {
 
-		public SymbolNotFoundException (string message) : base (message)
+		public SymbolsNotFoundException (string message) : base (message)
 		{
 		}
 
 #if !NET_CORE
-		SymbolNotFoundException (
+		SymbolsNotFoundException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 			: base (info, context)
@@ -783,14 +783,14 @@ namespace Mono.Cecil.Cil {
 #if !NET_CORE
 	[Serializable]
 #endif
-	public sealed class SymbolNotMatchingException : InvalidOperationException {
+	public sealed class SymbolsNotMatchingException : InvalidOperationException {
 
-		public SymbolNotMatchingException (string message) : base (message)
+		public SymbolsNotMatchingException (string message) : base (message)
 		{
 		}
 
 #if !NET_CORE
-		SymbolNotMatchingException (
+		SymbolsNotMatchingException (
 			System.Runtime.Serialization.SerializationInfo info,
 			System.Runtime.Serialization.StreamingContext context)
 			: base (info, context)
@@ -848,7 +848,7 @@ namespace Mono.Cecil.Cil {
 			}
 
 			if (throw_if_no_symbol)
-				throw new SymbolNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
+				throw new SymbolsNotFoundException (string.Format ("No symbol found for file: {0}", fileName));
 
 			return null;
 		}
