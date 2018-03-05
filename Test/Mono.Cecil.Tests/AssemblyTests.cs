@@ -1,6 +1,7 @@
 using System;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 using NUnit.Framework;
 
@@ -91,15 +92,16 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void MismatchedLibraryAndSymbols_DoNotThrow ()
+		public void MismatchedLibraryAndSymbols ()
 		{
 			// SQLite-net.dll (from nuget) shiped with mismatched symbol files, but throwIfNoSymbol did not prevent it from throwing
-			var readerParms = new ReaderParameters {
+			var parameters = new ReaderParameters {
 				ReadSymbols = true,
-				SymbolReaderProvider = new Cil.DefaultSymbolReaderProvider (throwIfNoSymbol: false)
+				SymbolReaderProvider = new DefaultSymbolReaderProvider (throwIfNoSymbol: false),
+				ThrowIfSymbolsAreNotMatching = false,
 			};
 
-			using (var module = GetResourceModule ("SQLite-net.dll", readerParms)) {
+			using (var module = GetResourceModule ("SQLite-net.dll", parameters)) {
 				Assert.Null (module.SymbolReader);
 			}
 		}
