@@ -280,7 +280,7 @@ namespace Mono.Cecil.Pdb {
 					target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = value };
 					break;
 				case 'T': {
-					var type = module.GetType (value, runtimeName: true);
+					var type = TypeParser.ParseType (module, value);
 					if (type != null)
 						target = new ImportTarget (ImportTargetKind.ImportType) { type = type };
 					break;
@@ -298,7 +298,7 @@ namespace Mono.Cecil.Pdb {
 						target = new ImportTarget (ImportTargetKind.DefineNamespaceAlias) { alias = alias_value, @namespace = alias_target_value };
 						break;
 					case 'T':
-						var type = module.GetType (alias_target_value, runtimeName: true);
+						var type = TypeParser.ParseType (module, alias_target_value);
 						if (type != null)
 							target = new ImportTarget (ImportTargetKind.DefineTypeAlias) { alias = alias_value, type = type };
 						break;

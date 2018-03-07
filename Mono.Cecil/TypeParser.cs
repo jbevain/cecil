@@ -246,8 +246,12 @@ namespace Mono.Cecil {
 		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info, bool type_def_only)
 		{
 			TypeReference type;
-			if (!TryGetDefinition (module, type_info, out type) && !type_def_only)
+			if (!TryGetDefinition (module, type_info, out type)) {
+				if (type_def_only)
+					return null;
+
 				type = CreateReference (type_info, module, GetMetadataScope (module, type_info));
+			}
 
 			return CreateSpecs (type, type_info);
 		}
