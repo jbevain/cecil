@@ -255,6 +255,15 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void GetNonExistentTypeRuntimeName ()
+		{
+			using (var module = GetResourceModule ("libhello.dll")) {
+				var type = module.GetType ("DoesNotExist", runtimeName: true);
+				Assert.IsNull (type);
+			}
+		}
+
+		[Test]
 		public void OpenModuleImmediate ()
 		{
 			using (var module = GetResourceModule ("hello.exe", ReadingMode.Immediate)) {

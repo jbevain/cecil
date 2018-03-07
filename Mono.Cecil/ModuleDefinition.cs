@@ -669,7 +669,7 @@ namespace Mono.Cecil {
 		public TypeReference GetType (string fullName, bool runtimeName)
 		{
 			return runtimeName
-				? TypeParser.ParseType (this, fullName)
+				? TypeParser.ParseType (this, fullName, typeDefinitionOnly: true)
 				: GetType (fullName);
 		}
 
