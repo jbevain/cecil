@@ -30,14 +30,17 @@ namespace Mono.Cecil.Tests
 				.SelectMany (m => m.Types)
 				.SelectMany (GetNestedTypes)
 				.Where (t => !t.IsNestedPrivate && !t.IsNestedFamily)
+				.OrderBy(t => t.FullName)
 				.ToList ();
 			var visibleFields = visibleTypes
 				.SelectMany (t => t.Fields)
 				.Where (m => m.IsPublic || m.IsAssembly)
+				.OrderBy (t => t.FullName)
 				.ToList ();
 			var visibleMethods = visibleTypes
 				.SelectMany (t => t.Methods)
 				.Where (m => m.IsPublic || m.IsAssembly)
+				.OrderBy (t => t.FullName)
 				.ToList ();
 
 			byte [] signature = null;
@@ -68,7 +71,7 @@ namespace Mono.Cecil.Tests
 			Array.ForEach (signature,
 				i => str.AppendFormat ("{0:X2}", i));
 			var result = str.ToString ();
-			var expected = "4EDFA26604A9E9FF7536DA6280624B8B35492B17BB2007329C259398E75930B7";
+			var expected = "73749C57E84195F3998A7BE05EB137E74D60A545731479D3FF8D00FDAF35FAE2";
 
 			Assert.That (result, Is.EqualTo (expected),
 				"The interface signature has changed and is now '" +
