@@ -4,20 +4,17 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-using Mono.Cecil;
-
 using NUnit.Framework;
 
-namespace Mono.Cecil.Tests
-{
-	[TestFixture] 
-	public class InterfaceContract
-    {
-		private IEnumerable<TypeDefinition> GetNestedTypes(TypeDefinition main)
-		{
-			return main.NestedTypes.SelectMany (t => GetNestedTypes (t)).Concat(new [] { main });
-		}
+namespace Mono.Cecil.Tests {
 
+	[TestFixture]
+	public class InterfaceContract {
+
+		private IEnumerable<TypeDefinition> GetNestedTypes (TypeDefinition main)
+		{
+			return main.NestedTypes.SelectMany (t => GetNestedTypes (t)).Concat (new [] { main });
+		}
 
 		[Test]
 		public void EnsureConsistentVersioning ()
@@ -30,7 +27,7 @@ namespace Mono.Cecil.Tests
 				.SelectMany (m => m.Types)
 				.SelectMany (GetNestedTypes)
 				.Where (t => !t.IsNestedPrivate && !t.IsNestedFamily)
-				.OrderBy(t => t.FullName)
+				.OrderBy (t => t.FullName)
 				.ToList ();
 			var visibleFields = visibleTypes
 				.SelectMany (t => t.Fields)
