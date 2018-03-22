@@ -69,7 +69,10 @@ namespace Mono.Cecil.Tests {
 			var result = str.ToString ();
 
 			// for version 0.10.0-beta7 'Mono.Cecil, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e'
-			var expected = "73749C57E84195F3998A7BE05EB137E74D60A545731479D3FF8D00FDAF35FAE2";
+			// var expected = "73749C57E84195F3998A7BE05EB137E74D60A545731479D3FF8D00FDAF35FAE2";
+
+			// for version 0.10.0 'Mono.Cecil, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e'
+			var expected = "935E6F60AA5612F4170558B73CE7ADB4F92E4644B2AD175302B2FDEDBF1E4331";
 
 			Assert.That (result, Is.EqualTo (expected),
 				"The interface signature has changed and is now '" +
