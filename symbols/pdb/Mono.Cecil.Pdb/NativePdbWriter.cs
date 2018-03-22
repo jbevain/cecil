@@ -111,10 +111,10 @@ namespace Mono.Cecil.Pdb {
 			}
 
 			if (info.HasCustomDebugInformations) {
-				var scopes = info.CustomDebugInformations.OfType<StateMachineScopeDebugInformation> ().ToArray ();
+				var state_machine = info.CustomDebugInformations.FirstOrDefault (cdi => cdi.Kind == CustomDebugInformationKind.StateMachineScope) as StateMachineScopeDebugInformation;
 
-				if (scopes.Length > 0)
-					metadata.WriteIteratorScopes (scopes, info);
+				if (state_machine != null)
+					metadata.WriteIteratorScopes (state_machine, info);
 			}
 
 			metadata.WriteCustomMetadata ();
@@ -139,7 +139,7 @@ namespace Mono.Cecil.Pdb {
 					async_metadata.WriteUInt32 ((uint) async_debug_info.Resumes.Count);
 					for (int i = 0; i < async_debug_info.Resumes.Count; ++i) {
 						async_metadata.WriteUInt32 ((uint) async_debug_info.Yields [i].Offset);
-						async_metadata.WriteUInt32 (async_debug_info.MoveNextMethod != null ? async_debug_info.MoveNextMethod.MetadataToken.ToUInt32 () : 0);
+						async_metadata.WriteUInt32 (async_debug_info.resume_methods [i].MetadataToken.ToUInt32 ());
 						async_metadata.WriteUInt32 ((uint) async_debug_info.Resumes [i].Offset);
 					}
 
@@ -253,9 +253,9 @@ namespace Mono.Cecil.Pdb {
 
 			doc_writer = writer.DefineDocument (
 				document.Url,
-				document.Language.ToGuid (),
-				document.LanguageVendor.ToGuid (),
-				document.Type.ToGuid ());
+				document.LanguageGuid,
+				document.LanguageVendorGuid,
+				document.TypeGuid);
 
 			documents [document.Url] = doc_writer;
 			return doc_writer;
@@ -312,10 +312,11 @@ namespace Mono.Cecil.Pdb {
 			Write (CustomMetadataType.ForwardInfo, () => writer.WriteUInt32 (import_parent.ToUInt32 ()));
 		}
 
-		public void WriteIteratorScopes (StateMachineScopeDebugInformation [] scopes, MethodDebugInformation debug_info)
+		public void WriteIteratorScopes (StateMachineScopeDebugInformation state_machine, MethodDebugInformation debug_info)
 		{
 			Write (CustomMetadataType.IteratorScopes, () => {
-				writer.WriteInt32 (scopes.Length);
+				var scopes = state_machine.Scopes;
+				writer.WriteInt32 (scopes.Count);
 				foreach (var scope in scopes) {
 					var start = scope.Start.Offset;
 					var end = scope.End.IsEndOfMethod ? debug_info.code_size : scope.End.Offset;

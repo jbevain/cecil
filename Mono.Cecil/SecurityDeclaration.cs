@@ -9,7 +9,7 @@
 //
 
 using System;
-
+using System.Diagnostics;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -38,6 +38,7 @@ namespace Mono.Cecil {
 		Collection<SecurityDeclaration> SecurityDeclarations { get; }
 	}
 
+	[DebuggerDisplay ("{AttributeType}")]
 	public sealed class SecurityAttribute : ICustomAttribute {
 
 		TypeReference attribute_type;
@@ -69,6 +70,14 @@ namespace Mono.Cecil {
 		public SecurityAttribute (TypeReference attributeType)
 		{
 			this.attribute_type = attributeType;
+		}
+
+		bool ICustomAttribute.HasConstructorArguments {
+			get { return false; }
+		}
+
+		Collection<CustomAttributeArgument> ICustomAttribute.ConstructorArguments {
+			get { throw new NotSupportedException (); }
 		}
 	}
 
@@ -143,11 +152,7 @@ namespace Mono.Cecil {
 			if (resolved || !HasImage)
 				return;
 
-			module.Read (this, (declaration, reader) => {
-				reader.ReadSecurityDeclarationSignature (declaration);
-				return this;
-			});
-
+			module.Read (this, (declaration, reader) => reader.ReadSecurityDeclarationSignature (declaration));
 			resolved = true;
 		}
 	}

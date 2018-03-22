@@ -234,20 +234,24 @@ namespace Mono.Cecil {
 			return fullname.Substring (start, position - start);
 		}
 
-		public static TypeReference ParseType (ModuleDefinition module, string fullname)
+		public static TypeReference ParseType (ModuleDefinition module, string fullname, bool typeDefinitionOnly = false)
 		{
 			if (string.IsNullOrEmpty (fullname))
 				return null;
 
 			var parser = new TypeParser (fullname);
-			return GetTypeReference (module, parser.ParseType (true));
+			return GetTypeReference (module, parser.ParseType (true), typeDefinitionOnly);
 		}
 
-		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info)
+		static TypeReference GetTypeReference (ModuleDefinition module, Type type_info, bool type_def_only)
 		{
 			TypeReference type;
-			if (!TryGetDefinition (module, type_info, out type))
+			if (!TryGetDefinition (module, type_info, out type)) {
+				if (type_def_only)
+					return null;
+
 				type = CreateReference (type_info, module, GetMetadataScope (module, type_info));
+			}
 
 			return CreateSpecs (type, type_info);
 		}
@@ -296,7 +300,7 @@ namespace Mono.Cecil {
 			var instance_arguments = instance.GenericArguments;
 
 			for (int i = 0; i < generic_arguments.Length; i++)
-				instance_arguments.Add (GetTypeReference (type.Module, generic_arguments [i]));
+				instance_arguments.Add (GetTypeReference (type.Module, generic_arguments [i], false));
 
 			return instance;
 		}

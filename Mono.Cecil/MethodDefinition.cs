@@ -143,9 +143,9 @@ namespace Mono.Cecil {
 
 		public MethodBody Body {
 			get {
-				MethodBody localBody = this.body;
-				if (localBody != null)
-					return localBody;
+				var local = this.body;
+				if (local != null)
+					return local;
 
 				if (!HasBody)
 					return null;
@@ -165,6 +165,8 @@ namespace Mono.Cecil {
 				// we reset Body to null in ILSpy to save memory; so we need that operation to be thread-safe
 				lock (module.SyncRoot) {
 					body = value;
+					if (value == null)
+						this.debug_info = null;
 				}
 			}
 		}

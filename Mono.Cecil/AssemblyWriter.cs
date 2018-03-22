@@ -2386,13 +2386,19 @@ namespace Mono.Cecil {
 			var method_info = ((MethodDefinition) provider).DebugInformation;
 
 			var signature = CreateSignatureWriter ();
-			signature.WriteUInt32 ((uint) state_machine_scope.Start.Offset);
 
-			var end_offset = state_machine_scope.End.IsEndOfMethod
-				? method_info.code_size
-				: state_machine_scope.End.Offset;
+			var scopes = state_machine_scope.Scopes;
 
-			signature.WriteUInt32 ((uint) (end_offset - state_machine_scope.Start.Offset));
+			for (int i = 0; i < scopes.Count; i++) {
+				var scope = scopes [i];
+				signature.WriteUInt32 ((uint) scope.Start.Offset);
+
+				var end_offset = scope.End.IsEndOfMethod
+					? method_info.code_size
+					: scope.End.Offset;
+
+				signature.WriteUInt32 ((uint) (end_offset - scope.Start.Offset));
+			}
 
 			AddCustomDebugInformation (provider, state_machine_scope, signature);
 		}
@@ -2402,10 +2408,12 @@ namespace Mono.Cecil {
 			var signature = CreateSignatureWriter ();
 			signature.WriteUInt32 ((uint) async_method.catch_handler.Offset + 1);
 
-			for (int i = 0; i < async_method.yields.Count; i++) {
-				signature.WriteUInt32 ((uint) async_method.yields [i].Offset);
-				signature.WriteUInt32 ((uint) async_method.resumes [i].Offset);
-				signature.WriteCompressedUInt32 (async_method.move_next.MetadataToken.RID);
+			if (!async_method.yields.IsNullOrEmpty ()) {
+				for (int i = 0; i < async_method.yields.Count; i++) {
+					signature.WriteUInt32 ((uint) async_method.yields [i].Offset);
+					signature.WriteUInt32 ((uint) async_method.resumes [i].Offset);
+					signature.WriteCompressedUInt32 (async_method.resume_methods [i].MetadataToken.RID);
+				}
 			}
 
 			AddCustomDebugInformation (provider, async_method, signature);

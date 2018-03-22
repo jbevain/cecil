@@ -354,8 +354,9 @@ namespace Mono.Cecil.Tests {
 
 				var state_machine_scope = move_next.DebugInformation.CustomDebugInformations [0] as StateMachineScopeDebugInformation;
 				Assert.IsNotNull (state_machine_scope);
-				Assert.AreEqual (142, state_machine_scope.Start.Offset);
-				Assert.AreEqual (319, state_machine_scope.End.Offset);
+				Assert.AreEqual (1, state_machine_scope.Scopes.Count);
+				Assert.AreEqual (142, state_machine_scope.Scopes [0].Start.Offset);
+				Assert.AreEqual (319, state_machine_scope.Scopes [0].End.Offset);
 
 				var async_body = move_next.DebugInformation.CustomDebugInformations [1] as AsyncMethodBodyDebugInformation;
 				Assert.IsNotNull (async_body);
@@ -369,7 +370,8 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (98, async_body.Resumes [0].Offset);
 				Assert.AreEqual (227, async_body.Resumes [1].Offset);
 
-				Assert.AreEqual (move_next, async_body.MoveNextMethod);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [0]);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [1]);
 			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 

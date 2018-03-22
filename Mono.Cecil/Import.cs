@@ -177,7 +177,7 @@ namespace Mono.Cecil {
 				string.Empty,
 				type.Name,
 				module,
-				ImportScope (type.Assembly ()),
+				ImportScope (type),
 				type.IsValueType ());
 
 			reference.etype = ImportElementType (type);
@@ -191,6 +191,11 @@ namespace Mono.Cecil {
 				ImportGenericParameters (reference, type.GetGenericArguments ());
 
 			return reference;
+		}
+
+		protected virtual IMetadataScope ImportScope (Type type)
+		{
+			return ImportScope (type.Assembly ());
 		}
 
 		static bool ImportOpenGenericType (Type type, ImportGenericKind import_kind)
@@ -294,7 +299,7 @@ namespace Mono.Cecil {
 			return etype;
 		}
 
-		AssemblyNameReference ImportScope (SR.Assembly assembly)
+		protected AssemblyNameReference ImportScope (SR.Assembly assembly)
 		{
 			return ImportReference (assembly.GetName ());
 		}
@@ -504,7 +509,7 @@ namespace Mono.Cecil {
 				type.Namespace,
 				type.Name,
 				module,
-				ImportScope (type.Scope),
+				ImportScope (type),
 				type.IsValueType);
 
 			MetadataSystem.TryProcessPrimitiveTypeReference (reference);
@@ -518,7 +523,12 @@ namespace Mono.Cecil {
 			return reference;
 		}
 
-		IMetadataScope ImportScope (IMetadataScope scope)
+		protected virtual IMetadataScope ImportScope (TypeReference type)
+		{
+			return ImportScope (type.Scope);
+		}
+
+		protected IMetadataScope ImportScope (IMetadataScope scope)
 		{
 			switch (scope.MetadataScopeType) {
 			case MetadataScopeType.AssemblyNameReference:

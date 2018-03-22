@@ -320,8 +320,15 @@ namespace Mono.Cecil.Tests {
 
 				var state_machine_scope = move_next.CustomDebugInformations.OfType<StateMachineScopeDebugInformation> ().FirstOrDefault ();
 				Assert.IsNotNull (state_machine_scope);
-				Assert.AreEqual (0, state_machine_scope.Start.Offset);
-				Assert.IsTrue (state_machine_scope.End.IsEndOfMethod);
+				Assert.AreEqual (3, state_machine_scope.Scopes.Count);
+				Assert.AreEqual (0, state_machine_scope.Scopes [0].Start.Offset);
+				Assert.IsTrue (state_machine_scope.Scopes [0].End.IsEndOfMethod);
+
+				Assert.AreEqual (0, state_machine_scope.Scopes [1].Start.Offset);
+				Assert.AreEqual (0, state_machine_scope.Scopes [1].End.Offset);
+
+				Assert.AreEqual (184, state_machine_scope.Scopes [2].Start.Offset);
+				Assert.AreEqual (343, state_machine_scope.Scopes [2].End.Offset);
 
 				var async_body = move_next.CustomDebugInformations.OfType<AsyncMethodBodyDebugInformation> ().FirstOrDefault ();
 				Assert.IsNotNull (async_body);
@@ -335,7 +342,8 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (91, async_body.Resumes [0].Offset);
 				Assert.AreEqual (252, async_body.Resumes [1].Offset);
 
-				Assert.AreEqual (move_next, async_body.MoveNextMethod);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [0]);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [1]);
 			});
 		}
 

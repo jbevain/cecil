@@ -137,9 +137,15 @@ namespace Mono.Cecil.Pdb {
 				}
 			}
 
-			if (function.iteratorScopes != null)
-				foreach (var iterator_scope in function.iteratorScopes)
-					symbol.CustomDebugInformations.Add (new StateMachineScopeDebugInformation ((int) iterator_scope.Offset, (int) (iterator_scope.Offset + iterator_scope.Length + 1)));
+			if (function.iteratorScopes != null) {
+				var state_machine = new StateMachineScopeDebugInformation ();
+
+				foreach (var iterator_scope in function.iteratorScopes) {
+					state_machine.Scopes.Add (new StateMachineScope ((int) iterator_scope.Offset, (int) (iterator_scope.Offset + iterator_scope.Length + 1)));
+				}
+
+				symbol.CustomDebugInformations.Add (state_machine);
+			}
 
 			if (function.synchronizationInformation != null) {
 				var async_debug_info = new AsyncMethodBodyDebugInformation ((int) function.synchronizationInformation.GeneratedCatchHandlerOffset);
@@ -147,11 +153,11 @@ namespace Mono.Cecil.Pdb {
 				foreach (var synchronization_point in function.synchronizationInformation.synchronizationPoints) {
 					async_debug_info.Yields.Add (new InstructionOffset ((int) synchronization_point.SynchronizeOffset));
 					async_debug_info.Resumes.Add (new InstructionOffset ((int) synchronization_point.ContinuationOffset));
+					async_debug_info.ResumeMethods.Add (method);
 				}
 
 				symbol.CustomDebugInformations.Add (async_debug_info);
 
-				async_debug_info.MoveNextMethod = method;
 				symbol.StateMachineKickOffMethod = (MethodDefinition) method.Module.LookupToken ((int) function.synchronizationInformation.kickoffMethodToken);
 			}
 
@@ -274,7 +280,7 @@ namespace Mono.Cecil.Pdb {
 					target = new ImportTarget (ImportTargetKind.ImportNamespace) { @namespace = value };
 					break;
 				case 'T': {
-					var type = module.GetType (value, runtimeName: true);
+					var type = TypeParser.ParseType (module, value);
 					if (type != null)
 						target = new ImportTarget (ImportTargetKind.ImportType) { type = type };
 					break;
@@ -292,7 +298,7 @@ namespace Mono.Cecil.Pdb {
 						target = new ImportTarget (ImportTargetKind.DefineNamespaceAlias) { alias = alias_value, @namespace = alias_target_value };
 						break;
 					case 'T':
-						var type = module.GetType (alias_target_value, runtimeName: true);
+						var type = TypeParser.ParseType (module, alias_target_value);
 						if (type != null)
 							target = new ImportTarget (ImportTargetKind.DefineTypeAlias) { alias = alias_value, type = type };
 						break;
