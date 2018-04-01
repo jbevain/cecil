@@ -10,6 +10,30 @@ namespace Mono.Cecil.Tests {
 	public class NestedTypesTests : BaseTestFixture {
 
 		[Test]
+		public void NestedTypeRefs ()
+		{
+			TestCSharp ("NestedTypes.cs", module => {
+				var bingo = module.GetType ("Bingo");
+				var fuel = bingo.NestedTypes [0];
+
+				var method = new MethodDefinition ("test",
+					MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.Static,
+					module.ImportReference (typeof (void)));
+
+				bingo.Methods.Add (method);
+
+				var il = method.Body.GetILProcessor ();
+				var tr = new TypeReference (null, fuel.Name, module, null)
+				{
+					DeclaringType = bingo
+				};
+
+				il.Body.Variables.Add (new Cil.VariableDefinition (tr));
+				il.Emit (Cil.OpCodes.Ret);
+			});
+		}
+
+		[Test]
 		public void NestedTypes ()
 		{
 			TestCSharp ("NestedTypes.cs", module => {

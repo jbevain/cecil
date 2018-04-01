@@ -1327,8 +1327,14 @@ namespace Mono.Cecil {
 			if (type == null)
 				return MetadataToken.Zero;
 
-			if (type.IsDefinition)
-				return type.token;
+			for (var temp = type; ; temp = temp.DeclaringType)
+			{
+				if (temp.IsDefinition)
+					return type.CheckedResolve ().token;
+
+				if (temp.IsTypeSpecification () || !temp.IsNested)
+					break;
+			}
 
 			if (type.IsTypeSpecification ())
 				return GetTypeSpecToken (type);
