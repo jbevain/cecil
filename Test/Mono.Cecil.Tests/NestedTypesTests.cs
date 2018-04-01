@@ -21,6 +21,7 @@ namespace Mono.Cecil.Tests {
 					module.ImportReference (typeof (void)));
 
 				bingo.Methods.Add (method);
+				method.Body.InitLocals = true;
 
 				var il = method.Body.GetILProcessor ();
 				var tr = new TypeReference (null, fuel.Name, module, null)
