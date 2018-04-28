@@ -108,6 +108,12 @@ namespace Mono.Cecil {
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 			}
+
+			if( parameters.PublicKeyBytes != null && name != null ) {
+				// Delay signing with a public-only key is possible. We only need to assign the
+				// public key to the assembly name and we should not actually sign the assembly.
+				name.PublicKey = parameters.PublicKeyBytes;
+			}
 #endif
 
 			using (var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters)) {

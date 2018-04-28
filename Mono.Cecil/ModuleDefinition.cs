@@ -213,6 +213,7 @@ namespace Mono.Cecil {
 		bool write_symbols;
 #if !NET_CORE
 		SR.StrongNameKeyPair key_pair;
+		byte [] public_key_bytes;
 #endif
 
 		public uint? Timestamp {
@@ -239,6 +240,11 @@ namespace Mono.Cecil {
 		public SR.StrongNameKeyPair StrongNameKeyPair {
 			get { return key_pair; }
 			set { key_pair = value; }
+		}
+
+		public byte [] PublicKeyBytes {
+			get { return public_key_bytes; }
+			set { public_key_bytes = value; }
 		}
 #endif
 	}
