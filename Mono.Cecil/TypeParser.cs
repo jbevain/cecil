@@ -402,13 +402,13 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		public static string ToParseable (TypeReference type)
+		public static string ToParseable (TypeReference type, bool top_level = true)
 		{
 			if (type == null)
 				return null;
 
 			var name = new StringBuilder ();
-			AppendType (type, name, true, true);
+			AppendType (type, name, true, top_level);
 			return name.ToString ();
 		}
 

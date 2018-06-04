@@ -3156,7 +3156,7 @@ namespace Mono.Cecil {
 
 		void WriteTypeReference (TypeReference type)
 		{
-			WriteUTF8String (TypeParser.ToParseable (type));
+			WriteUTF8String (TypeParser.ToParseable (type, top_level: false));
 		}
 
 		public void WriteMarshalInfo (MarshalInfo marshal_info)
