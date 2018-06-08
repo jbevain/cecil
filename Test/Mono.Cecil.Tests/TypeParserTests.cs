@@ -88,7 +88,7 @@ namespace Mono.Cecil.Tests {
 		public void FullyQualifiedTypeReference ()
 		{
 			var module = GetCurrentModule ();
-			var cecil = module.AssemblyReferences.Where (reference => reference.Name == "Mono.Cecil").First ();
+			var cecil = module.AssemblyReferences.Where (reference => reference.Name != typeof (TypeDefinition).Assembly.GetName ().Name).First ();
 
 			var fullname = "Mono.Cecil.TypeDefinition, " + cecil.FullName;
 

@@ -2988,7 +2988,7 @@ namespace Mono.Cecil {
 				break;
 			case ElementType.None:
 				if (type.IsTypeOf ("System", "Type"))
-					WriteTypeReference ((TypeReference) value);
+					WriteCustomAttributeTypeValue ((TypeReference) value);
 				else
 					WriteCustomAttributeEnumValue (type, value);
 				break;
@@ -2996,6 +2996,27 @@ namespace Mono.Cecil {
 				WritePrimitiveValue (value);
 				break;
 			}
+		}
+
+		private void WriteCustomAttributeTypeValue (TypeReference value)
+		{
+			var typeDefinition = value as TypeDefinition;
+
+			if (typeDefinition != null) {
+				TypeDefinition outermostDeclaringType = typeDefinition;
+				while (outermostDeclaringType.DeclaringType != null)
+					outermostDeclaringType = outermostDeclaringType.DeclaringType;
+
+				// In CLR .winmd files, custom attribute arguments reference unmangled type names (rather than <CLR>Name)
+				if (WindowsRuntimeProjections.IsClrImplementationType (outermostDeclaringType)) {
+					WindowsRuntimeProjections.Project (outermostDeclaringType);
+					WriteTypeReference (value);
+					WindowsRuntimeProjections.RemoveProjection (outermostDeclaringType);
+					return;
+				}
+			}
+
+			WriteTypeReference (value);
 		}
 
 		void WritePrimitiveValue (object value)
