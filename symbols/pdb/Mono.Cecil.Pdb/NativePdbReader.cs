@@ -61,8 +61,6 @@ namespace Mono.Cecil.Pdb {
 
 			if (directory.Type != ImageDebugType.CodeView)
 				return false;
-			if (directory.MajorVersion != 0 || directory.MinorVersion != 0)
-				return false;
 
 			var data = entry.Data;
 
