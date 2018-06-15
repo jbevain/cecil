@@ -2406,6 +2406,9 @@ namespace Mono.Cecil {
 			if (token.TokenType != TokenType.Signature)
 				throw new NotSupportedException ();
 
+			if (token.RID == 0)
+				return null;
+
 			if (!MoveTo (Table.StandAloneSig, token.RID))
 				return null;
 
