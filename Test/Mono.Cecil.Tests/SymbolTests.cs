@@ -80,6 +80,58 @@ namespace Mono.Cecil.Tests {
 				Assert.IsFalse (module.HasSymbols);
 			}
 		}
+
+		[Test]
+		public void DefaultPortablePdbStream ()
+		{
+			using (var symbolStream = GetResourceStream ("PdbTarget.pdb")) {
+				var parameters = new ReaderParameters {
+					SymbolReaderProvider = new PortablePdbReaderProvider (),
+					SymbolStream = symbolStream,
+				};
+
+				using (var module = GetResourceModule ("PdbTarget.exe", parameters)) {
+					Assert.IsNotNull (module.SymbolReader);
+					Assert.IsTrue (module.HasSymbols);
+					Assert.AreEqual (typeof (PortablePdbReader), module.SymbolReader.GetType ());
+				}
+			}
+		}
+
+		[Test]
+		public void DefaultPdbStream ()
+		{
+			using (var symbolStream = GetResourceStream ("libpdb.pdb")) {
+				var parameters = new ReaderParameters {
+					SymbolReaderProvider = new NativePdbReaderProvider (),
+					SymbolStream = symbolStream,
+				};
+
+				using (var module = GetResourceModule ("libpdb.dll", parameters)) {
+					Assert.IsNotNull (module.SymbolReader);
+					Assert.IsTrue (module.HasSymbols);
+					Assert.AreEqual (typeof (NativePdbReader), module.SymbolReader.GetType ());
+				}
+			}
+		}
+
+		[Test]
+		public void DefaultMdbStream ()
+		{
+			using (var symbolStream = GetResourceStream ("libmdb.dll.mdb")) {
+				var parameters = new ReaderParameters {
+					SymbolReaderProvider = new MdbReaderProvider (),
+					SymbolStream = symbolStream,
+				};
+
+				using (var module = GetResourceModule ("libmdb.dll", parameters)) {
+					Assert.IsNotNull (module.SymbolReader);
+					Assert.IsTrue (module.HasSymbols);
+					Assert.AreEqual (typeof (MdbReader), module.SymbolReader.GetType ());
+				}
+			}
+		}
 	}
 }
+
 #endif

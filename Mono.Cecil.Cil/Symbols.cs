@@ -16,6 +16,7 @@ using SR = System.Reflection;
 
 using Mono.Collections.Generic;
 using Mono.Cecil.Cil;
+using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Cil {
 
@@ -855,7 +856,69 @@ namespace Mono.Cecil.Cil {
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
 		{
-			throw new NotSupportedException ();
+			if (module.Image.HasDebugTables ())
+				return null;
+
+			if (module.HasDebugHeader) {
+				var header = module.GetDebugHeader ();
+				var entry = header.GetEmbeddedPortablePdbEntry ();
+				if (entry != null)
+					return new EmbeddedPortablePdbReaderProvider ().GetSymbolReader (module, "");
+			}
+
+			Mixin.CheckStream (symbolStream);
+			Mixin.CheckReadSeek (symbolStream);
+
+			var position = symbolStream.Position;
+
+			const int portablePdbHeader = 0x424a5342;
+
+			var reader = new BinaryStreamReader (symbolStream);
+			var intHeader = reader.ReadInt32 ();
+			symbolStream.Position = position;
+
+			if (intHeader == portablePdbHeader) {
+				return new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream);
+			}
+
+			const string nativePdbHeader = "Microsoft C/C++ MSF 7.00";
+
+			var bytesHeader = reader.ReadBytes (nativePdbHeader.Length);
+			symbolStream.Position = position;
+			var isNativePdb = true;
+
+			for (var i = 0; i < bytesHeader.Length; i++) {
+				if (bytesHeader [i] != (byte) nativePdbHeader [i]) {
+					isNativePdb = false;
+					break;
+				}
+			}
+
+			if (isNativePdb) {
+				try {
+					return SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, symbolStream);
+				} catch (Exception) {
+					// We might not include support for native pdbs.
+				}
+			}
+
+			const long mdbHeader = 0x45e82623fd7fa614;
+
+			var longHeader = reader.ReadInt64 ();
+			symbolStream.Position = position;
+
+			if (longHeader == mdbHeader) {
+				try {
+					return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, symbolStream);
+				} catch (Exception) {
+					// We might not include support for mdbs.
+				}
+			}
+
+			if (throw_if_no_symbol)
+				throw new SymbolsNotFoundException (string.Format ("No symbols found in stream"));
+
+			return null;
 		}
 	}
 

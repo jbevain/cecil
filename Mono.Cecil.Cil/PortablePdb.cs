@@ -158,7 +158,6 @@ namespace Mono.Cecil.Cil {
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
-			Mixin.CheckFileName (fileName);
 
 			var header = module.GetDebugHeader ();
 			var entry = header.GetEmbeddedPortablePdbEntry ();
