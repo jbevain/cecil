@@ -10,16 +10,12 @@
 
 #if !READ_ONLY
 
-#if !NET_CORE
-
 using System;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Runtime.Serialization;
-
 using Mono.Security.Cryptography;
-
 using Mono.Cecil.PE;
 
 namespace Mono.Cecil {
@@ -153,6 +149,5 @@ namespace Mono.Cecil {
 	}
 }
 
-#endif
 
 #endif

@@ -36,7 +36,8 @@ namespace Mono.Cecil.Tests {
 		}
 #endif
 		public static bool OnCoreClr {
-			get { return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
+			get {
+				return  TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
 		}
 
 		static Type TryGetType (string assemblyQualifiedName)

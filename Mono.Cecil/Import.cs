@@ -155,9 +155,7 @@ namespace Mono.Cecil {
 			{ typeof (float), ElementType.R4 },
 			{ typeof (double), ElementType.R8 },
 			{ typeof (string), ElementType.String },
-#if !NET_CORE
 			{ typeof (TypedReference), ElementType.TypedByRef },
-#endif
 			{ typeof (IntPtr), ElementType.I },
 			{ typeof (UIntPtr), ElementType.U },
 			{ typeof (object), ElementType.Object },
@@ -315,10 +313,8 @@ namespace Mono.Cecil {
 			reference = new AssemblyNameReference (name.Name, name.Version)
 			{
 				PublicKeyToken = name.GetPublicKeyToken (),
-#if !NET_CORE
 				Culture = name.CultureInfo.Name,
 				HashAlgorithm = (AssemblyHashAlgorithm) name.HashAlgorithm,
-#endif
 			};
 
 			module.AssemblyReferences.Add (reference);
@@ -364,20 +360,13 @@ namespace Mono.Cecil {
 
 		static SR.FieldInfo ResolveFieldDefinition (SR.FieldInfo field)
 		{
-#if NET_CORE
-			throw new NotImplementedException ();
-#else
+
 			return field.Module.ResolveField (field.MetadataToken);
-#endif
 		}
 
 		static SR.MethodBase ResolveMethodDefinition (SR.MethodBase method)
 		{
-#if NET_CORE
-			throw new NotImplementedException ();
-#else
 			return method.Module.ResolveMethod (method.MetadataToken);
-#endif
 		}
 
 		MethodReference ImportMethod (SR.MethodBase method, ImportGenericContext context, ImportGenericKind import_kind)

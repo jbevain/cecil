@@ -8,68 +8,65 @@
 // Licensed under the MIT/X11 license.
 //
 
+using Mono.Cecil.Cil;
+using Mono.Cecil.Metadata;
+using Mono.Cecil.PE;
+using Mono.Collections.Generic;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-
-using Mono;
-using Mono.Collections.Generic;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Metadata;
-using Mono.Cecil.PE;
-
-using RVA = System.UInt32;
-using RID = System.UInt32;
-using CodedRID = System.UInt32;
-using StringIndex = System.UInt32;
 using BlobIndex = System.UInt32;
+using CodedRID = System.UInt32;
 using GuidIndex = System.UInt32;
+using RID = System.UInt32;
+using RVA = System.UInt32;
+using StringIndex = System.UInt32;
 
 namespace Mono.Cecil {
 
 #if !READ_ONLY
 
-	using ModuleRow      = Row<StringIndex, GuidIndex>;
-	using TypeRefRow     = Row<CodedRID, StringIndex, StringIndex>;
-	using TypeDefRow     = Row<TypeAttributes, StringIndex, StringIndex, CodedRID, RID, RID>;
-	using FieldRow       = Row<FieldAttributes, StringIndex, BlobIndex>;
-	using MethodRow      = Row<RVA, MethodImplAttributes, MethodAttributes, StringIndex, BlobIndex, RID>;
-	using ParamRow       = Row<ParameterAttributes, ushort, StringIndex>;
-	using InterfaceImplRow = Row<uint, CodedRID>;
-	using MemberRefRow   = Row<CodedRID, StringIndex, BlobIndex>;
-	using ConstantRow    = Row<ElementType, CodedRID, BlobIndex>;
-	using CustomAttributeRow = Row<CodedRID, CodedRID, BlobIndex>;
-	using FieldMarshalRow = Row<CodedRID, BlobIndex>;
-	using DeclSecurityRow = Row<SecurityAction, CodedRID, BlobIndex>;
-	using ClassLayoutRow = Row<ushort, uint, RID>;
-	using FieldLayoutRow = Row<uint, RID>;
-	using EventMapRow    = Row<RID, RID>;
-	using EventRow       = Row<EventAttributes, StringIndex, CodedRID>;
-	using PropertyMapRow = Row<RID, RID>;
-	using PropertyRow    = Row<PropertyAttributes, StringIndex, BlobIndex>;
-	using MethodSemanticsRow = Row<MethodSemanticsAttributes, RID, CodedRID>;
-	using MethodImplRow  = Row<RID, CodedRID, CodedRID>;
-	using ImplMapRow     = Row<PInvokeAttributes, CodedRID, StringIndex, RID>;
-	using FieldRVARow    = Row<RVA, RID>;
-	using AssemblyRow    = Row<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint>;
 	using AssemblyRefRow = Row<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint>;
-	using FileRow        = Row<FileAttributes, StringIndex, BlobIndex>;
-	using ExportedTypeRow = Row<TypeAttributes, uint, StringIndex, StringIndex, CodedRID>;
-	using ManifestResourceRow = Row<uint, ManifestResourceAttributes, StringIndex, CodedRID>;
-	using NestedClassRow = Row<RID, RID>;
-	using GenericParamRow = Row<ushort, GenericParameterAttributes, CodedRID, StringIndex>;
-	using MethodSpecRow = Row<CodedRID, BlobIndex>;
-	using GenericParamConstraintRow = Row<RID, CodedRID>;
+	using AssemblyRow = Row<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint>;
+	using ClassLayoutRow = Row<ushort, uint, RID>;
+	using ConstantRow = Row<ElementType, CodedRID, BlobIndex>;
+	using CustomAttributeRow = Row<CodedRID, CodedRID, BlobIndex>;
+	using CustomDebugInformationRow = Row<CodedRID, GuidIndex, BlobIndex>;
+	using DeclSecurityRow = Row<SecurityAction, CodedRID, BlobIndex>;
 	using DocumentRow = Row<BlobIndex, GuidIndex, BlobIndex, GuidIndex>;
-	using MethodDebugInformationRow = Row<RID, BlobIndex>;
+	using EventMapRow = Row<RID, RID>;
+	using EventRow = Row<EventAttributes, StringIndex, CodedRID>;
+	using ExportedTypeRow = Row<TypeAttributes, uint, StringIndex, StringIndex, CodedRID>;
+	using FieldLayoutRow = Row<uint, RID>;
+	using FieldMarshalRow = Row<CodedRID, BlobIndex>;
+	using FieldRow = Row<FieldAttributes, StringIndex, BlobIndex>;
+	using FieldRVARow = Row<RVA, RID>;
+	using FileRow = Row<FileAttributes, StringIndex, BlobIndex>;
+	using GenericParamConstraintRow = Row<RID, CodedRID>;
+	using GenericParamRow = Row<ushort, GenericParameterAttributes, CodedRID, StringIndex>;
+	using ImplMapRow = Row<PInvokeAttributes, CodedRID, StringIndex, RID>;
+	using ImportScopeRow = Row<RID, BlobIndex>;
+	using InterfaceImplRow = Row<uint, CodedRID>;
+	using LocalConstantRow = Row<StringIndex, BlobIndex>;
 	using LocalScopeRow = Row<RID, RID, RID, RID, uint, uint>;
 	using LocalVariableRow = Row<VariableAttributes, ushort, StringIndex>;
-	using LocalConstantRow = Row<StringIndex, BlobIndex>;
-	using ImportScopeRow = Row<RID, BlobIndex>;
+	using ManifestResourceRow = Row<uint, ManifestResourceAttributes, StringIndex, CodedRID>;
+	using MemberRefRow = Row<CodedRID, StringIndex, BlobIndex>;
+	using MethodDebugInformationRow = Row<RID, BlobIndex>;
+	using MethodImplRow = Row<RID, CodedRID, CodedRID>;
+	using MethodRow = Row<RVA, MethodImplAttributes, MethodAttributes, StringIndex, BlobIndex, RID>;
+	using MethodSemanticsRow = Row<MethodSemanticsAttributes, RID, CodedRID>;
+	using MethodSpecRow = Row<CodedRID, BlobIndex>;
+	using ModuleRow = Row<StringIndex, GuidIndex>;
+	using NestedClassRow = Row<RID, RID>;
+	using ParamRow = Row<ParameterAttributes, ushort, StringIndex>;
+	using PropertyMapRow = Row<RID, RID>;
+	using PropertyRow = Row<PropertyAttributes, StringIndex, BlobIndex>;
 	using StateMachineMethodRow = Row<RID, RID>;
-	using CustomDebugInformationRow = Row<CodedRID, GuidIndex, BlobIndex>;
+	using TypeDefRow = Row<TypeAttributes, StringIndex, StringIndex, CodedRID, RID, RID>;
+	using TypeRefRow = Row<CodedRID, StringIndex, StringIndex>;
 
 	static class ModuleWriter {
 
@@ -99,16 +96,13 @@ namespace Mono.Cecil {
 			var fq_name = stream.value.GetFileName ();
 			var timestamp = parameters.Timestamp ?? module.timestamp;
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
-
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = new DefaultSymbolWriterProvider ();
 
-#if !NET_CORE
 			if (parameters.StrongNameKeyPair != null && name != null) {
 				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 			}
-#endif
 
 			using (var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters)) {
 				var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider, symbol_writer);
@@ -118,10 +112,8 @@ namespace Mono.Cecil {
 				stream.value.SetLength (0);
 				writer.WriteImage ();
 
-#if !NET_CORE
 				if (parameters.StrongNameKeyPair != null)
 					CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
-#endif
 			}
 		}
 
@@ -1088,9 +1080,6 @@ namespace Mono.Cecil {
 				if (module.IsMain)
 					continue;
 
-#if NET_CORE
-				throw new NotSupportedException ();
-#else
 				var parameters = new WriterParameters {
 					SymbolWriterProvider = symbol_writer_provider,
 				};
@@ -1108,7 +1097,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-#if !NET_CORE
+
 		string GetModuleFileName (string name)
 		{
 			if (string.IsNullOrEmpty (name))
@@ -1117,7 +1106,6 @@ namespace Mono.Cecil {
 			var path = Path.GetDirectoryName (fq_name);
 			return Path.Combine (path, name);
 		}
-#endif
 
 		void AddAssemblyReferences ()
 		{
@@ -1209,10 +1197,8 @@ namespace Mono.Cecil {
 			var table = GetTable<FileTable> (Table.File);
 			var hash = resource.Hash;
 
-#if !NET_CORE
 			if (hash.IsNullOrEmpty ())
 				hash = CryptoService.ComputeHash (resource.File);
-#endif
 
 			return (uint) table.AddRow (new FileRow (
 				FileAttributes.ContainsNoMetaData,
@@ -3297,7 +3283,6 @@ namespace Mono.Cecil {
 		}
 	}
 
-#endif
 
 	static partial class Mixin {
 

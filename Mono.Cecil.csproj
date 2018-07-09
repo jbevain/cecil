@@ -16,4 +16,9 @@
     <Compile Include="Mono.Collections.Generic\*.cs" />
     <Compile Include="Mono.Security.Cryptography\*.cs" />
   </ItemGroup>  
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Security.Cryptography.Algorithms">
+      <Version>4.3.1</Version>
+    </PackageReference>
+  </ItemGroup>
 </Project>
