@@ -2,6 +2,7 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <PropertyGroup>
     <Configurations>Debug;Release;Debug_ReadOnly;Release_ReadOnly</Configurations>

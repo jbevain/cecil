@@ -3,6 +3,8 @@
     <RootNamespace>Mono.Cecil</RootNamespace>
     <AssemblyName>Mono.Cecil</AssemblyName>
     <TargetFrameworks>net35;net40;netstandard2.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <NuspecFile>Mono.Cecil.nuspec</NuspecFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ProjectInfo.cs" />
