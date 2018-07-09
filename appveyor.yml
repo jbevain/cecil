@@ -1,10 +1,18 @@
 version: 0.9.6.{build}
-configuration: net_4_0_Debug
-build:
-  project: Mono.Cecil.sln
-  verbosity: minimal
+image: Visual Studio 2017
+before_build:
+  # Display .NET Core version
+  - cmd: dotnet --version
+  # Display minimal restore text
+  - cmd: dotnet restore Mono.Cecil.sln --verbosity m
+build_script:
+  - cmd: dotnet build --no-restore Mono.Cecil.sln --verbosity m
+
 test_script:
-- nunit-console.exe Mono.Cecil.nunit
+  - cmd: dotnet test Mono.Cecil.sln --no-build -f netcoreapp2.1
+  - nunit-console.exe Mono.Cecil.net35.nunit
+  - nunit-console.exe Mono.Cecil.net40.nunit
+  
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/925de8a68a6d8d3ce68e

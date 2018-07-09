@@ -1,0 +1,42 @@
+<Project>
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configurations>Debug;Release;Debug_ReadOnly;Release_ReadOnly</Configurations>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\cecil.snk</AssemblyOriginatorKeyFile>
+    <DefineConstants Condition="'$(TargetFramework)'=='net35'">$(DefineConstants);NET_3_5;</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='net40'">$(DefineConstants);NET_4_0;</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0' OR '$(TargetFramework)'=='netcoreapp2.1'">$(DefineConstants);NET_CORE;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
+    <DefineConstants>$(DefineConstants);READ_ONLY;</DefineConstants>
+  </PropertyGroup>
+   <PropertyGroup Condition="'$(TargetFramework)' == 'net35' ">
+    <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>
+    <FrameworkPathOverride Condition="'$(FrameworkPathOverrideForMono)' != ''">$([System.IO.Path]::Combine($(FrameworkPathOverrideForMono),2.0-api))</FrameworkPathOverride>
+    <FrameworkPathOverride Condition="'$(FrameworkPathOverride)' == ''">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net40' ">
+    <FrameworkPathOverride Condition="'$(FrameworkPathOverrideForMono)' != ''">$([System.IO.Path]::Combine($(FrameworkPathOverrideForMono),4.0-api))</FrameworkPathOverride>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+  </PropertyGroup>
+  <ItemGroup  Condition="'$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
+    
+    <Reference Include="System.Core" />
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CecilOverrides Condition="'$(CecilOverrides)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Mono.Cecil.overrides))\Mono.Cecil.overrides</CecilOverrides>
+  </PropertyGroup>  
+  <Import Project="$(CecilOverrides)" Condition="Exists('$(CecilOverrides)')" />
+
+
+</Project>

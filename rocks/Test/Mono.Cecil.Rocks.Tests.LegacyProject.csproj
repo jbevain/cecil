@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Import Project="..\..\Mono.Cecil.Tests.props" />
+  <PropertyGroup>
+    <ProjectGuid>{C6CFD7E1-B855-44DC-B4CE-9CD72984AF52}</ProjectGuid>
+    <RootNamespace>Mono.Cecil.Rocks.Tests</RootNamespace>
+    <AssemblyName>Mono.Cecil.Rocks.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Mono.Cecil.LegacyProject.csproj">
+      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
+      <Name>Mono.Cecil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Test\Mono.Cecil.Tests.LegacyProject.csproj">
+      <Project>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</Project>
+      <Name>Mono.Cecil.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Mono.Cecil.Rocks.LegacyProject.csproj">
+      <Project>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</Project>
+      <Name>Mono.Cecil.Rocks</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Mono.Cecil.Tests\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\**\*" />
+  </ItemGroup>
+  <ItemGroup Condition="$(NetStandard)">
+    <PackageReference Include="System.Security.Permissions">
+      <Version>4.5.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildCSharpTargets)" />
+</Project>

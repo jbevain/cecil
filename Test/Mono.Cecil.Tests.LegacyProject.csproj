@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\Tests.props" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\Mono.Cecil.Tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;netcoreapp2.1</TargetFrameworks>
+    <ProjectGuid>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Tests</RootNamespace>
     <AssemblyName>Mono.Cecil.Tests</AssemblyName>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.1'">
-
+  <ItemGroup Condition="$(NetStandard)">
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
       <Version>2.3.2</Version>
     </PackageReference>
@@ -16,12 +16,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Cecil.csproj">
+      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\symbols\mdb\Mono.Cecil.Mdb.csproj">
+    <ProjectReference Include="..\symbols\mdb\Mono.Cecil.Mdb.LegacyProject.csproj">
+      <Project>{8559dd7f-a16f-46d0-a05a-9139faeba8fd}</Project>
       <Name>Mono.Cecil.Mdb</Name>
     </ProjectReference>
-    <ProjectReference Include="..\symbols\pdb\Mono.Cecil.Pdb.csproj">
+    <ProjectReference Include="..\symbols\pdb\Mono.Cecil.Pdb.LegacyProject.csproj">
+      <Project>{63e6915c-7ea4-4d76-ab28-0d7191eea626}</Project>
       <Name>Mono.Cecil.Pdb</Name>
     </ProjectReference>
   </ItemGroup>
@@ -32,4 +35,5 @@
   <ItemGroup>
     <None Include="Resources\**\*" />
   </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="!$(NetStandard)" />
 </Project>

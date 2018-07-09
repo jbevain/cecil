@@ -1,8 +1,21 @@
 language: csharp
+sudo: required
+
+dist: trusty
+dotnet: 2.1.301
+mono: latest
 solution: Mono.Cecil.sln
+
+before_install:
+  - mono --version
+  - ls -lh /usr/lib/mono
 install:
-  - nuget restore Mono.Cecil.sln
+  - dotnet restore Mono.Cecil.sln -v m
   - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=net_4_0_Debug Mono.Cecil.sln
-  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe Mono.Cecil.nunit
+  - FrameworkPathOverrideForMono=/usr/lib/mono dotnet build Mono.Cecil.sln
+  
+  - dotnet test Mono.Cecil.sln --no-build -f netcoreapp2.1
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe Mono.Cecil.net35.nunit
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe Mono.Cecil.net40.nunit
+  
