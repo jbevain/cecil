@@ -13,7 +13,7 @@
     <DefineConstants Condition="'$(TargetFramework)'=='netstandard2.0' OR '$(TargetFramework)'=='netcoreapp2.1'">$(DefineConstants);NET_CORE;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
-    <DefineConstants>$(DefineConstants);READ_ONLY;</DefineConstants>
+    <DefineConstants>$(DefineConstants);READ_ONLY</DefineConstants>
   </PropertyGroup>
    <PropertyGroup Condition="'$(TargetFramework)' == 'net35' ">
     <DefineConstants>$(DefineConstants);LEGACY</DefineConstants>

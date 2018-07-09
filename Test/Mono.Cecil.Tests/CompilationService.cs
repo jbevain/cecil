@@ -28,11 +28,13 @@ namespace Mono.Cecil.Tests {
 	}
 
 	public static class Platform {
-
+#if NET_CORE
+		public static bool OnMono => Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
+#else
 		public static bool OnMono {
 			get { return TryGetType ("Mono.Runtime") != null; }
 		}
-
+#endif
 		public static bool OnCoreClr {
 			get { return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
 		}
