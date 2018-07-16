@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\Tests.props" />
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net35;net40</TargetFrameworks>
     <RootNamespace>Mono.Cecil.Rocks.Tests</RootNamespace>
     <AssemblyName>Mono.Cecil.Rocks.Tests</AssemblyName>
   </PropertyGroup>
@@ -15,7 +15,9 @@
     <Compile Include="Mono.Cecil.Tests\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\**\*" />
+    <None Include="Resources\**\*" >
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
     <PackageReference Include="System.Security.Permissions">
