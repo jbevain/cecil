@@ -147,7 +147,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("System.Security.Permissions.SecurityPermissionAttribute", attribute.AttributeType.FullName);
 				Assert.AreEqual (0, attribute.Fields.Count);
 				Assert.AreEqual (0, attribute.Properties.Count);
-			});
+			}, !Platform.OnCoreClr);
 		}
 
 		[Test]

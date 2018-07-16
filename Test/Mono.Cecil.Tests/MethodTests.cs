@@ -171,7 +171,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (1, bar_reference.GetSentinelPosition ());
 
 				Assert.AreEqual (bar, bar_reference.Resolve ());
-			});
+			}, verify:!Platform.OnCoreClr);
 		}
 
 		[Test]

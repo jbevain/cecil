@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic">
       <Version>2.8.2</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.DotNet.ILVerification" Version="1.0.0-alpha-*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Cecil.csproj">

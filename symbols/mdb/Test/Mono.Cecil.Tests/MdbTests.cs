@@ -52,7 +52,7 @@ namespace Mono.Cecil.Tests {
 				var method = type.GetMethod ("WinIOError");
 
 				Assert.IsNotNull (method.Body);
-			}, verify: !Platform.OnMono, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
+			}, verify: !Platform.OnMono && !Platform.OnCoreClr, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
 		}
 
 		[Test]

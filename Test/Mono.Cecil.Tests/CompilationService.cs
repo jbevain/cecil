@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Reflection;
 using NUnit.Framework;
@@ -11,7 +12,10 @@ using NUnit.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using CS = Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using VB = Microsoft.CodeAnalysis.VisualBasic;
+using System.Reflection.PortableExecutable;
+using ILVerify;
 #endif
 
 namespace Mono.Cecil.Tests {
@@ -28,24 +32,31 @@ namespace Mono.Cecil.Tests {
 	}
 
 	public static class Platform {
-//#if NET_CORE
-//		public static bool OnMono => Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
-//#else
 		public static bool OnMono {
 			get { return TryGetType ("Mono.Runtime") != null; }
 		}
-//#endif
 		public static bool OnCoreClr {
 			get {
-				return  TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
+				return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null;
+			}
 		}
 
+#if NET_CORE
+		public static bool OnLinux {
+			get { return Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX; }
+		}
+#else
+		public static bool OnLinux {
+			get { return OnMono; }
+		}
+#endif
 		static Type TryGetType (string assemblyQualifiedName)
 		{
 			try {
 				// Note that throwOnError=false only suppresses some exceptions, not all.
-				return Type.GetType(assemblyQualifiedName, throwOnError: false);
-			} catch {
+				return Type.GetType (assemblyQualifiedName, throwOnError: false);
+			}
+			catch {
 				return null;
 			}
 		}
@@ -117,9 +128,43 @@ namespace Mono.Cecil.Tests {
 			var output = Platform.OnMono ? ShellService.PEDump (name) : ShellService.PEVerify (name);
 			if (output.ExitCode != 0)
 				Assert.Fail (output.ToString ());
+#else
+			VerifyWithIlVerify (name);
 #endif
 		}
+#if NET_CORE
+		private static void VerifyWithIlVerify (string name)
+		{
+			
+			Assembly coreAssembly = typeof(object).GetTypeInfo ().Assembly;
+		
+			var resolver = new TestResolver ();
+			var verifiyer = new ILVerify.Verifier (resolver);
+			verifiyer.SetSystemModuleName (coreAssembly.GetName ());
+			using (var stream = new FileStream (name, FileMode.Open, FileAccess.Read)) {
+				var results = verifiyer.Verify (new PEReader (stream));
+				Assert.IsEmpty (results, string.Join (";", results.Select (a => a.Message)));
+			}
+		}
+#endif
 	}
+
+#if NET_CORE
+	sealed class TestResolver : ResolverBase {
+
+		protected override PEReader ResolveCore (string simpleName)
+		{
+			try {
+				Assembly assembly = Assembly.Load (new AssemblyName (simpleName));
+				return new PEReader (File.OpenRead (assembly.Location));
+			}
+			catch (Exception) {
+				return null;
+			}
+
+		}
+	}
+#endif
 
 	class IlasmCompilationService : CompilationService {
 
@@ -166,8 +211,8 @@ namespace Mono.Cecil.Tests {
 			var source = File.ReadAllText (name);
 
 			var tpa = BaseAssemblyResolver.TrustedPlatformAssemblies.Value;
-			
-			var references = new [] 
+
+			var references = new []
 			{
 				MetadataReference.CreateFromFile (tpa ["netstandard"]),
 				MetadataReference.CreateFromFile (tpa ["mscorlib"]),
@@ -181,9 +226,9 @@ namespace Mono.Cecil.Tests {
 			switch (extension) {
 			case ".cs":
 				return CS.CSharpCompilation.Create (
-					assemblyName, 
+					assemblyName,
 					new [] { CS.SyntaxFactory.ParseSyntaxTree (source) },
-					references, 
+					references,
 					new CS.CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
 
 			case ".vb":
@@ -323,7 +368,7 @@ namespace Mono.Cecil.Tests {
 		public static ProcessOutput ILAsm (string source, string output)
 		{
 			var ilasm = "ilasm";
-			if (!Platform.OnMono)
+			if (!Platform.OnLinux)
 				ilasm = NetFrameworkTool ("ilasm");
 
 			return RunProcess (ilasm, "/nologo", "/dll", "/out:" + Quote (output), Quote (source));
@@ -369,14 +414,14 @@ namespace Mono.Cecil.Tests {
 
 			foreach (var sdk in sdks) {
 				var pgf = IntPtr.Size == 8
-					? Environment.GetEnvironmentVariable("ProgramFiles(x86)")
-					: Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+					? Environment.GetEnvironmentVariable ("ProgramFiles(x86)")
+					: Environment.GetFolderPath (Environment.SpecialFolder.ProgramFiles);
 
 				var exe = Path.Combine (
 					Path.Combine (pgf, sdk),
 					tool + ".exe");
 
-				if (File.Exists(exe))
+				if (File.Exists (exe))
 					return exe;
 			}
 

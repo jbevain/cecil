@@ -123,7 +123,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.Basic, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -157,14 +157,14 @@ namespace Mono.Cecil.Tests {
 		public void EmptyRootNamespace ()
 		{
 			TestModule ("EmptyRootNamespace.dll", module => {
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
 		public void VisualBasicNamespace ()
 		{
 			TestModule ("AVbTest.exe", module => {
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 
 		}
 
