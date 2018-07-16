@@ -215,6 +215,10 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void Win32FileVersion ()
 		{
+			#if NET_CORE
+			if(Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+				Assert.Ignore();
+			#endif
 			TestModule ("libhello.dll", module => {
 				var version = FileVersionInfo.GetVersionInfo (module.FileName);
 
