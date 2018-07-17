@@ -52,7 +52,7 @@ namespace Mono.Cecil.Tests {
 	.line 10,10:3,12 'c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs'
 	IL_001c: ldc.i4.0
 	IL_001d: stloc.1
-	IL_001e: br.s IL_0020d
+	IL_001e: br.s IL_0020
 	.line 11,11:2,3 'c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs'
 	IL_0020: ldloc.1
 	IL_0021: ret
