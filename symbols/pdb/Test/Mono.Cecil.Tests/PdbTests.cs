@@ -52,12 +52,12 @@ namespace Mono.Cecil.Tests {
 	.line 10,10:3,12 'c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs'
 	IL_001c: ldc.i4.0
 	IL_001d: stloc.1
-	IL_001e: br.s IL_0020
+	IL_001e: br.s IL_0020d
 	.line 11,11:2,3 'c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs'
 	IL_0020: ldloc.1
 	IL_0021: ret
 ", main);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -83,7 +83,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual ("i", variables [0].Name);
 				Assert.IsFalse (variables [0].IsDebuggerHidden);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -103,7 +103,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -123,7 +123,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.Basic, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnLinux, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
 		}
 
 		[Test]
@@ -143,28 +143,28 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
 				Assert.AreEqual (DocumentLanguage.FSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
 		public void EmptyEnumerable ()
 		{
 			TestModule ("empty-iterator.dll", module => {
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
 		public void EmptyRootNamespace ()
 		{
 			TestModule ("EmptyRootNamespace.dll", module => {
-			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr || Platform.OnLinux, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
 		public void VisualBasicNamespace ()
 		{
 			TestModule ("AVbTest.exe", module => {
-			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 
 		}
 
@@ -218,7 +218,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("u", variable.Name);
 				Assert.IsFalse (variable.IsDebuggerHidden);
 				Assert.AreEqual (5, variable.Index);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -276,7 +276,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual ("u", constant.Name);
 				Assert.AreEqual (null, constant.Value);
 				Assert.AreEqual (MetadataType.String, constant.ConstantType.MetadataType);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -325,7 +325,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (ImportTargetKind.DefineNamespaceAlias, target.Kind);
 				Assert.AreEqual ("Foo2", target.Alias);
 				Assert.AreEqual ("System.Reflection", target.Namespace);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -339,7 +339,7 @@ namespace Mono.Cecil.Tests {
 				Assert.IsNotNull (symbol);
 				Assert.IsNotNull (symbol.StateMachineKickOffMethod);
 				Assert.AreEqual ("System.Threading.Tasks.Task ComplexPdb.Program::TestAsync()", symbol.StateMachineKickOffMethod.FullName);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -372,7 +372,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (move_next, async_body.ResumeMethods [0]);
 				Assert.AreEqual (move_next, async_body.ResumeMethods [1]);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -408,7 +408,7 @@ namespace Mono.Cecil.Tests {
 				}
 
 				Assert.AreEqual ("System", import.Targets [0].Namespace);
-			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]

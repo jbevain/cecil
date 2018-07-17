@@ -16,7 +16,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void DefaultPdb ()
 		{
-			IgnoreOnMono ();
+			IgnoreOnLinux();
 
 			TestModule ("libpdb.dll", module => {
 				Assert.IsTrue (module.HasSymbols);

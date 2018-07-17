@@ -16,6 +16,12 @@ namespace Mono.Cecil.Tests {
 				Assert.Ignore ();
 		}
 
+		protected static void IgnoreOnLinux ()
+		{
+			if (Platform.OnLinux)
+				Assert.Ignore ();
+		}
+
 		public static string GetResourcePath (string name, Assembly assembly)
 		{
 			return Path.Combine (FindResourcesDirectory (assembly), name);

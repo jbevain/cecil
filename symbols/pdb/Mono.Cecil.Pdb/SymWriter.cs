@@ -20,17 +20,12 @@ namespace Mono.Cecil.Pdb
 	internal class SymWriter
 	{
 		[DllImport("ole32.dll")]
-		private static extern int CoCreateInstance([In]ref Guid rclsid, IntPtr pUnkOuter,
-		Int32 dwClsContext,
-		[In]ref Guid riid,
-		[MarshalAs(UnmanagedType.Interface)] out object ppv);
-
-		//static extern int CoCreateInstance (
-		//	[In] ref Guid rclsid,
-		//	[In, MarshalAs (UnmanagedType.IUnknown)] object pUnkOuter,
-		//	[In] uint dwClsContext,
-		//	[In] ref Guid riid,
-		//	[Out, MarshalAs (UnmanagedType.Interface)] out object ppv);
+		static extern int CoCreateInstance (
+			[In] ref Guid rclsid,
+			[In, MarshalAs (UnmanagedType.IUnknown)] object pUnkOuter,
+			[In] uint dwClsContext,
+			[In] ref Guid riid,
+			[Out, MarshalAs (UnmanagedType.Interface)] out object ppv);
 
 		static Guid s_symUnmangedWriterIID = new Guid("0b97726e-9e6d-4f05-9a26-424022093caa");
 		static Guid s_CorSymWriter_SxS_ClassID = new Guid ("108296c1-281e-11d3-bd22-0000f80849bd");
@@ -41,7 +36,7 @@ namespace Mono.Cecil.Pdb
 		public SymWriter ()
 		{
 			object objWriter;
-			CoCreateInstance (ref s_CorSymWriter_SxS_ClassID, IntPtr.Zero, 1, ref s_symUnmangedWriterIID, out objWriter);
+			CoCreateInstance (ref s_CorSymWriter_SxS_ClassID, null, 1, ref s_symUnmangedWriterIID, out objWriter);
 
 			m_writer = (ISymUnmanagedWriter2) objWriter;
 			documents = new Collection<ISymUnmanagedDocumentWriter> ();
