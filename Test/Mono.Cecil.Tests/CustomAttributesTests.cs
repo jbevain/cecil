@@ -437,7 +437,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InterfaceImplementation ()
 		{
-			IgnoreOnMono();
+			IgnoreOnLinux();
 
 			TestIL ("ca-iface-impl.il", module => {
 				var type = module.GetType ("FooType");

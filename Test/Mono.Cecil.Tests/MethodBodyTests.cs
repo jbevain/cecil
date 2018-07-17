@@ -284,7 +284,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void BranchOutsideMethod ()
 		{
-			IgnoreOnMono ();
+			IgnoreOnLinux();
 
 			TestIL ("branch-out.il", module => {
 				var type = module.GetType ("Foo");

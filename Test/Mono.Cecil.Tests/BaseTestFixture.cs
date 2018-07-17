@@ -10,12 +10,6 @@ namespace Mono.Cecil.Tests {
 
 	public abstract class BaseTestFixture {
 
-		protected static void IgnoreOnMono ()
-		{
-			if (Platform.OnMono)
-				Assert.Ignore ();
-		}
-
 		protected static void IgnoreOnLinux ()
 		{
 			if (Platform.OnLinux)

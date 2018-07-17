@@ -414,7 +414,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void CreateMethodFromScratch ()
 		{
-			IgnoreOnMono ();
+			IgnoreOnLinux ();
 
 			var module = ModuleDefinition.CreateModule ("Pan", ModuleKind.Dll);
 			var type = new TypeDefinition ("Pin", "Pon", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.ImportReference (typeof (object)));
