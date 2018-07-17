@@ -157,7 +157,7 @@ namespace Mono.Cecil.Tests {
 		public void EmptyRootNamespace ()
 		{
 			TestModule ("EmptyRootNamespace.dll", module => {
-			}, verify:!Platform.OnCoreClr || Platform.OnLinux, readOnly: Platform.OnMono, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
+			}, verify:!Platform.OnCoreClr, readOnly: Platform.OnLinux, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
