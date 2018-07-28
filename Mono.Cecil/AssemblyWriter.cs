@@ -216,11 +216,11 @@ namespace Mono.Cecil {
 
 		public override void Write (TableHeapBuffer buffer)
 		{
-			buffer.WriteUInt16 (0);		// Generation
-			buffer.WriteString (row.Col1);	// Name
-			buffer.WriteGuid (row.Col2);		// Mvid
-			buffer.WriteUInt16 (0);		// EncId
-			buffer.WriteUInt16 (0);		// EncBaseId
+			buffer.WriteUInt16 (0);     // Generation
+			buffer.WriteString (row.Col1);  // Name
+			buffer.WriteGuid (row.Col2);        // Mvid
+			buffer.WriteUInt16 (0);     // EncId
+			buffer.WriteUInt16 (0);     // EncBaseId
 		}
 	}
 
@@ -230,9 +230,9 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < length; i++) {
 				buffer.WriteCodedRID (
-					rows [i].Col1, CodedIndex.ResolutionScope);	// Scope
-				buffer.WriteString (rows [i].Col2);			// Name
-				buffer.WriteString (rows [i].Col3);			// Namespace
+					rows [i].Col1, CodedIndex.ResolutionScope); // Scope
+				buffer.WriteString (rows [i].Col2);         // Name
+				buffer.WriteString (rows [i].Col3);         // Namespace
 			}
 		}
 	}
@@ -242,13 +242,13 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt32 ((uint) rows [i].Col1);	// Attributes
-				buffer.WriteString (rows [i].Col2);			// Name
-				buffer.WriteString (rows [i].Col3);			// Namespace
+				buffer.WriteUInt32 ((uint)rows [i].Col1);   // Attributes
+				buffer.WriteString (rows [i].Col2);         // Name
+				buffer.WriteString (rows [i].Col3);         // Namespace
 				buffer.WriteCodedRID (
-					rows [i].Col4, CodedIndex.TypeDefOrRef);	// Extends
-				buffer.WriteRID (rows [i].Col5, Table.Field);	// FieldList
-				buffer.WriteRID (rows [i].Col6, Table.Method);	// MethodList
+					rows [i].Col4, CodedIndex.TypeDefOrRef);    // Extends
+				buffer.WriteRID (rows [i].Col5, Table.Field);   // FieldList
+				buffer.WriteRID (rows [i].Col6, Table.Method);  // MethodList
 			}
 		}
 	}
@@ -258,9 +258,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Attributes
-				buffer.WriteString (rows [i].Col2);			// Name
-				buffer.WriteBlob (rows [i].Col3);			// Signature
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Attributes
+				buffer.WriteString (rows [i].Col2);         // Name
+				buffer.WriteBlob (rows [i].Col3);           // Signature
 			}
 		}
 	}
@@ -270,12 +270,12 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt32 (rows [i].Col1);		// RVA
-				buffer.WriteUInt16 ((ushort) rows [i].Col2);	// ImplFlags
-				buffer.WriteUInt16 ((ushort) rows [i].Col3);	// Flags
-				buffer.WriteString (rows [i].Col4);		// Name
-				buffer.WriteBlob (rows [i].Col5);		// Signature
-				buffer.WriteRID (rows [i].Col6, Table.Param);	// ParamList
+				buffer.WriteUInt32 (rows [i].Col1);     // RVA
+				buffer.WriteUInt16 ((ushort)rows [i].Col2); // ImplFlags
+				buffer.WriteUInt16 ((ushort)rows [i].Col3); // Flags
+				buffer.WriteString (rows [i].Col4);     // Name
+				buffer.WriteBlob (rows [i].Col5);       // Signature
+				buffer.WriteRID (rows [i].Col6, Table.Param);   // ParamList
 			}
 		}
 	}
@@ -285,9 +285,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Attributes
-				buffer.WriteUInt16 (rows [i].Col2);		// Sequence
-				buffer.WriteString (rows [i].Col3);		// Name
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Attributes
+				buffer.WriteUInt16 (rows [i].Col2);     // Sequence
+				buffer.WriteString (rows [i].Col3);     // Name
 			}
 		}
 	}
@@ -297,8 +297,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.TypeDef);		// Class
-				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.TypeDefOrRef);	// Interface
+				buffer.WriteRID (rows [i].Col1, Table.TypeDef);     // Class
+				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.TypeDefOrRef);  // Interface
 			}
 		}
 
@@ -325,7 +325,7 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);
+				buffer.WriteUInt16 ((ushort)rows [i].Col1);
 				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.HasConstant);
 				buffer.WriteBlob (rows [i].Col3);
 			}
@@ -342,8 +342,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.HasCustomAttribute);	// Parent
-				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.CustomAttributeType);	// Type
+				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.HasCustomAttribute);    // Parent
+				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.CustomAttributeType);   // Type
 				buffer.WriteBlob (rows [i].Col3);
 			}
 		}
@@ -375,7 +375,7 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);
+				buffer.WriteUInt16 ((ushort)rows [i].Col1);
 				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.HasDeclSecurity);
 				buffer.WriteBlob (rows [i].Col3);
 			}
@@ -392,9 +392,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 (rows [i].Col1);		// PackingSize
-				buffer.WriteUInt32 (rows [i].Col2);		// ClassSize
-				buffer.WriteRID (rows [i].Col3, Table.TypeDef);	// Parent
+				buffer.WriteUInt16 (rows [i].Col1);     // PackingSize
+				buffer.WriteUInt32 (rows [i].Col2);     // ClassSize
+				buffer.WriteRID (rows [i].Col3, Table.TypeDef); // Parent
 			}
 		}
 
@@ -409,8 +409,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt32 (rows [i].Col1);		// Offset
-				buffer.WriteRID (rows [i].Col2, Table.Field);	// Parent
+				buffer.WriteUInt32 (rows [i].Col1);     // Offset
+				buffer.WriteRID (rows [i].Col2, Table.Field);   // Parent
 			}
 		}
 
@@ -434,8 +434,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.TypeDef);		// Parent
-				buffer.WriteRID (rows [i].Col2, Table.Event);		// EventList
+				buffer.WriteRID (rows [i].Col1, Table.TypeDef);     // Parent
+				buffer.WriteRID (rows [i].Col2, Table.Event);       // EventList
 			}
 		}
 	}
@@ -445,9 +445,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Flags
-				buffer.WriteString (rows [i].Col2);		// Name
-				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.TypeDefOrRef);	// EventType
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Flags
+				buffer.WriteString (rows [i].Col2);     // Name
+				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.TypeDefOrRef);  // EventType
 			}
 		}
 	}
@@ -457,8 +457,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.TypeDef);		// Parent
-				buffer.WriteRID (rows [i].Col2, Table.Property);	// PropertyList
+				buffer.WriteRID (rows [i].Col1, Table.TypeDef);     // Parent
+				buffer.WriteRID (rows [i].Col2, Table.Property);    // PropertyList
 			}
 		}
 	}
@@ -468,9 +468,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Flags
-				buffer.WriteString (rows [i].Col2);		// Name
-				buffer.WriteBlob (rows [i].Col3);		// Type
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Flags
+				buffer.WriteString (rows [i].Col2);     // Name
+				buffer.WriteBlob (rows [i].Col3);       // Type
 			}
 		}
 	}
@@ -480,9 +480,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Flags
-				buffer.WriteRID (rows [i].Col2, Table.Method);	// Method
-				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.HasSemantics);	// Association
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Flags
+				buffer.WriteRID (rows [i].Col2, Table.Method);  // Method
+				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.HasSemantics);  // Association
 			}
 		}
 
@@ -497,9 +497,9 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.TypeDef);	// Class
-				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.MethodDefOrRef);	// MethodBody
-				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.MethodDefOrRef);	// MethodDeclaration
+				buffer.WriteRID (rows [i].Col1, Table.TypeDef); // Class
+				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.MethodDefOrRef);    // MethodBody
+				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.MethodDefOrRef);    // MethodDeclaration
 			}
 		}
 	}
@@ -509,7 +509,7 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++)
-				buffer.WriteString (rows [i]);	// Name
+				buffer.WriteString (rows [i]);  // Name
 		}
 	}
 
@@ -518,7 +518,7 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++)
-				buffer.WriteBlob (rows [i]);	// Signature
+				buffer.WriteBlob (rows [i]);    // Signature
 		}
 	}
 
@@ -527,10 +527,10 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Flags
-				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.MemberForwarded);	// MemberForwarded
-				buffer.WriteString (rows [i].Col3);		// ImportName
-				buffer.WriteRID (rows [i].Col4, Table.ModuleRef);	// ImportScope
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Flags
+				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.MemberForwarded);   // MemberForwarded
+				buffer.WriteString (rows [i].Col3);     // ImportName
+				buffer.WriteRID (rows [i].Col4, Table.ModuleRef);   // ImportScope
 			}
 		}
 
@@ -548,8 +548,8 @@ namespace Mono.Cecil {
 		{
 			position = buffer.position;
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt32 (rows [i].Col1);		// RVA
-				buffer.WriteRID (rows [i].Col2, Table.Field);	// Field
+				buffer.WriteUInt32 (rows [i].Col1);     // RVA
+				buffer.WriteRID (rows [i].Col2, Table.Field);   // Field
 			}
 		}
 
@@ -563,15 +563,15 @@ namespace Mono.Cecil {
 
 		public override void Write (TableHeapBuffer buffer)
 		{
-			buffer.WriteUInt32 ((uint) row.Col1);	// AssemblyHashAlgorithm
-			buffer.WriteUInt16 (row.Col2);			// MajorVersion
-			buffer.WriteUInt16 (row.Col3);			// MinorVersion
-			buffer.WriteUInt16 (row.Col4);			// Build
-			buffer.WriteUInt16 (row.Col5);			// Revision
-			buffer.WriteUInt32 ((uint) row.Col6);	// Flags
-			buffer.WriteBlob (row.Col7);			// PublicKey
-			buffer.WriteString (row.Col8);			// Name
-			buffer.WriteString (row.Col9);			// Culture
+			buffer.WriteUInt32 ((uint)row.Col1);    // AssemblyHashAlgorithm
+			buffer.WriteUInt16 (row.Col2);          // MajorVersion
+			buffer.WriteUInt16 (row.Col3);          // MinorVersion
+			buffer.WriteUInt16 (row.Col4);          // Build
+			buffer.WriteUInt16 (row.Col5);          // Revision
+			buffer.WriteUInt32 ((uint)row.Col6);    // Flags
+			buffer.WriteBlob (row.Col7);            // PublicKey
+			buffer.WriteString (row.Col8);          // Name
+			buffer.WriteString (row.Col9);          // Culture
 		}
 	}
 
@@ -580,15 +580,15 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 (rows [i].Col1);		// MajorVersion
-				buffer.WriteUInt16 (rows [i].Col2);		// MinorVersion
-				buffer.WriteUInt16 (rows [i].Col3);		// Build
-				buffer.WriteUInt16 (rows [i].Col4);		// Revision
-				buffer.WriteUInt32 ((uint) rows [i].Col5);	// Flags
-				buffer.WriteBlob (rows [i].Col6);		// PublicKeyOrToken
-				buffer.WriteString (rows [i].Col7);		// Name
-				buffer.WriteString (rows [i].Col8);		// Culture
-				buffer.WriteBlob (rows [i].Col9);		// Hash
+				buffer.WriteUInt16 (rows [i].Col1);     // MajorVersion
+				buffer.WriteUInt16 (rows [i].Col2);     // MinorVersion
+				buffer.WriteUInt16 (rows [i].Col3);     // Build
+				buffer.WriteUInt16 (rows [i].Col4);     // Revision
+				buffer.WriteUInt32 ((uint)rows [i].Col5);   // Flags
+				buffer.WriteBlob (rows [i].Col6);       // PublicKeyOrToken
+				buffer.WriteString (rows [i].Col7);     // Name
+				buffer.WriteString (rows [i].Col8);     // Culture
+				buffer.WriteBlob (rows [i].Col9);       // Hash
 			}
 		}
 	}
@@ -598,7 +598,7 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt32 ((uint) rows [i].Col1);
+				buffer.WriteUInt32 ((uint)rows [i].Col1);
 				buffer.WriteString (rows [i].Col2);
 				buffer.WriteBlob (rows [i].Col3);
 			}
@@ -610,7 +610,7 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt32 ((uint) rows [i].Col1);
+				buffer.WriteUInt32 ((uint)rows [i].Col1);
 				buffer.WriteUInt32 (rows [i].Col2);
 				buffer.WriteString (rows [i].Col3);
 				buffer.WriteString (rows [i].Col4);
@@ -625,7 +625,7 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < length; i++) {
 				buffer.WriteUInt32 (rows [i].Col1);
-				buffer.WriteUInt32 ((uint) rows [i].Col2);
+				buffer.WriteUInt32 ((uint)rows [i].Col2);
 				buffer.WriteString (rows [i].Col3);
 				buffer.WriteCodedRID (rows [i].Col4, CodedIndex.Implementation);
 			}
@@ -637,8 +637,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.TypeDef);		// NestedClass
-				buffer.WriteRID (rows [i].Col2, Table.TypeDef);		// EnclosingClass
+				buffer.WriteRID (rows [i].Col1, Table.TypeDef);     // NestedClass
+				buffer.WriteRID (rows [i].Col2, Table.TypeDef);     // EnclosingClass
 			}
 		}
 
@@ -653,10 +653,10 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 (rows [i].Col1);		// Number
-				buffer.WriteUInt16 ((ushort) rows [i].Col2);	// Flags
-				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.TypeOrMethodDef);	// Owner
-				buffer.WriteString (rows [i].Col4);		// Name
+				buffer.WriteUInt16 (rows [i].Col1);     // Number
+				buffer.WriteUInt16 ((ushort)rows [i].Col2); // Flags
+				buffer.WriteCodedRID (rows [i].Col3, CodedIndex.TypeOrMethodDef);   // Owner
+				buffer.WriteString (rows [i].Col4);     // Name
 			}
 		}
 	}
@@ -666,8 +666,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.MethodDefOrRef);	// Method
-				buffer.WriteBlob (rows [i].Col2);	// Instantiation
+				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.MethodDefOrRef);    // Method
+				buffer.WriteBlob (rows [i].Col2);   // Instantiation
 			}
 		}
 	}
@@ -677,8 +677,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.GenericParam);	// Owner
-				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.TypeDefOrRef);	// Constraint
+				buffer.WriteRID (rows [i].Col1, Table.GenericParam);    // Owner
+				buffer.WriteCodedRID (rows [i].Col2, CodedIndex.TypeDefOrRef);  // Constraint
 			}
 		}
 	}
@@ -688,10 +688,10 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteBlob (rows [i].Col1);	// Name
-				buffer.WriteGuid (rows [i].Col2);	// HashAlgorithm
-				buffer.WriteBlob (rows [i].Col3);	// Hash
-				buffer.WriteGuid (rows [i].Col4);	// Language
+				buffer.WriteBlob (rows [i].Col1);   // Name
+				buffer.WriteGuid (rows [i].Col2);   // HashAlgorithm
+				buffer.WriteBlob (rows [i].Col3);   // Hash
+				buffer.WriteGuid (rows [i].Col4);   // Language
 			}
 		}
 	}
@@ -701,8 +701,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.Document);	// Document
-				buffer.WriteBlob (rows [i].Col2);	// SequencePoints
+				buffer.WriteRID (rows [i].Col1, Table.Document);    // Document
+				buffer.WriteBlob (rows [i].Col2);   // SequencePoints
 			}
 		}
 	}
@@ -712,8 +712,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.Method);	// Method
-				buffer.WriteRID (rows [i].Col2, Table.ImportScope);	// ImportScope
+				buffer.WriteRID (rows [i].Col1, Table.Method);  // Method
+				buffer.WriteRID (rows [i].Col2, Table.ImportScope); // ImportScope
 				buffer.WriteRID (rows [i].Col3, Table.LocalVariable); // VariableList
 				buffer.WriteRID (rows [i].Col4, Table.LocalConstant); // ConstantList
 				buffer.WriteUInt32 (rows [i].Col5); // StartOffset
@@ -727,8 +727,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteUInt16 ((ushort) rows [i].Col1);	// Attributes
-				buffer.WriteUInt16 (rows [i].Col2);	// Index
+				buffer.WriteUInt16 ((ushort)rows [i].Col1); // Attributes
+				buffer.WriteUInt16 (rows [i].Col2); // Index
 				buffer.WriteString (rows [i].Col3); // Name
 			}
 		}
@@ -739,8 +739,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteString (rows [i].Col1);	// Name
-				buffer.WriteBlob (rows [i].Col2);	// Signature
+				buffer.WriteString (rows [i].Col1); // Name
+				buffer.WriteBlob (rows [i].Col2);   // Signature
 			}
 		}
 	}
@@ -750,8 +750,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.ImportScope);	// Parent
-				buffer.WriteBlob (rows [i].Col2);	// Imports
+				buffer.WriteRID (rows [i].Col1, Table.ImportScope); // Parent
+				buffer.WriteBlob (rows [i].Col2);   // Imports
 			}
 		}
 	}
@@ -761,8 +761,8 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteRID (rows [i].Col1, Table.Method);	// MoveNextMethod
-				buffer.WriteRID (rows [i].Col2, Table.Method);	// KickoffMethod
+				buffer.WriteRID (rows [i].Col1, Table.Method);  // MoveNextMethod
+				buffer.WriteRID (rows [i].Col2, Table.Method);  // KickoffMethod
 			}
 		}
 	}
@@ -772,15 +772,15 @@ namespace Mono.Cecil {
 		public override void Write (TableHeapBuffer buffer)
 		{
 			for (int i = 0; i < length; i++) {
-				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.HasCustomDebugInformation);	// Parent
-				buffer.WriteGuid (rows [i].Col2);	// Kind
-				buffer.WriteBlob (rows [i].Col3);	// Value
+				buffer.WriteCodedRID (rows [i].Col1, CodedIndex.HasCustomDebugInformation); // Parent
+				buffer.WriteGuid (rows [i].Col2);   // Kind
+				buffer.WriteBlob (rows [i].Col3);   // Value
 			}
 		}
 
 		public override int Compare (CustomDebugInformationRow x, CustomDebugInformationRow y)
 		{
-			return Compare(x.Col1, y.Col1);
+			return Compare (x.Col1, y.Col1);
 		}
 	}
 
@@ -936,7 +936,7 @@ namespace Mono.Cecil {
 			this.user_string_heap = new UserStringHeapBuffer ();
 			this.blob_heap = new BlobHeapBuffer ();
 			this.table_heap = new TableHeapBuffer (module, this);
-			this.pdb_heap = new PdbHeapBuffer();
+			this.pdb_heap = new PdbHeapBuffer ();
 
 			this.document_table = GetTable<DocumentTable> (Table.Document);
 			this.method_debug_information_table = GetTable<MethodDebugInformationTable> (Table.MethodDebugInformation);
@@ -961,7 +961,7 @@ namespace Mono.Cecil {
 			return map;
 		}
 
-		TTable GetTable<TTable> (Table table) where TTable : MetadataTable, new ()
+		TTable GetTable<TTable> (Table table) where TTable : MetadataTable, new()
 		{
 			return table_heap.GetTable<TTable> (table);
 		}
@@ -1057,10 +1057,10 @@ namespace Mono.Cecil {
 
 			table.row = new AssemblyRow (
 				name.HashAlgorithm,
-				(ushort) name.Version.Major,
-				(ushort) name.Version.Minor,
-				(ushort) name.Version.Build,
-				(ushort) name.Version.Revision,
+				(ushort)name.Version.Major,
+				(ushort)name.Version.Minor,
+				(ushort)name.Version.Build,
+				(ushort)name.Version.Revision,
 				name.Attributes,
 				GetBlobIndex (name.PublicKey),
 				GetStringIndex (name.Name),
@@ -1093,7 +1093,6 @@ namespace Mono.Cecil {
 					FileAttributes.ContainsMetaData,
 					GetStringIndex (module.Name),
 					GetBlobIndex (hash)));
-#endif
 			}
 		}
 
@@ -1125,10 +1124,10 @@ namespace Mono.Cecil {
 				var version = reference.Version;
 
 				var rid = table.AddRow (new AssemblyRefRow (
-					(ushort) version.Major,
-					(ushort) version.Minor,
-					(ushort) version.Build,
-					(ushort) version.Revision,
+					(ushort)version.Major,
+					(ushort)version.Minor,
+					(ushort)version.Build,
+					(ushort)version.Revision,
 					reference.Attributes,
 					GetBlobIndex (key_or_token),
 					GetStringIndex (reference.Name),
@@ -1172,17 +1171,17 @@ namespace Mono.Cecil {
 
 				switch (resource.ResourceType) {
 				case ResourceType.Embedded:
-					row.Col1 = AddEmbeddedResource ((EmbeddedResource) resource);
+					row.Col1 = AddEmbeddedResource ((EmbeddedResource)resource);
 					break;
 				case ResourceType.Linked:
 					row.Col4 = CodedIndex.Implementation.CompressMetadataToken (
 						new MetadataToken (
 							TokenType.File,
-							AddLinkedResource ((LinkedResource) resource)));
+							AddLinkedResource ((LinkedResource)resource)));
 					break;
 				case ResourceType.AssemblyLinked:
 					row.Col4 = CodedIndex.Implementation.CompressMetadataToken (
-						((AssemblyLinkedResource) resource).Assembly.MetadataToken);
+						((AssemblyLinkedResource)resource).Assembly.MetadataToken);
 					break;
 				default:
 					throw new NotSupportedException ();
@@ -1200,7 +1199,7 @@ namespace Mono.Cecil {
 			if (hash.IsNullOrEmpty ())
 				hash = CryptoService.ComputeHash (resource.File);
 
-			return (uint) table.AddRow (new FileRow (
+			return (uint)table.AddRow (new FileRow (
 				FileAttributes.ContainsNoMetaData,
 				GetStringIndex (resource.File),
 				GetBlobIndex (hash)));
@@ -1221,7 +1220,7 @@ namespace Mono.Cecil {
 
 				var rid = table.AddRow (new ExportedTypeRow (
 					exported_type.Attributes,
-					(uint) exported_type.Identifier,
+					(uint)exported_type.Identifier,
 					GetStringIndex (exported_type.Name),
 					GetStringIndex (exported_type.Namespace),
 					MakeCodedRID (GetExportedTypeScope (exported_type), CodedIndex.Implementation)));
@@ -1295,7 +1294,7 @@ namespace Mono.Cecil {
 		void AttachFieldsToken (TypeDefinition type)
 		{
 			var fields = type.Fields;
-			type.fields_range.Length = (uint) fields.Count;
+			type.fields_range.Length = (uint)fields.Count;
 			for (int i = 0; i < fields.Count; i++)
 				fields [i].token = new MetadataToken (TokenType.Field, field_rid++);
 		}
@@ -1303,7 +1302,7 @@ namespace Mono.Cecil {
 		void AttachMethodsToken (TypeDefinition type)
 		{
 			var methods = type.Methods;
-			type.methods_range.Length = (uint) methods.Count;
+			type.methods_range.Length = (uint)methods.Count;
 			for (int i = 0; i < methods.Count; i++)
 				methods [i].token = new MetadataToken (TokenType.Method, method_rid++);
 		}
@@ -1488,7 +1487,7 @@ namespace Mono.Cecil {
 				var generic_parameter = items [i];
 
 				var rid = generic_param_table.AddRow (new GenericParamRow (
-					(ushort) generic_parameter.Position,
+					(ushort)generic_parameter.Position,
 					generic_parameter.Attributes,
 					MakeCodedRID (generic_parameter.Owner, CodedIndex.TypeOrMethodDef),
 					GetStringIndex (generic_parameter.Name)));
@@ -1540,8 +1539,8 @@ namespace Mono.Cecil {
 				var table = GetTable<ClassLayoutTable> (Table.ClassLayout);
 
 				table.AddRow (new ClassLayoutRow (
-					(ushort) type.PackingSize,
-					(uint) type.ClassSize,
+					(ushort)type.PackingSize,
+					(uint)type.ClassSize,
 					type.token.RID));
 
 				return;
@@ -1626,7 +1625,7 @@ namespace Mono.Cecil {
 		void AddFieldLayout (FieldDefinition field)
 		{
 			var table = GetTable<FieldLayoutTable> (Table.FieldLayout);
-			table.AddRow (new FieldLayoutRow ((uint) field.Offset, field.token.RID));
+			table.AddRow (new FieldLayoutRow ((uint)field.Offset, field.token.RID));
 		}
 
 		void AddMethods (TypeDefinition type)
@@ -1686,7 +1685,7 @@ namespace Mono.Cecil {
 				if (!RequiresParameterRow (parameter))
 					continue;
 
-				AddParameter ((ushort) (i + 1), parameter, param_table);
+				AddParameter ((ushort)(i + 1), parameter, param_table);
 			}
 		}
 
@@ -1878,16 +1877,16 @@ namespace Mono.Cecil {
 			case ElementType.Var:
 				return ElementType.Class;
 			case ElementType.GenericInst:
-				var generic_instance = (GenericInstanceType) constant_type;
+				var generic_instance = (GenericInstanceType)constant_type;
 				if (generic_instance.ElementType.IsTypeOf ("System", "Nullable`1"))
 					return GetConstantType (generic_instance.GenericArguments [0], constant);
 
-				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
+				return GetConstantType (((TypeSpecification)constant_type).ElementType, constant);
 			case ElementType.CModOpt:
 			case ElementType.CModReqD:
 			case ElementType.ByRef:
 			case ElementType.Sentinel:
-				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
+				return GetConstantType (((TypeSpecification)constant_type).ElementType, constant);
 			case ElementType.Boolean:
 			case ElementType.Char:
 			case ElementType.I:
@@ -2042,7 +2041,7 @@ namespace Mono.Cecil {
 			if (!method_spec.IsGenericInstance)
 				throw new NotSupportedException ();
 
-			var generic_instance = (GenericInstanceMethod) method_spec;
+			var generic_instance = (GenericInstanceMethod)method_spec;
 
 			var signature = CreateSignatureWriter ();
 			signature.WriteByte (0x0a);
@@ -2054,7 +2053,7 @@ namespace Mono.Cecil {
 
 		public uint AddStandAloneSignature (uint signature)
 		{
-			return (uint) standalone_sig_table.AddRow (signature);
+			return (uint)standalone_sig_table.AddRow (signature);
 		}
 
 		public uint GetLocalVariableBlobIndex (Collection<VariableDefinition> variables)
@@ -2076,7 +2075,7 @@ namespace Mono.Cecil {
 		{
 			var signature = CreateSignatureWriter ();
 			signature.WriteByte (0x7);
-			signature.WriteCompressedUInt32 ((uint) variables.Count);
+			signature.WriteCompressedUInt32 ((uint)variables.Count);
 			for (int i = 0; i < variables.Count; i++)
 				signature.WriteTypeSignature (variables [i].VariableType);
 			return signature;
@@ -2130,7 +2129,7 @@ namespace Mono.Cecil {
 
 			if (property.HasParameters) {
 				parameters = property.Parameters;
-				param_count = (uint) parameters.Count;
+				param_count = (uint)parameters.Count;
 			}
 
 			signature.WriteByte (calling_convention);
@@ -2168,7 +2167,7 @@ namespace Mono.Cecil {
 				signature.WriteInt32 (0);
 				break;
 			case ElementType.String:
-				signature.WriteConstantString ((string) value);
+				signature.WriteConstantString ((string)value);
 				break;
 			default:
 				signature.WriteConstantPrimitive (value);
@@ -2247,9 +2246,9 @@ namespace Mono.Cecil {
 			case TokenType.TypeRef:
 			case TokenType.TypeSpec:
 			case TokenType.GenericParam:
-				return GetTypeToken ((TypeReference) provider);
+				return GetTypeToken ((TypeReference)provider);
 			case TokenType.MethodSpec:
-				return GetMethodSpecToken ((MethodSpecification) provider);
+				return GetMethodSpecToken ((MethodSpecification)provider);
 			case TokenType.MemberRef:
 				return GetMemberRefToken (member);
 			default:
@@ -2283,8 +2282,8 @@ namespace Mono.Cecil {
 				scope.import != null ? AddImportScope (scope.import) : 0,
 				local_variable_rid,
 				local_constant_rid,
-				(uint) scope.Start.Offset,
-				(uint) ((scope.End.IsEndOfMethod ? method_info.code_size : scope.End.Offset) - scope.Start.Offset)));
+				(uint)scope.Start.Offset,
+				(uint)((scope.End.IsEndOfMethod ? method_info.code_size : scope.End.Offset) - scope.Start.Offset)));
 
 			scope.token = new MetadataToken (TokenType.LocalScope, rid);
 
@@ -2304,7 +2303,7 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < scope.Variables.Count; i++) {
 				var variable = scope.Variables [i];
-				local_variable_table.AddRow (new LocalVariableRow (variable.Attributes, (ushort) variable.Index, GetStringIndex (variable.Name)));
+				local_variable_table.AddRow (new LocalVariableRow (variable.Attributes, (ushort)variable.Index, GetStringIndex (variable.Name)));
 				variable.token = new MetadataToken (TokenType.LocalVariable, local_variable_rid);
 				local_variable_rid++;
 
@@ -2316,7 +2315,7 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < scope.Constants.Count; i++) {
 				var constant = scope.Constants [i];
-				local_constant_table.AddRow (new LocalConstantRow (GetStringIndex (constant.Name), GetBlobIndex (GetConstantSignature(constant))));
+				local_constant_table.AddRow (new LocalConstantRow (GetStringIndex (constant.Name), GetBlobIndex (GetConstantSignature (constant))));
 				constant.token = new MetadataToken (TokenType.LocalConstant, local_constant_rid);
 				local_constant_rid++;
 			}
@@ -2330,16 +2329,16 @@ namespace Mono.Cecil {
 			signature.WriteTypeSignature (type);
 
 			if (type.IsTypeOf ("System", "Decimal")) {
-				var bits = decimal.GetBits ((decimal) constant.Value);
+				var bits = decimal.GetBits ((decimal)constant.Value);
 
-				var low = (uint) bits [0];
-				var mid = (uint) bits [1];
-				var high = (uint) bits [2];
+				var low = (uint)bits [0];
+				var mid = (uint)bits [1];
+				var high = (uint)bits [2];
 
-				var scale = (byte) (bits [3] >> 16);
+				var scale = (byte)(bits [3] >> 16);
 				var negative = (bits [3] & 0x80000000) != 0;
 
-				signature.WriteByte ((byte) (scale | (negative ? 0x80 : 0x00)));
+				signature.WriteByte ((byte)(scale | (negative ? 0x80 : 0x00)));
 				signature.WriteUInt32 (low);
 				signature.WriteUInt32 (mid);
 				signature.WriteUInt32 (high);
@@ -2348,7 +2347,7 @@ namespace Mono.Cecil {
 			}
 
 			if (type.IsTypeOf ("System", "DateTime")) {
-				var date = (DateTime) constant.Value;
+				var date = (DateTime)constant.Value;
 				signature.WriteInt64 (date.Ticks);
 				return signature;
 			}
@@ -2369,20 +2368,20 @@ namespace Mono.Cecil {
 				var custom_info = custom_infos [i];
 				switch (custom_info.Kind) {
 				case CustomDebugInformationKind.Binary:
-					var binary_info = (BinaryCustomDebugInformation) custom_info;
+					var binary_info = (BinaryCustomDebugInformation)custom_info;
 					AddCustomDebugInformation (provider, binary_info, GetBlobIndex (binary_info.Data));
 					break;
 				case CustomDebugInformationKind.AsyncMethodBody:
-					AddAsyncMethodBodyDebugInformation (provider, (AsyncMethodBodyDebugInformation) custom_info);
+					AddAsyncMethodBodyDebugInformation (provider, (AsyncMethodBodyDebugInformation)custom_info);
 					break;
 				case CustomDebugInformationKind.StateMachineScope:
-					AddStateMachineScopeDebugInformation (provider, (StateMachineScopeDebugInformation) custom_info);
+					AddStateMachineScopeDebugInformation (provider, (StateMachineScopeDebugInformation)custom_info);
 					break;
 				case CustomDebugInformationKind.EmbeddedSource:
-					AddEmbeddedSourceDebugInformation (provider, (EmbeddedSourceDebugInformation) custom_info);
+					AddEmbeddedSourceDebugInformation (provider, (EmbeddedSourceDebugInformation)custom_info);
 					break;
 				case CustomDebugInformationKind.SourceLink:
-					AddSourceLinkDebugInformation (provider, (SourceLinkDebugInformation) custom_info);
+					AddSourceLinkDebugInformation (provider, (SourceLinkDebugInformation)custom_info);
 					break;
 				default:
 					throw new NotImplementedException ();
@@ -2392,7 +2391,7 @@ namespace Mono.Cecil {
 
 		void AddStateMachineScopeDebugInformation (ICustomDebugInformationProvider provider, StateMachineScopeDebugInformation state_machine_scope)
 		{
-			var method_info = ((MethodDefinition) provider).DebugInformation;
+			var method_info = ((MethodDefinition)provider).DebugInformation;
 
 			var signature = CreateSignatureWriter ();
 
@@ -2400,13 +2399,13 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < scopes.Count; i++) {
 				var scope = scopes [i];
-				signature.WriteUInt32 ((uint) scope.Start.Offset);
+				signature.WriteUInt32 ((uint)scope.Start.Offset);
 
 				var end_offset = scope.End.IsEndOfMethod
 					? method_info.code_size
 					: scope.End.Offset;
 
-				signature.WriteUInt32 ((uint) (end_offset - scope.Start.Offset));
+				signature.WriteUInt32 ((uint)(end_offset - scope.Start.Offset));
 			}
 
 			AddCustomDebugInformation (provider, state_machine_scope, signature);
@@ -2415,12 +2414,12 @@ namespace Mono.Cecil {
 		void AddAsyncMethodBodyDebugInformation (ICustomDebugInformationProvider provider, AsyncMethodBodyDebugInformation async_method)
 		{
 			var signature = CreateSignatureWriter ();
-			signature.WriteUInt32 ((uint) async_method.catch_handler.Offset + 1);
+			signature.WriteUInt32 ((uint)async_method.catch_handler.Offset + 1);
 
 			if (!async_method.yields.IsNullOrEmpty ()) {
 				for (int i = 0; i < async_method.yields.Count; i++) {
-					signature.WriteUInt32 ((uint) async_method.yields [i].Offset);
-					signature.WriteUInt32 ((uint) async_method.resumes [i].Offset);
+					signature.WriteUInt32 ((uint)async_method.yields [i].Offset);
+					signature.WriteUInt32 ((uint)async_method.resumes [i].Offset);
 					signature.WriteCompressedUInt32 (async_method.resume_methods [i].MetadataToken.RID);
 				}
 			}
@@ -2518,7 +2517,7 @@ namespace Mono.Cecil {
 				break;
 			case ImportTargetKind.ImportXmlNamespaceWithAlias:
 				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
-				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));	
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
 				break;
 			case ImportTargetKind.ImportAlias:
 				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
@@ -2581,7 +2580,7 @@ namespace Mono.Cecil {
 				return signature;
 			}
 
-			signature.WriteByte ((byte) separator);
+			signature.WriteByte ((byte)separator);
 			var parts = name.Split (new [] { separator });
 			for (int i = 0; i < parts.Length; i++) {
 				if (parts [i] == String.Empty)
@@ -2597,7 +2596,7 @@ namespace Mono.Cecil {
 		{
 			const char unix = '/';
 			const char win = '\\';
-			const char zero = (char) 0;
+			const char zero = (char)0;
 
 			separator = zero;
 			if (string.IsNullOrEmpty (path))
@@ -2652,7 +2651,7 @@ namespace Mono.Cecil {
 
 		public void WriteElementType (ElementType element_type)
 		{
-			WriteByte ((byte) element_type);
+			WriteByte ((byte)element_type);
 		}
 
 		public void WriteUTF8String (string @string)
@@ -2663,13 +2662,13 @@ namespace Mono.Cecil {
 			}
 
 			var bytes = Encoding.UTF8.GetBytes (@string);
-			WriteCompressedUInt32 ((uint) bytes.Length);
+			WriteCompressedUInt32 ((uint)bytes.Length);
 			WriteBytes (bytes);
 		}
 
 		public void WriteMethodSignature (IMethodSignature method)
 		{
-			byte calling_convention = (byte) method.CallingConvention;
+			byte calling_convention = (byte)method.CallingConvention;
 			if (method.HasThis)
 				calling_convention |= 0x20;
 			if (method.ExplicitThis)
@@ -2688,9 +2687,9 @@ namespace Mono.Cecil {
 			WriteByte (calling_convention);
 
 			if (generic_arity > 0)
-				WriteCompressedUInt32 ((uint) generic_arity);
+				WriteCompressedUInt32 ((uint)generic_arity);
 
-			WriteCompressedUInt32 ((uint) param_count);
+			WriteCompressedUInt32 ((uint)param_count);
 			WriteTypeSignature (method.ReturnType);
 
 			if (param_count == 0)
@@ -2722,68 +2721,68 @@ namespace Mono.Cecil {
 			switch (etype) {
 			case ElementType.MVar:
 			case ElementType.Var: {
-				var generic_parameter = (GenericParameter) type;
+					var generic_parameter = (GenericParameter)type;
 
-				WriteElementType (etype);
-				var position = generic_parameter.Position;
-				if (position == -1)
-					throw new NotSupportedException ();
+					WriteElementType (etype);
+					var position = generic_parameter.Position;
+					if (position == -1)
+						throw new NotSupportedException ();
 
-				WriteCompressedUInt32 ((uint) position);
-				break;
-			}
+					WriteCompressedUInt32 ((uint)position);
+					break;
+				}
 
 			case ElementType.GenericInst: {
-				var generic_instance = (GenericInstanceType) type;
-				WriteElementType (ElementType.GenericInst);
-				WriteElementType (generic_instance.IsValueType ? ElementType.ValueType : ElementType.Class);
-				WriteCompressedUInt32 (MakeTypeDefOrRefCodedRID (generic_instance.ElementType));
+					var generic_instance = (GenericInstanceType)type;
+					WriteElementType (ElementType.GenericInst);
+					WriteElementType (generic_instance.IsValueType ? ElementType.ValueType : ElementType.Class);
+					WriteCompressedUInt32 (MakeTypeDefOrRefCodedRID (generic_instance.ElementType));
 
-				WriteGenericInstanceSignature (generic_instance);
-				break;
-			}
+					WriteGenericInstanceSignature (generic_instance);
+					break;
+				}
 
 			case ElementType.Ptr:
 			case ElementType.ByRef:
 			case ElementType.Pinned:
 			case ElementType.Sentinel: {
-				var type_spec = (TypeSpecification) type;
-				WriteElementType (etype);
-				WriteTypeSignature (type_spec.ElementType);
-				break;
-			}
-
-			case ElementType.FnPtr: {
-				var fptr = (FunctionPointerType) type;
-				WriteElementType (ElementType.FnPtr);
-				WriteMethodSignature (fptr);
-				break;
-			}
-
-			case ElementType.CModOpt:
-			case ElementType.CModReqD: {
-				var modifier = (IModifierType) type;
-				WriteModifierSignature (etype, modifier);
-				break;
-			}
-
-			case ElementType.Array: {
-				var array = (ArrayType) type;
-				if (!array.IsVector) {
-					WriteArrayTypeSignature (array);
+					var type_spec = (TypeSpecification)type;
+					WriteElementType (etype);
+					WriteTypeSignature (type_spec.ElementType);
 					break;
 				}
 
-				WriteElementType (ElementType.SzArray);
-				WriteTypeSignature (array.ElementType);
-				break;
-			}
+			case ElementType.FnPtr: {
+					var fptr = (FunctionPointerType)type;
+					WriteElementType (ElementType.FnPtr);
+					WriteMethodSignature (fptr);
+					break;
+				}
+
+			case ElementType.CModOpt:
+			case ElementType.CModReqD: {
+					var modifier = (IModifierType)type;
+					WriteModifierSignature (etype, modifier);
+					break;
+				}
+
+			case ElementType.Array: {
+					var array = (ArrayType)type;
+					if (!array.IsVector) {
+						WriteArrayTypeSignature (array);
+						break;
+					}
+
+					WriteElementType (ElementType.SzArray);
+					WriteTypeSignature (array.ElementType);
+					break;
+				}
 
 			case ElementType.None: {
-				WriteElementType (type.IsValueType ? ElementType.ValueType : ElementType.Class);
-				WriteCompressedUInt32 (MakeTypeDefOrRefCodedRID (type));
-				break;
-			}
+					WriteElementType (type.IsValueType ? ElementType.ValueType : ElementType.Class);
+					WriteCompressedUInt32 (MakeTypeDefOrRefCodedRID (type));
+					break;
+				}
 
 			default:
 				if (!TryWriteElementType (type))
@@ -2802,7 +2801,7 @@ namespace Mono.Cecil {
 			var dimensions = array.Dimensions;
 			var rank = dimensions.Count;
 
-			WriteCompressedUInt32 ((uint) rank);
+			WriteCompressedUInt32 ((uint)rank);
 
 			var sized = 0;
 			var lbounds = 0;
@@ -2827,11 +2826,11 @@ namespace Mono.Cecil {
 					sizes [i] = dimension.UpperBound.Value - low_bounds [i] + 1;
 			}
 
-			WriteCompressedUInt32 ((uint) sized);
+			WriteCompressedUInt32 ((uint)sized);
 			for (int i = 0; i < sized; i++)
-				WriteCompressedUInt32 ((uint) sizes [i]);
+				WriteCompressedUInt32 ((uint)sizes [i]);
 
-			WriteCompressedUInt32 ((uint) lbounds);
+			WriteCompressedUInt32 ((uint)lbounds);
 			for (int i = 0; i < lbounds; i++)
 				WriteCompressedInt32 (low_bounds [i]);
 		}
@@ -2841,7 +2840,7 @@ namespace Mono.Cecil {
 			var generic_arguments = instance.GenericArguments;
 			var arity = generic_arguments.Count;
 
-			WriteCompressedUInt32 ((uint) arity);
+			WriteCompressedUInt32 ((uint)arity);
 			for (int i = 0; i < arity; i++)
 				WriteTypeSignature (generic_arguments [i]);
 		}
@@ -2895,7 +2894,7 @@ namespace Mono.Cecil {
 		void WriteCustomAttributeFixedArgument (TypeReference type, CustomAttributeArgument argument)
 		{
 			if (type.IsArray) {
-				WriteCustomAttributeFixedArrayArgument ((ArrayType) type, argument);
+				WriteCustomAttributeFixedArrayArgument ((ArrayType)type, argument);
 				return;
 			}
 
@@ -2925,12 +2924,12 @@ namespace Mono.Cecil {
 		void WriteCustomAttributeElement (TypeReference type, CustomAttributeArgument argument)
 		{
 			if (type.IsArray) {
-				WriteCustomAttributeFixedArrayArgument ((ArrayType) type, argument);
+				WriteCustomAttributeFixedArrayArgument ((ArrayType)type, argument);
 				return;
 			}
 
 			if (type.etype == ElementType.Object) {
-				argument = (CustomAttributeArgument) argument.Value;
+				argument = (CustomAttributeArgument)argument.Value;
 				type = argument.Type;
 
 				WriteCustomAttributeFieldOrPropType (type);
@@ -2947,7 +2946,7 @@ namespace Mono.Cecil {
 
 			switch (etype) {
 			case ElementType.String:
-				var @string = (string) value;
+				var @string = (string)value;
 				if (@string == null)
 					WriteByte (0xff);
 				else
@@ -2955,7 +2954,7 @@ namespace Mono.Cecil {
 				break;
 			case ElementType.None:
 				if (type.IsTypeOf ("System", "Type"))
-					WriteTypeReference ((TypeReference) value);
+					WriteTypeReference ((TypeReference)value);
 				else
 					WriteCustomAttributeEnumValue (type, value);
 				break;
@@ -2972,40 +2971,40 @@ namespace Mono.Cecil {
 
 			switch (value.GetType ().GetTypeCode ()) {
 			case TypeCode.Boolean:
-				WriteByte ((byte) (((bool) value) ? 1 : 0));
+				WriteByte ((byte)(((bool)value) ? 1 : 0));
 				break;
 			case TypeCode.Byte:
-				WriteByte ((byte) value);
+				WriteByte ((byte)value);
 				break;
 			case TypeCode.SByte:
-				WriteSByte ((sbyte) value);
+				WriteSByte ((sbyte)value);
 				break;
 			case TypeCode.Int16:
-				WriteInt16 ((short) value);
+				WriteInt16 ((short)value);
 				break;
 			case TypeCode.UInt16:
-				WriteUInt16 ((ushort) value);
+				WriteUInt16 ((ushort)value);
 				break;
 			case TypeCode.Char:
-				WriteInt16 ((short) (char) value);
+				WriteInt16 ((short)(char)value);
 				break;
 			case TypeCode.Int32:
-				WriteInt32 ((int) value);
+				WriteInt32 ((int)value);
 				break;
 			case TypeCode.UInt32:
-				WriteUInt32 ((uint) value);
+				WriteUInt32 ((uint)value);
 				break;
 			case TypeCode.Single:
-				WriteSingle ((float) value);
+				WriteSingle ((float)value);
 				break;
 			case TypeCode.Int64:
-				WriteInt64 ((long) value);
+				WriteInt64 ((long)value);
 				break;
 			case TypeCode.UInt64:
-				WriteUInt64 ((ulong) value);
+				WriteUInt64 ((ulong)value);
 				break;
 			case TypeCode.Double:
-				WriteDouble ((double) value);
+				WriteDouble ((double)value);
 				break;
 			default:
 				throw new NotSupportedException (value.GetType ().FullName);
@@ -3024,7 +3023,7 @@ namespace Mono.Cecil {
 		void WriteCustomAttributeFieldOrPropType (TypeReference type)
 		{
 			if (type.IsArray) {
-				var array = (ArrayType) type;
+				var array = (ArrayType)type;
 				WriteElementType (ElementType.SzArray);
 				WriteCustomAttributeFieldOrPropType (array.ElementType);
 				return;
@@ -3054,7 +3053,7 @@ namespace Mono.Cecil {
 		{
 			var count = GetNamedArgumentCount (attribute);
 
-			WriteUInt16 ((ushort) count);
+			WriteUInt16 ((ushort)count);
 
 			if (count == 0)
 				return;
@@ -3113,22 +3112,22 @@ namespace Mono.Cecil {
 			}
 
 			var buffer = new SignatureWriter (metadata);
-			buffer.WriteCompressedUInt32 ((uint) count);
+			buffer.WriteCompressedUInt32 ((uint)count);
 			buffer.WriteICustomAttributeNamedArguments (attribute);
 
-			WriteCompressedUInt32 ((uint) buffer.length);
+			WriteCompressedUInt32 ((uint)buffer.length);
 			WriteBytes (buffer);
 		}
 
 		public void WriteSecurityDeclaration (SecurityDeclaration declaration)
 		{
-			WriteByte ((byte) '.');
+			WriteByte ((byte)'.');
 
 			var attributes = declaration.security_attributes;
 			if (attributes == null)
 				throw new NotSupportedException ();
 
-			WriteCompressedUInt32 ((uint) attributes.Count);
+			WriteCompressedUInt32 ((uint)attributes.Count);
 
 			for (int i = 0; i < attributes.Count; i++)
 				WriteSecurityAttribute (attributes [i]);
@@ -3160,7 +3159,7 @@ namespace Mono.Cecil {
 			if (property.Name != "XML")
 				return null;
 
-			return (string) property.Argument.Value;
+			return (string)property.Argument.Value;
 		}
 
 		void WriteTypeReference (TypeReference type)
@@ -3174,38 +3173,38 @@ namespace Mono.Cecil {
 
 			switch (marshal_info.native) {
 			case NativeType.Array: {
-				var array = (ArrayMarshalInfo) marshal_info;
-				if (array.element_type != NativeType.None)
-					WriteNativeType (array.element_type);
-				if (array.size_parameter_index > -1)
-					WriteCompressedUInt32 ((uint) array.size_parameter_index);
-				if (array.size > -1)
-					WriteCompressedUInt32 ((uint) array.size);
-				if (array.size_parameter_multiplier > -1)
-					WriteCompressedUInt32 ((uint) array.size_parameter_multiplier);
-				return;
-			}
+					var array = (ArrayMarshalInfo)marshal_info;
+					if (array.element_type != NativeType.None)
+						WriteNativeType (array.element_type);
+					if (array.size_parameter_index > -1)
+						WriteCompressedUInt32 ((uint)array.size_parameter_index);
+					if (array.size > -1)
+						WriteCompressedUInt32 ((uint)array.size);
+					if (array.size_parameter_multiplier > -1)
+						WriteCompressedUInt32 ((uint)array.size_parameter_multiplier);
+					return;
+				}
 			case NativeType.SafeArray: {
-				var array = (SafeArrayMarshalInfo) marshal_info;
-				if (array.element_type != VariantType.None)
-					WriteVariantType (array.element_type);
-				return;
-			}
+					var array = (SafeArrayMarshalInfo)marshal_info;
+					if (array.element_type != VariantType.None)
+						WriteVariantType (array.element_type);
+					return;
+				}
 			case NativeType.FixedArray: {
-				var array = (FixedArrayMarshalInfo) marshal_info;
-				if (array.size > -1)
-					WriteCompressedUInt32 ((uint) array.size);
-				if (array.element_type != NativeType.None)
-					WriteNativeType (array.element_type);
-				return;
-			}
+					var array = (FixedArrayMarshalInfo)marshal_info;
+					if (array.size > -1)
+						WriteCompressedUInt32 ((uint)array.size);
+					if (array.element_type != NativeType.None)
+						WriteNativeType (array.element_type);
+					return;
+				}
 			case NativeType.FixedSysString:
-				var sys_string = (FixedSysStringMarshalInfo) marshal_info;
+				var sys_string = (FixedSysStringMarshalInfo)marshal_info;
 				if (sys_string.size > -1)
-					WriteCompressedUInt32 ((uint) sys_string.size);
+					WriteCompressedUInt32 ((uint)sys_string.size);
 				return;
 			case NativeType.CustomMarshaler:
-				var marshaler = (CustomMarshalInfo) marshal_info;
+				var marshaler = (CustomMarshalInfo)marshal_info;
 				WriteUTF8String (marshaler.guid != Guid.Empty ? marshaler.guid.ToString () : string.Empty);
 				WriteUTF8String (marshaler.unmanaged_type);
 				WriteTypeReference (marshaler.managed_type);
@@ -3216,12 +3215,12 @@ namespace Mono.Cecil {
 
 		void WriteNativeType (NativeType native)
 		{
-			WriteByte ((byte) native);
+			WriteByte ((byte)native);
 		}
 
 		void WriteVariantType (VariantType variant)
 		{
-			WriteByte ((byte) variant);
+			WriteByte ((byte)variant);
 		}
 
 		public void WriteSequencePoints (MethodDebugInformation info)
@@ -3250,9 +3249,9 @@ namespace Mono.Cecil {
 				}
 
 				if (i > 0)
-					WriteCompressedUInt32 ((uint) (sequence_point.Offset - info.SequencePoints [i - 1].Offset));
+					WriteCompressedUInt32 ((uint)(sequence_point.Offset - info.SequencePoints [i - 1].Offset));
 				else
-					WriteCompressedUInt32 ((uint) sequence_point.Offset);
+					WriteCompressedUInt32 ((uint)sequence_point.Offset);
 
 				if (sequence_point.IsHidden) {
 					WriteInt16 (0);
@@ -3262,16 +3261,16 @@ namespace Mono.Cecil {
 				var delta_lines = sequence_point.EndLine - sequence_point.StartLine;
 				var delta_columns = sequence_point.EndColumn - sequence_point.StartColumn;
 
-				WriteCompressedUInt32 ((uint) delta_lines);
+				WriteCompressedUInt32 ((uint)delta_lines);
 
 				if (delta_lines == 0)
-					WriteCompressedUInt32((uint) delta_columns);
+					WriteCompressedUInt32 ((uint)delta_columns);
 				else
 					WriteCompressedInt32 (delta_columns);
 
 				if (start_line < 0) {
-					WriteCompressedUInt32 ((uint) sequence_point.StartLine);
-					WriteCompressedUInt32 ((uint) sequence_point.StartColumn);
+					WriteCompressedUInt32 ((uint)sequence_point.StartLine);
+					WriteCompressedUInt32 ((uint)sequence_point.StartColumn);
 				} else {
 					WriteCompressedInt32 (sequence_point.StartLine - start_line);
 					WriteCompressedInt32 (sequence_point.StartColumn - start_column);
@@ -3283,6 +3282,7 @@ namespace Mono.Cecil {
 		}
 	}
 
+#endif
 
 	static partial class Mixin {
 
