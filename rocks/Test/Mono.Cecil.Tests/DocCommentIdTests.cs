@@ -8,10 +8,11 @@ using Mono.Cecil.Rocks;
 
 namespace N
 {
+
     /// <summary>
     /// ID string generated is "T:N.X". 
     /// </summary>
-    public class X
+    public class X : IX<KVP<string, int>>
     {
         /// <summary>
         /// ID string generated is "M:N.X.#ctor".
@@ -102,7 +103,19 @@ namespace N
 	    public static void Linq (IEnumerable<string> enumerable, Func<string> selector)
 	    {
 	    }
+
+        /// <summary>
+		/// ID string generated is "M:N.X.N#IX{N#KVP{System#String,System#Int32}}#IXA(N.KVP{System.String,System.Int32})"
+        /// </summary>
+        void IX<KVP<string, int>>.IXA (KVP<string, int> k) { }
     }
+
+	public interface IX<K>
+	{
+		void IXA (K k);
+	}
+
+	public class KVP<K, T> { }
 }
 
 namespace Mono.Cecil.Tests {
@@ -249,6 +262,15 @@ namespace Mono.Cecil.Tests {
 			var method = type.GetMethod ("Linq");
 
 			AssertDocumentID ("M:N.X.Linq(System.Collections.Generic.IEnumerable{System.String},System.Func{System.String})", method);
+		}
+
+		[Test]
+		public void EII ()
+		{
+			var type = GetTestType ();
+			var method = type.Methods.Where (m => m.Name.Contains("IXA")).First ();
+
+			AssertDocumentID ("M:N.X.N#IX{N#KVP{System#String,System#Int32}}#IXA(N.KVP{System.String,System.Int32})", method);
 		}
 
 		TypeDefinition GetTestType ()
