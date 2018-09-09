@@ -450,6 +450,8 @@ namespace Mono.Cecil.Cil {
 
 			var directory = new ImageDebugDirectory {
 				Type = ImageDebugType.EmbeddedPortablePdb,
+				MajorVersion = 0x0100,
+				MinorVersion = 0x0100,
 			};
 
 			var data = new MemoryStream ();

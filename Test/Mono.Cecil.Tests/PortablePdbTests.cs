@@ -364,6 +364,8 @@ namespace Mono.Cecil.Tests {
 
 				var eppdb = header.Entries [1];
 				Assert.AreEqual (ImageDebugType.EmbeddedPortablePdb, eppdb.Directory.Type);
+				Assert.AreEqual (0x0100, eppdb.Directory.MajorVersion);
+				Assert.AreEqual (0x0100, eppdb.Directory.MinorVersion);
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 
