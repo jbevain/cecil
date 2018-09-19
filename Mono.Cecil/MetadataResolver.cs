@@ -59,6 +59,15 @@ namespace Mono.Cecil {
 			this.member = member;
 		}
 
+		public ResolutionException (MemberReference member, Exception innerException)
+			: base ("Failed to resolve " + member.FullName, innerException)
+		{
+			if (member == null)
+				throw new ArgumentNullException ("member");
+
+			this.member = member;
+		}
+
 #if !NET_CORE
 		ResolutionException (
 			System.Runtime.Serialization.SerializationInfo info,
