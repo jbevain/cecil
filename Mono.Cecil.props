@@ -43,6 +43,10 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefineConstants>$(DefineConstants);NET_4_0;</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition=" $(Configuration.StartsWith('net_462_')) ">
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <DefineConstants>$(DefineConstants);NET_4_0;</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="$(NetStandard)">
     <TargetFramework Condition="$(IsTestProject)">netcoreapp2.0</TargetFramework>
     <TargetFramework Condition="!$(IsTestProject)">netstandard1.3</TargetFramework>
@@ -62,6 +66,10 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Debug_ReadOnly' "/>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release' "/>
   <PropertyGroup Condition=" '$(Configuration)' == 'net_4_0_Release_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_462_Debug' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_462_Debug_ReadOnly' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_462_Release' "/>
+  <PropertyGroup Condition=" '$(Configuration)' == 'net_462_Release_ReadOnly' "/>
   <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Debug' "/>
   <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Debug_ReadOnly' "/>
   <PropertyGroup Condition=" '$(Configuration)' == 'netstandard_Release' "/>
