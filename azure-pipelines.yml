@@ -9,7 +9,7 @@ pool:
 variables:
   solution: 'Mono.Cecil.sln'
   buildPlatform: 'Any CPU'
-  buildConfiguration: 'net_4_0_Debug'
+  buildConfiguration: 'netstandard'
 
 steps:
 - task: VSBuild@1
