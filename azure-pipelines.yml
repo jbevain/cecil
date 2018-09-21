@@ -12,6 +12,12 @@ variables:
   buildConfiguration: 'netstandard_Debug'
 
 steps:
+- task: NuGetToolInstaller@0
+  displayName: 'NuGet install'
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    restoreSolution: '$(solution)'
 - task: VSBuild@1
   displayName: 'Build solution'
   inputs:
