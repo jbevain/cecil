@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\Mono.Cecil.Tests.props" />
   <PropertyGroup>
     <ProjectGuid>{C6CFD7E1-B855-44DC-B4CE-9CD72984AF52}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Rocks.Tests</RootNamespace>
@@ -25,6 +26,5 @@
   <ItemGroup>
     <None Include="Resources\**\*" />
   </ItemGroup>
-  <Import Project="..\..\Mono.Cecil.Tests.props" />
-  <Import Project="$(MSBuildCSharpTargets)" />
+  <Import Project="$(MSBuildCSharpTargets)" Condition="!$(NetStandard)" />
 </Project>
