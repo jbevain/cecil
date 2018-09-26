@@ -49,7 +49,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="$(NetStandard)">
     <TargetFramework Condition="$(IsTestProject)">netcoreapp2.0</TargetFramework>
-    <TargetFramework Condition="!$(IsTestProject)">netstandard1.3</TargetFramework>
+    <TargetFramework Condition="!$(IsTestProject)">netstandard2.0</TargetFramework>
   </PropertyGroup>
   <Import Project="NetStandard.props" Condition="$(NetStandard)" />
   <!-- Shared References -->

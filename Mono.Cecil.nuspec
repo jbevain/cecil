@@ -16,7 +16,7 @@
     <dependencies>
       <group targetFramework=".NETFramework3.5" />
       <group targetFramework=".NETFramework4.0" />
-      <group targetFramework=".NETStandard1.3">
+      <group targetFramework=".NETStandard2.0">
         <dependency id="System.Collections" version="4.0.11" />
         <dependency id="System.IO.FileSystem" version="4.0.1" />
         <dependency id="System.IO.FileSystem.Primitives" version="4.0.1" />
@@ -31,6 +31,6 @@
   <files>
     <file src="bin\net_3_5_Release\*.dll" target="lib/net35" />
     <file src="bin\net_4_0_Release\*.dll" target="lib/net40" />
-    <file src="bin\netstandard_Release\netstandard1.3\*.dll" target="lib/netstandard1.3" />
+    <file src="bin\netstandard_Release\netstandard2.0\*.dll" target="lib/netstandard2.0" />
   </files>
 </package>

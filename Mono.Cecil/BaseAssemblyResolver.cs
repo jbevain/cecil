@@ -76,9 +76,8 @@ namespace Mono.Cecil {
 		// Maps file names of available trusted platform assemblies to their full paths.
 		// Internal for testing.
 		internal static readonly Lazy<Dictionary<string, string>> TrustedPlatformAssemblies = new Lazy<Dictionary<string, string>> (CreateTrustedPlatformAssemblyMap);
-#else
-		Collection<string> gac_paths;
 #endif
+		Collection<string> gac_paths;
 
 		public void AddSearchDirectory (string directory)
 		{
@@ -137,7 +136,7 @@ namespace Mono.Cecil {
 			assembly = SearchTrustedPlatformAssemblies (name, parameters);
 			if (assembly != null)
 				return assembly;
-#else
+#endif
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
 			var framework_dirs = on_mono
 				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
@@ -162,7 +161,6 @@ namespace Mono.Cecil {
 			assembly = SearchDirectory (name, framework_dirs, parameters);
 			if (assembly != null)
 				return assembly;
-#endif
 			if (ResolveFailure != null) {
 				assembly = ResolveFailure (this, name);
 				if (assembly != null)
@@ -234,7 +232,6 @@ namespace Mono.Cecil {
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
-#if !NET_CORE
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
@@ -380,7 +377,7 @@ namespace Mono.Cecil {
 
 			return null;
 		}
-#endif
+
 		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ()
