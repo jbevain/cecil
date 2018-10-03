@@ -156,3 +156,7 @@ class Parent {
 	public class Child {
 	}
 }
+
+[Foo ("Foo\0Bar\0")]
+class NullCharInString {
+}
