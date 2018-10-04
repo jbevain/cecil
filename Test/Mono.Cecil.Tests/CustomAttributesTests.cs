@@ -449,6 +449,21 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+		[Test]
+		public void NullCharInString ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var type = module.GetType ("NullCharInString");
+				var attributes = type.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				var attribute = attributes [0];
+				Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+				var value = (string) attribute.ConstructorArguments [0].Value;
+				Assert.AreEqual (8, value.Length);
+				Assert.AreEqual ('\0', value [7]);
+			});
+		}
+
 #if !READ_ONLY
 		[Test]
 		public void DefineCustomAttributeFromBlob ()
