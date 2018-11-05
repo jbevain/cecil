@@ -30,11 +30,28 @@ namespace Mono.Cecil {
 
 	static class CryptoService {
 
-		public static void StrongName (Stream stream, ImageWriter writer, StrongNameKeyPair key_pair)
+		public static byte[] GetPublicKey (WriterParameters parameters)
+		{
+			using (var rsa = parameters.CreateRSA ()) {
+				var cspBlob = CryptoConvert.ToCapiPublicKeyBlob(rsa);
+				var publicKey = new byte[12 + cspBlob.Length];
+				Buffer.BlockCopy(cspBlob, 0, publicKey, 12, cspBlob.Length);
+				publicKey[1] = 36;
+				publicKey[4] = 4;
+				publicKey[5] = 128;
+				publicKey[8] = (byte)(cspBlob.Length >> 0);
+				publicKey[9] = (byte)(cspBlob.Length >> 8);
+				publicKey[10] = (byte)(cspBlob.Length >> 16);
+				publicKey[11] = (byte)(cspBlob.Length >> 24);
+				return publicKey;
+			}
+		}
+
+		public static void StrongName (Stream stream, ImageWriter writer, WriterParameters parameters)
 		{
 			int strong_name_pointer;
 
-			var strong_name = CreateStrongName (key_pair, HashStream (stream, writer, out strong_name_pointer));
+			var strong_name = CreateStrongName (parameters, HashStream (stream, writer, out strong_name_pointer));
 			PatchStrongName (stream, strong_name_pointer, strong_name);
 		}
 
@@ -44,11 +61,11 @@ namespace Mono.Cecil {
 			stream.Write (strong_name, 0, strong_name.Length);
 		}
 
-		static byte [] CreateStrongName (StrongNameKeyPair key_pair, byte [] hash)
+		static byte [] CreateStrongName (WriterParameters parameters, byte [] hash)
 		{
 			const string hash_algo = "SHA1";
 
-			using (var rsa = key_pair.CreateRSA ()) {
+			using (var rsa = parameters.CreateRSA ()) {
 				var formatter = new RSAPKCS1SignatureFormatter (rsa);
 				formatter.SetHashAlgorithm (hash_algo);
 
@@ -124,12 +141,20 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static RSA CreateRSA (this StrongNameKeyPair key_pair)
+		public static RSA CreateRSA (this WriterParameters writer_parameters)
 		{
 			byte [] key;
 			string key_container;
 
-			if (!TryGetKeyContainer (key_pair, out key, out key_container))
+			if (writer_parameters.StrongNameKeyBlob != null)
+				return CryptoConvert.FromCapiKeyBlob (writer_parameters.StrongNameKeyBlob);
+
+			if (writer_parameters.StrongNameKeyContainer != null)
+				key_container = writer_parameters.StrongNameKeyContainer ;
+			else
+			#pragma warning disable 0618
+			if (!TryGetKeyContainer (writer_parameters.StrongNameKeyPair, out key, out key_container))
+			#pragma warning restore 0618
 				return CryptoConvert.FromCapiKeyBlob (key);
 
 			var parameters = new CspParameters {

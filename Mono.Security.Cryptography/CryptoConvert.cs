@@ -48,6 +48,14 @@ namespace Mono.Security.Cryptography {
 			return (uint)((bytes [offset+3] << 24) | (bytes [offset+2] << 16) | (bytes [offset+1] << 8) | bytes [offset]);
 		}
 
+		static private void WriteUInt32LE (byte [] bytes, int offset, uint value)
+		{
+			bytes[offset + 3] = (byte)(value >> 24);
+			bytes[offset + 2] = (byte)(value >> 16);
+			bytes[offset + 1] = (byte)(value >> 8);
+			bytes[offset] = (byte)value;
+		}
+
 		static private byte[] Trim (byte[] array)
 		{
 			for (int i=0; i < array.Length; i++) {
@@ -243,6 +251,29 @@ namespace Mono.Security.Cryptography {
 					return FromCapiPrivateKeyBlob (blob, offset);
 			}
 			throw new CryptographicException ("Unknown blob format.");
+		}
+
+		static public byte[] ToCapiPublicKeyBlob (RSA rsa)
+		{
+			var rsap = rsa.ExportParameters (false);
+			var blob = new byte[rsap.Modulus.Length + 20];
+			blob [0] = 0x06;	// PUBLICKEYBLOB (0x06)
+			blob [1] = 0x02;	// Version (0x02)
+			blob [2] = 0x00;	// Reserved (word)
+			blob [3] = 0x00;
+			blob [5] = 0x24;	// ALGID
+			WriteUInt32LE (blob, 8, 0x31415352);	// DWORD magic = RSA1
+			WriteUInt32LE (blob, 12, (uint)rsap.Modulus.Length << 3);	// DWORD bitlen
+
+			// DWORD public exponent
+			blob[18] = rsap.Exponent [0];
+			blob[17] = rsap.Exponent [1];
+			blob[16] = rsap.Exponent [2];
+
+			// BYTE modulus[rsapubkey.bitlen/8];
+			Array.Reverse (rsap.Modulus);
+			Buffer.BlockCopy (rsap.Modulus, 0, blob, 20, rsap.Modulus.Length);
+			return blob;
 		}
 	}
 }
