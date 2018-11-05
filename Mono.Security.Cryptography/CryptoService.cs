@@ -36,9 +36,14 @@ namespace Mono.Cecil {
 				var cspBlob = CryptoConvert.ToCapiPublicKeyBlob(rsa);
 				var publicKey = new byte[12 + cspBlob.Length];
 				Buffer.BlockCopy(cspBlob, 0, publicKey, 12, cspBlob.Length);
+				// The first 12 bytes are documented at:
+				// http://msdn.microsoft.com/library/en-us/cprefadd/html/grfungethashfromfile.asp
+				// ALG_ID - Signature
 				publicKey[1] = 36;
+				// ALG_ID - Hash
 				publicKey[4] = 4;
 				publicKey[5] = 128;
+				// Length of Public Key (in bytes)
 				publicKey[8] = (byte)(cspBlob.Length >> 0);
 				publicKey[9] = (byte)(cspBlob.Length >> 8);
 				publicKey[10] = (byte)(cspBlob.Length >> 16);
