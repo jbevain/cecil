@@ -30,6 +30,8 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+#if !READ_ONLY
+
 		[Test]
 		public void EmptyStructLayout ()
 		{
@@ -42,6 +44,8 @@ namespace Mono.Cecil.Tests {
 				module.Types.Add (foo) ;
 			}) ;
 		}
+
+#endif
 
 		[Test]
 		public void SimpleInterfaces ()
