@@ -797,7 +797,7 @@ namespace Microsoft.Cci.Pdb {
     isvolatile=0x00000200,   // TRUE if volatile pointer
     isconst=0x00000400,   // TRUE if const pointer
     isunaligned=0x00000800,   // TRUE if unaligned pointer
-    isrestrict=0x00001000,   // TRUE if restricted pointer (allow agressive opts)
+    isrestrict=0x00001000,   // TRUE if restricted pointer (allow aggressive opts)
   };
 
   internal struct LeafPointer {
