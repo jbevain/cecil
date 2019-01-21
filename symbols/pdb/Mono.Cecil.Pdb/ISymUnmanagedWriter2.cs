@@ -24,7 +24,7 @@ namespace Mono.Cecil.Pdb {
 
 		void DefineDocument (
 			[In, MarshalAs (UnmanagedType.LPWStr)] string url,
-			[In] ref Guid langauge,
+			[In] ref Guid language,
 			[In] ref Guid languageVendor,
 			[In] ref Guid documentType,
 			[Out, MarshalAs (UnmanagedType.Interface)] out ISymUnmanagedDocumentWriter pRetVal);
