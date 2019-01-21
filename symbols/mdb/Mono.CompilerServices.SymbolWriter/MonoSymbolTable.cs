@@ -64,7 +64,7 @@ using System.IO;
 //
 // After doing so, recompile everything, including the debugger.  Symbol files
 // with different versions are incompatible to each other and the debugger and
-// the runtime enfore this, so you need to recompile all your assemblies after
+// the runtime enforce this, so you need to recompile all your assemblies after
 // changing the file format.
 //
 
