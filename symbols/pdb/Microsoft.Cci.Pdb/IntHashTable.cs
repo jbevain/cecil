@@ -512,7 +512,7 @@ namespace Microsoft.Cci.Pdb {
     //}
 
     // Implements an enumerator for a hashtable. The enumerator uses the
-    // internal version number of the hashtabke to ensure that no modifications
+    // internal version number of the hashtable to ensure that no modifications
     // are made to the hashtable while an enumeration is in progress.
     //private class IntHashTableEnumerator : IEnumerator {
     //  private IntHashTable hashtable;
