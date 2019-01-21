@@ -1576,7 +1576,7 @@ namespace Microsoft.Cci.Pdb {
     CV_CFL_DHUGE=0x02
   };
 
-  //  enum describing compile flag ambiant code model
+  //  enum describing compile flag ambient code model
 
   internal enum CV_CFL_CODE {
     CV_CFL_CNEAR=0x00,
