@@ -25,7 +25,7 @@ namespace Mono.Cecil {
 
 		SupportsLastError	= 0x0040,	// Information about target function. Not relevant for fields
 
-		// Calling convetion
+		// Calling convention
 		CallConvMask		= 0x0700,
 		CallConvWinapi		= 0x0100,
 		CallConvCdecl		= 0x0200,
