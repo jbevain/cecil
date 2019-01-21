@@ -131,7 +131,7 @@ namespace Mono.Cecil.PE {
 
 			// ImageBase			4 || 8
 			// SectionAlignment		4
-			// FileAlignement		4
+			// FileAlignment		4
 			// OSMajor				2
 			// OSMinor				2
 			// UserMajor			2
