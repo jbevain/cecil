@@ -156,7 +156,7 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void TypeExtentingGenericOfSelf ()
+		public void TypeExtendingGenericOfSelf ()
 		{
 			TestCSharp ("Generics.cs", module => {
 				var rec_child = module.GetType ("RecChild");
