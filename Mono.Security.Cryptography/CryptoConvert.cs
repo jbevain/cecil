@@ -1,5 +1,5 @@
 //
-// CryptoConvert.cs - Crypto Convertion Routines
+// CryptoConvert.cs - Crypto Conversion Routines
 //
 // Author:
 //	Sebastien Pouliot  <sebastien@ximian.com>
