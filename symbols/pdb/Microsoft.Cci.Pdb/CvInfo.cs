@@ -2329,7 +2329,7 @@ namespace Microsoft.Cci.Pdb {
   internal struct DiscardedSym {
     // internal ushort reclen;    // Record length [SYMTYPE]
     // internal ushort rectyp;    // S_DISCARDED
-    internal CV_DISCARDED iscarded;
+    internal CV_DISCARDED discarded;
     internal uint fileid;     // First FILEID if line number info present
     internal uint linenum;    // First line number
     internal byte[] data;       // Original record(s) with invalid indices
