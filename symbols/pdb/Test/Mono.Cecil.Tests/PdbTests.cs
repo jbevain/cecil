@@ -1,4 +1,5 @@
 #if !READ_ONLY
+using System;
 using System.IO;
 using System.Linq;
 
@@ -104,6 +105,37 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
 			}, readOnly: Platform.OnMono, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+		}
+
+		[Test]
+		public void FilePathShouldBePreserved()
+		{
+			//Create a new module and read it back
+			var module = ModuleDefinition.CreateModule ("Pres", ModuleKind.Dll);
+
+			var file = Path.Combine (Path.GetTempPath (), "pres.dll");
+			module.Write (file, new WriterParameters { 
+				SymbolWriterProvider = new PdbWriterProvider (),
+			});
+
+			module = ModuleDefinition.ReadModule (file, new ReaderParameters {
+				SymbolReaderProvider = new PdbReaderProvider (),
+			});
+
+			var filePath = ImageDebugHeader.ReadFilePath (module.GetDebugHeader ());
+
+			//Modify it with PortablePdbWriterProvider
+			file = Path.Combine (Path.GetTempPath (), "mod.dll");
+			module.Write (file, new WriterParameters {
+				SymbolWriterProvider = new PortablePdbWriterProvider (),
+			});
+
+			module = ModuleDefinition.ReadModule (file, new ReaderParameters {
+				SymbolReaderProvider = new PdbReaderProvider (),
+			});
+
+			//The modified filePath should match the original filePath
+			Assert.AreEqual(filePath, ImageDebugHeader.ReadFilePath(module.GetDebugHeader()));
 		}
 
 		[Test]

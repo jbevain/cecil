@@ -66,6 +66,19 @@ namespace Mono.Cecil.Cil {
 			: this (new [] { entry })
 		{
 		}
+
+		public static string ReadFilePath (ImageDebugHeader header)
+		{
+			var bytesToSkip = 4 + 16 + 4; //id + guid + postfix
+
+			var data = header.Entries [0].Data;
+			var length = data.Length - bytesToSkip;
+			var filePath = new byte[length];
+
+			Array.Copy(data, bytesToSkip, filePath, 0, length - 1);
+
+			return System.Text.Encoding.UTF8.GetString(filePath).TrimEnd ('\0');
+		}
 	}
 
 	public sealed class ImageDebugHeaderEntry {

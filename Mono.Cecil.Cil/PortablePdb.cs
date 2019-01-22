@@ -318,9 +318,7 @@ namespace Mono.Cecil.Cil {
 			// PDB Age
 			buffer.WriteUInt32 (1);
 			// PDB Path
-			var filename = writer.BaseStream.GetFileName ();
-			if (!string.IsNullOrEmpty (filename))
-				filename = Path.GetFileName (filename);
+			var filename = ImageDebugHeader.ReadFilePath (module.GetDebugHeader ());
 
 			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (filename));
 			buffer.WriteByte (0);
