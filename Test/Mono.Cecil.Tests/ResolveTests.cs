@@ -134,7 +134,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { AssemblyResolver = resolver };
 
 			var types = ModuleDefinition.ReadModule (
-				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs")),
 				parameters);
 
 			resolver.Register (types.Assembly);
@@ -155,7 +155,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { AssemblyResolver = resolver };
 
 			var types = ModuleDefinition.ReadModule (
-				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs")),
 				parameters);
 
 			resolver.Register (types.Assembly);
