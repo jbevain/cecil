@@ -1301,7 +1301,7 @@ namespace Mono.Cecil {
 			return Path.GetFullPath (file_stream.Name);
 		}
 
-#if !NET_4_0
+#if NET_3_5
 		public static void CopyTo (this Stream self, Stream target)
 		{
 			var buffer = new byte [1024 * 8];
