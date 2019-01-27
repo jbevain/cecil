@@ -8,7 +8,13 @@ using Mono.Cecil.PE;
 
 #if !NET_CORE
 namespace System.Runtime.CompilerServices {
+
+	[AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
 	public sealed class CallerFilePathAttribute : Attribute {
+	}
+
+	[AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
+	public sealed class CallerMemberNameAttribute : Attribute {
 	}
 }
 #endif
