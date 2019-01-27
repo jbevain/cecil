@@ -11,7 +11,6 @@ using NUnit.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using CS = Microsoft.CodeAnalysis.CSharp;
-using VB = Microsoft.CodeAnalysis.VisualBasic;
 #endif
 
 namespace Mono.Cecil.Tests {
@@ -90,7 +89,7 @@ namespace Mono.Cecil.Tests {
 			if (extension == ".il")
 				return IlasmCompilationService.Instance.Compile (name);
 
-			if (extension == ".cs" || extension == ".vb")
+			if (extension == ".cs")
 #if NET_CORE
 				return RoslynCompilationService.Instance.Compile (name);
 #else
@@ -182,14 +181,6 @@ namespace Mono.Cecil.Tests {
 					new [] { CS.SyntaxFactory.ParseSyntaxTree (source) },
 					references, 
 					new CS.CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
-
-			case ".vb":
-				return VB.VisualBasicCompilation.Create (
-					assemblyName,
-					new [] { VB.SyntaxFactory.ParseSyntaxTree (source) },
-					references,
-					new VB.VisualBasicCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
-
 			default:
 				throw new NotSupportedException ();
 			}
