@@ -155,9 +155,7 @@ namespace Mono.Cecil {
 			{ typeof (float), ElementType.R4 },
 			{ typeof (double), ElementType.R8 },
 			{ typeof (string), ElementType.String },
-#if !NET_CORE
 			{ typeof (TypedReference), ElementType.TypedByRef },
-#endif
 			{ typeof (IntPtr), ElementType.I },
 			{ typeof (UIntPtr), ElementType.U },
 			{ typeof (object), ElementType.Object },
