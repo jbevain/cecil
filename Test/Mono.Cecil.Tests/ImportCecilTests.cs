@@ -361,7 +361,9 @@ namespace Mono.Cecil.Tests {
 
 		static ModuleDefinition CreateModule (string name)
 		{
-			return ModuleDefinition.CreateModule (name, ModuleKind.Dll);
+			var resolver = new DefaultAssemblyResolver ();
+			resolver.AddSearchDirectory (Path.GetDirectoryName (typeof (ImportCecilTests).Assembly.Location));
+			return ModuleDefinition.CreateModule (name, new ModuleParameters { Kind = ModuleKind.Dll, AssemblyResolver = resolver });
 		}
 	}
 }
