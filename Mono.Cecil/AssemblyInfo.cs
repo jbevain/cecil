@@ -14,9 +14,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle (Consts.AssemblyName)]
 
-#if !NET_CORE
 [assembly: Guid ("fd225bb4-fa53-44b2-a6db-85f5e48dcb54")]
-#endif
 
 [assembly: InternalsVisibleTo ("Mono.Cecil.Tests, PublicKey=" + Consts.PublicKey)]
 [assembly: InternalsVisibleTo ("Mono.Cecil.Pdb, PublicKey=" + Consts.PublicKey)]
