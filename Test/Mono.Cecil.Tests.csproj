@@ -27,8 +27,6 @@
     <Compile Include="Mono.Cecil.Tests\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="Resources\**\*" />
   </ItemGroup>
 </Project>
