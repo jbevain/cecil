@@ -191,10 +191,7 @@ namespace Mono.Cecil {
 			string paths;
 
 			try {
-				// AppContext is only available on platforms that implement .NET Standard 1.6
-				var appContextType = Type.GetType ("System.AppContext, System.AppContext, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
-				var getData = appContextType?.GetTypeInfo ().GetDeclaredMethod ("GetData");
-				paths = (string) getData?.Invoke (null, new [] { "TRUSTED_PLATFORM_ASSEMBLIES" });
+				paths = (string) AppDomain.CurrentDomain.GetData ("TRUSTED_PLATFORM_ASSEMBLIES");
 			} catch {
 				paths = null;
 			}
@@ -380,7 +377,7 @@ namespace Mono.Cecil {
 
 			return null;
 		}
-#endif
+
 		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ()
@@ -396,7 +393,7 @@ namespace Mono.Cecil {
 					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
 				reference.Name + ".dll");
 		}
-
+#endif
 		public void Dispose ()
 		{
 			Dispose (true);
