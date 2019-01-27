@@ -282,7 +282,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void OwnedStreamModuleFileName ()
 		{
-			var path = GetAssemblyResourcePath ("hello.exe", GetType ().Assembly);
+			var path = GetAssemblyResourcePath ("hello.exe");
 			using (var file = File.Open (path, FileMode.Open))
 			{
 				using (var module = ModuleDefinition.ReadModule (file))

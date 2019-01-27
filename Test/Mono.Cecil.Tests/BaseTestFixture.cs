@@ -1,10 +1,17 @@
 using System;
 using System.IO;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using Mono.Cecil.Cil;
 using NUnit.Framework;
 
 using Mono.Cecil.PE;
+
+#if !NET_CORE
+namespace System.Runtime.CompilerServices {
+	public sealed class CallerFilePathAttribute : Attribute {
+	}
+}
+#endif
 
 namespace Mono.Cecil.Tests {
 
@@ -16,49 +23,49 @@ namespace Mono.Cecil.Tests {
 				Assert.Ignore ();
 		}
 
-		public static string GetResourcePath (string name, Assembly assembly)
+		public static string GetResourcePath (string name, string sourceFilePath)
 		{
-			return Path.Combine (FindResourcesDirectory (assembly), name);
+			return Path.Combine (FindResourcesDirectory (sourceFilePath), name);
 		}
 
-		public static string GetAssemblyResourcePath (string name, Assembly assembly)
+		public static string GetAssemblyResourcePath (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return GetResourcePath (Path.Combine ("assemblies", name), assembly);
+			return GetResourcePath (Path.Combine ("assemblies", name), sourceFilePath);
 		}
 
-		public static string GetCSharpResourcePath (string name, Assembly assembly)
+		public static string GetCSharpResourcePath (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return GetResourcePath (Path.Combine ("cs", name), assembly);
+			return GetResourcePath (Path.Combine ("cs", name), sourceFilePath);
 		}
 
-		public static string GetILResourcePath (string name, Assembly assembly)
+		public static string GetILResourcePath (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return GetResourcePath (Path.Combine ("il", name), assembly);
+			return GetResourcePath (Path.Combine ("il", name), sourceFilePath);
 		}
 
-		public ModuleDefinition GetResourceModule (string name)
+		public ModuleDefinition GetResourceModule (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, sourceFilePath));
 		}
 
-		public ModuleDefinition GetResourceModule (string name, ReaderParameters parameters)
+		public ModuleDefinition GetResourceModule (string name, ReaderParameters parameters, [CallerFilePath] string sourceFilePath = "")
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), parameters);
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, sourceFilePath), parameters);
 		}
 
-		public ModuleDefinition GetResourceModule (string name, ReadingMode mode)
+		public ModuleDefinition GetResourceModule (string name, ReadingMode mode, [CallerFilePath] string sourceFilePath = "")
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), new ReaderParameters (mode));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, sourceFilePath), new ReaderParameters (mode));
 		}
 
-		public Stream GetResourceStream (string name)
+		public Stream GetResourceStream (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read);
+			return new FileStream (GetAssemblyResourcePath (name, sourceFilePath), FileMode.Open, FileAccess.Read);
 		}
 
-		internal Image GetResourceImage (string name)
+		internal Image GetResourceImage (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			var file = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read);
+			var file = new FileStream (GetAssemblyResourcePath (name, sourceFilePath), FileMode.Open, FileAccess.Read);
 			return ImageReader.ReadImage (Disposable.Owned (file as Stream), file.Name);
 		}
 
@@ -72,9 +79,9 @@ namespace Mono.Cecil.Tests {
 			return ModuleDefinition.ReadModule (GetType ().Module.FullyQualifiedName, parameters);
 		}
 
-		public static string FindResourcesDirectory (Assembly assembly)
+		public static string FindResourcesDirectory (string sourceFilePath)
 		{
-			var path = Path.GetDirectoryName (new Uri (assembly.CodeBase).LocalPath);
+			var path = Path.GetDirectoryName (sourceFilePath);
 			while (!Directory.Exists (Path.Combine (path, "Resources"))) {
 				var old = path;
 				path = Path.GetDirectoryName (path);
@@ -142,12 +149,11 @@ namespace Mono.Cecil.Tests {
 		public readonly IAssemblyResolver AssemblyResolver;
 		public readonly Action<ModuleDefinition> Test;
 		public readonly bool ApplyWindowsRuntimeProjections;
+		public readonly string SourceFilePath;
 
 		public abstract string ModuleLocation { get; }
 
-		protected Assembly Assembly { get { return Test.Method.Module.Assembly; } }
-
-		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
+		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections, [CallerFilePath] string sourceFilePath = "")
 		{
 			Test = test;
 			Verify = verify;
@@ -156,6 +162,7 @@ namespace Mono.Cecil.Tests {
 			SymbolWriterProvider = symbolWriterProvider;
 			AssemblyResolver = assemblyResolver;
 			ApplyWindowsRuntimeProjections = applyWindowsRuntimeProjections;
+			SourceFilePath = sourceFilePath;
 		}
 	}
 
@@ -171,7 +178,7 @@ namespace Mono.Cecil.Tests {
 
 		public override string ModuleLocation
 		{
-			get { return BaseTestFixture.GetAssemblyResourcePath (Module, Assembly); }
+			get { return BaseTestFixture.GetAssemblyResourcePath (Module, SourceFilePath); }
 		}
 	}
 
@@ -189,7 +196,7 @@ namespace Mono.Cecil.Tests {
 		{
 			get
 			{
-				return CompilationService.CompileResource (BaseTestFixture.GetCSharpResourcePath (File, Assembly));
+				return CompilationService.CompileResource (BaseTestFixture.GetCSharpResourcePath (File, SourceFilePath));
 			}
 		}
 	}
@@ -208,7 +215,7 @@ namespace Mono.Cecil.Tests {
 		{
 			get
 			{
-				return CompilationService.CompileResource (BaseTestFixture.GetILResourcePath (File, Assembly)); ;
+				return CompilationService.CompileResource (BaseTestFixture.GetILResourcePath (File, SourceFilePath)); ;
 			}
 		}
 	}
