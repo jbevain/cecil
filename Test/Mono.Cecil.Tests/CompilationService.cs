@@ -36,6 +36,14 @@ namespace Mono.Cecil.Tests {
 			get { return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
 		}
 
+		public static bool OnWindows {
+			get { return Environment.OSVersion.Platform == PlatformID.Win32NT; }
+		}
+
+		public static bool HasNativePdbSupport {
+			get { return OnWindows && !OnMono; }
+		}
+
 		static Type TryGetType (string assemblyQualifiedName)
 		{
 			try {
@@ -311,7 +319,7 @@ namespace Mono.Cecil.Tests {
 		public static ProcessOutput ILAsm (string source, string output)
 		{
 			var ilasm = "ilasm";
-			if (!Platform.OnMono)
+			if (Platform.OnWindows)
 				ilasm = NetFrameworkTool ("ilasm");
 
 			return RunProcess (ilasm, "/nologo", "/dll", "/out:" + Quote (output), Quote (source));

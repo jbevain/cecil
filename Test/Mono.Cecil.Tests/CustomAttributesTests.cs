@@ -437,7 +437,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InterfaceImplementation ()
 		{
-			IgnoreOnMono();
+			OnlyOnWindows (); // Mono's ilasm doesn't support .interfaceimpl
 
 			TestIL ("ca-iface-impl.il", module => {
 				var type = module.GetType ("FooType");
