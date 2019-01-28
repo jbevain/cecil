@@ -16,12 +16,10 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void DefaultPdb ()
 		{
-			IgnoreOnMono ();
-
 			TestModule ("libpdb.dll", module => {
 				Assert.IsTrue (module.HasSymbols);
 				Assert.AreEqual (typeof (NativePdbReader), module.SymbolReader.GetType ());
-			}, symbolReaderProvider: typeof (DefaultSymbolReaderProvider), symbolWriterProvider: typeof (DefaultSymbolWriterProvider));
+			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof (DefaultSymbolReaderProvider), symbolWriterProvider: typeof (DefaultSymbolWriterProvider));
 		}
 
 		[Test]

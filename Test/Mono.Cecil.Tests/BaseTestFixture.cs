@@ -29,6 +29,18 @@ namespace Mono.Cecil.Tests {
 				Assert.Ignore ();
 		}
 
+		protected static void IgnoreOnCoreClr ()
+		{
+			if (Platform.OnCoreClr)
+				Assert.Ignore ();
+		}
+
+		protected static void OnlyOnWindows ()
+		{
+			if (!Platform.OnWindows)
+				Assert.Ignore ();
+		}
+
 		public static string GetResourcePath (string name, string sourceFilePath)
 		{
 			return Path.Combine (FindResourcesDirectory (sourceFilePath), name);

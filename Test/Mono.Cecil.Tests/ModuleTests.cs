@@ -49,8 +49,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MultiModules ()
 		{
-			if (Platform.OnCoreClr)
-				return;
+			IgnoreOnCoreClr ();
 
 			TestModule("mma.exe", module => {
 				var assembly = module.Assembly;
@@ -160,8 +159,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ExportedTypeFromNetModule ()
 		{
-			if (Platform.OnCoreClr)
-				return;
+			IgnoreOnCoreClr ();
 
 			TestModule ("mma.exe", module => {
 				Assert.IsTrue (module.HasExportedTypes);
@@ -215,6 +213,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void Win32FileVersion ()
 		{
+			IgnoreOnCoreClr ();
+
 			TestModule ("libhello.dll", module => {
 				var version = FileVersionInfo.GetVersionInfo (module.FileName);
 
