@@ -6,6 +6,7 @@ using System.Text;
 using NUnit.Framework;
 
 using Mono.Cecil.Cil;
+using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Tests {
 
@@ -347,7 +348,6 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
-#if !READ_ONLY
 		[Test]
 		public void EmbeddedCompressedPortablePdb ()
 		{
@@ -373,7 +373,7 @@ namespace Mono.Cecil.Tests {
 		{
 			TestModule ("PdbTarget.exe", test, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 			TestModule ("EmbeddedPdbTarget.exe", test, verify: !Platform.OnMono);
-			TestModule("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof(EmbeddedPortablePdbWriterProvider));
+			TestModule ("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof(EmbeddedPortablePdbWriterProvider));
 		}
 
 		[Test]
@@ -553,7 +553,123 @@ class Program
 	IL_0001: ret", main);
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
-#endif
+
+		public sealed class SymbolWriterProvider : ISymbolWriterProvider {
+
+			readonly DefaultSymbolWriterProvider writer_provider = new DefaultSymbolWriterProvider ();
+
+			public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+			{
+				return new SymbolWriter (writer_provider.GetSymbolWriter (module, fileName));
+			}
+
+			public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+			{
+				return new SymbolWriter (writer_provider.GetSymbolWriter (module, symbolStream));
+			}
+		}
+
+		public sealed class SymbolWriter : ISymbolWriter {
+
+			readonly ISymbolWriter symbol_writer;
+
+			public SymbolWriter (ISymbolWriter symbolWriter)
+			{
+				this.symbol_writer = symbolWriter;
+			}
+
+			public ImageDebugHeader GetDebugHeader ()
+			{
+				var header = symbol_writer.GetDebugHeader ();
+				if (!header.HasEntries)
+					return header;
+
+				for (int i = 0; i < header.Entries.Length; i++) {
+					header.Entries [i] = ProcessEntry (header.Entries [i]);
+				}
+
+				return header;
+			}
+
+			private static ImageDebugHeaderEntry ProcessEntry (ImageDebugHeaderEntry entry)
+			{
+				if (entry.Directory.Type != ImageDebugType.CodeView)
+					return entry;
+
+				var reader = new ByteBuffer (entry.Data);
+				var writer = new ByteBuffer ();
+
+				var sig = reader.ReadUInt32 ();
+				if (sig != 0x53445352)
+					return entry;
+
+				writer.WriteUInt32 (sig); // RSDS
+				writer.WriteBytes (reader.ReadBytes (16)); // MVID
+				writer.WriteUInt32 (reader.ReadUInt32 ()); // Age
+
+				var length = Array.IndexOf (entry.Data, (byte) 0, reader.position) - reader.position;
+
+				var fullPath = Encoding.UTF8.GetString (reader.ReadBytes (length));
+
+				writer.WriteBytes (Encoding.UTF8.GetBytes (Path.GetFileName (fullPath)));
+				writer.WriteByte (0);
+
+				var newData = new byte [writer.length];
+				Buffer.BlockCopy (writer.buffer, 0, newData, 0, writer.length);
+
+				var directory = entry.Directory;
+				directory.SizeOfData = newData.Length;
+
+				return new ImageDebugHeaderEntry (directory, newData);
+			}
+
+			public ISymbolReaderProvider GetReaderProvider ()
+			{
+				return symbol_writer.GetReaderProvider ();
+			}
+
+			public void Write (MethodDebugInformation info)
+			{
+				symbol_writer.Write (info);
+			}
+
+			public void Dispose ()
+			{
+				symbol_writer.Dispose ();
+			}
+		}
+
+		static string GetDebugHeaderPdbPath (ModuleDefinition module)
+		{
+			var header = module.GetDebugHeader ();
+			var cv = Mixin.GetCodeViewEntry (header);
+			Assert.IsNotNull (cv);
+			var length = Array.IndexOf (cv.Data, (byte)0, 24) - 24;
+			var bytes = new byte [length];
+			Buffer.BlockCopy (cv.Data, 24, bytes, 0, length);
+			return Encoding.UTF8.GetString (bytes);
+		}
+
+		[Test]
+		public void UseCustomSymbolWriterToChangeDebugHeaderPdbPath ()
+		{
+			const string resource = "mylib.dll";
+
+			string debug_header_pdb_path;
+			string dest = Path.Combine (Path.GetTempPath (), resource);
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				debug_header_pdb_path = GetDebugHeaderPdbPath (module);
+				Assert.IsTrue (Path.IsPathRooted (debug_header_pdb_path));
+				module.Write (dest, new WriterParameters { SymbolWriterProvider = new SymbolWriterProvider () });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (dest, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				var pdb_path = GetDebugHeaderPdbPath (module);
+				Assert.IsFalse (Path.IsPathRooted (pdb_path));
+				Assert.AreEqual (Path.GetFileName (debug_header_pdb_path), pdb_path);
+			}
+		}
 	}
 }
 #endif
