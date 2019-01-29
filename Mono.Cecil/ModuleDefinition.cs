@@ -287,6 +287,10 @@ namespace Mono.Cecil {
 
 		internal Collection<CustomDebugInformation> custom_infos;
 
+#if !READ_ONLY
+		internal MetadataBuilder metadata_builder;
+#endif
+
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
 		}
