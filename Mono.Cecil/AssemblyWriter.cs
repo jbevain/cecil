@@ -110,18 +110,25 @@ namespace Mono.Cecil {
 			}
 #endif
 
-			using (var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters)) {
-				var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider, symbol_writer);
-				BuildMetadata (module, metadata);
+			var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider);
+			try {
+				module.metadata_builder = metadata;
 
-				var writer = ImageWriter.CreateWriter (module, metadata, stream);
-				stream.value.SetLength (0);
-				writer.WriteImage ();
+				using (var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters)) {
+					metadata.SetSymbolWriter (symbol_writer);
+					BuildMetadata (module, metadata);
+
+					var writer = ImageWriter.CreateWriter (module, metadata, stream);
+					stream.value.SetLength (0);
+					writer.WriteImage ();
 
 #if !NET_CORE
-				if (parameters.StrongNameKeyPair != null)
-					CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
+					if (parameters.StrongNameKeyPair != null)
+						CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
 #endif
+				}
+			} finally {
+				module.metadata_builder = null;
 			}
 		}
 
@@ -796,7 +803,7 @@ namespace Mono.Cecil {
 
 		readonly internal ModuleDefinition module;
 		readonly internal ISymbolWriterProvider symbol_writer_provider;
-		readonly internal ISymbolWriter symbol_writer;
+		internal ISymbolWriter symbol_writer;
 		readonly internal TextMap text_map;
 		readonly internal string fq_name;
 		readonly internal uint timestamp;
@@ -846,8 +853,6 @@ namespace Mono.Cecil {
 		readonly TypeSpecTable typespec_table;
 		readonly MethodSpecTable method_spec_table;
 
-		readonly bool portable_pdb;
-
 		internal MetadataBuilder metadata_builder;
 
 		readonly DocumentTable document_table;
@@ -862,25 +867,13 @@ namespace Mono.Cecil {
 		readonly Dictionary<ImportScopeRow, MetadataToken> import_scope_map;
 		readonly Dictionary<string, MetadataToken> document_map;
 
-		public MetadataBuilder (ModuleDefinition module, string fq_name, uint timestamp, ISymbolWriterProvider symbol_writer_provider, ISymbolWriter symbol_writer)
+		public MetadataBuilder (ModuleDefinition module, string fq_name, uint timestamp, ISymbolWriterProvider symbol_writer_provider)
 		{
 			this.module = module;
 			this.text_map = CreateTextMap ();
 			this.fq_name = fq_name;
 			this.timestamp = timestamp;
 			this.symbol_writer_provider = symbol_writer_provider;
-
-			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ()) {
-				symbol_writer = new PortablePdbWriter (this, module);
-			}
-
-			this.symbol_writer = symbol_writer;
-
-			var pdb_writer = symbol_writer as IMetadataSymbolWriter;
-			if (pdb_writer != null) {
-				portable_pdb = true;
-				pdb_writer.SetMetadata (this);
-			}
 
 			this.code = new CodeWriter (this);
 			this.data = new DataBuffer ();
@@ -916,9 +909,6 @@ namespace Mono.Cecil {
 			method_spec_map = new Dictionary<MethodSpecRow, MetadataToken> (row_equality_comparer);
 			generic_parameters = new Collection<GenericParameter> ();
 
-			if (!portable_pdb)
-				return;
-
 			this.document_table = GetTable<DocumentTable> (Table.Document);
 			this.method_debug_information_table = GetTable<MethodDebugInformationTable> (Table.MethodDebugInformation);
 			this.local_scope_table = GetTable<LocalScopeTable> (Table.LocalScope);
@@ -937,7 +927,6 @@ namespace Mono.Cecil {
 			this.module = module;
 			this.text_map = new TextMap ();
 			this.symbol_writer_provider = writer_provider;
-			this.portable_pdb = true;
 
 			this.string_heap = new StringHeapBuffer ();
 			this.guid_heap = new GuidHeapBuffer ();
@@ -959,6 +948,14 @@ namespace Mono.Cecil {
 
 			this.document_map = new Dictionary<string, MetadataToken> ();
 			this.import_scope_map = new Dictionary<ImportScopeRow, MetadataToken> (row_equality_comparer);
+		}
+
+		public void SetSymbolWriter (ISymbolWriter writer)
+		{
+			symbol_writer = writer;
+
+			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ())
+				symbol_writer = new PortablePdbWriter (this, module);
 		}
 
 		TextMap CreateTextMap ()
@@ -1050,10 +1047,6 @@ namespace Mono.Cecil {
 
 			if (module.EntryPoint != null)
 				entry_point = LookupToken (module.EntryPoint);
-
-			var pdb_writer = symbol_writer as IMetadataSymbolWriter;
-			if (pdb_writer != null)
-				pdb_writer.WriteModule ();
 		}
 
 		void BuildAssembly ()
