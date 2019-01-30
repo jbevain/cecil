@@ -464,6 +464,35 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
+		[Test]
+		public void OrderedAttributes ()
+		{
+			TestModule ("ordered-attrs.exe", module => {
+				var type = module.GetType ("Program");
+				var method = type.GetMethod ("Main");
+				var attributes = method.CustomAttributes;
+				Assert.AreEqual (6, attributes.Count);
+
+				Assert.AreEqual ("AAttribute", attributes [0].AttributeType.Name);
+				Assert.AreEqual ("Main.A1", attributes [0].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("AAttribute", attributes [1].AttributeType.Name);
+				Assert.AreEqual ("Main.A2", attributes [1].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("BAttribute", attributes [2].AttributeType.Name);
+				Assert.AreEqual ("Main.B1", attributes [2].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("AAttribute", attributes [3].AttributeType.Name);
+				Assert.AreEqual ("Main.A3", attributes [3].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("BAttribute", attributes [4].AttributeType.Name);
+				Assert.AreEqual ("Main.B2", attributes [4].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("BAttribute", attributes [5].AttributeType.Name);
+				Assert.AreEqual ("Main.B3", attributes [5].Fields [0].Argument.Value as string);
+			});
+		}
+
 #if !READ_ONLY
 		[Test]
 		public void DefineCustomAttributeFromBlob ()
