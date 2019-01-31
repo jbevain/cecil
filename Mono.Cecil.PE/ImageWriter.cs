@@ -243,8 +243,8 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (0);	// OSMinor
 			WriteUInt16 (0);	// UserMajor
 			WriteUInt16 (0);	// UserMinor
-			WriteUInt16 (4);	// SubSysMajor
-			WriteUInt16 (0);	// SubSysMinor
+			WriteUInt16 (module.subsystem_major);	// SubSysMajor
+			WriteUInt16 (module.subsystem_minor);	// SubSysMinor
 			WriteUInt32 (0);	// Reserved
 
 			var last_section = LastSection();
