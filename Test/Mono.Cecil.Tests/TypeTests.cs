@@ -291,5 +291,12 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (MetadataType.Object, type.BaseType.MetadataType);
 			}
 		}
+
+		[Test]
+		public void SelfReferencingTypeRef ()
+		{
+			TestModule ("self-ref-typeref.dll", module => {
+			});
+		}
 	}
 }

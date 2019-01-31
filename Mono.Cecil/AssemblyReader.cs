@@ -1119,11 +1119,14 @@ namespace Mono.Cecil {
 			metadata.AddTypeReference (type);
 
 			if (scope_token.TokenType == TokenType.TypeRef) {
-				declaring_type = GetTypeDefOrRef (scope_token);
+				if (scope_token.RID != rid) {
+					declaring_type = GetTypeDefOrRef (scope_token);
 
-				scope = declaring_type != null
-					? declaring_type.Scope
-					: module;
+					scope = declaring_type != null
+						? declaring_type.Scope
+						: module;
+				} else // obfuscated typeref row pointing to self
+					scope = module;
 			} else
 				scope = GetTypeReferenceScope (scope_token);
 
