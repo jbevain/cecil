@@ -265,7 +265,7 @@ namespace Mono.Cecil {
 					if (version.MajorRevision == 3300)
 						path = Path.Combine (path, "v1.0.3705");
 					else
-						path = Path.Combine (path, "v1.0.5000.0");
+						path = Path.Combine (path, "v1.1.4322");
 					break;
 				case 2:
 					path = Path.Combine (path, "v2.0.50727");
