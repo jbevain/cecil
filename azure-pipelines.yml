@@ -1,0 +1,17 @@
+pool:
+  vmImage: 'VS2017-Win2016'
+
+variables:
+  configuration: 'Release'
+
+steps:
+- script: |
+    dotnet build --configuration $(configuration)
+    dotnet test --configuration $(buildConfiguration) --logger trx
+    dotnet publish --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
