@@ -180,6 +180,8 @@ namespace Mono.Cecil.Tests {
 
 			TestModule("winrtcomp.winmd", module => {
 				Assert.IsTrue (module.Assembly.Name.IsWindowsRuntime);
+				Assert.AreEqual (6, module.Image.SubSystemMajor);
+				Assert.AreEqual (2, module.Image.SubSystemMinor);
 			}, verify: false, assemblyResolver: resolver);
 		}
 #endif
@@ -193,6 +195,15 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (1, header.Entries.Length);
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.Deterministic));
+			});
+		}
+
+		[Test]
+		public void Net471TargetingAssembly ()
+		{
+			TestModule ("net471.exe", module => {
+				Assert.AreEqual (6, module.Image.SubSystemMajor);
+				Assert.AreEqual (0, module.Image.SubSystemMinor);
 			});
 		}
 
