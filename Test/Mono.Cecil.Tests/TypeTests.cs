@@ -296,7 +296,7 @@ namespace Mono.Cecil.Tests {
 		public void SelfReferencingTypeRef ()
 		{
 			TestModule ("self-ref-typeref.dll", module => {
-			});
+			}, verify: false);
 		}
 	}
 }
