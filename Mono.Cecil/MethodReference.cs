@@ -183,7 +183,7 @@ namespace Mono.Cecil {
 
 		public static bool IsVarArg (this IMethodSignature self)
 		{
-			return (self.CallingConvention & MethodCallingConvention.VarArg) != 0;
+			return self.CallingConvention == MethodCallingConvention.VarArg;
 		}
 
 		public static int GetSentinelPosition (this IMethodSignature self)
