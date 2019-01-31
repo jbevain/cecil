@@ -255,17 +255,22 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (GetSubSystem ());	// SubSystem
 			WriteUInt16 ((ushort) module.Characteristics);	// DLLFlags
 
-			const ulong stack_reserve = 0x100000;
-			const ulong stack_commit = 0x1000;
-			const ulong heap_reserve = 0x100000;
-			const ulong heap_commit = 0x1000;
-
 			if (!pe64) {
-				WriteUInt32 ((uint) stack_reserve);
-				WriteUInt32 ((uint) stack_commit);
-				WriteUInt32 ((uint) heap_reserve);
-				WriteUInt32 ((uint) heap_commit);
+				const uint stack_reserve = 0x100000;
+				const uint stack_commit = 0x1000;
+				const uint heap_reserve = 0x100000;
+				const uint heap_commit = 0x1000;
+
+				WriteUInt32 (stack_reserve);
+				WriteUInt32 (stack_commit);
+				WriteUInt32 (heap_reserve);
+				WriteUInt32 (heap_commit);
 			} else {
+				const ulong stack_reserve = 0x400000;
+				const ulong stack_commit = 0x4000;
+				const ulong heap_reserve = 0x100000;
+				const ulong heap_commit = 0x2000;
+
 				WriteUInt64 (stack_reserve);
 				WriteUInt64 (stack_commit);
 				WriteUInt64 (heap_reserve);
