@@ -9,13 +9,14 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\cecil.snk</AssemblyOriginatorKeyFile>
     <DefineConstants Condition=" '$(TargetFramework)' == 'net40' ">$(DefineConstants);NET_4_0</DefineConstants>
     <DefineConstants Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netcoreapp2.1' ">$(DefineConstants);NET_CORE</DefineConstants>
-	<RootNamespace></RootNamespace>
+	  <RootNamespace></RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" $(Configuration.Contains('ReadOnly')) ">
     <DefineConstants>$(DefineConstants);READ_ONLY</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <FrameworkPathOverride Condition=" '$(net40FrameworkPathOverride)' != '' ">$(net40FrameworkPathOverride)</FrameworkPathOverride>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <Reference Include="System" />
