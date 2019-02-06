@@ -11,7 +11,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MdbWithJustLineInfo ()
 		{
-			TestModule ("hello.exe", module => {
+			TestModule ("simplemdb.exe", module => {
 				var type = module.GetType ("Program");
 				var main = type.GetMethod ("Main");
 
