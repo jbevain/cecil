@@ -3769,7 +3769,7 @@ namespace Mono.Cecil {
 			if (length == 0)
 				return string.Empty;
 
-			if (position + length >= buffer.Length)
+			if (position + length > buffer.Length)
 				return string.Empty;
 
 			var @string = Encoding.UTF8.GetString (buffer, position, length);
