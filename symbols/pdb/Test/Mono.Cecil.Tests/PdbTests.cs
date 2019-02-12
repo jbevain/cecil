@@ -1,4 +1,3 @@
-#if !READ_ONLY
 using System.IO;
 using System.Linq;
 
@@ -411,6 +410,7 @@ namespace Mono.Cecil.Tests {
 			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
+#if !READ_ONLY
 		[Test]
 		public void CreateMethodFromScratch ()
 		{
@@ -464,6 +464,6 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual ("temp", method.DebugInformation.Scope.Variables [0].Name);
 		}
+#endif
 	}
 }
-#endif
