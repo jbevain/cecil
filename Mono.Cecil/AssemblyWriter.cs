@@ -1911,7 +1911,7 @@ namespace Mono.Cecil {
 
 		static ElementType GetConstantType (Type type)
 		{
-			switch (Type.GetTypeCode(type)) {
+			switch (Type.GetTypeCode (type)) {
 			case TypeCode.Boolean:
 				return ElementType.Boolean;
 			case TypeCode.Byte:
@@ -2971,7 +2971,7 @@ namespace Mono.Cecil {
 			if (value == null)
 				throw new ArgumentNullException ();
 
-			switch (Type.GetTypeCode(value.GetType ())) {
+			switch (Type.GetTypeCode (value.GetType ())) {
 			case TypeCode.Boolean:
 				WriteByte ((byte) (((bool) value) ? 1 : 0));
 				break;
