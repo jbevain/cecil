@@ -1284,16 +1284,6 @@ namespace Mono.Cecil {
 			return Path.GetFullPath (file_stream.Name);
 		}
 
-#if NET_3_5
-		public static void CopyTo (this Stream self, Stream target)
-		{
-			var buffer = new byte [1024 * 8];
-			int read;
-			while ((read = self.Read (buffer, 0, buffer.Length)) > 0)
-				target.Write (buffer, 0, read);
-		}
-#endif
-
 		public static TargetRuntime ParseRuntime (this string self)
 		{
 			if (string.IsNullOrEmpty (self))
