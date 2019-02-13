@@ -17,14 +17,14 @@
       <group targetFramework=".NETFramework3.5" />
       <group targetFramework=".NETFramework4.0" />
       <group targetFramework=".NETStandard1.3">
-        <dependency id="System.Collections" version="4.0.11" />
-        <dependency id="System.IO.FileSystem" version="4.0.1" />
-        <dependency id="System.IO.FileSystem.Primitives" version="4.0.1" />
-        <dependency id="System.Reflection" version="4.1.0" />
-        <dependency id="System.Runtime.Extensions" version="4.1.0" />
-        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
-        <dependency id="System.Security.Cryptography.Csp" version="4.0.0" />
-        <dependency id="System.Threading" version="4.0.11" />
+        <dependency id="System.Collections" version="4.3.0" />
+        <dependency id="System.IO.FileSystem" version="4.3.0" />
+        <dependency id="System.IO.FileSystem.Primitives" version="4.3.0" />
+        <dependency id="System.Reflection" version="4.3.0" />
+        <dependency id="System.Runtime.Extensions" version="4.3.0" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.3.0" />
+        <dependency id="System.Security.Cryptography.Csp" version="4.3.0" />
+        <dependency id="System.Threading" version="4.3.0" />
       </group>
     </dependencies>
   </metadata>
