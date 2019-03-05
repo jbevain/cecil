@@ -43,8 +43,6 @@ namespace Mono.Cecil.Tests {
 			}) ;
 		}
 
-#endif
-
 		[Test]
 		public void SimpleInterfaces ()
 		{

@@ -747,8 +747,6 @@ namespace Mono.Cecil {
 		}
 	}
 
-#endif
-
 	static partial class Mixin {
 
 		public static void CheckModule (ModuleDefinition module)
