@@ -553,7 +553,6 @@ class Program
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
-#if !READ_ONLY
 		public sealed class SymbolWriterProvider : ISymbolWriterProvider {
 
 			readonly DefaultSymbolWriterProvider writer_provider = new DefaultSymbolWriterProvider ();
@@ -670,6 +669,5 @@ class Program
 				Assert.AreEqual (Path.GetFileName (debug_header_pdb_path), pdb_path);
 			}
 		}
-#endif
 	}
 }

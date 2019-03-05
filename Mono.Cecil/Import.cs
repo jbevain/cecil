@@ -17,8 +17,6 @@ using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
 
-#if !READ_ONLY
-
 	public interface IMetadataImporterProvider {
 		IMetadataImporter GetMetadataImporter (ModuleDefinition module);
 	}

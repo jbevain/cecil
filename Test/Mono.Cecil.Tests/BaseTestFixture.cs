@@ -148,13 +148,11 @@ namespace Mono.Cecil.Tests {
 			if (testCase.ReadOnly)
 				return;
 
-#if !READ_ONLY
 			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred))
 				runner.RunTest ();
 
 			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate))
 				runner.RunTest ();
-#endif
 		}
 	}
 
@@ -269,14 +267,12 @@ namespace Mono.Cecil.Tests {
 			case TestCaseType.ReadDeferred:
 				parameters.ReadingMode = ReadingMode.Deferred;
 				return ModuleDefinition.ReadModule (location, parameters);
-#if !READ_ONLY
 			case TestCaseType.WriteFromImmediate:
 				parameters.ReadingMode = ReadingMode.Immediate;
 				return RoundTrip (location, parameters, "cecil-irt");
 			case TestCaseType.WriteFromDeferred:
 				parameters.ReadingMode = ReadingMode.Deferred;
 				return RoundTrip (location, parameters, "cecil-drt");
-#endif
 			default:
 				return null;
 			}
@@ -290,7 +286,6 @@ namespace Mono.Cecil.Tests {
 			return (ISymbolReaderProvider) Activator.CreateInstance (test_case.SymbolReaderProvider);
 		}
 
-#if !READ_ONLY
 		ISymbolWriterProvider GetSymbolWriterProvider ()
 		{
 			if (test_case.SymbolReaderProvider == null)
@@ -298,7 +293,6 @@ namespace Mono.Cecil.Tests {
 
 			return (ISymbolWriterProvider) Activator.CreateInstance (test_case.SymbolWriterProvider);
 		}
-#endif
 
 		IAssemblyResolver GetAssemblyResolver ()
 		{
@@ -311,7 +305,6 @@ namespace Mono.Cecil.Tests {
 			return test_resolver;
 		}
 
-#if !READ_ONLY
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
 		{
 			var rt_folder = Path.Combine (Path.GetTempPath (), folder);
@@ -334,7 +327,7 @@ namespace Mono.Cecil.Tests {
 
 			return ModuleDefinition.ReadModule (rt_module, reader_parameters);
 		}
-#endif
+
 		public void RunTest ()
 		{
 			var module = GetModule ();
@@ -358,9 +351,7 @@ namespace Mono.Cecil.Tests {
 	enum TestCaseType {
 		ReadImmediate,
 		ReadDeferred,
-#if !READ_ONLY
 		WriteFromImmediate,
 		WriteFromDeferred,
-#endif
 	}
 }

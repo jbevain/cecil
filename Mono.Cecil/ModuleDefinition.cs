@@ -31,10 +31,8 @@ namespace Mono.Cecil {
 		ReadingMode reading_mode;
 		internal IAssemblyResolver assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
-#if !READ_ONLY
 		internal IMetadataImporterProvider metadata_importer_provider;
 		internal IReflectionImporterProvider reflection_importer_provider;
-#endif
 		Stream symbol_stream;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
@@ -63,7 +61,6 @@ namespace Mono.Cecil {
 			set { metadata_resolver = value; }
 		}
 
-#if !READ_ONLY
 		public IMetadataImporterProvider MetadataImporterProvider {
 			get { return metadata_importer_provider; }
 			set { metadata_importer_provider = value; }
@@ -73,7 +70,6 @@ namespace Mono.Cecil {
 			get { return reflection_importer_provider; }
 			set { reflection_importer_provider = value; }
 		}
-#endif
 
 		public Stream SymbolStream {
 			get { return symbol_stream; }
@@ -117,8 +113,6 @@ namespace Mono.Cecil {
 		}
 	}
 
-#if !READ_ONLY
-
 	public sealed class ModuleParameters {
 
 		ModuleKind kind;
@@ -127,10 +121,8 @@ namespace Mono.Cecil {
 		TargetArchitecture architecture;
 		IAssemblyResolver assembly_resolver;
 		IMetadataResolver metadata_resolver;
-#if !READ_ONLY
 		IMetadataImporterProvider metadata_importer_provider;
 		IReflectionImporterProvider reflection_importer_provider;
-#endif
 
 		public ModuleKind Kind {
 			get { return kind; }
@@ -162,7 +154,6 @@ namespace Mono.Cecil {
 			set { metadata_resolver = value; }
 		}
 
-#if !READ_ONLY
 		public IMetadataImporterProvider MetadataImporterProvider {
 			get { return metadata_importer_provider; }
 			set { metadata_importer_provider = value; }
@@ -172,7 +163,6 @@ namespace Mono.Cecil {
 			get { return reflection_importer_provider; }
 			set { reflection_importer_provider = value; }
 		}
-#endif
 
 		public ModuleParameters ()
 		{
@@ -221,8 +211,6 @@ namespace Mono.Cecil {
 		}
 	}
 
-#endif
-
 	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider, ICustomDebugInformationProvider, IDisposable {
 
 		internal Image Image;
@@ -255,10 +243,9 @@ namespace Mono.Cecil {
 		internal AssemblyDefinition assembly;
 		MethodDefinition entry_point;
 
-#if !READ_ONLY
 		internal IReflectionImporter reflection_importer;
 		internal IMetadataImporter metadata_importer;
-#endif
+
 		Collection<CustomAttribute> custom_attributes;
 		Collection<AssemblyNameReference> references;
 		Collection<ModuleReference> modules;
@@ -268,9 +255,7 @@ namespace Mono.Cecil {
 
 		internal Collection<CustomDebugInformation> custom_infos;
 
-#if !READ_ONLY
 		internal MetadataBuilder metadata_builder;
-#endif
 
 		public bool IsMain {
 			get { return kind != ModuleKind.NetModule; }
@@ -360,7 +345,6 @@ namespace Mono.Cecil {
 			get { return assembly; }
 		}
 
-#if !READ_ONLY
 		internal IReflectionImporter ReflectionImporter {
 			get {
 				if (reflection_importer == null)
@@ -378,7 +362,6 @@ namespace Mono.Cecil {
 				return metadata_importer;
 			}
 		}
-#endif
 
 		public IAssemblyResolver AssemblyResolver {
 			get {
@@ -732,8 +715,6 @@ namespace Mono.Cecil {
 			return MetadataResolver.Resolve (type);
 		}
 
-#if !READ_ONLY
-
 		static void CheckContext (IGenericParameterProvider context, ModuleDefinition module)
 		{
 			if (context == null)
@@ -905,8 +886,6 @@ namespace Mono.Cecil {
 			return MetadataImporter.ImportReference (method, context);
 		}
 
-#endif
-
 		public IMetadataTokenProvider LookupToken (int token)
 		{
 			return LookupToken (new MetadataToken ((uint) token));
@@ -978,8 +957,6 @@ namespace Mono.Cecil {
 			return Image.DebugHeader ?? new ImageDebugHeader ();
 		}
 
-#if !READ_ONLY
-
 		public static ModuleDefinition CreateModule (string name, ModuleKind kind)
 		{
 			return CreateModule (name, new ModuleParameters { Kind = kind });
@@ -1007,12 +984,11 @@ namespace Mono.Cecil {
 			if (parameters.MetadataResolver != null)
 				module.metadata_resolver = parameters.MetadataResolver;
 
-#if !READ_ONLY
 			if (parameters.MetadataImporterProvider != null)
 				module.metadata_importer = parameters.MetadataImporterProvider.GetMetadataImporter (module);
+
 			if (parameters.ReflectionImporterProvider != null)
 				module.reflection_importer = parameters.ReflectionImporterProvider.GetReflectionImporter (module);
-#endif
 
 			if (parameters.Kind != ModuleKind.NetModule) {
 				var assembly = new AssemblyDefinition ();
@@ -1033,8 +1009,6 @@ namespace Mono.Cecil {
 
 			return new AssemblyNameDefinition (name, Mixin.ZeroVersion);
 		}
-
-#endif
 
 		public void ReadSymbols ()
 		{
@@ -1127,8 +1101,6 @@ namespace Mono.Cecil {
 				parameters);
 		}
 
-#if !READ_ONLY
-
 		public void Write (string fileName)
 		{
 			Write (fileName, new WriterParameters ());
@@ -1167,9 +1139,6 @@ namespace Mono.Cecil {
 
 			ModuleWriter.WriteModule (this, Disposable.NotOwned (stream), parameters);
 		}
-
-#endif
-
 	}
 
 	static partial class Mixin {

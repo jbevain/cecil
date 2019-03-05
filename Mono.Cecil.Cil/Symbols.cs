@@ -750,9 +750,8 @@ namespace Mono.Cecil.Cil {
 	}
 
 	public interface ISymbolReader : IDisposable {
-#if !READ_ONLY
+
 		ISymbolWriterProvider GetWriterProvider ();
-#endif
 		bool ProcessDebugHeader (ImageDebugHeader header);
 		MethodDebugInformation Read (MethodDefinition method);
 	}
@@ -1011,8 +1010,6 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-#if !READ_ONLY
-
 	public interface ISymbolWriter : IDisposable {
 
 		ISymbolReaderProvider GetReaderProvider ();
@@ -1045,8 +1042,6 @@ namespace Mono.Cecil.Cil {
 			throw new NotSupportedException ();
 		}
 	}
-
-#endif
 }
 
 namespace Mono.Cecil {

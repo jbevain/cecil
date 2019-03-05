@@ -18,8 +18,6 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.PE;
 using Mono.Collections.Generic;
 
-#if !READ_ONLY
-
 namespace Mono.Cecil.Pdb {
 
 	public class NativePdbWriter : ISymbolWriter {
@@ -362,5 +360,3 @@ namespace Mono.Cecil.Pdb {
 		}
 	}
 }
-
-#endif

@@ -9,15 +9,6 @@ using Mono.Cecil.Pdb;
 
 namespace Mono.Cecil.Tests {
 
-#if READ_ONLY
-	// Stubs to avoid ifdefing out the symbolWriterProvider arguments for all the tests that are using them
-	public class DefaultSymbolWriterProvider {}
-	public class PdbWriterProvider {}
-	public class MdbWriterProvider {}
-	public class PortablePdbWriterProvider {}
-	public class EmbeddedPortablePdbWriterProvider {}
-#endif
-
 	[TestFixture]
 	public class SymbolTests : BaseTestFixture {
 

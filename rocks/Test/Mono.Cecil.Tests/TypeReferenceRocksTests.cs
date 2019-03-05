@@ -1,4 +1,3 @@
-#if !READ_ONLY
 using System;
 
 using Mono.Cecil.Rocks;
@@ -123,4 +122,3 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 }
-#endif
