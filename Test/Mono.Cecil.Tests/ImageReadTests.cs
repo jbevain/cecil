@@ -207,7 +207,6 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
-#if !READ_ONLY
 		[Test]
 		public void ExternalPdbDeterministicAssembly ()
 		{
@@ -236,6 +235,5 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.EmbeddedPortablePdb));
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
-#endif
 	}
 }

@@ -12,7 +12,6 @@ namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class ModuleTests : BaseTestFixture {
 
-#if !READ_ONLY
 		[Test]
 		public void CreateModuleEscapesAssemblyName ()
 		{
@@ -22,7 +21,6 @@ namespace Mono.Cecil.Tests {
 			module = ModuleDefinition.CreateModule ("Test.exe", ModuleKind.Console);
 			Assert.AreEqual ("Test", module.Assembly.Name.Name);
 		}
-#endif
 
 		[Test]
 		public void SingleModule ()
@@ -49,8 +47,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void MultiModules ()
 		{
-			if (Platform.OnCoreClr)
-				return;
+			IgnoreOnCoreClr ();
 
 			TestModule("mma.exe", module => {
 				var assembly = module.Assembly;
@@ -160,8 +157,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ExportedTypeFromNetModule ()
 		{
-			if (Platform.OnCoreClr)
-				return;
+			IgnoreOnCoreClr ();
 
 			TestModule ("mma.exe", module => {
 				Assert.IsTrue (module.HasExportedTypes);
@@ -215,6 +211,8 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void Win32FileVersion ()
 		{
+			IgnoreOnCoreClr ();
+
 			TestModule ("libhello.dll", module => {
 				var version = FileVersionInfo.GetVersionInfo (module.FileName);
 
@@ -282,7 +280,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void OwnedStreamModuleFileName ()
 		{
-			var path = GetAssemblyResourcePath ("hello.exe", GetType ().Assembly);
+			var path = GetAssemblyResourcePath ("hello.exe");
 			using (var file = File.Open (path, FileMode.Open))
 			{
 				using (var module = ModuleDefinition.ReadModule (file))
@@ -294,7 +292,6 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
-#if !READ_ONLY
 		[Test]
 		public void ReadAndWriteFile ()
 		{
@@ -327,6 +324,5 @@ namespace Mono.Cecil.Tests {
 			// Ensure you can still delete the file
 			File.Delete (path);
 		}
-#endif
 	}
 }

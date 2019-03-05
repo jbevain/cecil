@@ -11,7 +11,6 @@ using NUnit.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using CS = Microsoft.CodeAnalysis.CSharp;
-using VB = Microsoft.CodeAnalysis.VisualBasic;
 #endif
 
 namespace Mono.Cecil.Tests {
@@ -35,6 +34,14 @@ namespace Mono.Cecil.Tests {
 
 		public static bool OnCoreClr {
 			get { return TryGetType ("System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") != null; }
+		}
+
+		public static bool OnWindows {
+			get { return Environment.OSVersion.Platform == PlatformID.Win32NT; }
+		}
+
+		public static bool HasNativePdbSupport {
+			get { return OnWindows && !OnMono; }
 		}
 
 		static Type TryGetType (string assemblyQualifiedName)
@@ -90,7 +97,7 @@ namespace Mono.Cecil.Tests {
 			if (extension == ".il")
 				return IlasmCompilationService.Instance.Compile (name);
 
-			if (extension == ".cs" || extension == ".vb")
+			if (extension == ".cs")
 #if NET_CORE
 				return RoslynCompilationService.Instance.Compile (name);
 #else
@@ -182,14 +189,6 @@ namespace Mono.Cecil.Tests {
 					new [] { CS.SyntaxFactory.ParseSyntaxTree (source) },
 					references, 
 					new CS.CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
-
-			case ".vb":
-				return VB.VisualBasicCompilation.Create (
-					assemblyName,
-					new [] { VB.SyntaxFactory.ParseSyntaxTree (source) },
-					references,
-					new VB.VisualBasicCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
-
 			default:
 				throw new NotSupportedException ();
 			}
@@ -320,7 +319,7 @@ namespace Mono.Cecil.Tests {
 		public static ProcessOutput ILAsm (string source, string output)
 		{
 			var ilasm = "ilasm";
-			if (!Platform.OnMono)
+			if (Platform.OnWindows)
 				ilasm = NetFrameworkTool ("ilasm");
 
 			return RunProcess (ilasm, "/nologo", "/dll", "/out:" + Quote (output), Quote (source));

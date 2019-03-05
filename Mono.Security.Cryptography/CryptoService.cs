@@ -8,10 +8,6 @@
 // Licensed under the MIT/X11 license.
 //
 
-#if !READ_ONLY
-
-#if !NET_CORE
-
 using System;
 using System.IO;
 using System.Reflection;
@@ -152,7 +148,3 @@ namespace Mono.Cecil {
 		}
 	}
 }
-
-#endif
-
-#endif

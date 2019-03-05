@@ -1,4 +1,3 @@
-#if !READ_ONLY
 using System;
 using System.IO;
 using System.Linq;
@@ -672,4 +671,3 @@ class Program
 		}
 	}
 }
-#endif

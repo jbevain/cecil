@@ -1,22 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <Import Project="..\..\..\Mono.Cecil.Tests.props" />
   <PropertyGroup>
-    <ProjectGuid>{29300103-CB76-4A1D-B6FD-FFD91C1EC8AA}</ProjectGuid>
-    <RootNamespace>Mono.Cecil.Pdb.Tests</RootNamespace>
-    <AssemblyName>Mono.Cecil.Pdb.Tests</AssemblyName>
+    <TargetFrameworks>netcoreapp2.1;net40</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Mono.Cecil.csproj">
-      <Project>{D68133BD-1E63-496E-9EDE-4FBDBF77B486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Test\Mono.Cecil.Tests.csproj">
-      <Project>{A47B1F49-A81A-43E8-BE6B-DD28AF2C4055}</Project>
       <Name>Mono.Cecil.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\Mono.Cecil.Pdb.csproj">
-      <Project>{63E6915C-7EA4-4D76-AB28-0D7191EEA626}</Project>
       <Name>Mono.Cecil.Pdb</Name>
     </ProjectReference>
   </ItemGroup>
@@ -26,5 +20,4 @@
   <ItemGroup>
     <None Include="Resources\**\*" />
   </ItemGroup>
-  <Import Project="$(MSBuildCSharpTargets)" Condition="!$(NetStandard)" />
 </Project>

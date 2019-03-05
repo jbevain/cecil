@@ -65,8 +65,6 @@ namespace Mono.Cecil.Pdb {
 		}
 	}
 
-#if !READ_ONLY
-
 	public sealed class NativePdbWriterProvider : ISymbolWriterProvider {
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
@@ -125,6 +123,4 @@ namespace Mono.Cecil.Pdb {
 			return new NativePdbWriterProvider ().GetSymbolWriter (module, symbolStream);
 		}
 	}
-
-#endif
 }

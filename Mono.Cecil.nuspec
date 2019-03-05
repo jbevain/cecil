@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Mono.Cecil</id>
-    <version>0.10.3.0</version>
+    <version>0.11.0.0</version>
     <title>Mono.Cecil</title>
     <authors>Jb Evain</authors>
     <owners>Jb Evain</owners>
@@ -14,23 +14,29 @@
     <language>en-US</language>
     <tags>assembly assemblies module modules il cil msil bytecode reflection injection cecil mono aop</tags>
     <dependencies>
-      <group targetFramework=".NETFramework3.5" />
       <group targetFramework=".NETFramework4.0" />
-      <group targetFramework=".NETStandard1.3">
-        <dependency id="System.Collections" version="4.0.11" />
-        <dependency id="System.IO.FileSystem" version="4.0.1" />
-        <dependency id="System.IO.FileSystem.Primitives" version="4.0.1" />
-        <dependency id="System.Reflection" version="4.1.0" />
-        <dependency id="System.Runtime.Extensions" version="4.1.0" />
-        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
-        <dependency id="System.Security.Cryptography.Csp" version="4.0.0" />
-        <dependency id="System.Threading" version="4.0.11" />
-      </group>
+      <group targetFramework=".NETStandard2.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\net_3_5_Release\*.dll" target="lib/net35" />
-    <file src="bin\net_4_0_Release\*.dll" target="lib/net40" />
-    <file src="bin\netstandard_Release\netstandard1.3\*.dll" target="lib/netstandard1.3" />
+    <file src="bin\Release\net40\Mono.Cecil.dll" target="lib/net40" />
+    <file src="bin\Release\net40\Mono.Cecil.pdb" target="lib/net40" />
+    <file src="bin\Release\netstandard2.0\Mono.Cecil.dll" target="lib/netstandard2.0" />
+    <file src="bin\Release\netstandard2.0\Mono.Cecil.pdb" target="lib/netstandard2.0" />
+
+    <file src="rocks\bin\Release\net40\Mono.Cecil.Rocks.dll" target="lib/net40" />
+    <file src="rocks\bin\Release\net40\Mono.Cecil.Rocks.pdb" target="lib/net40" />
+    <file src="rocks\bin\Release\netstandard2.0\Mono.Cecil.Rocks.dll" target="lib/netstandard2.0" />
+    <file src="rocks\bin\Release\netstandard2.0\Mono.Cecil.Rocks.pdb" target="lib/netstandard2.0" />
+
+    <file src="symbols\mdb\bin\Release\net40\Mono.Cecil.Mdb.dll" target="lib/net40" />
+    <file src="symbols\mdb\bin\Release\net40\Mono.Cecil.Mdb.pdb" target="lib/net40" />
+    <file src="symbols\mdb\bin\Release\netstandard2.0\Mono.Cecil.Mdb.dll" target="lib/netstandard2.0" />
+    <file src="symbols\mdb\bin\Release\netstandard2.0\Mono.Cecil.Mdb.pdb" target="lib/netstandard2.0" />
+
+    <file src="symbols\pdb\bin\Release\net40\Mono.Cecil.Pdb.dll" target="lib/net40" />
+    <file src="symbols\pdb\bin\Release\net40\Mono.Cecil.Pdb.pdb" target="lib/net40" />
+    <file src="symbols\pdb\bin\Release\netstandard2.0\Mono.Cecil.Pdb.dll" target="lib/netstandard2.0" />
+    <file src="symbols\pdb\bin\Release\netstandard2.0\Mono.Cecil.Pdb.pdb" target="lib/netstandard2.0" />
   </files>
 </package>

@@ -30,8 +30,6 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
-#if !READ_ONLY
-
 		[Test]
 		public void EmptyStructLayout ()
 		{
