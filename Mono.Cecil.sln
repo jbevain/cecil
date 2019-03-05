@@ -21,9 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mono.Cecil.Rocks.Tests", "r
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug_ReadOnly|Any CPU = Debug_ReadOnly|Any CPU
 		Debug|Any CPU = Debug|Any CPU
-		Release_ReadOnly|Any CPU = Release_ReadOnly|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
