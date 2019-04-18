@@ -358,6 +358,11 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (characteristics);
 		}
 
+		uint GetRVAFileOffset (Section section, RVA rva)
+		{
+			return section.PointerToRawData + rva - section.VirtualAddress;
+		}
+
 		void MoveTo (uint pointer)
 		{
 			BaseStream.Seek (pointer, SeekOrigin.Begin);
@@ -365,7 +370,7 @@ namespace Mono.Cecil.PE {
 
 		void MoveToRVA (Section section, RVA rva)
 		{
-			BaseStream.Seek (section.PointerToRawData + rva - section.VirtualAddress, SeekOrigin.Begin);
+			BaseStream.Seek (GetRVAFileOffset (section, rva), SeekOrigin.Begin);
 		}
 
 		void MoveToRVA (TextSegment segment)
@@ -807,6 +812,14 @@ namespace Mono.Cecil.PE {
 		public uint GetHeaderSize ()
 		{
 			return pe_header_size + SizeOfOptionalHeader () + (sections * section_header_size);
+		}
+
+		public void PatchMvid (Guid guid)
+		{
+			uint offset = GetRVAFileOffset (text, text_map.GetRVA (TextSegment.GuidHeap));
+			BaseStream.Seek (offset, SeekOrigin.Begin);
+			var arr = guid.ToByteArray ();
+			BaseStream.Write (arr, 0, arr.Length);
 		}
 
 		void PatchWin32Resources (ByteBuffer resources)
