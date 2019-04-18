@@ -107,7 +107,7 @@ namespace Mono.Cecil {
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 			}
 
-			if (parameters.DeterministicGuid)
+			if (parameters.DeterministicMvid)
 				module.Mvid = Guid.Empty;
 			var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider);
 			try {
@@ -123,7 +123,7 @@ namespace Mono.Cecil {
 
 					if (parameters.StrongNameKeyPair != null)
 						CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
-					if (parameters.DeterministicGuid) {
+					if (parameters.DeterministicMvid) {
 						module.Mvid = ComputeGuid (stream.value);
 						writer.PatchMvid (module.Mvid);
 					}

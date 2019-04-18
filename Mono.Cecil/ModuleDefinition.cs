@@ -210,7 +210,7 @@ namespace Mono.Cecil {
 			set { key_pair = value; }
 		}
 
-		public bool DeterministicGuid { get; set; }
+		public bool DeterministicMvid { get; set; }
 	}
 
 	public sealed class ModuleDefinition : ModuleReference, ICustomAttributeProvider, ICustomDebugInformationProvider, IDisposable {
