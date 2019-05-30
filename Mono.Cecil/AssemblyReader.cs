@@ -103,8 +103,14 @@ namespace Mono.Cecil {
 					? symbol_reader_provider.GetSymbolReader (module, parameters.SymbolStream)
 					: symbol_reader_provider.GetSymbolReader (module, module.FileName);
 
-				if (reader != null)
-					module.ReadSymbols (reader, parameters.ThrowIfSymbolsAreNotMatching);
+				if (reader != null) {
+					try {
+						module.ReadSymbols (reader, parameters.ThrowIfSymbolsAreNotMatching);
+					} catch (Exception) {
+						reader.Dispose ();
+						throw;
+					}
+				}
 			}
 
 			if (module.Image.HasDebugTables ())
