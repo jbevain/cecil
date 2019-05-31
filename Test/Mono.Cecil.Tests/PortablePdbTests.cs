@@ -669,5 +669,19 @@ class Program
 				Assert.AreEqual (Path.GetFileName (debug_header_pdb_path), pdb_path);
 			}
 		}
+
+		[Test]
+		public void WriteAndReadAgainModuleWithDeterministicMvid ()
+		{
+			const string resource = "mylib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, SymbolWriterProvider = new SymbolWriterProvider () });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+			}
+		}
 	}
 }

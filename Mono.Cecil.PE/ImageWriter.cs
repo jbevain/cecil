@@ -814,14 +814,6 @@ namespace Mono.Cecil.PE {
 			return pe_header_size + SizeOfOptionalHeader () + (sections * section_header_size);
 		}
 
-		public void PatchMvid (Guid guid)
-		{
-			uint offset = GetRVAFileOffset (text, text_map.GetRVA (TextSegment.GuidHeap));
-			BaseStream.Seek (offset, SeekOrigin.Begin);
-			var arr = guid.ToByteArray ();
-			BaseStream.Write (arr, 0, arr.Length);
-		}
-
 		void PatchWin32Resources (ByteBuffer resources)
 		{
 			PatchResourceDirectoryTable (resources);

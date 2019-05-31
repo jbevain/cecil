@@ -109,6 +109,7 @@ namespace Mono.Cecil {
 
 			if (parameters.DeterministicMvid)
 				module.Mvid = Guid.Empty;
+
 			var metadata = new MetadataBuilder (module, fq_name, timestamp, symbol_writer_provider);
 			try {
 				module.metadata_builder = metadata;
@@ -117,60 +118,19 @@ namespace Mono.Cecil {
 					metadata.SetSymbolWriter (symbol_writer);
 					BuildMetadata (module, metadata);
 
+					if (parameters.DeterministicMvid)
+						metadata.ComputeDeterministicMvid ();
+
 					var writer = ImageWriter.CreateWriter (module, metadata, stream);
 					stream.value.SetLength (0);
 					writer.WriteImage ();
 
 					if (parameters.StrongNameKeyPair != null)
 						CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
-					if (parameters.DeterministicMvid) {
-						module.Mvid = ComputeGuid (stream.value);
-						writer.PatchMvid (module.Mvid);
-					}
 				}
 			} finally {
 				module.metadata_builder = null;
 			}
-		}
-
-		static void CopyStreamChunk (Stream stream, Stream dest_stream, byte [] buffer, int length)
-		{
-			while (length > 0) {
-				int read = stream.Read (buffer, 0, System.Math.Min (buffer.Length, length));
-				dest_stream.Write (buffer, 0, read);
-				length -= read;
-			}
-		}
-
-		static byte [] ComputeHash (Stream stream)
-		{
-			const int buffer_size = 8192;
-
-			var sha1 = new SHA1Managed ();
-
-			stream.Seek (0, SeekOrigin.Begin);
-			var buffer = new byte [buffer_size];
-
-			using (var crypto_stream = new CryptoStream (Stream.Null, sha1, CryptoStreamMode.Write))
-				CopyStreamChunk (stream, crypto_stream, buffer, (int) stream.Length);
-			return sha1.Hash;
-		}
-
-		static unsafe Guid ComputeGuid (Stream stream)
-		{
-			byte[] hashCode = ComputeHash (stream);
-
-			// From corefx/src/System.Reflection.Metadata/src/System/Reflection/Metadata/BlobContentId.cs
-			Guid guid = default(Guid);
-			byte* guidPtr = (byte*)&guid;
-			for (var i = 0; i < 16; i++) {
-				guidPtr[i] = hashCode[i];
-			}
-			// modify the guid data so it decodes to the form of a "random" guid ala rfc4122
-			guidPtr[7] = (byte)((guidPtr[7] & 0x0f) | (4 << 4));
-			guidPtr[8] = (byte)((guidPtr[8] & 0x3f) | (2 << 6));
-
-			return guid;
 		}
 
 		static void BuildMetadata (ModuleDefinition module, MetadataBuilder metadata)
@@ -2683,6 +2643,25 @@ namespace Mono.Cecil {
 			signature.WriteSequencePoints (info);
 
 			method_debug_information_table.rows [rid - 1].Col2 = GetBlobIndex (signature);
+		}
+
+		public void ComputeDeterministicMvid ()
+		{
+			var guid = CryptoService.ComputeGuid (CryptoService.ComputeHash (
+				data,
+				resources,
+				string_heap,
+				user_string_heap,
+				blob_heap,
+				table_heap,
+				code));
+
+			var position = guid_heap.position;
+			guid_heap.position = 0;
+			guid_heap.WriteBytes (guid.ToByteArray ());
+			guid_heap.position = position;
+
+			module.Mvid = guid;
 		}
 	}
 
