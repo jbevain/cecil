@@ -132,19 +132,17 @@ namespace Mono.Cecil {
 			return sha1.Hash;
 		}
 
-		public static unsafe Guid ComputeGuid (byte [] hash)
+		public static Guid ComputeGuid (byte [] hash)
 		{
 			// From corefx/src/System.Reflection.Metadata/src/System/Reflection/Metadata/BlobContentId.cs
-			Guid guid = default (Guid);
-			byte* guidPtr = (byte*) &guid;
-			for (var i = 0; i < 16; i++) {
-				guidPtr[i] = hash [i];
-			}
-			// modify the guid data so it decodes to the form of a "random" guid ala rfc4122
-			guidPtr [7] = (byte) ((guidPtr [7] & 0x0f) | (4 << 4));
-			guidPtr [8] = (byte) ((guidPtr [8] & 0x3f) | (2 << 6));
+			var guid = new byte [16];
+			Buffer.BlockCopy (hash, 0, guid, 0, 16);
 
-			return guid;
+			// modify the guid data so it decodes to the form of a "random" guid ala rfc4122
+			guid [7] = (byte) ((guid [7] & 0x0f) | (4 << 4));
+			guid [8] = (byte) ((guid [8] & 0x3f) | (2 << 6));
+
+			return new Guid (guid);
 		}
 	}
 
