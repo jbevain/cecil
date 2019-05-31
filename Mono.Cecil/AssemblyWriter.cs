@@ -2653,7 +2653,8 @@ namespace Mono.Cecil {
 				string_heap,
 				user_string_heap,
 				blob_heap,
-				table_heap));
+				table_heap,
+				code));
 
 			var position = guid_heap.position;
 			guid_heap.position = 0;
