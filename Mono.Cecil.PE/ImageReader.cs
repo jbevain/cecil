@@ -350,7 +350,7 @@ namespace Mono.Cecil.PE {
 					PointerToRawData = ReadInt32 (),
 				};
 
-				if (directory.AddressOfRawData == 0) {
+				if (directory.PointerToRawData == 0) {
 					entries [i] = new ImageDebugHeaderEntry (directory, Empty<byte>.Array);
 					continue;
 				}
