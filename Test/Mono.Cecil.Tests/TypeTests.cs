@@ -98,8 +98,8 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (t.HasConstraints);
 				Assert.AreEqual (2, t.Constraints.Count);
 
-				Assert.AreEqual ("Zap", t.Constraints [0].FullName);
-				Assert.AreEqual ("IZoom", t.Constraints [1].FullName);
+				Assert.AreEqual ("Zap", t.Constraints [0].ConstraintType.FullName);
+				Assert.AreEqual ("IZoom", t.Constraints [1].ConstraintType.FullName);
 			});
 		}
 
@@ -132,8 +132,8 @@ namespace Mono.Cecil.Tests {
 				var t2 = duel.GenericParameters [1];
 				var t3 = duel.GenericParameters [2];
 
-				Assert.AreEqual (t1, t2.Constraints [0]);
-				Assert.AreEqual (t2, t3.Constraints [0]);
+				Assert.AreEqual (t1, t2.Constraints [0].ConstraintType);
+				Assert.AreEqual (t2, t3.Constraints [0].ConstraintType);
 			});
 		}
 

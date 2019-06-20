@@ -1162,6 +1162,7 @@ namespace Mono.Cecil {
 			returnType,
 			propertyType,
 			interfaceType,
+			constraintType,
 		}
 
 		public static void CheckName (object name)
