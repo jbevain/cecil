@@ -243,10 +243,18 @@ namespace Mono.Cecil {
 				var parameter = parameters [i];
 
 				if (parameter.HasConstraints)
-					Mixin.Read (parameter.Constraints);
+					ReadGenericParameterConstraints (parameter);
 
 				ReadCustomAttributes (parameter);
 			}
+		}
+
+		void ReadGenericParameterConstraints (GenericParameter parameter)
+		{
+			var constraints = parameter.Constraints;
+
+			for (int i = 0; i < constraints.Count; i++)
+				ReadCustomAttributes (constraints [i]);
 		}
 
 		void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
