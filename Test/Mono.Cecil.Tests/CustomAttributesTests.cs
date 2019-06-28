@@ -461,7 +461,7 @@ namespace Mono.Cecil.Tests {
 				var attributes = constraint.CustomAttributes;
 				Assert.AreEqual (1, attributes.Count);
 				Assert.AreEqual ("System.Runtime.CompilerServices.NullableAttribute", attributes [0].AttributeType.FullName);
-			});
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
