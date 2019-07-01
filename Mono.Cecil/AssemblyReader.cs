@@ -243,10 +243,18 @@ namespace Mono.Cecil {
 				var parameter = parameters [i];
 
 				if (parameter.HasConstraints)
-					Mixin.Read (parameter.Constraints);
+					ReadGenericParameterConstraints (parameter);
 
 				ReadCustomAttributes (parameter);
 			}
+		}
+
+		void ReadGenericParameterConstraints (GenericParameter parameter)
+		{
+			var constraints = parameter.Constraints;
+
+			for (int i = 0; i < constraints.Count; i++)
+				ReadCustomAttributes (constraints [i]);
 		}
 
 		void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
@@ -1993,27 +2001,31 @@ namespace Mono.Cecil {
 		{
 			InitializeGenericConstraints ();
 
-			Collection<MetadataToken> mapping;
+			Collection<Row<uint, MetadataToken>> mapping;
 			if (!metadata.TryGetGenericConstraintMapping (generic_parameter, out mapping))
 				return false;
 
 			return mapping.Count > 0;
 		}
 
-		public Collection<TypeReference> ReadGenericConstraints (GenericParameter generic_parameter)
+		public GenericParameterConstraintCollection ReadGenericConstraints (GenericParameter generic_parameter)
 		{
 			InitializeGenericConstraints ();
 
-			Collection<MetadataToken> mapping;
+			Collection<Row<uint, MetadataToken>> mapping;
 			if (!metadata.TryGetGenericConstraintMapping (generic_parameter, out mapping))
-				return new Collection<TypeReference> ();
+				return new GenericParameterConstraintCollection (generic_parameter);
 
-			var constraints = new Collection<TypeReference> (mapping.Count);
+			var constraints = new GenericParameterConstraintCollection (generic_parameter, mapping.Count);
 
 			this.context = (IGenericContext) generic_parameter.Owner;
 
-			for (int i = 0; i < mapping.Count; i++)
-				constraints.Add (GetTypeDefOrRef (mapping [i]));
+			for (int i = 0; i < mapping.Count; i++) {
+				constraints.Add (
+					new GenericParameterConstraint (
+						GetTypeDefOrRef (mapping [i].Col2),
+						new MetadataToken (TokenType.GenericParamConstraint, mapping [i].Col1)));
+			}
 
 			metadata.RemoveGenericConstraintMapping (generic_parameter);
 
@@ -2027,15 +2039,16 @@ namespace Mono.Cecil {
 
 			var length = MoveTo (Table.GenericParamConstraint);
 
-			metadata.GenericConstraints = new Dictionary<uint, Collection<MetadataToken>> (length);
+			metadata.GenericConstraints = new Dictionary<uint, Collection<Row<uint, MetadataToken>>> (length);
 
-			for (int i = 1; i <= length; i++)
+			for (uint i = 1; i <= length; i++) {
 				AddGenericConstraintMapping (
 					ReadTableIndex (Table.GenericParam),
-					ReadMetadataToken (CodedIndex.TypeDefOrRef));
+					new Row<uint, MetadataToken> (i, ReadMetadataToken (CodedIndex.TypeDefOrRef)));
+			}
 		}
 
-		void AddGenericConstraintMapping (uint generic_parameter, MetadataToken constraint)
+		void AddGenericConstraintMapping (uint generic_parameter, Row<uint, MetadataToken> constraint)
 		{
 			metadata.SetGenericConstraintMapping (
 				generic_parameter,

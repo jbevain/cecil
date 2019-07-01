@@ -450,6 +450,21 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void GenericParameterConstraint ()
+		{
+			TestModule ("GenericParameterConstraintAttributes.dll", module => {
+				var type = module.GetType ("Foo.Library`1");
+				var gp = type.GenericParameters.Single ();
+				var constraint = gp.Constraints.Single ();
+
+				Assert.IsTrue (constraint.HasCustomAttributes);
+				var attributes = constraint.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("System.Runtime.CompilerServices.NullableAttribute", attributes [0].AttributeType.FullName);
+			}, verify: !Platform.OnMono);
+		}
+
+		[Test]
 		public void NullCharInString ()
 		{
 			TestCSharp ("CustomAttributes.cs", module => {

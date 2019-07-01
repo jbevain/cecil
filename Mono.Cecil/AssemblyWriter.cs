@@ -1513,12 +1513,20 @@ namespace Mono.Cecil {
 		{
 			var constraints = generic_parameter.Constraints;
 
-			var rid = generic_parameter.token.RID;
+			var gp_rid = generic_parameter.token.RID;
 
-			for (int i = 0; i < constraints.Count; i++)
-				table.AddRow (new GenericParamConstraintRow (
-					rid,
-					MakeCodedRID (GetTypeToken (constraints [i]), CodedIndex.TypeDefOrRef)));
+			for (int i = 0; i < constraints.Count; i++) {
+				var constraint = constraints [i];
+
+				var rid = table.AddRow (new GenericParamConstraintRow (
+					gp_rid,
+					MakeCodedRID (GetTypeToken (constraint.ConstraintType), CodedIndex.TypeDefOrRef)));
+
+				constraint.token = new MetadataToken (TokenType.GenericParamConstraint, rid);
+
+				if (constraint.HasCustomAttributes)
+					AddCustomAttributes (constraint);
+			}
 		}
 
 		void AddInterfaces (TypeDefinition type)
