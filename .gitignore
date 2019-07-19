@@ -14,3 +14,4 @@ TestResults
 project.lock.json
 .vs/
 .idea/
+/docs/
