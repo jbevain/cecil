@@ -18,8 +18,6 @@ using Mono.Cecil.PE;
 
 using RVA = System.UInt32;
 
-#if !READ_ONLY
-
 namespace Mono.Cecil.Cil {
 
 	sealed class CodeWriter : ByteBuffer {
@@ -655,5 +653,3 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 }
-
-#endif

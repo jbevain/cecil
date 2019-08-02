@@ -437,7 +437,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InterfaceImplementation ()
 		{
-			IgnoreOnMono();
+			OnlyOnWindows (); // Mono's ilasm doesn't support .interfaceimpl
 
 			TestIL ("ca-iface-impl.il", module => {
 				var type = module.GetType ("FooType");
@@ -447,6 +447,21 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (1, attributes.Count);
 				Assert.AreEqual ("FooAttribute", attributes [0].AttributeType.FullName);
 			});
+		}
+
+		[Test]
+		public void GenericParameterConstraint ()
+		{
+			TestModule ("GenericParameterConstraintAttributes.dll", module => {
+				var type = module.GetType ("Foo.Library`1");
+				var gp = type.GenericParameters.Single ();
+				var constraint = gp.Constraints.Single ();
+
+				Assert.IsTrue (constraint.HasCustomAttributes);
+				var attributes = constraint.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("System.Runtime.CompilerServices.NullableAttribute", attributes [0].AttributeType.FullName);
+			}, verify: !Platform.OnMono);
 		}
 
 		[Test]
@@ -464,7 +479,35 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
-#if !READ_ONLY
+		[Test]
+		public void OrderedAttributes ()
+		{
+			TestModule ("ordered-attrs.exe", module => {
+				var type = module.GetType ("Program");
+				var method = type.GetMethod ("Main");
+				var attributes = method.CustomAttributes;
+				Assert.AreEqual (6, attributes.Count);
+
+				Assert.AreEqual ("AAttribute", attributes [0].AttributeType.Name);
+				Assert.AreEqual ("Main.A1", attributes [0].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("AAttribute", attributes [1].AttributeType.Name);
+				Assert.AreEqual ("Main.A2", attributes [1].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("BAttribute", attributes [2].AttributeType.Name);
+				Assert.AreEqual ("Main.B1", attributes [2].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("AAttribute", attributes [3].AttributeType.Name);
+				Assert.AreEqual ("Main.A3", attributes [3].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("BAttribute", attributes [4].AttributeType.Name);
+				Assert.AreEqual ("Main.B2", attributes [4].Fields [0].Argument.Value as string);
+
+				Assert.AreEqual ("BAttribute", attributes [5].AttributeType.Name);
+				Assert.AreEqual ("Main.B3", attributes [5].Fields [0].Argument.Value as string);
+			});
+		}
+
 		[Test]
 		public void DefineCustomAttributeFromBlob ()
 		{
@@ -502,7 +545,7 @@ namespace Mono.Cecil.Tests {
 
 			module.Dispose ();
 		}
-#endif
+
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));

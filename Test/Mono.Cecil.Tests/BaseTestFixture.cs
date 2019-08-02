@@ -1,10 +1,23 @@
 using System;
 using System.IO;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using Mono.Cecil.Cil;
 using NUnit.Framework;
 
 using Mono.Cecil.PE;
+
+#if !NET_CORE
+namespace System.Runtime.CompilerServices {
+
+	[AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
+	public sealed class CallerFilePathAttribute : Attribute {
+	}
+
+	[AttributeUsage (AttributeTargets.Parameter, Inherited = false)]
+	public sealed class CallerMemberNameAttribute : Attribute {
+	}
+}
+#endif
 
 namespace Mono.Cecil.Tests {
 
@@ -16,49 +29,61 @@ namespace Mono.Cecil.Tests {
 				Assert.Ignore ();
 		}
 
-		public static string GetResourcePath (string name, Assembly assembly)
+		protected static void IgnoreOnCoreClr ()
 		{
-			return Path.Combine (FindResourcesDirectory (assembly), name);
+			if (Platform.OnCoreClr)
+				Assert.Ignore ();
 		}
 
-		public static string GetAssemblyResourcePath (string name, Assembly assembly)
+		protected static void OnlyOnWindows ()
 		{
-			return GetResourcePath (Path.Combine ("assemblies", name), assembly);
+			if (!Platform.OnWindows)
+				Assert.Ignore ();
 		}
 
-		public static string GetCSharpResourcePath (string name, Assembly assembly)
+		public static string GetResourcePath (string name, string sourceFilePath)
 		{
-			return GetResourcePath (Path.Combine ("cs", name), assembly);
+			return Path.Combine (FindResourcesDirectory (sourceFilePath), name);
 		}
 
-		public static string GetILResourcePath (string name, Assembly assembly)
+		public static string GetAssemblyResourcePath (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return GetResourcePath (Path.Combine ("il", name), assembly);
+			return GetResourcePath (Path.Combine ("assemblies", name), sourceFilePath);
 		}
 
-		public ModuleDefinition GetResourceModule (string name)
+		public static string GetCSharpResourcePath (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly));
+			return GetResourcePath (Path.Combine ("cs", name), sourceFilePath);
 		}
 
-		public ModuleDefinition GetResourceModule (string name, ReaderParameters parameters)
+		public static string GetILResourcePath (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), parameters);
+			return GetResourcePath (Path.Combine ("il", name), sourceFilePath);
 		}
 
-		public ModuleDefinition GetResourceModule (string name, ReadingMode mode)
+		public ModuleDefinition GetResourceModule (string name, [CallerFilePath] string sourceFilePath = "")
 		{
-			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, GetType ().Assembly), new ReaderParameters (mode));
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, sourceFilePath));
 		}
 
-		public Stream GetResourceStream (string name)
+		public ModuleDefinition GetResourceModule (string name, ReaderParameters parameters, [CallerFilePath] string sourceFilePath = "")
 		{
-			return new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read);
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, sourceFilePath), parameters);
 		}
 
-		internal Image GetResourceImage (string name)
+		public ModuleDefinition GetResourceModule (string name, ReadingMode mode, [CallerFilePath] string sourceFilePath = "")
 		{
-			var file = new FileStream (GetAssemblyResourcePath (name, GetType ().Assembly), FileMode.Open, FileAccess.Read);
+			return ModuleDefinition.ReadModule (GetAssemblyResourcePath (name, sourceFilePath), new ReaderParameters (mode));
+		}
+
+		public Stream GetResourceStream (string name, [CallerFilePath] string sourceFilePath = "")
+		{
+			return new FileStream (GetAssemblyResourcePath (name, sourceFilePath), FileMode.Open, FileAccess.Read);
+		}
+
+		internal Image GetResourceImage (string name, [CallerFilePath] string sourceFilePath = "")
+		{
+			var file = new FileStream (GetAssemblyResourcePath (name, sourceFilePath), FileMode.Open, FileAccess.Read);
 			return ImageReader.ReadImage (Disposable.Owned (file as Stream), file.Name);
 		}
 
@@ -72,9 +97,9 @@ namespace Mono.Cecil.Tests {
 			return ModuleDefinition.ReadModule (GetType ().Module.FullyQualifiedName, parameters);
 		}
 
-		public static string FindResourcesDirectory (Assembly assembly)
+		public static string FindResourcesDirectory (string sourceFilePath)
 		{
-			var path = Path.GetDirectoryName (new Uri (assembly.CodeBase).LocalPath);
+			var path = Path.GetDirectoryName (sourceFilePath);
 			while (!Directory.Exists (Path.Combine (path, "Resources"))) {
 				var old = path;
 				path = Path.GetDirectoryName (path);
@@ -97,19 +122,19 @@ namespace Mono.Cecil.Tests {
 			return str.Trim ().Replace ("\r\n", "\n");
 		}
 
-		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
+		public static void TestModule (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false, [CallerFilePath] string sourceFilePath = "")
 		{
-			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
+			Run (new ModuleTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath));
 		}
 
-		public static void TestCSharp (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
+		public static void TestCSharp (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false, [CallerFilePath] string sourceFilePath = "")
 		{
-			Run (new CSharpTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
+			Run (new CSharpTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath));
 		}
 
-		public static void TestIL (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false)
+		public static void TestIL (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = false, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false, [CallerFilePath] string sourceFilePath = "")
 		{
-			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections));
+			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath));
 		}
 
 		static void Run (TestCase testCase)
@@ -123,13 +148,11 @@ namespace Mono.Cecil.Tests {
 			if (testCase.ReadOnly)
 				return;
 
-#if !READ_ONLY
 			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromDeferred))
 				runner.RunTest ();
 
 			using (var runner = new TestRunner (testCase, TestCaseType.WriteFromImmediate))
 				runner.RunTest ();
-#endif
 		}
 	}
 
@@ -142,12 +165,11 @@ namespace Mono.Cecil.Tests {
 		public readonly IAssemblyResolver AssemblyResolver;
 		public readonly Action<ModuleDefinition> Test;
 		public readonly bool ApplyWindowsRuntimeProjections;
+		public readonly string SourceFilePath;
 
 		public abstract string ModuleLocation { get; }
 
-		protected Assembly Assembly { get { return Test.Method.Module.Assembly; } }
-
-		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
+		protected TestCase (Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections, string sourceFilePath = "")
 		{
 			Test = test;
 			Verify = verify;
@@ -156,6 +178,7 @@ namespace Mono.Cecil.Tests {
 			SymbolWriterProvider = symbolWriterProvider;
 			AssemblyResolver = assemblyResolver;
 			ApplyWindowsRuntimeProjections = applyWindowsRuntimeProjections;
+			SourceFilePath = sourceFilePath;
 		}
 	}
 
@@ -163,15 +186,15 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string Module;
 
-		public ModuleTestCase (string module, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
-			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections)
+		public ModuleTestCase (string module, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections, string sourceFilePath = "")
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath)
 		{
 			Module = module;
 		}
 
 		public override string ModuleLocation
 		{
-			get { return BaseTestFixture.GetAssemblyResourcePath (Module, Assembly); }
+			get { return BaseTestFixture.GetAssemblyResourcePath (Module, SourceFilePath); }
 		}
 	}
 
@@ -179,8 +202,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string File;
 
-		public CSharpTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
-			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections)
+		public CSharpTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections, string sourceFilePath = "")
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath)
 		{
 			File = file;
 		}
@@ -189,7 +212,7 @@ namespace Mono.Cecil.Tests {
 		{
 			get
 			{
-				return CompilationService.CompileResource (BaseTestFixture.GetCSharpResourcePath (File, Assembly));
+				return CompilationService.CompileResource (BaseTestFixture.GetCSharpResourcePath (File, SourceFilePath));
 			}
 		}
 	}
@@ -198,8 +221,8 @@ namespace Mono.Cecil.Tests {
 
 		public readonly string File;
 
-		public ILTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections)
-			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections)
+		public ILTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections, string sourceFilePath = "")
+			: base (test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath)
 		{
 			File = file;
 		}
@@ -208,7 +231,7 @@ namespace Mono.Cecil.Tests {
 		{
 			get
 			{
-				return CompilationService.CompileResource (BaseTestFixture.GetILResourcePath (File, Assembly)); ;
+				return CompilationService.CompileResource (BaseTestFixture.GetILResourcePath (File, SourceFilePath)); ;
 			}
 		}
 	}
@@ -244,14 +267,12 @@ namespace Mono.Cecil.Tests {
 			case TestCaseType.ReadDeferred:
 				parameters.ReadingMode = ReadingMode.Deferred;
 				return ModuleDefinition.ReadModule (location, parameters);
-#if !READ_ONLY
 			case TestCaseType.WriteFromImmediate:
 				parameters.ReadingMode = ReadingMode.Immediate;
 				return RoundTrip (location, parameters, "cecil-irt");
 			case TestCaseType.WriteFromDeferred:
 				parameters.ReadingMode = ReadingMode.Deferred;
 				return RoundTrip (location, parameters, "cecil-drt");
-#endif
 			default:
 				return null;
 			}
@@ -265,7 +286,6 @@ namespace Mono.Cecil.Tests {
 			return (ISymbolReaderProvider) Activator.CreateInstance (test_case.SymbolReaderProvider);
 		}
 
-#if !READ_ONLY
 		ISymbolWriterProvider GetSymbolWriterProvider ()
 		{
 			if (test_case.SymbolReaderProvider == null)
@@ -273,7 +293,6 @@ namespace Mono.Cecil.Tests {
 
 			return (ISymbolWriterProvider) Activator.CreateInstance (test_case.SymbolWriterProvider);
 		}
-#endif
 
 		IAssemblyResolver GetAssemblyResolver ()
 		{
@@ -286,7 +305,6 @@ namespace Mono.Cecil.Tests {
 			return test_resolver;
 		}
 
-#if !READ_ONLY
 		ModuleDefinition RoundTrip (string location, ReaderParameters reader_parameters, string folder)
 		{
 			var rt_folder = Path.Combine (Path.GetTempPath (), folder);
@@ -309,7 +327,7 @@ namespace Mono.Cecil.Tests {
 
 			return ModuleDefinition.ReadModule (rt_module, reader_parameters);
 		}
-#endif
+
 		public void RunTest ()
 		{
 			var module = GetModule ();
@@ -333,9 +351,7 @@ namespace Mono.Cecil.Tests {
 	enum TestCaseType {
 		ReadImmediate,
 		ReadDeferred,
-#if !READ_ONLY
 		WriteFromImmediate,
 		WriteFromDeferred,
-#endif
 	}
 }

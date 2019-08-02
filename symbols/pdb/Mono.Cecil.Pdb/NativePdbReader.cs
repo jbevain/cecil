@@ -35,12 +35,11 @@ namespace Mono.Cecil.Pdb {
 			this.pdb_file = file;
 		}
 
-#if !READ_ONLY
 		public ISymbolWriterProvider GetWriterProvider ()
 		{
 			return new NativePdbWriterProvider ();
 		}
-#endif
+
 		/*
 		uint Magic = 0x53445352;
 		Guid Signature;
@@ -183,12 +182,12 @@ namespace Mono.Cecil.Pdb {
 				parent.variables = new Collection<VariableDebugInformation> (scope.slots.Length);
 
 				foreach (PdbSlot slot in scope.slots) {
-					if (slot.flags == 1) // parameter names
+					if ((slot.flags & 1) != 0) // parameter names
 						continue;
 
 					var index = (int) slot.slot;
 					var variable = new VariableDebugInformation (index, slot.name);
-					if (slot.flags == 4)
+					if ((slot.flags & 4) != 0)
 						variable.IsDebuggerHidden = true;
 					parent.variables.Add (variable);
 				}

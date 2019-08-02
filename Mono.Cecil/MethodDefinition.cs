@@ -180,6 +180,9 @@ namespace Mono.Cecil {
 
 				return debug_info ?? (debug_info = new MethodDebugInformation (this));
 			}
+			set {
+				debug_info = value;
+			}
 		}
 
 		public bool HasPInvokeInfo {
