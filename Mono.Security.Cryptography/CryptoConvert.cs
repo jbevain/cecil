@@ -52,6 +52,16 @@ namespace Mono.Security.Cryptography {
 			bytes[offset] = (byte)value;
 		}
 
+		static private byte [] GetBytesLE (int val)
+		{
+			return new byte [] { 
+				(byte) (val & 0xff), 
+				(byte) ((val >> 8) & 0xff), 
+				(byte) ((val >> 16) & 0xff), 
+				(byte) ((val >> 24) & 0xff)
+			};
+                }
+
 		static private byte[] Trim (byte[] array)
 		{
 			for (int i=0; i < array.Length; i++) {
@@ -249,26 +259,39 @@ namespace Mono.Security.Cryptography {
 			throw new CryptographicException ("Unknown blob format.");
 		}
 
-		static public byte[] ToCapiPublicKeyBlob (RSA rsa)
+		static public byte[] ToCapiPublicKeyBlob (RSA rsa) 
 		{
-			var rsap = rsa.ExportParameters (false);
-			var blob = new byte[rsap.Modulus.Length + 20];
-			blob [0] = 0x06;	// PUBLICKEYBLOB (0x06)
-			blob [1] = 0x02;	// Version (0x02)
-			blob [2] = 0x00;	// Reserved (word)
-			blob [3] = 0x00;
-			blob [5] = 0x24;	// ALGID
-			WriteUInt32LE (blob, 8, 0x31415352);	// DWORD magic = RSA1
-			WriteUInt32LE (blob, 12, (uint)rsap.Modulus.Length << 3);	// DWORD bitlen
+			RSAParameters p = rsa.ExportParameters (false);
+			int keyLength = p.Modulus.Length; // in bytes
+			byte[] blob = new byte [20 + keyLength];
 
-			// DWORD public exponent
-			blob[18] = rsap.Exponent [0];
-			blob[17] = rsap.Exponent [1];
-			blob[16] = rsap.Exponent [2];
+			blob [0] = 0x06;	// Type - PUBLICKEYBLOB (0x06)
+			blob [1] = 0x02;	// Version - Always CUR_BLOB_VERSION (0x02)
+			// [2], [3]		// RESERVED - Always 0
+			blob [5] = 0x24;	// ALGID - Always 00 24 00 00 (for CALG_RSA_SIGN)
+			blob [8] = 0x52;	// Magic - RSA1 (ASCII in hex)
+			blob [9] = 0x53;
+			blob [10] = 0x41;
+			blob [11] = 0x31;
 
-			// BYTE modulus[rsapubkey.bitlen/8];
-			Array.Reverse (rsap.Modulus);
-			Buffer.BlockCopy (rsap.Modulus, 0, blob, 20, rsap.Modulus.Length);
+			byte[] bitlen = GetBytesLE (keyLength << 3);
+			blob [12] = bitlen [0];	// bitlen
+			blob [13] = bitlen [1];	
+			blob [14] = bitlen [2];	
+			blob [15] = bitlen [3];
+
+			// public exponent (DWORD)
+			int pos = 16;
+			int n = p.Exponent.Length;
+			while (n > 0)
+				blob [pos++] = p.Exponent [--n];
+			// modulus
+			pos = 20;
+			byte[] part = p.Modulus;
+			int len = part.Length;
+			Array.Reverse (part, 0, len);
+			Buffer.BlockCopy (part, 0, blob, pos, len);
+			pos += len;
 			return blob;
 		}
 	}
