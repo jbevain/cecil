@@ -26,24 +26,24 @@ namespace Mono.Cecil {
 
 	static class CryptoService {
 
-		public static byte[] GetPublicKey (WriterParameters parameters)
+		public static byte [] GetPublicKey (WriterParameters parameters)
 		{
 			using (var rsa = parameters.CreateRSA ()) {
-				var cspBlob = CryptoConvert.ToCapiPublicKeyBlob(rsa);
-				var publicKey = new byte[12 + cspBlob.Length];
-				Buffer.BlockCopy(cspBlob, 0, publicKey, 12, cspBlob.Length);
+				var cspBlob = CryptoConvert.ToCapiPublicKeyBlob (rsa);
+				var publicKey = new byte [12 + cspBlob.Length];
+				Buffer.BlockCopy (cspBlob, 0, publicKey, 12, cspBlob.Length);
 				// The first 12 bytes are documented at:
 				// http://msdn.microsoft.com/library/en-us/cprefadd/html/grfungethashfromfile.asp
 				// ALG_ID - Signature
-				publicKey[1] = 36;
+				publicKey [1] = 36;
 				// ALG_ID - Hash
-				publicKey[4] = 4;
-				publicKey[5] = 128;
+				publicKey [4] = 4;
+				publicKey [5] = 128;
 				// Length of Public Key (in bytes)
-				publicKey[8] = (byte)(cspBlob.Length >> 0);
-				publicKey[9] = (byte)(cspBlob.Length >> 8);
-				publicKey[10] = (byte)(cspBlob.Length >> 16);
-				publicKey[11] = (byte)(cspBlob.Length >> 24);
+				publicKey [8] = (byte) (cspBlob.Length >> 0);
+				publicKey [9] = (byte) (cspBlob.Length >> 8);
+				publicKey [10] = (byte) (cspBlob.Length >> 16);
+				publicKey [11] = (byte) (cspBlob.Length >> 24);
 				return publicKey;
 			}
 		}
@@ -96,7 +96,6 @@ namespace Mono.Cecil {
 			var sha1 = new SHA1Managed ();
 			var buffer = new byte [buffer_size];
 			using (var crypto_stream = new CryptoStream (Stream.Null, sha1, CryptoStreamMode.Write)) {
-
 				stream.Seek (0, SeekOrigin.Begin);
 				CopyStreamChunk (stream, crypto_stream, buffer, header_size);
 
@@ -179,11 +178,8 @@ namespace Mono.Cecil {
 				return CryptoConvert.FromCapiKeyBlob (writer_parameters.StrongNameKeyBlob);
 
 			if (writer_parameters.StrongNameKeyContainer != null)
-				key_container = writer_parameters.StrongNameKeyContainer ;
-			else
-			#pragma warning disable 0618
-			if (!TryGetKeyContainer (writer_parameters.StrongNameKeyPair, out key, out key_container))
-			#pragma warning restore 0618
+				key_container = writer_parameters.StrongNameKeyContainer;
+			else if (!TryGetKeyContainer (writer_parameters.StrongNameKeyPair, out key, out key_container))
 				return CryptoConvert.FromCapiKeyBlob (key);
 
 			var parameters = new CspParameters {
