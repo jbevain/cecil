@@ -102,8 +102,8 @@ namespace Mono.Cecil {
 			if (symbol_writer_provider == null && parameters.WriteSymbols)
 				symbol_writer_provider = new DefaultSymbolWriterProvider ();
 
-			if (parameters.StrongNameKeyPair != null && name != null) {
-				name.PublicKey = parameters.StrongNameKeyPair.PublicKey;
+			if (parameters.HasStrongNameKey && name != null) {
+				name.PublicKey = CryptoService.GetPublicKey (parameters);
 				module.Attributes |= ModuleAttributes.StrongNameSigned;
 			}
 
@@ -125,8 +125,8 @@ namespace Mono.Cecil {
 					stream.value.SetLength (0);
 					writer.WriteImage ();
 
-					if (parameters.StrongNameKeyPair != null)
-						CryptoService.StrongName (stream.value, writer, parameters.StrongNameKeyPair);
+					if (parameters.HasStrongNameKey)
+						CryptoService.StrongName (stream.value, writer, parameters);
 				}
 			} finally {
 				module.metadata_builder = null;
