@@ -44,14 +44,6 @@ namespace Mono.Security.Cryptography {
 			return (uint)((bytes [offset+3] << 24) | (bytes [offset+2] << 16) | (bytes [offset+1] << 8) | bytes [offset]);
 		}
 
-		static private void WriteUInt32LE (byte [] bytes, int offset, uint value)
-		{
-			bytes[offset + 3] = (byte)(value >> 24);
-			bytes[offset + 2] = (byte)(value >> 16);
-			bytes[offset + 1] = (byte)(value >> 8);
-			bytes[offset] = (byte)value;
-		}
-
 		static private byte [] GetBytesLE (int val)
 		{
 			return new byte [] { 
