@@ -246,6 +246,9 @@ namespace Mono.Cecil.Pdb {
 				document.LanguageVendorGuid,
 				document.TypeGuid);
 
+			if (!document.Hash.IsNullOrEmpty ())
+				doc_writer.SetCheckSum (document.HashAlgorithmGuid, document.Hash);
+
 			documents [document.Url] = doc_writer;
 			return doc_writer;
 		}
