@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.Cci.Pdb;
-
-namespace Microsoft.Cci {
+namespace Microsoft.Cci.Pdb {
 
   /// <summary>
   /// This class represents the information read from a PDB file (both legacy Windows and Portable).
@@ -15,7 +13,7 @@ namespace Microsoft.Cci {
     /// <summary>
     /// Enumeration of per-function information contained in the PDB file.
     /// </summary>
-    public IEnumerable<PdbFunction> Functions;
+    public PdbFunction[] Functions;
 
     /// <summary>
     /// Mapping from tokens to source files and line numbers.

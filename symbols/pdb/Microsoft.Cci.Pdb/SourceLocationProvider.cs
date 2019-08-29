@@ -7,7 +7,7 @@ using System.IO;
 
 #pragma warning disable 1591 // TODO: doc comments
 
-namespace Microsoft.Cci {
+namespace Microsoft.Cci.Pdb {
 
   internal sealed class PdbIteratorScope : ILocalScope {
 
