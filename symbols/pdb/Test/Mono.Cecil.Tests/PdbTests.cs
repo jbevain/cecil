@@ -99,7 +99,8 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (@"c:\sources\cecil\symbols\Mono.Cecil.Pdb\Test\Resources\assemblies\test.cs", document.Url);
 				Assert.AreEqual (DocumentType.Text, document.Type);
-				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+				Assert.AreEqual (DocumentHashAlgorithm.MD5, document.HashAlgorithm);
+				Assert.AreEqual (new byte [] { 228, 176, 152, 54, 82, 238, 238, 68, 237, 156, 5, 142, 118, 160, 118, 245 }, document.Hash);
 				Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
 			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
@@ -119,7 +120,8 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (@"c:\tmp\VBConsApp\Program.vb", document.Url);
 				Assert.AreEqual (DocumentType.Text, document.Type);
-				Assert.AreEqual (DocumentHashAlgorithm.None, document.HashAlgorithm);
+				Assert.AreEqual (DocumentHashAlgorithm.MD5, document.HashAlgorithm);
+				Assert.AreEqual (new byte [] { 184, 188, 100, 23, 27, 123, 187, 201, 175, 206, 110, 198, 242, 139, 154, 119 }, document.Hash);
 				Assert.AreEqual (DocumentLanguage.Basic, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
 			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
