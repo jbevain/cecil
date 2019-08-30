@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: dotnet build -c Debug Mono.Cecil.sln
     - name: Test .NET Core
-      run: dotnet test --no--build -c Debug Mono.Cecil.sln
+      run: dotnet test --no-build -c Debug Mono.Cecil.sln
     - name: Get NuGet
       run: curl -o ./nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
     - name: Get NUnit.Console
