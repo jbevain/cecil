@@ -167,9 +167,13 @@ namespace Mono.Cecil.Mdb {
 			return new ImageDebugHeader ();
 		}
 
-		public void Dispose ()
+		public void Write ()
 		{
 			writer.WriteSymbolFile (mvid);
+		}
+
+		public void Dispose ()
+		{
 		}
 
 		class SourceFile : ISourceFile {

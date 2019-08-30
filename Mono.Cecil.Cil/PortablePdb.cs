@@ -334,6 +334,14 @@ namespace Mono.Cecil.Cil {
 			if (IsEmbedded)
 				return;
 
+			writer.stream.Dispose ();
+		}
+
+		public void Write ()
+		{
+			if (IsEmbedded)
+				return;
+
 			WritePdbFile ();
 		}
 
@@ -348,7 +356,6 @@ namespace Mono.Cecil.Cil {
 			writer.WriteMetadata ();
 
 			writer.Flush ();
-			writer.stream.Dispose ();
 		}
 
 		void WritePdbHeap ()
@@ -425,8 +432,6 @@ namespace Mono.Cecil.Cil {
 
 		public ImageDebugHeader GetDebugHeader ()
 		{
-			writer.Dispose ();
-
 			var directory = new ImageDebugDirectory {
 				Type = ImageDebugType.EmbeddedPortablePdb,
 				MajorVersion = 0x0100,
@@ -450,10 +455,12 @@ namespace Mono.Cecil.Cil {
 
 			directory.SizeOfData = (int) data.Length;
 
-			return new ImageDebugHeader (new [] {
-				writer.GetDebugHeader ().Entries [0],
-				new ImageDebugHeaderEntry (directory, data.ToArray ())
-			});
+			var header = writer.GetDebugHeader ();
+			var entries = new ImageDebugHeaderEntry [header.Entries.Length + 1];
+			Array.Copy (header.Entries, 0, entries, 0, header.Entries.Length);
+			entries [entries.Length - 1] = new ImageDebugHeaderEntry (directory, data.ToArray ());
+
+			return new ImageDebugHeader (entries);
 		}
 
 		public void Write (MethodDebugInformation info)
@@ -461,8 +468,14 @@ namespace Mono.Cecil.Cil {
 			writer.Write (info);
 		}
 
+		public void Write ()
+		{
+			writer.Write ();
+		}
+
 		public void Dispose ()
 		{
+			writer.Dispose ();
 		}
 	}
 
