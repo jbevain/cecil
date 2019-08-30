@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+    - release/*
+  pull_request:
+    branches:
+    - master
+    - release/*
+
+jobs:
+  linux:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: dotnet build -c Debug Mono.Cecil.sln
+    - name: Test
+      run: dotnet test --no-build -c Debug Mono.Cecil.sln
