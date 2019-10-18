@@ -683,5 +683,42 @@ class Program
 			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
 			}
 		}
+
+		[Test]
+		public void DoubleWriteAndReadAgainModuleWithDeterministicMvid ()
+		{
+			Guid mvid1_in, mvid1_out, mvid2_in, mvid2_out;
+
+			{
+				const string resource = "foo.dll";
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters {  })) {
+					mvid1_in = module.Mvid;
+					module.Write (destination, new WriterParameters { DeterministicMvid = true });
+				}
+
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { })) {
+					mvid1_out = module.Mvid;
+				}
+			}
+
+			{
+				const string resource = "hello2.exe";
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters {  })) {
+					mvid2_in = module.Mvid;
+					module.Write (destination, new WriterParameters { DeterministicMvid = true });
+				}
+
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { })) {
+					mvid2_out = module.Mvid;
+				}
+			}
+
+			Assert.AreNotEqual (mvid1_in, mvid2_in);
+			Assert.AreNotEqual (mvid1_out, mvid2_out);
+		}
 	}
 }
