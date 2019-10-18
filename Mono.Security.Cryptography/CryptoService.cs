@@ -146,7 +146,7 @@ namespace Mono.Cecil {
 
 			using (var crypto_stream = new CryptoStream (Stream.Null, sha1, CryptoStreamMode.Write)) {
 				for (int i = 0; i < buffers.Length; i++) {
-					crypto_stream.Write (buffers [0].buffer, 0, buffers [0].length);
+					crypto_stream.Write (buffers [i].buffer, 0, buffers [i].length);
 				}
 			}
 
