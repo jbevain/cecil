@@ -923,12 +923,10 @@ namespace Mono.Cecil {
 		internal void Read<TItem> (TItem item, Action<TItem, MetadataReader> read)
 		{
 			lock (module_lock) {
-				var position = reader.position;
 				var context = reader.context;
 
 				read (item, reader);
 
-				reader.position = position;
 				reader.context = context;
 			}
 		}
@@ -936,12 +934,10 @@ namespace Mono.Cecil {
 		internal TRet Read<TItem, TRet> (TItem item, Func<TItem, MetadataReader, TRet> read)
 		{
 			lock (module_lock) {
-				var position = reader.position;
 				var context = reader.context;
 
 				var ret = read (item, reader);
 
-				reader.position = position;
 				reader.context = context;
 
 				return ret;
@@ -954,12 +950,10 @@ namespace Mono.Cecil {
 				if (variable != null)
 					return variable;
 
-				var position = reader.position;
 				var context = reader.context;
 
 				var ret = read (item, reader);
 
-				reader.position = position;
 				reader.context = context;
 
 				return variable = ret;
@@ -1308,18 +1302,6 @@ namespace Mono.Cecil {
 		public static bool IsWindowsMetadata (this ModuleDefinition module)
 		{
 			return module.MetadataKind != MetadataKind.Ecma335;
-		}
-
-		public static byte [] ReadAll (this Stream self)
-		{
-			int read;
-			var memory = new MemoryStream ((int) self.Length);
-			var buffer = new byte [1024];
-
-			while ((read = self.Read (buffer, 0, buffer.Length)) != 0)
-				memory.Write (buffer, 0, read);
-
-			return memory.ToArray ();
 		}
 
 		public static void Read (object o)

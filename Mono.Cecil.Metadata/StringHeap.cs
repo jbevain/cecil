@@ -11,15 +11,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Metadata {
 
-	class StringHeap : Heap {
+	unsafe class StringHeap : Heap {
 
 		readonly Dictionary<uint, string> strings = new Dictionary<uint, string> ();
 
-		public StringHeap (byte [] data)
-			: base (data)
+		public StringHeap (byte* data, uint size)
+			: base (data, size)
 		{
 		}
 
@@ -32,7 +33,7 @@ namespace Mono.Cecil.Metadata {
 			if (strings.TryGetValue (index, out @string))
 				return @string;
 
-			if (index > data.Length - 1)
+			if (index > size - 1)
 				return string.Empty;
 
 			@string = ReadStringAt (index);
@@ -54,7 +55,12 @@ namespace Mono.Cecil.Metadata {
 				length++;
 			}
 
-			return Encoding.UTF8.GetString (data, start, length);
+#if NET_CORE
+			return Encoding.UTF8.GetString (this.data + start, length);
+#else
+			var buffer = new PByteBuffer (this.data + start, (uint) length);
+			return Encoding.UTF8.GetString (buffer.ReadBytes (length));
+#endif
 		}
 	}
 }

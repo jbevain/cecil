@@ -10,7 +10,7 @@
 
 using System;
 using System.IO;
-
+using System.Runtime.InteropServices;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
@@ -18,6 +18,27 @@ using Mono.Collections.Generic;
 using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
+
+	readonly unsafe struct NativeMemory : IDisposable
+	{
+		private readonly IntPtr pointer;
+		private readonly int length;
+
+		public byte* Pointer => (byte*)pointer;
+
+		public int Length => length;
+
+		public NativeMemory(int length)
+		{
+			this.pointer = Marshal.AllocHGlobal (length);
+			this.length = length;
+		}
+
+		public void Dispose()
+		{
+			Marshal.FreeHGlobal (pointer);
+		}
+	}
 
 	sealed class Image : IDisposable {
 
@@ -36,7 +57,7 @@ namespace Mono.Cecil.PE {
 
 		public Section [] Sections;
 
-		public Section MetadataSection;
+		public NativeMemory Metadata;
 
 		public uint EntryPointToken;
 		public uint Timestamp;
@@ -164,6 +185,7 @@ namespace Mono.Cecil.PE {
 
 		public void Dispose ()
 		{
+			Metadata.Dispose ();
 			Stream.Dispose ();
 		}
 	}

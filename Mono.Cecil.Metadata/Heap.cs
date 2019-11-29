@@ -8,17 +8,23 @@
 // Licensed under the MIT/X11 license.
 //
 
+using Mono.Cecil.PE;
+
 namespace Mono.Cecil.Metadata {
 
-	abstract class Heap {
+	abstract unsafe class Heap {
 
 		public int IndexSize;
 
-		readonly internal byte [] data;
+		readonly internal byte* data;
+		readonly internal uint size;
 
-		protected Heap (byte [] data)
+		public ByteSpan Span => new ByteSpan (data, size);
+
+		protected Heap (byte* data, uint size)
 		{
 			this.data = data;
+			this.size = size;
 		}
 	}
 }

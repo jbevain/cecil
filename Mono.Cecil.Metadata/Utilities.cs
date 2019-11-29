@@ -19,7 +19,7 @@ namespace Mono.Cecil {
 		public const int TableCount = 58;
 		public const int CodedIndexCount = 14;
 
-		public static uint ReadCompressedUInt32 (this byte [] data, ref int position)
+		public static unsafe uint ReadCompressedUInt32 (byte* data, ref int position)
 		{
 			uint integer;
 			if ((data [position] & 0x80) == 0) {

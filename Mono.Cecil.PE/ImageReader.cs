@@ -10,7 +10,7 @@
 
 using System;
 using System.IO;
-
+using System.Runtime.InteropServices;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
@@ -19,14 +19,12 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil.PE {
 
-	sealed class ImageReader : BinaryStreamReader {
+	sealed unsafe class ImageReader : BinaryStreamReader {
 
 		readonly Image image;
 
 		DataDirectory cli;
 		DataDirectory metadata;
-
-		uint table_heap_offset;
 
 		public ImageReader (Disposable<Stream> stream, string file_name)
 			: base (stream.value)
@@ -199,29 +197,28 @@ namespace Mono.Cecil.PE {
 			Advance (8);
 		}
 
-		string ReadAlignedString (int length)
+		string ReadAlignedString (int length, ref PByteBuffer b)
 		{
 			int read = 0;
 			var buffer = new char [length];
 			while (read < length) {
-				var current = ReadByte ();
+				var current = b.ReadByte ();
 				if (current == 0)
 					break;
 
 				buffer [read++] = (char) current;
 			}
 
-			Advance (-1 + ((read + 4) & ~3) - read);
+			b.Advance (-1 + ((read + 4) & ~3) - read);
 
 			return new string (buffer, 0, read);
 		}
 
-		string ReadZeroTerminatedString (int length)
+		string ReadZeroTerminatedString (byte[] bytes)
 		{
 			int read = 0;
-			var buffer = new char [length];
-			var bytes = ReadBytes (length);
-			while (read < length) {
+			var buffer = new char [bytes.Length];
+			while (read < bytes.Length) {
 				var current = bytes [read];
 				if (current == 0)
 					break;
@@ -240,7 +237,7 @@ namespace Mono.Cecil.PE {
 				var section = new Section ();
 
 				// Name
-				section.Name = ReadZeroTerminatedString (8);
+				section.Name = ReadZeroTerminatedString (ReadBytes (8));
 
 				// VirtualSize		4
 				Advance (4);
@@ -296,29 +293,29 @@ namespace Mono.Cecil.PE {
 		{
 			MoveTo (metadata);
 
-			if (ReadUInt32 () != 0x424a5342)
+			image.Metadata = new NativeMemory((int)metadata.Size);
+			var bytes = ReadBytes ((int)metadata.Size);
+			Marshal.Copy (bytes, 0, (IntPtr)image.Metadata.Pointer, image.Metadata.Length);
+
+			var buffer = new PByteBuffer (image.Metadata.Pointer, (uint) image.Metadata.Length);
+
+			if (buffer.ReadUInt32 () != 0x424a5342)
 				throw new BadImageFormatException ();
 
 			// MajorVersion			2
 			// MinorVersion			2
 			// Reserved				4
-			Advance (8);
+			buffer.Advance (8);
 
-			image.RuntimeVersion = ReadZeroTerminatedString (ReadInt32 ());
+			image.RuntimeVersion = ReadZeroTerminatedString (buffer.ReadBytes (buffer.ReadInt32 ()));
 
 			// Flags		2
-			Advance (2);
+			buffer.Advance (2);
 
-			var streams = ReadUInt16 ();
-
-			var section = image.GetSectionAtVirtualAddress (metadata.VirtualAddress);
-			if (section == null)
-				throw new BadImageFormatException ();
-
-			image.MetadataSection = section;
+			var streams = buffer.ReadUInt16 ();
 
 			for (int i = 0; i < streams; i++)
-				ReadMetadataStream (section);
+				ReadMetadataStream (ref buffer);
 
 			if (image.PdbHeap != null)
 				ReadPdbHeap ();
@@ -368,73 +365,62 @@ namespace Mono.Cecil.PE {
 			image.DebugHeader = new ImageDebugHeader (entries);
 		}
 
-		void ReadMetadataStream (Section section)
+		void ReadMetadataStream (ref PByteBuffer buffer)
 		{
 			// Offset		4
-			uint offset = metadata.VirtualAddress - section.VirtualAddress + ReadUInt32 (); // relative to the section start
+			var offset = buffer.ReadUInt32 ();
 
 			// Size			4
-			uint size = ReadUInt32 ();
+			uint size = buffer.ReadUInt32 ();
 
-			var data = ReadHeapData (offset, size);
+			var data = image.Metadata.Pointer + offset;
 
-			var name = ReadAlignedString (16);
+			var name = ReadAlignedString (16, ref buffer);
 			switch (name) {
 			case "#~":
 			case "#-":
-				image.TableHeap = new TableHeap (data);
-				table_heap_offset = offset;
+				image.TableHeap = new TableHeap (data, size);
 				break;
 			case "#Strings":
-				image.StringHeap = new StringHeap (data);
+				image.StringHeap = new StringHeap (data, size);
 				break;
 			case "#Blob":
-				image.BlobHeap = new BlobHeap (data);
+				image.BlobHeap = new BlobHeap (data, size);
 				break;
 			case "#GUID":
-				image.GuidHeap = new GuidHeap (data);
+				image.GuidHeap = new GuidHeap (data, size);
 				break;
 			case "#US":
-				image.UserStringHeap = new UserStringHeap (data);
+				image.UserStringHeap = new UserStringHeap (data, size);
 				break;
 			case "#Pdb":
-				image.PdbHeap = new PdbHeap (data);
+				image.PdbHeap = new PdbHeap (data, size);
 				break;
 			}
-		}
-
-		byte [] ReadHeapData (uint offset, uint size)
-		{
-			var position = BaseStream.Position;
-			MoveTo (offset + image.MetadataSection.PointerToRawData);
-			var data = ReadBytes ((int) size);
-			BaseStream.Position = position;
-
-			return data;
 		}
 
 		void ReadTableHeap ()
 		{
 			var heap = image.TableHeap;
 
-			MoveTo (table_heap_offset + image.MetadataSection.PointerToRawData);
+			var buffer = new PByteBuffer (heap.Span);
 
 			// Reserved			4
 			// MajorVersion		1
 			// MinorVersion		1
-			Advance (6);
+			buffer.Advance (6);
 
 			// HeapSizes		1
-			var sizes = ReadByte ();
+			var sizes = buffer.ReadByte ();
 
 			// Reserved2		1
-			Advance (1);
+			buffer.Advance (1);
 
 			// Valid			8
-			heap.Valid = ReadInt64 ();
+			heap.Valid = buffer.ReadInt64 ();
 
 			// Sorted			8
-			heap.Sorted = ReadInt64 ();
+			heap.Sorted = buffer.ReadInt64 ();
 
 			if (image.PdbHeap != null) {
 				for (int i = 0; i < Mixin.TableCount; i++) {
@@ -449,14 +435,14 @@ namespace Mono.Cecil.PE {
 				if (!heap.HasTable ((Table) i))
 					continue;
 
-				heap.Tables [i].Length = ReadUInt32 ();
+				heap.Tables [i].Length = buffer.ReadUInt32 ();
 			}
 
 			SetIndexSize (image.StringHeap, sizes, 0x1);
 			SetIndexSize (image.GuidHeap, sizes, 0x2);
 			SetIndexSize (image.BlobHeap, sizes, 0x4);
 
-			ComputeTableInformations ();
+			ComputeTableInformations (ref buffer);
 		}
 
 		static void SetIndexSize (Heap heap, uint sizes, byte flag)
@@ -477,9 +463,9 @@ namespace Mono.Cecil.PE {
 			return image.GetCodedIndexSize (index);
 		}
 
-		void ComputeTableInformations ()
+		void ComputeTableInformations (ref PByteBuffer buffer)
 		{
-			uint offset = (uint) BaseStream.Position - table_heap_offset - image.MetadataSection.PointerToRawData; // header
+			uint offset = (uint) (buffer.p - image.TableHeap.data);
 
 			int stridx_size = image.StringHeap.IndexSize;
 			int guididx_size = image.GuidHeap != null ? image.GuidHeap.IndexSize : 2;
@@ -740,7 +726,7 @@ namespace Mono.Cecil.PE {
 		{
 			var heap = image.PdbHeap;
 
-			var buffer = new ByteBuffer (heap.data);
+			var buffer = new PByteBuffer (heap.Span);
 
 			heap.Id = buffer.ReadBytes (20);
 			heap.EntryPoint = buffer.ReadUInt32 ();
