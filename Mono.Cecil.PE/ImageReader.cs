@@ -289,13 +289,33 @@ namespace Mono.Cecil.PE {
 			// ManagedNativeHeader		8
 		}
 
+		void CopyTo (ref NativeMemory memory)
+		{
+			var destination = memory.Pointer;
+			var size = memory.Length;
+
+			var buffer = new byte [Math.Min (81920, size)];
+			while (size > 0) {
+				int readSize = Math.Min (size, buffer.Length);
+				int bytesRead = Read (buffer, 0, readSize);
+
+				if (bytesRead <= 0 || bytesRead > readSize) {
+					throw new IOException ();
+				}
+
+				Marshal.Copy (buffer, 0, (IntPtr) destination, bytesRead);
+
+				destination += bytesRead;
+				size -= bytesRead;
+			}
+		}
+
 		void ReadMetadata ()
 		{
-			MoveTo (metadata);
-
 			image.Metadata = new NativeMemory((int)metadata.Size);
-			var bytes = ReadBytes ((int)metadata.Size);
-			Marshal.Copy (bytes, 0, (IntPtr)image.Metadata.Pointer, image.Metadata.Length);
+
+			MoveTo (metadata);
+			CopyTo (ref image.Metadata);
 
 			var buffer = new PByteBuffer (image.Metadata.Pointer, (uint) image.Metadata.Length);
 
