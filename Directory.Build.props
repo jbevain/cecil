@@ -12,10 +12,10 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-    <FrameworkPathOverride Condition=" '$(net40FrameworkPathOverride)' != '' ">$(net40FrameworkPathOverride)</FrameworkPathOverride>
-    <FrameworkPathOverride Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true' AND '$(net40FrameworkPathOverride)' == '' ">/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/4.0-api/</FrameworkPathOverride>
-    <FrameworkPathOverride Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true' AND '$(net40FrameworkPathOverride)' == '' ">/usr/lib/mono/4.0-api/</FrameworkPathOverride>
   </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net40" Version="1.0.0" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <Reference Include="System" />
     <Reference Include="System.Core" />
