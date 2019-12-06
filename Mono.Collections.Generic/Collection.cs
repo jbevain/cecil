@@ -99,13 +99,21 @@ namespace Mono.Collections.Generic {
 			items = Empty<T>.Array;
 		}
 
+		static class EmptyArray<T> {
+			public static readonly T [] Value = new T[0];
+		}
+
 		public Collection (int capacity)
 		{
 			if (capacity < 0)
 				throw new ArgumentOutOfRangeException ();
 
-			items = new T [capacity];
+			items = capacity == 0 
+				? EmptyArray<T>.Value
+				: new T [capacity];
 		}
+		
+		
 
 		public Collection (ICollection<T> items)
 		{
