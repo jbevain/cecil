@@ -3816,8 +3816,6 @@ namespace Mono.Cecil {
 
 		public Collection<SequencePoint> ReadSequencePoints (Document document)
 		{
-			var sequence_points = new Collection<SequencePoint> ();
-
 			ReadCompressedUInt32 (); // local_sig_token
 
 			if (document == null)
@@ -3828,6 +3826,13 @@ namespace Mono.Cecil {
 			var start_column = 0;
 			var first_non_hidden = true;
 
+			//there's about 5 compressed int32's per sequenec points.  we don't know exactly how many
+			//but let's take a conservative guess so we dont end up reallocating the sequence_points collection
+			//as it grows.
+			var bytes_remaining_for_sequencepoints = sig_length - (position - start);
+			var estimated_sequencepoint_amount = (int)bytes_remaining_for_sequencepoints / 5;
+			var sequence_points = new Collection<SequencePoint> (estimated_sequencepoint_amount);
+			
 			for (var i = 0; CanReadMore (); i++) {
 				var delta_il = (int) ReadCompressedUInt32 ();
 				if (i > 0 && delta_il == 0) {
@@ -3874,7 +3879,7 @@ namespace Mono.Cecil {
 
 		public bool CanReadMore ()
 		{
-			return position - start < sig_length;
+			return (position - start) < sig_length;
 		}
 	}
 }
