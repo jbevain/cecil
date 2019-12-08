@@ -98,7 +98,7 @@ namespace Mono.Collections.Generic {
 		{
 			items = Empty<T>.Array;
 		}
-		
+
 		public Collection (int capacity)
 		{
 			if (capacity < 0)
@@ -108,7 +108,7 @@ namespace Mono.Collections.Generic {
 				? Empty<T>.Array
 				: new T [capacity];
 		}
-		
+
 		public Collection (ICollection<T> items)
 		{
 			if (items == null)
