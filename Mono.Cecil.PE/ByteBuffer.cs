@@ -43,6 +43,11 @@ namespace Mono.Cecil.PE {
 			this.e = this.p + this.span.length;
 		}
 
+		public int RemainingBytes ()
+		{
+			return (int) (e - p);
+		}
+
 		public bool CanReadMore ()
 		{
 			return p < e;

@@ -2288,7 +2288,7 @@ namespace Mono.Cecil {
 			if (call_conv != methodspec_sig)
 				throw new NotSupportedException ();
 
-			var arity = reader.ReadCompressedUInt32 ();
+			var arity = sig.ReadCompressedUInt32 ();
 
 			var instance = new GenericInstanceMethod (method, (int) arity);
 
@@ -3430,10 +3430,10 @@ namespace Mono.Cecil {
 				var is_value_type = buffer.ReadByte () == (byte) ElementType.ValueType;
 				var element_type = GetTypeDefOrRef (ReadTypeTokenSignature (ref buffer));
 
-				var arity = ReadCompressedUInt32 ();
+				var arity = buffer.ReadCompressedUInt32 ();
 				var generic_instance = new GenericInstanceType (element_type);
 
-				ReadGenericInstanceSignature (element_type, generic_instance, arity ref buffer);
+				ReadGenericInstanceSignature (element_type, generic_instance, arity, ref buffer);
 
 				if (is_value_type) {
 					generic_instance.KnownValueType ();
@@ -3833,8 +3833,7 @@ namespace Mono.Cecil {
 			//there's about 5 compressed int32's per sequence points.  we don't know exactly how many
 			//but let's take a conservative guess so we dont end up reallocating the sequence_points collection
 			//as it grows.
-			var bytes_remaining_for_sequencepoints = sig_length - (position - start);
-			var estimated_sequencepoint_amount = (int)bytes_remaining_for_sequencepoints / 5;
+			var estimated_sequencepoint_amount = (int) buffer.RemainingBytes () / 5;
 			var sequence_points = new Collection<SequencePoint> (estimated_sequencepoint_amount);
 			
 			for (var i = 0; buffer.CanReadMore (); i++) {
@@ -3879,11 +3878,6 @@ namespace Mono.Cecil {
 			}
 
 			return sequence_points;
-		}
-
-		public bool CanReadMore ()
-		{
-			return (position - start) < sig_length;
 		}
 	}
 }
