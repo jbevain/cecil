@@ -42,7 +42,7 @@ namespace Mono.Cecil.Tests {
 			if (self.GenericParameters.Count != arguments.Length)
 				throw new ArgumentException ();
 
-			var instance = new GenericInstanceType (self);
+			var instance = new GenericInstanceType (self, arguments.Length);
 			foreach (var argument in arguments)
 				instance.GenericArguments.Add (argument);
 

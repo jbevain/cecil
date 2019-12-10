@@ -63,5 +63,11 @@ namespace Mono.Cecil {
 			: base (method)
 		{
 		}
+
+		internal GenericInstanceMethod (MethodReference method, int arity)
+			: this (method)
+		{
+			this.arguments = new Collection<TypeReference> (arity);
+		}
 	}
 }
