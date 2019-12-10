@@ -2278,9 +2278,11 @@ namespace Mono.Cecil {
 			if (call_conv != methodspec_sig)
 				throw new NotSupportedException ();
 
-			var instance = new GenericInstanceMethod (method);
+			var arity = reader.ReadCompressedUInt32 ();
 
-			reader.ReadGenericInstanceSignature (method, instance);
+			var instance = new GenericInstanceMethod (method, (int) arity);
+
+			reader.ReadGenericInstanceSignature (method, instance, arity);
 
 			return instance;
 		}
@@ -3324,10 +3326,8 @@ namespace Mono.Cecil {
 				owner_parameters.Add (new GenericParameter (owner));
 		}
 
-		public void ReadGenericInstanceSignature (IGenericParameterProvider provider, IGenericInstance instance)
+		public void ReadGenericInstanceSignature (IGenericParameterProvider provider, IGenericInstance instance, uint arity)
 		{
-			var arity = ReadCompressedUInt32 ();
-
 			if (!provider.IsDefinition)
 				CheckGenericContext (provider, (int) arity - 1);
 
@@ -3423,9 +3423,11 @@ namespace Mono.Cecil {
 			case ElementType.GenericInst: {
 				var is_value_type = ReadByte () == (byte) ElementType.ValueType;
 				var element_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
-				var generic_instance = new GenericInstanceType (element_type);
 
-				ReadGenericInstanceSignature (element_type, generic_instance);
+				var arity = ReadCompressedUInt32 ();
+				var generic_instance = new GenericInstanceType (element_type, (int) arity);
+
+				ReadGenericInstanceSignature (element_type, generic_instance, arity);
 
 				if (is_value_type) {
 					generic_instance.KnownValueType ();

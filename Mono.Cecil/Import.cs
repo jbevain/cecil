@@ -259,8 +259,8 @@ namespace Mono.Cecil {
 		TypeReference ImportGenericInstance (Type type, ImportGenericContext context)
 		{
 			var element_type = ImportType (type.GetGenericTypeDefinition (), context, ImportGenericKind.Definition);
-			var instance = new GenericInstanceType (element_type);
 			var arguments = type.GetGenericArguments ();
+			var instance = new GenericInstanceType (element_type, arguments.Length);
 			var instance_arguments = instance.GenericArguments;
 
 			context.Push (element_type);
@@ -633,9 +633,8 @@ namespace Mono.Cecil {
 			case ElementType.GenericInst:
 				var instance = (GenericInstanceType) type;
 				var element_type = ImportType (instance.ElementType, context);
-				var imported_instance = new GenericInstanceType (element_type);
-
 				var arguments = instance.GenericArguments;
+				var imported_instance = new GenericInstanceType (element_type, arguments.Count);
 				var imported_arguments = imported_instance.GenericArguments;
 
 				for (int i = 0; i < arguments.Count; i++)
