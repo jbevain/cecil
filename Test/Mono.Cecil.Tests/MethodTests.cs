@@ -204,6 +204,8 @@ namespace Mono.Cecil.Tests {
 				var beta = type.GetMethod ("Beta");
 				var charlie = type.GetMethod ("Charlie");
 
+				// Note that the test depends on the C# compiler emitting the constructor call instruction as
+				// the first instruction of the method body. This requires optimizations to be enabled.
 				var new_list_beta = (MethodReference) beta.Body.Instructions [0].Operand;
 				var new_list_charlie = (MethodReference) charlie.Body.Instructions [0].Operand;
 

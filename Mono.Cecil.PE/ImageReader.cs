@@ -118,8 +118,7 @@ namespace Mono.Cecil.PE {
 
 			//						pe32 || pe64
 
-			// LMajor				1
-			// LMinor				1
+			image.LinkerVersion = ReadUInt16 ();
 			// CodeSize				4
 			// InitializedDataSize	4
 			// UninitializedDataSize4
@@ -138,11 +137,16 @@ namespace Mono.Cecil.PE {
 			// UserMinor			2
 			// SubSysMajor			2
 			// SubSysMinor			2
+			Advance(44);
+
+			image.SubSystemMajor = ReadUInt16 ();
+			image.SubSystemMinor = ReadUInt16 ();
+
 			// Reserved				4
 			// ImageSize			4
 			// HeaderSize			4
 			// FileChecksum			4
-			Advance (66);
+			Advance (16);
 
 			// SubSystem			2
 			subsystem = ReadUInt16 ();
@@ -160,12 +164,18 @@ namespace Mono.Cecil.PE {
 
 			// ExportTable			8
 			// ImportTable			8
+
+			Advance (pe64 ? 56 : 40);
+
 			// ResourceTable		8
+
+			image.Win32Resources = ReadDataDirectory ();
+
 			// ExceptionTable		8
 			// CertificateTable		8
 			// BaseRelocationTable	8
 
-			Advance (pe64 ? 88 : 72);
+			Advance (24);
 
 			// Debug				8
 			image.Debug = ReadDataDirectory ();
@@ -340,7 +350,7 @@ namespace Mono.Cecil.PE {
 					PointerToRawData = ReadInt32 (),
 				};
 
-				if (directory.AddressOfRawData == 0) {
+				if (directory.PointerToRawData == 0 || directory.SizeOfData < 0) {
 					entries [i] = new ImageDebugHeaderEntry (directory, Empty<byte>.Array);
 					continue;
 				}

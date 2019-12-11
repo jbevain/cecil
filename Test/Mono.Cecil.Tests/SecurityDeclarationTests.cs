@@ -93,7 +93,6 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
-#if !READ_ONLY
 		[Test]
 		public void DefineSecurityDeclarationByBlob ()
 		{
@@ -126,7 +125,6 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("System.String", argument.Type.FullName);
 			Assert.AreEqual (permission_set, argument.Value);
 		}
-#endif
 
 		[Test]
 		public void SecurityDeclarationWithoutAttributes ()
@@ -249,10 +247,10 @@ namespace Mono.Cecil.Tests {
 			}
 
 			switch (Type.GetTypeCode (value.GetType ())) {
-			case TypeCode.String:
+			case System.TypeCode.String:
 				signature.AppendFormat ("\"{0}\"", value);
 				break;
-			case TypeCode.Char:
+			case System.TypeCode.Char:
 				signature.AppendFormat ("'{0}'", (char) value);
 				break;
 			default:

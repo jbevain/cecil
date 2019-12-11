@@ -16,8 +16,6 @@ using Mono.Cecil.PE;
 
 using RVA = System.UInt32;
 
-#if !READ_ONLY
-
 namespace Mono.Cecil.Metadata {
 
 	sealed class TableHeapBuffer : HeapBuffer {
@@ -501,5 +499,3 @@ namespace Mono.Cecil.Metadata {
 		}
 	}
 }
-
-#endif

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if !NET_CORE
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Win32;
@@ -66,23 +68,13 @@ namespace Mono.Cecil.Tests {
 
 		void LoadWindowsSdk (string registryVersion, string windowsKitsVersion, Action<string> registerAssembliesCallback)
 		{
-#if NET_4_0
 			using (var localMachine32Key = RegistryKey.OpenBaseKey (RegistryHive.LocalMachine, RegistryView.Registry32)) {
 				using (var sdkKey = localMachine32Key.OpenSubKey (@"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v" + registryVersion)) {
-#else
-			{
-				// this will fail on 64-bit process as there's no way (other than pinoke) to read from 32-bit registry view
-				using (var sdkKey = Registry.LocalMachine.OpenSubKey (@"SOFTWARE\Microsoft\Microsoft SDKs\Windows\" + registryVersion)) {
-#endif
 					string installationFolder = null;
 					if (sdkKey != null)
 						installationFolder = (string)sdkKey.GetValue ("InstallationFolder");
 					if (string.IsNullOrEmpty (installationFolder)) {
-#if NET_4_0
 						var programFilesX86 = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
-#else
-						var programFilesX86 = Environment.GetEnvironmentVariable ("ProgramFiles(x86)");
-#endif
 						installationFolder = Path.Combine (programFilesX86, @"Windows Kits\" + windowsKitsVersion);
 					}
 					registerAssembliesCallback (installationFolder);
@@ -91,3 +83,4 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 }
+#endif

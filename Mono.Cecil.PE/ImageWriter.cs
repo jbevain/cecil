@@ -11,8 +11,6 @@
 using System;
 using System.IO;
 
-#if !READ_ONLY
-
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 
@@ -87,21 +85,15 @@ namespace Mono.Cecil.PE {
 
 		void GetWin32Resources ()
 		{
-			var rsrc = GetImageResourceSection ();
-			if (rsrc == null)
+			if (!module.HasImage)
 				return;
 
-			win32_resources = module.Image.GetReaderAt (rsrc.VirtualAddress, rsrc.SizeOfRawData, (s, reader) => new ByteBuffer (reader.ReadBytes ((int) s)));
-		}
+			DataDirectory win32_resources_directory = module.Image.Win32Resources;
+			var size = win32_resources_directory.Size;
 
-		Section GetImageResourceSection ()
-		{
-			if (!module.HasImage)
-				return null;
-
-			const string rsrc_section = ".rsrc";
-
-			return module.Image.GetSection (rsrc_section);
+			if (size > 0) {
+				win32_resources = module.Image.GetReaderAt (win32_resources_directory.VirtualAddress, size, (s, reader) => new ByteBuffer (reader.ReadBytes ((int) s)));
+			}
 		}
 
 		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Disposable<Stream> stream)
@@ -224,9 +216,8 @@ namespace Mono.Cecil.PE {
 
 		void WriteOptionalHeaders ()
 		{
-			WriteUInt16 ((ushort) (!pe64 ? 0x10b : 0x20b));	// Magic
-			WriteByte (8);	// LMajor
-			WriteByte (0);	// LMinor
+			WriteUInt16 ((ushort) (!pe64 ? 0x10b : 0x20b)); // Magic
+			WriteUInt16 (module.linker_version);
 			WriteUInt32 (text.SizeOfRawData);	// CodeSize
 			WriteUInt32 ((reloc != null ? reloc.SizeOfRawData : 0)
 				+ (rsrc != null ? rsrc.SizeOfRawData : 0));	// InitializedDataSize
@@ -250,8 +241,8 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (0);	// OSMinor
 			WriteUInt16 (0);	// UserMajor
 			WriteUInt16 (0);	// UserMinor
-			WriteUInt16 (4);	// SubSysMajor
-			WriteUInt16 (0);	// SubSysMinor
+			WriteUInt16 (module.subsystem_major);	// SubSysMajor
+			WriteUInt16 (module.subsystem_minor);	// SubSysMinor
 			WriteUInt32 (0);	// Reserved
 
 			var last_section = LastSection();
@@ -262,17 +253,22 @@ namespace Mono.Cecil.PE {
 			WriteUInt16 (GetSubSystem ());	// SubSystem
 			WriteUInt16 ((ushort) module.Characteristics);	// DLLFlags
 
-			const ulong stack_reserve = 0x100000;
-			const ulong stack_commit = 0x1000;
-			const ulong heap_reserve = 0x100000;
-			const ulong heap_commit = 0x1000;
-
 			if (!pe64) {
-				WriteUInt32 ((uint) stack_reserve);
-				WriteUInt32 ((uint) stack_commit);
-				WriteUInt32 ((uint) heap_reserve);
-				WriteUInt32 ((uint) heap_commit);
+				const uint stack_reserve = 0x100000;
+				const uint stack_commit = 0x1000;
+				const uint heap_reserve = 0x100000;
+				const uint heap_commit = 0x1000;
+
+				WriteUInt32 (stack_reserve);
+				WriteUInt32 (stack_commit);
+				WriteUInt32 (heap_reserve);
+				WriteUInt32 (heap_commit);
 			} else {
+				const ulong stack_reserve = 0x400000;
+				const ulong stack_commit = 0x4000;
+				const ulong heap_reserve = 0x100000;
+				const ulong heap_commit = 0x2000;
+
 				WriteUInt64 (stack_reserve);
 				WriteUInt64 (stack_commit);
 				WriteUInt64 (heap_reserve);
@@ -362,6 +358,11 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (characteristics);
 		}
 
+		uint GetRVAFileOffset (Section section, RVA rva)
+		{
+			return section.PointerToRawData + rva - section.VirtualAddress;
+		}
+
 		void MoveTo (uint pointer)
 		{
 			BaseStream.Seek (pointer, SeekOrigin.Begin);
@@ -369,7 +370,7 @@ namespace Mono.Cecil.PE {
 
 		void MoveToRVA (Section section, RVA rva)
 		{
-			BaseStream.Seek (section.PointerToRawData + rva - section.VirtualAddress, SeekOrigin.Begin);
+			BaseStream.Seek (GetRVAFileOffset (section, rva), SeekOrigin.Begin);
 		}
 
 		void MoveToRVA (TextSegment segment)
@@ -846,12 +847,10 @@ namespace Mono.Cecil.PE {
 
 		void PatchResourceDataEntry (ByteBuffer resources)
 		{
-			var old_rsrc = GetImageResourceSection ();
 			var rva = resources.ReadUInt32 ();
 			resources.position -= 4;
-			resources.WriteUInt32 (rva - old_rsrc.VirtualAddress + rsrc.VirtualAddress);
+
+			resources.WriteUInt32 (rva - module.Image.Win32Resources.VirtualAddress + rsrc.VirtualAddress);
 		}
 	}
 }
-
-#endif

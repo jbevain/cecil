@@ -233,6 +233,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void GenericInstanceExternArguments ()
 		{
+			if (Platform.OnCoreClr)
+				return;
+
 			var module = GetCurrentModule ();
 
 			var fullname = string.Format ("System.Collections.Generic.Dictionary`2[[System.Int32, {0}],[System.String, {0}]]",
@@ -280,7 +283,7 @@ namespace Mono.Cecil.Tests {
 			var instance = type as GenericInstanceType;
 			Assert.IsNotNull (instance);
 			Assert.AreEqual (2, instance.GenericArguments.Count);
-			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Runtime" : "mscorlib", type.Scope.Name);
 			Assert.AreEqual (module, type.Module);
 			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
 			Assert.AreEqual ("Dictionary`2", type.Name);
@@ -296,7 +299,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("TypeParserTests", argument.Name);
 
 			argument = instance.GenericArguments [1];
-			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", argument.Scope.Name);
 			Assert.AreEqual (module, argument.Module);
 			Assert.AreEqual ("System", argument.Namespace);
 			Assert.AreEqual ("String", argument.Name);
@@ -319,7 +322,7 @@ namespace Mono.Cecil.Tests {
 			var instance = type as GenericInstanceType;
 			Assert.IsNotNull (instance);
 			Assert.AreEqual (2, instance.GenericArguments.Count);
-			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", type.Scope.Name);
 			Assert.AreEqual (module, type.Module);
 			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
 			Assert.AreEqual ("Dictionary`2", type.Name);
@@ -354,7 +357,7 @@ namespace Mono.Cecil.Tests {
 			var instance = type as GenericInstanceType;
 			Assert.IsNotNull (instance);
 			Assert.AreEqual (2, instance.GenericArguments.Count);
-			Assert.AreEqual ("mscorlib", type.Scope.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Runtime" : "mscorlib", type.Scope.Name);
 			Assert.AreEqual (module, type.Module);
 			Assert.AreEqual ("System.Collections.Generic", type.Namespace);
 			Assert.AreEqual ("Dictionary`2", type.Name);
@@ -364,7 +367,7 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual (2, type.GenericParameters.Count);
 
 			var argument = instance.GenericArguments [0];
-			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", argument.Scope.Name);
 			Assert.AreEqual (module, argument.Module);
 			Assert.AreEqual ("System", argument.Namespace);
 			Assert.AreEqual ("String", argument.Name);
@@ -385,7 +388,7 @@ namespace Mono.Cecil.Tests {
 			Assert.IsInstanceOf (typeof (TypeDefinition), argument);
 
 			argument = instance.GenericArguments [1];
-			Assert.AreEqual ("mscorlib", argument.Scope.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", argument.Scope.Name);
 			Assert.AreEqual (module, argument.Module);
 			Assert.AreEqual ("System", argument.Namespace);
 			Assert.AreEqual ("Int32", argument.Name);

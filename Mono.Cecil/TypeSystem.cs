@@ -184,7 +184,7 @@ namespace Mono.Cecil {
 					return typeRef;
 				var type = LookupType ("System", name);
 				type.etype = element_type;
-				type.IsValueType = true;
+				type.KnownValueType ();
 				return typeRef = type;
 			}
 		}
@@ -311,6 +311,12 @@ namespace Mono.Cecil {
 				return false;
 
 			return true;
+		}
+
+		public static void KnownValueType (this TypeReference type)
+		{
+			if (!type.IsDefinition)
+				type.IsValueType = true;
 		}
 
 		static bool IsCoreLibrary (AssemblyNameReference reference)

@@ -189,10 +189,10 @@ namespace Mono.Cecil.Rocks {
 				var instruction = self.Instructions [i];
 				if (instruction.OpCode.Code != Code.Ldc_I8)
 					continue;
-				var l = (long)instruction.Operand;
-				if (l >= uint.MaxValue)
+				var l = (long) instruction.Operand;
+				if (l >= int.MaxValue || l <= int.MinValue)
 					continue;
-				ExpandMacro (instruction, OpCodes.Ldc_I4, (uint)l);
+				ExpandMacro (instruction, OpCodes.Ldc_I4, (int) l);
 				self.Instructions.Insert (++i, Instruction.Create (OpCodes.Conv_I8));
 			}
 		}

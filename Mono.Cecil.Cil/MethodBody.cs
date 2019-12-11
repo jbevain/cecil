@@ -92,7 +92,7 @@ namespace Mono.Cecil.Cil {
 			var parameter_type = method.DeclaringType as TypeReference;
 
 			if (parameter_type.HasGenericParameters) {
-				var instance = new GenericInstanceType (parameter_type);
+				var instance = new GenericInstanceType (parameter_type, parameter_type.GenericParameters.Count);
 				for (int i = 0; i < parameter_type.GenericParameters.Count; i++)
 					instance.GenericArguments.Add (parameter_type.GenericParameters [i]);
 

@@ -61,5 +61,11 @@ namespace Mono.Cecil {
 			base.IsValueType = type.IsValueType;
 			this.etype = MD.ElementType.GenericInst;
 		}
+
+		internal GenericInstanceType (TypeReference type, int arity)
+			: this (type)
+		{
+			this.arguments = new Collection<TypeReference> (arity);
+		}
 	}
 }

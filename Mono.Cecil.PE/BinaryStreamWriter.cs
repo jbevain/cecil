@@ -11,8 +11,6 @@
 using System;
 using System.IO;
 
-#if !READ_ONLY
-
 namespace Mono.Cecil.PE {
 
 	class BinaryStreamWriter : BinaryWriter {
@@ -89,5 +87,3 @@ namespace Mono.Cecil.PE {
 		}
 	}
 }
-
-#endif

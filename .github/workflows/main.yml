@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+    - release/*
+  pull_request:
+    branches:
+    - master
+    - release/*
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: dotnet build -c Debug Mono.Cecil.sln
+    - name: Test
+      run: dotnet test --no-build -c Debug Mono.Cecil.sln
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: dotnet build -c Debug Mono.Cecil.sln
+    - name: Test .NET Core
+      run: dotnet test --no-build -c Debug Mono.Cecil.sln
+    - name: Get NuGet
+      run: curl -o ./nuget.exe https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+    - name: Get NUnit.Console
+      run: mono ./nuget.exe install NUnit.Console -Version 3.9.0 -OutputDirectory ./packages
+    - name: Test .NET 4.0 using Mono
+      run: mono ./packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe ./Mono.Cecil.nunit

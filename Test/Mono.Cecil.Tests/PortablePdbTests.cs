@@ -1,10 +1,11 @@
-#if !READ_ONLY
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using NUnit.Framework;
 
 using Mono.Cecil.Cil;
+using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Tests {
 
@@ -319,8 +320,15 @@ namespace Mono.Cecil.Tests {
 
 				var state_machine_scope = move_next.CustomDebugInformations.OfType<StateMachineScopeDebugInformation> ().FirstOrDefault ();
 				Assert.IsNotNull (state_machine_scope);
-				Assert.AreEqual (0, state_machine_scope.Start.Offset);
-				Assert.IsTrue (state_machine_scope.End.IsEndOfMethod);
+				Assert.AreEqual (3, state_machine_scope.Scopes.Count);
+				Assert.AreEqual (0, state_machine_scope.Scopes [0].Start.Offset);
+				Assert.IsTrue (state_machine_scope.Scopes [0].End.IsEndOfMethod);
+
+				Assert.AreEqual (0, state_machine_scope.Scopes [1].Start.Offset);
+				Assert.AreEqual (0, state_machine_scope.Scopes [1].End.Offset);
+
+				Assert.AreEqual (184, state_machine_scope.Scopes [2].Start.Offset);
+				Assert.AreEqual (343, state_machine_scope.Scopes [2].End.Offset);
 
 				var async_body = move_next.CustomDebugInformations.OfType<AsyncMethodBodyDebugInformation> ().FirstOrDefault ();
 				Assert.IsNotNull (async_body);
@@ -334,11 +342,11 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (91, async_body.Resumes [0].Offset);
 				Assert.AreEqual (252, async_body.Resumes [1].Offset);
 
-				Assert.AreEqual (move_next, async_body.MoveNextMethod);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [0]);
+				Assert.AreEqual (move_next, async_body.ResumeMethods [1]);
 			});
 		}
 
-#if !READ_ONLY
 		[Test]
 		public void EmbeddedCompressedPortablePdb ()
 		{
@@ -355,6 +363,8 @@ namespace Mono.Cecil.Tests {
 
 				var eppdb = header.Entries [1];
 				Assert.AreEqual (ImageDebugType.EmbeddedPortablePdb, eppdb.Directory.Type);
+				Assert.AreEqual (0x0100, eppdb.Directory.MajorVersion);
+				Assert.AreEqual (0x0100, eppdb.Directory.MinorVersion);
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 
@@ -362,7 +372,7 @@ namespace Mono.Cecil.Tests {
 		{
 			TestModule ("PdbTarget.exe", test, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 			TestModule ("EmbeddedPdbTarget.exe", test, verify: !Platform.OnMono);
-			TestModule("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof(EmbeddedPortablePdbWriterProvider));
+			TestModule ("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof(EmbeddedPortablePdbWriterProvider));
 		}
 
 		[Test]
@@ -398,11 +408,133 @@ namespace Mono.Cecil.Tests {
 				var symbol = method.DebugInformation;
 
 				Assert.IsNotNull (symbol);
-				Assert.AreEqual(1, symbol.Scope.Constants.Count);
+				Assert.AreEqual (1, symbol.Scope.Constants.Count);
 
 				var a = symbol.Scope.Constants [0];
 				Assert.AreEqual ("a", a.Name);
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
+		public void InvalidConstantRecord ()
+		{
+			using (var module = GetResourceModule ("mylib.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				var type = module.GetType ("mylib.Say");
+				var method = type.GetMethod ("hello");
+				var symbol = method.DebugInformation;
+
+				Assert.IsNotNull (symbol);
+				Assert.AreEqual (0, symbol.Scope.Constants.Count);
+			}
+		}
+
+		[Test]
+		public void SourceLink ()
+		{
+			TestModule ("TargetLib.dll", module => {
+				Assert.IsTrue (module.HasCustomDebugInformations);
+				Assert.AreEqual (1, module.CustomDebugInformations.Count);
+
+				var source_link = module.CustomDebugInformations [0] as SourceLinkDebugInformation;
+				Assert.IsNotNull (source_link);
+				Assert.AreEqual ("{\"documents\":{\"C:\\\\tmp\\\\SourceLinkProblem\\\\*\":\"https://raw.githubusercontent.com/bording/SourceLinkProblem/197d965ee7f1e7f8bd3cea55b5f904aeeb8cd51e/*\"}}", source_link.Content);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
+		public void EmbeddedSource ()
+		{
+			TestModule ("embedcs.exe", module => {
+				var program = GetDocument (module.GetType ("Program"));
+				var program_src = GetSourceDebugInfo (program);
+				Assert.IsTrue (program_src.compress);
+				var program_src_content = Encoding.UTF8.GetString (program_src.Content);
+				Assert.AreEqual (Normalize (@"using System;
+
+class Program
+{
+    static void Main()
+    {
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        // Hello hello hello hello hello hello
+        Console.WriteLine(B.Do());
+        Console.WriteLine(A.Do());
+    }
+}
+"), Normalize (program_src_content));
+
+				var a = GetDocument (module.GetType ("A"));
+				var a_src = GetSourceDebugInfo (a);
+				Assert.IsFalse (a_src.compress);
+				var a_src_content = Encoding.UTF8.GetString (a_src.Content);
+				Assert.AreEqual (Normalize (@"class A
+{
+    public static string Do()
+    {
+        return ""A::Do"";
+    }
+}"), Normalize (a_src_content));
+
+				var b = GetDocument(module.GetType ("B"));
+				var b_src = GetSourceDebugInfo (b);
+				Assert.IsFalse (b_src.compress);
+				var b_src_content = Encoding.UTF8.GetString (b_src.Content);
+				Assert.AreEqual (Normalize (@"class B
+{
+    public static string Do()
+    {
+        return ""B::Do"";
+    }
+}"), Normalize (b_src_content));
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		static Document GetDocument (TypeDefinition type)
+		{
+			foreach (var method in type.Methods) {
+				if (!method.HasBody)
+					continue;
+
+				foreach (var instruction in method.Body.Instructions) {
+					var sp = method.DebugInformation.GetSequencePoint (instruction);
+					if (sp != null && sp.Document != null)
+						return sp.Document;
+				}
+			}
+
+			return null;
+		}
+
+		static EmbeddedSourceDebugInformation GetSourceDebugInfo (Document document)
+		{
+			Assert.IsTrue (document.HasCustomDebugInformations);
+			Assert.AreEqual (1, document.CustomDebugInformations.Count);
+
+			var source = document.CustomDebugInformations [0] as EmbeddedSourceDebugInformation;
+			Assert.IsNotNull (source);
+			return source;
 		}
 
 		[Test]
@@ -420,7 +552,173 @@ namespace Mono.Cecil.Tests {
 	IL_0001: ret", main);
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
-#endif
+
+		public sealed class SymbolWriterProvider : ISymbolWriterProvider {
+
+			readonly DefaultSymbolWriterProvider writer_provider = new DefaultSymbolWriterProvider ();
+
+			public ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName)
+			{
+				return new SymbolWriter (writer_provider.GetSymbolWriter (module, fileName));
+			}
+
+			public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+			{
+				return new SymbolWriter (writer_provider.GetSymbolWriter (module, symbolStream));
+			}
+		}
+
+		public sealed class SymbolWriter : ISymbolWriter {
+
+			readonly ISymbolWriter symbol_writer;
+
+			public SymbolWriter (ISymbolWriter symbolWriter)
+			{
+				this.symbol_writer = symbolWriter;
+			}
+
+			public ImageDebugHeader GetDebugHeader ()
+			{
+				var header = symbol_writer.GetDebugHeader ();
+				if (!header.HasEntries)
+					return header;
+
+				for (int i = 0; i < header.Entries.Length; i++) {
+					header.Entries [i] = ProcessEntry (header.Entries [i]);
+				}
+
+				return header;
+			}
+
+			private static ImageDebugHeaderEntry ProcessEntry (ImageDebugHeaderEntry entry)
+			{
+				if (entry.Directory.Type != ImageDebugType.CodeView)
+					return entry;
+
+				var reader = new ByteBuffer (entry.Data);
+				var writer = new ByteBuffer ();
+
+				var sig = reader.ReadUInt32 ();
+				if (sig != 0x53445352)
+					return entry;
+
+				writer.WriteUInt32 (sig); // RSDS
+				writer.WriteBytes (reader.ReadBytes (16)); // MVID
+				writer.WriteUInt32 (reader.ReadUInt32 ()); // Age
+
+				var length = Array.IndexOf (entry.Data, (byte) 0, reader.position) - reader.position;
+
+				var fullPath = Encoding.UTF8.GetString (reader.ReadBytes (length));
+
+				writer.WriteBytes (Encoding.UTF8.GetBytes (Path.GetFileName (fullPath)));
+				writer.WriteByte (0);
+
+				var newData = new byte [writer.length];
+				Buffer.BlockCopy (writer.buffer, 0, newData, 0, writer.length);
+
+				var directory = entry.Directory;
+				directory.SizeOfData = newData.Length;
+
+				return new ImageDebugHeaderEntry (directory, newData);
+			}
+
+			public ISymbolReaderProvider GetReaderProvider ()
+			{
+				return symbol_writer.GetReaderProvider ();
+			}
+
+			public void Write (MethodDebugInformation info)
+			{
+				symbol_writer.Write (info);
+			}
+
+			public void Dispose ()
+			{
+				symbol_writer.Dispose ();
+			}
+		}
+
+		static string GetDebugHeaderPdbPath (ModuleDefinition module)
+		{
+			var header = module.GetDebugHeader ();
+			var cv = Mixin.GetCodeViewEntry (header);
+			Assert.IsNotNull (cv);
+			var length = Array.IndexOf (cv.Data, (byte)0, 24) - 24;
+			var bytes = new byte [length];
+			Buffer.BlockCopy (cv.Data, 24, bytes, 0, length);
+			return Encoding.UTF8.GetString (bytes);
+		}
+
+		[Test]
+		public void UseCustomSymbolWriterToChangeDebugHeaderPdbPath ()
+		{
+			const string resource = "mylib.dll";
+
+			string debug_header_pdb_path;
+			string dest = Path.Combine (Path.GetTempPath (), resource);
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				debug_header_pdb_path = GetDebugHeaderPdbPath (module);
+				Assert.IsTrue (Path.IsPathRooted (debug_header_pdb_path));
+				module.Write (dest, new WriterParameters { SymbolWriterProvider = new SymbolWriterProvider () });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (dest, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				var pdb_path = GetDebugHeaderPdbPath (module);
+				Assert.IsFalse (Path.IsPathRooted (pdb_path));
+				Assert.AreEqual (Path.GetFileName (debug_header_pdb_path), pdb_path);
+			}
+		}
+
+		[Test]
+		public void WriteAndReadAgainModuleWithDeterministicMvid ()
+		{
+			const string resource = "mylib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, SymbolWriterProvider = new SymbolWriterProvider () });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+			}
+		}
+
+		[Test]
+		public void DoubleWriteAndReadAgainModuleWithDeterministicMvid ()
+		{
+			Guid mvid1_in, mvid1_out, mvid2_in, mvid2_out;
+
+			{
+				const string resource = "foo.dll";
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters {  })) {
+					mvid1_in = module.Mvid;
+					module.Write (destination, new WriterParameters { DeterministicMvid = true });
+				}
+
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { })) {
+					mvid1_out = module.Mvid;
+				}
+			}
+
+			{
+				const string resource = "hello2.exe";
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters {  })) {
+					mvid2_in = module.Mvid;
+					module.Write (destination, new WriterParameters { DeterministicMvid = true });
+				}
+
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { })) {
+					mvid2_out = module.Mvid;
+				}
+			}
+
+			Assert.AreNotEqual (mvid1_in, mvid2_in);
+			Assert.AreNotEqual (mvid1_out, mvid2_out);
+		}
 	}
 }
-#endif

@@ -26,7 +26,8 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (definition);
 
 			Assert.AreEqual ("System.String System.String::Empty", definition.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", 
+				definition.Module.Assembly.Name.Name);
 		}
 
 		delegate string GetSubstring (string str, int start, int length);
@@ -42,7 +43,8 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (definition);
 
 			Assert.AreEqual ("System.String System.String::Substring(System.Int32,System.Int32)", definition.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib",
+				definition.Module.Assembly.Name.Name);
 		}
 
 		[Test]
@@ -56,7 +58,8 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual ("get_Length", definition.Name);
 			Assert.AreEqual ("System.String", definition.DeclaringType.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", 
+				definition.Module.Assembly.Name.Name);
 		}
 
 		[Test]
@@ -72,7 +75,8 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (definition);
 
 			Assert.AreEqual ("System.Void System.Collections.Generic.List`1::Add(T)", definition.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib",
+				definition.Module.Assembly.Name.Name);
 		}
 
 		[Test]
@@ -92,7 +96,8 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (definition);
 
 			Assert.AreEqual ("System.Boolean System.Collections.Generic.Dictionary`2::TryGetValue(TKey,TValue&)", definition.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib",
+				 definition.Module.Assembly.Name.Name);
 		}
 
 		class CustomResolver : DefaultAssemblyResolver {
@@ -129,7 +134,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { AssemblyResolver = resolver };
 
 			var types = ModuleDefinition.ReadModule (
-				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs")),
 				parameters);
 
 			resolver.Register (types.Assembly);
@@ -140,7 +145,7 @@ namespace Mono.Cecil.Tests {
 			var definition = reference.Resolve ();
 			Assert.IsNotNull (definition);
 			Assert.AreEqual ("System.Diagnostics.DebuggableAttribute", definition.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", definition.Module.Assembly.Name.Name);
 		}
 
 		[Test]
@@ -150,7 +155,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { AssemblyResolver = resolver };
 
 			var types = ModuleDefinition.ReadModule (
-				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs", typeof (ResolveTests).Assembly)),
+				CompilationService.CompileResource (GetCSharpResourcePath ("CustomAttributes.cs")),
 				parameters);
 
 			resolver.Register (types.Assembly);
@@ -162,7 +167,7 @@ namespace Mono.Cecil.Tests {
 			var definition = reference.Resolve ();
 			Assert.IsNotNull (definition);
 			Assert.AreEqual ("System.Diagnostics.DebuggableAttribute/DebuggingModes", definition.FullName);
-			Assert.AreEqual ("mscorlib", definition.Module.Assembly.Name.Name);
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", definition.Module.Assembly.Name.Name);
 		}
 
 		[Test]
@@ -173,6 +178,19 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("Get", get_a_b.Name);
 			Assert.IsNotNull (get_a_b.Module);
 			Assert.IsNull (get_a_b.Resolve ());
+		}
+
+		[Test]
+		public void GenericRectangularArrayGetMethodInMemberReferences ()
+		{
+			using (var module = GetResourceModule ("FSharp.Core.dll")) {
+				foreach (var member in module.GetMemberReferences ()) {
+					if (!member.DeclaringType.IsArray)
+						continue;
+
+					Assert.IsNull (member.Resolve ());
+				}
+			}
 		}
 
 		[Test]
@@ -223,7 +241,9 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (reference.IsRetargetable);
 				var assembly = resolver.Resolve (reference);
 				Assert.IsNotNull (assembly);
-				Assert.AreEqual (typeof (object).Assembly.GetName ().Version, assembly.Name.Version);
+
+				if (!Platform.OnCoreClr)
+					Assert.AreEqual (typeof (object).Assembly.GetName ().Version, assembly.Name.Version);
 			}
 		}
 

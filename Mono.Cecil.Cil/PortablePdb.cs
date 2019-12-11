@@ -60,12 +60,10 @@ namespace Mono.Cecil.Cil {
 			this.debug_reader = new MetadataReader (image, module, this.reader);
 		}
 
-#if !READ_ONLY
 		public ISymbolWriterProvider GetWriterProvider ()
 		{
 			return new PortablePdbWriterProvider ();
 		}
-#endif
 
 		public bool ProcessDebugHeader (ImageDebugHeader header)
 		{
@@ -94,7 +92,11 @@ namespace Mono.Cecil.Cil {
 
 			var pdb_guid = new Guid (buffer);
 
-			return module_guid == pdb_guid;
+			if (module_guid != pdb_guid)
+				return false;
+
+			ReadModule ();
+			return true;
 		}
 
 		static int ReadInt32 (byte [] bytes, int start)
@@ -103,6 +105,11 @@ namespace Mono.Cecil.Cil {
 				| (bytes [start + 1] << 8)
 				| (bytes [start + 2] << 16)
 				| (bytes [start + 3] << 24));
+		}
+
+		void ReadModule ()
+		{
+			module.custom_infos = debug_reader.GetCustomDebugInformation (module);
 		}
 
 		public MethodDebugInformation Read (MethodDefinition method)
@@ -149,7 +156,6 @@ namespace Mono.Cecil.Cil {
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
-			Mixin.CheckFileName (fileName);
 
 			var header = module.GetDebugHeader ();
 			var entry = header.GetEmbeddedPortablePdbEntry ();
@@ -192,12 +198,11 @@ namespace Mono.Cecil.Cil {
 			this.reader = reader;
 		}
 
-#if !READ_ONLY
 		public ISymbolWriterProvider GetWriterProvider ()
 		{
 			return new EmbeddedPortablePdbWriterProvider ();
 		}
-#endif
+
 		public bool ProcessDebugHeader (ImageDebugHeader header)
 		{
 			return reader.ProcessDebugHeader (header);
@@ -213,9 +218,6 @@ namespace Mono.Cecil.Cil {
 			reader.Dispose ();
 		}
 	}
-
-
-#if !READ_ONLY
 
 	public sealed class PortablePdbWriterProvider : ISymbolWriterProvider
 	{
@@ -245,11 +247,7 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	interface IMetadataSymbolWriter : ISymbolWriter {
-		void SetMetadata (MetadataBuilder metadata);
-	}
-
-	public sealed class PortablePdbWriter : ISymbolWriter, IMetadataSymbolWriter {
+	public sealed class PortablePdbWriter : ISymbolWriter {
 
 		readonly MetadataBuilder pdb_metadata;
 		readonly ModuleDefinition module;
@@ -263,20 +261,19 @@ namespace Mono.Cecil.Cil {
 		{
 			this.pdb_metadata = pdb_metadata;
 			this.module = module;
+
+			this.module_metadata = module.metadata_builder;
+
+			if (module_metadata != pdb_metadata)
+				this.pdb_metadata.metadata_builder = this.module_metadata;
+
+			pdb_metadata.AddCustomDebugInformations (module);
 		}
 
 		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module, ImageWriter writer)
 			: this (pdb_metadata, module)
 		{
 			this.writer = writer;
-		}
-
-		void IMetadataSymbolWriter.SetMetadata (MetadataBuilder metadata)
-		{
-			this.module_metadata = metadata;
-
-			if (module_metadata != pdb_metadata)
-				this.pdb_metadata.metadata_builder = metadata;
 		}
 
 		public ISymbolReaderProvider GetReaderProvider ()
@@ -304,11 +301,7 @@ namespace Mono.Cecil.Cil {
 			// PDB Age
 			buffer.WriteUInt32 (1);
 			// PDB Path
-			var filename = writer.BaseStream.GetFileName ();
-			if (!string.IsNullOrEmpty (filename))
-				filename = Path.GetFileName (filename);
-
-			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (filename));
+			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (writer.BaseStream.GetFileName ()));
 			buffer.WriteByte (0);
 
 			var data = new byte [buffer.length];
@@ -414,7 +407,7 @@ namespace Mono.Cecil.Cil {
 		}
 	}
 
-	public sealed class EmbeddedPortablePdbWriter : ISymbolWriter, IMetadataSymbolWriter {
+	public sealed class EmbeddedPortablePdbWriter : ISymbolWriter {
 
 		readonly Stream stream;
 		readonly PortablePdbWriter writer;
@@ -436,6 +429,8 @@ namespace Mono.Cecil.Cil {
 
 			var directory = new ImageDebugDirectory {
 				Type = ImageDebugType.EmbeddedPortablePdb,
+				MajorVersion = 0x0100,
+				MinorVersion = 0x0100,
 			};
 
 			var data = new MemoryStream ();
@@ -469,14 +464,7 @@ namespace Mono.Cecil.Cil {
 		public void Dispose ()
 		{
 		}
-
-		void IMetadataSymbolWriter.SetMetadata (MetadataBuilder metadata)
-		{
-			((IMetadataSymbolWriter) writer).SetMetadata (metadata);
-		}
 	}
-
-#endif
 
 	static class PdbGuidMapping {
 
@@ -548,6 +536,9 @@ namespace Mono.Cecil.Cil {
 
 			if (hash_algo == DocumentHashAlgorithm.SHA1)
 				return hash_sha1;
+
+			if (hash_algo == DocumentHashAlgorithm.SHA256)
+				return hash_sha256;
 
 			return new Guid ();
 		}

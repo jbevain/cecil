@@ -25,7 +25,7 @@ namespace Mono.Cecil.Mdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (Mixin.GetMdbFileName (fileName), module.Mvid));
+			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (Mixin.GetMdbFileName (fileName)));
 		}
 
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
@@ -33,15 +33,7 @@ namespace Mono.Cecil.Mdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			var file = MonoSymbolFile.ReadSymbolFile (symbolStream);
-			if (module.Mvid != file.Guid) {
-				var file_stream = symbolStream as FileStream;
-				if (file_stream != null)
-					throw new MonoSymbolFileException ("Symbol file `{0}' does not match assembly", file_stream.Name);
-
-				throw new MonoSymbolFileException ("Symbol file from stream does not match assembly");
-			}
-			return new MdbReader (module, file);
+			return new MdbReader (module, MonoSymbolFile.ReadSymbolFile (symbolStream));
 		}
 	}
 
@@ -58,12 +50,10 @@ namespace Mono.Cecil.Mdb {
 			this.documents = new Dictionary<string, Document> ();
 		}
 
-#if !READ_ONLY
 		public ISymbolWriterProvider GetWriterProvider ()
 		{
 			return new MdbWriterProvider ();
 		}
-#endif
 
 		public bool ProcessDebugHeader (ImageDebugHeader header)
 		{
@@ -78,12 +68,18 @@ namespace Mono.Cecil.Mdb {
 				return null;
 
 			var info = new MethodDebugInformation (method);
+			info.code_size = ReadCodeSize (method);
 
 			var scopes = ReadScopes (entry, info);
 			ReadLineNumbers (entry, info);
 			ReadLocalVariables (entry, scopes);
 
 			return info;
+		}
+
+		static int ReadCodeSize (MethodDefinition method)
+		{
+			return method.Module.Read (method, (m, reader) => reader.ReadCodeSize (m));
 		}
 
 		static void ReadLocalVariables (MethodEntry entry, ScopeDebugInformation [] scopes)
