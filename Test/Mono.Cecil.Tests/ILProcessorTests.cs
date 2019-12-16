@@ -53,6 +53,30 @@ namespace Mono.Cecil.Tests {
 			AssertOpCodeSequence (new [] { OpCodes.Ldloc_0, OpCodes.Ldloc_1, OpCodes.Ldloc_2, OpCodes.Ldloc_3 }, method);
 		}
 
+		[Test]
+		public void InsertAfterUsingIndex ()
+		{
+			var method = CreateTestMethod (OpCodes.Ldloc_0, OpCodes.Ldloc_2, OpCodes.Ldloc_3);
+			var il = method.GetILProcessor ();
+
+			il.InsertAfter (
+				0,
+				il.Create (OpCodes.Ldloc_1));
+
+			AssertOpCodeSequence (new [] { OpCodes.Ldloc_0, OpCodes.Ldloc_1, OpCodes.Ldloc_2, OpCodes.Ldloc_3 }, method);
+		}
+
+		[Test]
+		public void ReplaceUsingIndex ()
+		{
+			var method = CreateTestMethod (OpCodes.Ldloc_0, OpCodes.Ldloc_2, OpCodes.Ldloc_3);
+			var il = method.GetILProcessor ();
+
+			il.Replace (1, il.Create (OpCodes.Nop));
+
+			AssertOpCodeSequence (new [] { OpCodes.Ldloc_0, OpCodes.Nop, OpCodes.Ldloc_3 }, method);
+		}
+
 		static void AssertOpCodeSequence (OpCode [] expected, MethodBody body)
 		{
 			var opcodes = body.Instructions.Select (i => i.OpCode).ToArray ();
