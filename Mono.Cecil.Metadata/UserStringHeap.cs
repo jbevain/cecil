@@ -8,12 +8,14 @@
 // Licensed under the MIT/X11 license.
 //
 
+using System;
+
 namespace Mono.Cecil.Metadata {
 
-	sealed class UserStringHeap : StringHeap {
+	sealed unsafe class UserStringHeap : StringHeap {
 
-		public UserStringHeap (byte [] data)
-			: base (data)
+		public UserStringHeap (byte* data, uint size)
+			: base (data, size)
 		{
 		}
 
@@ -21,9 +23,13 @@ namespace Mono.Cecil.Metadata {
 		{
 			int start = (int) index;
 
-			uint length = (uint) (data.ReadCompressedUInt32 (ref start) & ~1);
+			uint length = (uint) (Mixin.ReadCompressedUInt32 (data, ref start) & ~1);
 			if (length < 1)
 				return string.Empty;
+
+			if (BitConverter.IsLittleEndian) {
+				return new string ((char*)(data + start), 0, (int)length / 2);
+			}
 
 			var chars = new char [length / 2];
 

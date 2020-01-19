@@ -9,13 +9,14 @@
 //
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Mono.Cecil.Metadata {
 
-	sealed class GuidHeap : Heap {
+	sealed unsafe class GuidHeap : Heap {
 
-		public GuidHeap (byte [] data)
-			: base (data)
+		public GuidHeap (byte* data, uint size)
+			: base (data, size)
 		{
 		}
 
@@ -23,14 +24,16 @@ namespace Mono.Cecil.Metadata {
 		{
 			const int guid_size = 16;
 
-			if (index == 0 || ((index - 1) + guid_size) > data.Length)
+			if (index == 0 || ((index - 1) + guid_size) > size)
 				return new Guid ();
 
-			var buffer = new byte [guid_size];
-
-			Buffer.BlockCopy (this.data, (int) ((index - 1) * guid_size), buffer, 0, guid_size);
-
-			return new Guid (buffer);
+			if (BitConverter.IsLittleEndian) {
+				return *(Guid*) (data + ((index - 1) * guid_size));
+			} else {
+				var buffer = new byte [guid_size];
+				Marshal.Copy ((IntPtr)(data + ((index - 1) * guid_size)), buffer, 0, guid_size);
+				return new Guid (buffer);
+			}
 		}
 	}
 }

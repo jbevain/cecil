@@ -40,14 +40,14 @@ namespace Mono.Cecil.Pdb
 			documents = new Collection<ISymUnmanagedDocumentWriter> ();
 		}
 
-		public byte[] GetDebugInfo (out ImageDebugDirectory idd)
+		public byte [] GetDebugInfo (out ImageDebugDirectory idd)
 		{
 			int size;
 
 			// get size of debug info
 			writer.GetDebugInfo (out idd, 0, out size, null);
 
-			byte[] debug_info = new byte[size];
+			byte [] debug_info = new byte [size];
 			writer.GetDebugInfo (out idd, size, out size, debug_info);
 
 			return debug_info;

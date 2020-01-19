@@ -80,7 +80,7 @@ namespace Mono.Cecil.Metadata {
 		}
 	}
 
-	sealed class TableHeap : Heap {
+	sealed unsafe class TableHeap : Heap {
 
 		public long Valid;
 		public long Sorted;
@@ -91,8 +91,8 @@ namespace Mono.Cecil.Metadata {
 			get { return Tables [(int) table]; }
 		}
 
-		public TableHeap (byte [] data)
-			: base (data)
+		public TableHeap (byte* data, uint size)
+			: base (data, size)
 		{
 		}
 

@@ -117,6 +117,7 @@ namespace Mono.Cecil {
 				using (var symbol_writer = GetSymbolWriter (module, fq_name, symbol_writer_provider, parameters)) {
 					metadata.SetSymbolWriter (symbol_writer);
 					BuildMetadata (module, metadata);
+					module.symbol_reader = null;
 
 					if (parameters.DeterministicMvid)
 						metadata.ComputeDeterministicMvid ();

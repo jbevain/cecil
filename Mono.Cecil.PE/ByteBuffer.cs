@@ -9,8 +9,172 @@
 //
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Mono.Cecil.PE {
+
+	readonly unsafe struct ByteSpan {
+		internal readonly byte* pointer;
+		internal readonly uint length;
+
+		public ByteSpan (byte* pointer, uint length)
+		{
+			this.pointer = pointer;
+			this.length = length;
+		}
+	}
+
+	unsafe ref struct PByteBuffer {
+
+		internal readonly ByteSpan span;
+		internal byte* p;
+		internal readonly byte* e;
+
+		public PByteBuffer (byte* bytes, uint length)
+			: this(new ByteSpan(bytes, length))
+		{
+		}
+
+		public PByteBuffer (ByteSpan span)
+		{
+			this.span = span;
+			this.p = this.span.pointer;
+			this.e = this.p + this.span.length;
+		}
+
+		public int RemainingBytes ()
+		{
+			return (int) (e - p);
+		}
+
+		public bool CanReadMore ()
+		{
+			return p < e;
+		}
+
+		public void Advance (int length)
+		{
+			p += length;
+		}
+
+		public byte PeekByte ()
+		{
+			return p [0];
+		}
+
+		public byte ReadByte ()
+		{
+			var b = p [0];
+			p++;
+			return b;
+		}
+
+		public ushort ReadUInt16 ()
+		{
+			ushort value;
+			if (BitConverter.IsLittleEndian) {
+				value = *(ushort*) p;
+			} else {
+				value = (ushort) (p [0] | (p [1] << 8));
+			}
+
+			p += 2;
+			return value;
+		}
+
+		public short ReadInt16 ()
+		{
+			return (short) ReadUInt16 ();
+		}
+
+		public uint ReadUInt32 ()
+		{
+			uint value;
+			if (BitConverter.IsLittleEndian) {
+				value = *(uint*) p;
+			} else {
+				value = (uint) (p [0]  | (p [1] << 8)  | (p [2] << 16) | (p [3] << 24));
+			}
+
+			p += 4;
+			return value;
+		}
+
+		public int ReadInt32 ()
+		{
+			return (int) ReadUInt32 ();
+		}
+
+		public ulong ReadUInt64 ()
+		{
+			uint low = ReadUInt32 ();
+			uint high = ReadUInt32 ();
+
+			return (((ulong) high) << 32) | low;
+		}
+
+		public long ReadInt64 ()
+		{
+			return (long) ReadUInt64 ();
+		}
+
+		public uint ReadCompressedUInt32 ()
+		{
+			byte first = ReadByte ();
+			if ((first & 0x80) == 0)
+				return first;
+
+			if ((first & 0x40) == 0)
+				return ((uint) (first & ~0x80) << 8)
+					| ReadByte ();
+
+			return ((uint) (first & ~0xc0) << 24)
+				| (uint) ReadByte () << 16
+				| (uint) ReadByte () << 8
+				| ReadByte ();
+		}
+
+		public int ReadCompressedInt32 ()
+		{
+			var b = p [0];
+			var u = (int) ReadCompressedUInt32 ();
+			var v = u >> 1;
+			if ((u & 1) == 0)
+				return v;
+
+			switch (b & 0xc0)
+			{
+				case 0:
+				case 0x40:
+					return v - 0x40;
+				case 0x80:
+					return v - 0x2000;
+				default:
+					return v - 0x10000000;
+			}
+		}
+
+		public byte [] ReadBytes (int count)
+		{
+			var bytes = new byte [count];
+			Marshal.Copy ((IntPtr)p, bytes, 0, count);
+			p += count;
+			return bytes;
+		}
+
+		public float ReadSingle ()
+		{
+			var u = ReadUInt32 ();
+			return *(float*) &u;
+		}
+
+		public double ReadDouble ()
+		{
+			var u = ReadUInt64 ();
+			return *(double*) &u;
+		}
+	}
 
 	class ByteBuffer {
 
