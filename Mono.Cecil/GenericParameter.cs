@@ -9,7 +9,7 @@
 //
 
 using System;
-
+using System.Threading;
 using Mono.Collections.Generic;
 
 using Mono.Cecil.Metadata;
@@ -60,7 +60,8 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Module.Read (ref constraints, this, (generic_parameter, reader) => reader.ReadGenericConstraints (generic_parameter));
 
-				return constraints = new GenericParameterConstraintCollection (this);
+				Interlocked.CompareExchange (ref constraints, new GenericParameterConstraintCollection (this), null);
+				return constraints;
 			}
 		}
 
@@ -293,8 +294,11 @@ namespace Mono.Cecil {
 
 		public Collection<CustomAttribute> CustomAttributes {
 			get {
-				if (generic_parameter == null)
-					return custom_attributes = new Collection<CustomAttribute> ();
+				if (generic_parameter == null) {
+					if (custom_attributes == null)
+						Interlocked.CompareExchange (ref custom_attributes, new Collection<CustomAttribute> (), null);
+					return custom_attributes;
+				}
 
 				return custom_attributes ?? (this.GetCustomAttributes (ref custom_attributes, generic_parameter.Module));
 			}

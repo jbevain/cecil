@@ -10,7 +10,7 @@
 
 using System;
 using System.IO;
-
+using System.Threading;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -46,7 +46,8 @@ namespace Mono.Cecil {
 				if (main_module.HasImage)
 					return main_module.Read (ref modules, this, (_, reader) => reader.ReadModules ());
 
-				return modules = new Collection<ModuleDefinition> (1) { main_module };
+				Interlocked.CompareExchange (ref modules, new Collection<ModuleDefinition> (1) { main_module }, null);
+				return modules;
 			}
 		}
 

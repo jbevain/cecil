@@ -12,6 +12,7 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Mono.Cecil {
 
@@ -97,7 +98,7 @@ namespace Mono.Cecil {
 					var local_public_key_token = new byte [8];
 					Array.Copy (hash, (hash.Length - 8), local_public_key_token, 0, 8);
 					Array.Reverse (local_public_key_token, 0, 8);
-					public_key_token = local_public_key_token; // publish only once finished (required for thread-safety)
+					Interlocked.CompareExchange (ref public_key_token, local_public_key_token, null); // publish only once finished (required for thread-safety)
 				}
 				return public_key_token ?? Empty<byte>.Array;
 			}
@@ -160,7 +161,9 @@ namespace Mono.Cecil {
 					builder.Append ("Retargetable=Yes");
 				}
 
-				return full_name = builder.ToString ();
+				Interlocked.CompareExchange (ref full_name, builder.ToString (), null);
+
+				return full_name;
 			}
 		}
 

@@ -10,7 +10,8 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Runtime.CompilerServices;
+using System.Threading;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
@@ -68,7 +69,7 @@ namespace Mono.Cecil {
 
 		static void InitializePrimitives ()
 		{
-			primitive_value_types = new Dictionary<string, Row<ElementType, bool>> (18, StringComparer.Ordinal) {
+			var types = new Dictionary<string, Row<ElementType, bool>> (18, StringComparer.Ordinal) {
 				{ "Void", new Row<ElementType, bool> (ElementType.Void, false) },
 				{ "Boolean", new Row<ElementType, bool> (ElementType.Boolean, true) },
 				{ "Char", new Row<ElementType, bool> (ElementType.Char, true) },
@@ -88,6 +89,8 @@ namespace Mono.Cecil {
 				{ "UIntPtr", new Row<ElementType, bool> (ElementType.U, true) },
 				{ "Object", new Row<ElementType, bool> (ElementType.Object, false) },
 			};
+
+			Interlocked.CompareExchange (ref primitive_value_types, types, null);
 		}
 
 		public static void TryProcessPrimitiveTypeReference (TypeReference type)
