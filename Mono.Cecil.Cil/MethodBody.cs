@@ -55,7 +55,7 @@ namespace Mono.Cecil.Cil {
 		public Collection<Instruction> Instructions {
 			get {
 				if (instructions == null)
-					Interlocked.CompareExchange (ref instructions, new InstructionCollection(method), null);
+					Interlocked.CompareExchange (ref instructions, new InstructionCollection (method), null);
 
 				return instructions;
 			}
@@ -79,9 +79,9 @@ namespace Mono.Cecil.Cil {
 		}
 
 		public Collection<VariableDefinition> Variables {
-			get	{
+			get {
 				if (variables == null)
-					Interlocked.CompareExchange (ref variables, new VariableDefinitionCollection(), null);
+					Interlocked.CompareExchange (ref variables, new VariableDefinitionCollection (), null);
 
 				return variables;
 			}

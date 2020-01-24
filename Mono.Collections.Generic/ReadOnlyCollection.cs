@@ -20,8 +20,7 @@ namespace Mono.Collections.Generic {
 		static ReadOnlyCollection<T> empty;
 
 		public static ReadOnlyCollection<T> Empty {
-			get
-			{
+			get {
 				if (empty != null)
 					return empty;
 

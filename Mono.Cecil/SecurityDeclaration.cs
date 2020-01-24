@@ -171,7 +171,7 @@ namespace Mono.Cecil {
 				if (resolved)
 					return;
 
-                module.Read (this, (declaration, reader) => reader.ReadSecurityDeclarationSignature (declaration));
+				module.Read (this, (declaration, reader) => reader.ReadSecurityDeclarationSignature (declaration));
 				resolved = true;
 			}
 		}
