@@ -85,14 +85,14 @@ namespace Mono.Cecil {
 			set {
 				public_key = value;
 				HasPublicKey = !public_key.IsNullOrEmpty ();
-				public_key_token = Empty<byte>.Array;
+				public_key_token = null;
 				full_name = null;
 			}
 		}
 
 		public byte [] PublicKeyToken {
 			get {
-				if (public_key_token.IsNullOrEmpty () && !public_key.IsNullOrEmpty ()) {
+				if (public_key_token == null && !public_key.IsNullOrEmpty ()) {
 					var hash = HashPublicKey ();
 					// we need the last 8 bytes in reverse order
 					var local_public_key_token = new byte [8];
