@@ -428,7 +428,8 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Read (ref references, this, (_, reader) => reader.ReadAssemblyReferences ());
 
-				return references = new Collection<AssemblyNameReference> ();
+				Interlocked.CompareExchange (ref references, new Collection<AssemblyNameReference> (), null);
+				return references;
 			}
 		}
 
@@ -449,7 +450,8 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Read (ref modules, this, (_, reader) => reader.ReadModuleReferences ());
 
-				return modules = new Collection<ModuleReference> ();
+				Interlocked.CompareExchange (ref modules, new Collection<ModuleReference> (), null);
+				return modules;
 			}
 		}
 
@@ -473,7 +475,8 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Read (ref resources, this, (_, reader) => reader.ReadResources ());
 
-				return resources = new Collection<Resource> ();
+				Interlocked.CompareExchange (ref resources, new Collection<Resource> (), null);
+				return resources;
 			}
 		}
 
@@ -507,7 +510,8 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Read (ref types, this, (_, reader) => reader.ReadTypes ());
 
-				return types = new TypeDefinitionCollection (this);
+				Interlocked.CompareExchange (ref types, new TypeDefinitionCollection (this), null);
+				return types;
 			}
 		}
 
@@ -528,7 +532,8 @@ namespace Mono.Cecil {
 				if (HasImage)
 					return Read (ref exported_types, this, (_, reader) => reader.ReadExportedTypes ());
 
-				return exported_types = new Collection<ExportedType> ();
+				Interlocked.CompareExchange (ref exported_types, new Collection<ExportedType> (), null);
+				return exported_types;
 			}
 		}
 
@@ -553,7 +558,10 @@ namespace Mono.Cecil {
 
 		public Collection<CustomDebugInformation> CustomDebugInformations {
 			get {
-				return custom_infos ?? (custom_infos = new Collection<CustomDebugInformation> ());
+				if (custom_infos == null)
+					Interlocked.CompareExchange (ref custom_infos, new Collection<CustomDebugInformation> (), null);
+
+				return custom_infos;
 			}
 		}
 

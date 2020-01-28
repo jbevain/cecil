@@ -10,7 +10,7 @@
 
 using System;
 using System.Text;
-
+using System.Threading;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -24,7 +24,12 @@ namespace Mono.Cecil {
 		}
 
 		public Collection<TypeReference> GenericArguments {
-			get { return arguments ?? (arguments = new Collection<TypeReference> ()); }
+			get {
+				if (arguments == null)
+					Interlocked.CompareExchange (ref arguments, new Collection<TypeReference> (), null);
+
+				return arguments;
+			}
 		}
 
 		public override bool IsGenericInstance {

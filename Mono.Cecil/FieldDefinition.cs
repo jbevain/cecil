@@ -9,6 +9,7 @@
 //
 
 using System;
+using System.Threading;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
@@ -37,7 +38,11 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
+			lock (Module.SyncRoot) {
+				if (offset != Mixin.NotResolvedMarker)
+					return;
+				offset = Module.Read (this, (field, reader) => reader.ReadFieldLayout (field));
+			}
 		}
 
 		public bool HasLayoutInfo {
@@ -76,7 +81,11 @@ namespace Mono.Cecil {
 			if (!HasImage)
 				return;
 
-			rva = Module.Read (this, (field, reader) => reader.ReadFieldRVA (field));
+			lock (Module.SyncRoot) {
+				if (rva != Mixin.NotResolvedMarker)
+					return;
+				rva = Module.Read (this, (field, reader) => reader.ReadFieldRVA (field));
+			}
 		}
 
 		public int RVA {
