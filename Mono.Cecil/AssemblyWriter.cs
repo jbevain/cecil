@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
 
@@ -1483,14 +1484,13 @@ namespace Mono.Cecil {
 
 		void AddGenericParameters ()
 		{
-			var items = this.generic_parameters.items;
-			var size = this.generic_parameters.size;
-			Array.Sort (items, 0, size, new GenericParameterComparer ());
+			var items = generic_parameters.ToArray();
+			Array.Sort (items, new GenericParameterComparer ());
 
 			var generic_param_table = GetTable<GenericParamTable> (Table.GenericParam);
 			var generic_param_constraint_table = GetTable<GenericParamConstraintTable> (Table.GenericParamConstraint);
 
-			for (int i = 0; i < size; i++) {
+			for (int i = 0; i < items.Length; i++) {
 				var generic_parameter = items [i];
 
 				var rid = generic_param_table.AddRow (new GenericParamRow (

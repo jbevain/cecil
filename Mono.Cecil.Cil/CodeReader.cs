@@ -242,11 +242,8 @@ namespace Mono.Cecil.Cil {
 
 		void ResolveBranches (Collection<Instruction> instructions)
 		{
-			var items = instructions.items;
-			var size = instructions.size;
-
-			for (int i = 0; i < size; i++) {
-				var instruction = items [i];
+			for (int i = 0; i < instructions.Count; i++) {
+				var instruction = instructions [i];
 				switch (instruction.opcode.OperandType) {
 				case OperandType.ShortInlineBrTarget:
 				case OperandType.InlineBrTarget:
@@ -271,16 +268,15 @@ namespace Mono.Cecil.Cil {
 
 		static Instruction GetInstruction (Collection<Instruction> instructions, int offset)
 		{
-			var size = instructions.size;
-			var items = instructions.items;
-			if (offset < 0 || offset > items [size - 1].offset)
+			var size = instructions.Count;
+			if (offset < 0 || offset > instructions [size - 1].offset)
 				return null;
 
 			int min = 0;
 			int max = size - 1;
 			while (min <= max) {
 				int mid = min + ((max - min) / 2);
-				var instruction = items [mid];
+				var instruction = instructions [mid];
 				var instruction_offset = instruction.offset;
 
 				if (offset == instruction_offset)

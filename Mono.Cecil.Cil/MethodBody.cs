@@ -153,7 +153,7 @@ namespace Mono.Cecil.Cil {
 			item.index = index;
 
 			for (int i = index; i < size; i++)
-				items [i].index = i + 1;
+				this [i].index = i + 1;
 		}
 
 		protected override void OnSet (VariableDefinition item, int index)
@@ -166,7 +166,7 @@ namespace Mono.Cecil.Cil {
 			item.index = -1;
 
 			for (int i = index + 1; i < size; i++)
-				items [i].index = i - 1;
+				this [i].index = i - 1;
 		}
 	}
 
@@ -190,7 +190,7 @@ namespace Mono.Cecil.Cil {
 			if (index == 0)
 				return;
 
-			var previous = items [index - 1];
+			var previous = this [index - 1];
 			previous.next = item;
 			item.previous = previous;
 		}
@@ -200,9 +200,9 @@ namespace Mono.Cecil.Cil {
 			if (size == 0)
 				return;
 
-			var current = items [index];
+			var current = this [index];
 			if (current == null) {
-				var last = items [index - 1];
+				var last = this [index - 1];
 				last.next = item;
 				item.previous = last;
 				return;
@@ -220,7 +220,7 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnSet (Instruction item, int index)
 		{
-			var current = items [index];
+			var current = this [index];
 
 			item.previous = current.previous;
 			item.next = current.next;

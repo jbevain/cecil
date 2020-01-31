@@ -41,7 +41,7 @@ namespace Mono.Cecil {
 			item.index = index;
 
 			for (int i = index; i < size; i++)
-				items [i].index = i + 1;
+				this [i].index = i + 1;
 		}
 
 		protected override void OnSet (ParameterDefinition item, int index)
@@ -56,7 +56,7 @@ namespace Mono.Cecil {
 			item.index = -1;
 
 			for (int i = index + 1; i < size; i++)
-				items [i].index = i - 1;
+				this [i].index = i - 1;
 		}
 	}
 }

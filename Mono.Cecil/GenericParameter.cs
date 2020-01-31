@@ -241,7 +241,7 @@ namespace Mono.Cecil {
 			UpdateGenericParameter (item, index);
 
 			for (int i = index; i < size; i++)
-				items[i].position = i + 1;
+				this[i].position = i + 1;
 		}
 
 		protected override void OnSet (GenericParameter item, int index)
@@ -263,7 +263,7 @@ namespace Mono.Cecil {
 			item.type = GenericParameterType.Type;
 
 			for (int i = index + 1; i < size; i++)
-				items[i].position = i - 1;
+				this[i].position = i - 1;
 		}
 	}
 

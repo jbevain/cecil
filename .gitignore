@@ -16,3 +16,4 @@ project.lock.json
 .idea/
 packages/*
 nuget.exe
+.ionide/

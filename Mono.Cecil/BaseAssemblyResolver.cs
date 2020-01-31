@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -92,9 +93,7 @@ namespace Mono.Cecil {
 
 		public string [] GetSearchDirectories ()
 		{
-			var directories = new string [this.directories.size];
-			Array.Copy (this.directories.items, directories, directories.Length);
-			return directories;
+			return directories.ToArray();
 		}
 
 		public event AssemblyResolveEventHandler ResolveFailure;
