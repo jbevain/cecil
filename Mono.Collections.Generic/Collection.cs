@@ -18,8 +18,7 @@ namespace Mono.Collections.Generic {
 		{
 		}
 
-		// [Obsolete("This function unfortunately does not actually take the capacity into account.")]
-		public Collection (int capacity)
+		public Collection (int capacity) : base(new List<T> (capacity))
 		{
 		}
 
