@@ -208,6 +208,20 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void LocallyScopedConstantArray ()
+		{
+			TestModule ("LocallyScopedConstantArray.dll", module => {
+				Assert.IsTrue (module.HasDebugHeader);
+				var method = module.Types
+					.Single (x => x.Name == "TestClass")
+					.Methods
+					.Single (x => x.Name == "TestMethod");
+				var debugInformation = method.DebugInformation;
+				Assert.IsNull (debugInformation.Scope.Constants.Single ().Value);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void ExternalPdbDeterministicAssembly ()
 		{
 			TestModule ("ExternalPdbDeterministic.dll", module => {
