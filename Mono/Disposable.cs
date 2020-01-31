@@ -25,7 +25,7 @@ namespace Mono {
 		}
 	}
 
-	struct Disposable<T> : IDisposable where T : class, IDisposable {
+	readonly struct Disposable<T> : IDisposable where T : class, IDisposable {
 
 		internal readonly T value;
 		readonly bool owned;

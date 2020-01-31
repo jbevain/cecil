@@ -9,13 +9,17 @@
 //
 
 using System;
-using Mono.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Mono {
 
 	static class Empty<T> {
 
-		public static readonly T [] Array = new T [0];
+		#if NET40
+		public static readonly T [] Array = new T[0];
+		#else
+		public static readonly T [] Array = System.Array.Empty<T> ();
+		#endif
 	}
 
 	class ArgumentNullOrEmptyException : ArgumentException {
@@ -31,21 +35,7 @@ namespace Mono.Cecil {
 
 	static partial class Mixin {
 
-		public static bool IsNullOrEmpty<T> (this T [] self)
-		{
-			return self == null || self.Length == 0;
-		}
-
-		public static bool IsNullOrEmpty<T> (this Collection<T> self)
-		{
-			return self == null || self.size == 0;
-		}
-
-		public static T [] Resize<T> (this T [] self, int length)
-		{
-			Array.Resize (ref self, length);
-			return self;
-		}
+		public static bool IsNullOrEmpty<T> (this ICollection<T> self) => self == null || self.Count == 0;
 
 		public static T [] Add<T> (this T [] self, T item)
 		{
@@ -54,7 +44,7 @@ namespace Mono.Cecil {
 				return self;
 			}
 
-			self = self.Resize (self.Length + 1);
+			Array.Resize (ref self, self.Length + 1);
 			self [self.Length - 1] = item;
 			return self;
 		}
