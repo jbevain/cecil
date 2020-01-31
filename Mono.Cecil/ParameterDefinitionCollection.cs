@@ -40,7 +40,7 @@ namespace Mono.Cecil {
 			item.method = method;
 			item.index = index;
 
-			for (int i = index; i < size; i++)
+			for (int i = index; i < Count; i++)
 				this [i].index = i + 1;
 		}
 
@@ -55,7 +55,7 @@ namespace Mono.Cecil {
 			item.method = null;
 			item.index = -1;
 
-			for (int i = index + 1; i < size; i++)
+			for (int i = index + 1; i < Count; i++)
 				this [i].index = i - 1;
 		}
 	}

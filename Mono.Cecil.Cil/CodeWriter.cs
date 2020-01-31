@@ -275,7 +275,7 @@ namespace Mono.Cecil.Cil {
 		int GetTargetOffset (Instruction instruction)
 		{
 			if (instruction == null) {
-				var last = body.instructions [body.instructions.size - 1];
+				var last = body.instructions [body.instructions.Count - 1];
 				return last.offset + last.GetSize ();
 			}
 

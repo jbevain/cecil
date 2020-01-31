@@ -152,7 +152,7 @@ namespace Mono.Cecil.Cil {
 		{
 			item.index = index;
 
-			for (int i = index; i < size; i++)
+			for (int i = index; i < Count; i++)
 				this [i].index = i + 1;
 		}
 
@@ -165,7 +165,7 @@ namespace Mono.Cecil.Cil {
 		{
 			item.index = -1;
 
-			for (int i = index + 1; i < size; i++)
+			for (int i = index + 1; i < Count; i++)
 				this [i].index = i - 1;
 		}
 	}
@@ -197,7 +197,7 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnInsert (Instruction item, int index)
 		{
-			if (size == 0)
+			if (Count == 0)
 				return;
 
 			var current = this [index];

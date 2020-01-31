@@ -8,23 +8,17 @@
 // Licensed under the MIT/X11 license.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Mono.Collections.Generic {
 
 	public class Collection<T> : System.Collections.ObjectModel.Collection<T> {
-
-		[Obsolete("Use Count instead.")]
-		internal int size => Count;
-
 		public Collection ()
 		{
-			
 		}
 
-		[Obsolete("This function unfortunately does not take the capacity into account.")]
+		// [Obsolete("This function unfortunately does not actually take the capacity into account.")]
 		public Collection (int capacity)
 		{
 		}

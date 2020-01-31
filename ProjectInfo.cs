@@ -11,7 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyProduct (Consts.AssemblyName)]
-[assembly: AssemblyCopyright ("Copyright © 2008 - 2018 Jb Evain")]
+[assembly: AssemblyCopyright ("Copyright © 2008 - 2020 Jb Evain")]
 
 [assembly: ComVisible (false)]
 

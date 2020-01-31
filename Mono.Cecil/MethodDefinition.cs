@@ -527,7 +527,7 @@ namespace Mono.Cecil {
 
 			var parameters = method.Parameters;
 
-			if (index < 0 || index >= parameters.size)
+			if (index < 0 || index >= parameters.Count)
 				return null;
 
 			return parameters [index];
@@ -537,7 +537,7 @@ namespace Mono.Cecil {
 		{
 			var variables = self.Variables;
 
-			if (index < 0 || index >= variables.size)
+			if (index < 0 || index >= variables.Count)
 				return null;
 
 			return variables [index];

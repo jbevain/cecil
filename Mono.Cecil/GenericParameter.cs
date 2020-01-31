@@ -240,7 +240,7 @@ namespace Mono.Cecil {
 		{
 			UpdateGenericParameter (item, index);
 
-			for (int i = index; i < size; i++)
+			for (int i = index; i < Count; i++)
 				this[i].position = i + 1;
 		}
 
@@ -262,7 +262,7 @@ namespace Mono.Cecil {
 			item.position = -1;
 			item.type = GenericParameterType.Type;
 
-			for (int i = index + 1; i < size; i++)
+			for (int i = index + 1; i < Count; i++)
 				this[i].position = i - 1;
 		}
 	}
