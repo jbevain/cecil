@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 
 using Mono.Cecil.Cil;
+using Mono.Cecil.Pdb;
 using Mono.Cecil.PE;
 
 namespace Mono.Cecil.Tests {
@@ -367,6 +368,33 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (0x0100, eppdb.Directory.MinorVersion);
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
+
+		[Test]
+		public void EmbeddedCompressedPortablePdbFromStream ()
+		{
+			var bytes = File.ReadAllBytes (GetAssemblyResourcePath ("EmbeddedCompressedPdbTarget.exe"));
+			var parameters = new ReaderParameters {
+				ReadSymbols = true,
+				SymbolReaderProvider = new PdbReaderProvider ()
+			};
+
+			var module = ModuleDefinition.ReadModule (new MemoryStream(bytes), parameters);
+			Assert.IsTrue (module.HasDebugHeader);
+
+			var header = module.GetDebugHeader ();
+
+			Assert.IsNotNull (header);
+			Assert.AreEqual (2, header.Entries.Length);
+
+			var cv = header.Entries [0];
+			Assert.AreEqual (ImageDebugType.CodeView, cv.Directory.Type);
+
+			var eppdb = header.Entries [1];
+			Assert.AreEqual (ImageDebugType.EmbeddedPortablePdb, eppdb.Directory.Type);
+			Assert.AreEqual (0x0100, eppdb.Directory.MajorVersion);
+			Assert.AreEqual (0x0100, eppdb.Directory.MinorVersion);
+		}
+
 
 		void TestPortablePdbModule (Action<ModuleDefinition> test)
 		{
