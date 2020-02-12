@@ -137,6 +137,11 @@ namespace Mono.Cecil.Tests {
 			Run (new ILTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath));
 		}
 
+		public static void TestBinary (string file, Action<ModuleDefinition> test, bool verify = true, bool readOnly = true, Type symbolReaderProvider = null, Type symbolWriterProvider = null, IAssemblyResolver assemblyResolver = null, bool applyWindowsRuntimeProjections = false, [CallerFilePath] string sourceFilePath = "")
+		{
+			Run (new BinaryTestCase (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath));
+		}
+
 		static void Run (TestCase testCase)
 		{
 			using (var runner = new TestRunner (testCase, TestCaseType.ReadDeferred))
@@ -235,7 +240,22 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 	}
+	class BinaryTestCase : ModuleTestCase {
 
+		public BinaryTestCase (string file, Action<ModuleDefinition> test, bool verify, bool readOnly, Type symbolReaderProvider, Type symbolWriterProvider, IAssemblyResolver assemblyResolver, bool applyWindowsRuntimeProjections, string sourceFilePath = "")
+			: base (file, test, verify, readOnly, symbolReaderProvider, symbolWriterProvider, assemblyResolver, applyWindowsRuntimeProjections, sourceFilePath)
+		{
+		}
+
+		public byte[] BinaryStream
+		{
+			get
+			{
+				byte[] bytes = System.IO.File.ReadAllBytes(ModuleLocation);
+				return bytes;
+			}
+		}
+	}
 	class TestRunner : IDisposable {
 
 		readonly TestCase test_case;
@@ -273,6 +293,28 @@ namespace Mono.Cecil.Tests {
 			case TestCaseType.WriteFromDeferred:
 				parameters.ReadingMode = ReadingMode.Deferred;
 				return RoundTrip (location, parameters, "cecil-drt");
+			default:
+				return null;
+			}
+		}
+
+		ModuleDefinition GetModuleFromBinary ()
+		{
+			var test_case_binary = test_case as BinaryTestCase;
+			var stream = test_case_binary.BinaryStream;
+
+			var parameters = new ReaderParameters {
+				SymbolReaderProvider = GetSymbolReaderProvider (),
+				AssemblyResolver = GetAssemblyResolver ()
+			};
+
+			switch (type) {
+			case TestCaseType.ReadImmediate:
+				parameters.ReadingMode = ReadingMode.Immediate;
+				return ModuleDefinition.ReadModule (new MemoryStream(stream), parameters);
+			case TestCaseType.ReadDeferred:
+				parameters.ReadingMode = ReadingMode.Deferred;
+				return ModuleDefinition.ReadModule (new MemoryStream (stream), parameters);
 			default:
 				return null;
 			}
@@ -330,7 +372,11 @@ namespace Mono.Cecil.Tests {
 
 		public void RunTest ()
 		{
-			var module = GetModule ();
+			ModuleDefinition module;
+			if (test_case is BinaryTestCase)
+				module = GetModuleFromBinary();
+			else
+				module = GetModule ();
 			if (module == null)
 				return;
 

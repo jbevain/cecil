@@ -39,7 +39,6 @@ namespace Mono.Cecil.Pdb {
 		public ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName)
 		{
 			Mixin.CheckModule (module);
-			Mixin.CheckFileName (fileName);
 
 			if (module.HasDebugHeader) {
 				var header = module.GetDebugHeader ();
@@ -47,6 +46,8 @@ namespace Mono.Cecil.Pdb {
 				if (entry != null)
 					return new EmbeddedPortablePdbReaderProvider ().GetSymbolReader (module, fileName);
 			}
+			
+			Mixin.CheckFileName (fileName);
 
 			return Mixin.IsPortablePdb (Mixin.GetPdbFileName (fileName))
 				? new PortablePdbReaderProvider ().GetSymbolReader (module, fileName)
