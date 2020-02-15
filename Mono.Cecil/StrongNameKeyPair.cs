@@ -129,4 +129,27 @@ namespace Mono.Cecil {
 		}
 	}
 }
+#else
+using System.IO;
+using System.Runtime.Serialization;
+
+namespace Mono.Cecil {
+	public class StrongNameKeyPair : System.Reflection.StrongNameKeyPair {
+		public StrongNameKeyPair(FileStream keyPairFile) : base(keyPairFile)
+		{
+		}
+
+		public StrongNameKeyPair(byte[] keyPairArray) : base(keyPairArray)
+		{
+		}
+
+		public StrongNameKeyPair(string keyPairContainer) : base(keyPairContainer)
+		{
+		}
+
+		protected StrongNameKeyPair(SerializationInfo info, StreamingContext context) : base(info, context)
+		{
+		}
+	}
+}
 #endif
