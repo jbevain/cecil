@@ -366,7 +366,7 @@ namespace Mono.Cecil {
 			var gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
 			var prefixes = new [] { string.Empty, "v4.0_" };
 
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < gac_paths.Count; i++) {
 				for (int j = 0; j < gacs.Length; j++) {
 					var gac = Path.Combine (gac_paths [i], gacs [j]);
 					var file = GetAssemblyFile (reference, prefixes [i], gac);
