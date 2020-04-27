@@ -382,7 +382,7 @@ namespace Mono.Cecil.PE {
 			var relativeOffset = ReadUInt32 ();
 			uint offset = image.ImageLayoutInMemory
 				? metadata.VirtualAddress + relativeOffset // relative to the metadata start
-                : metadata.VirtualAddress - section.VirtualAddress + relativeOffset; // relative to the section start
+				: metadata.VirtualAddress - section.VirtualAddress + relativeOffset; // relative to the section start
 
 			// Size			4
 			uint size = ReadUInt32 ();
