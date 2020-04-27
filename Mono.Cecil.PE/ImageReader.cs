@@ -28,12 +28,13 @@ namespace Mono.Cecil.PE {
 
 		uint table_heap_offset;
 
-		public ImageReader (Disposable<Stream> stream, string file_name)
+		public ImageReader (Disposable<Stream> stream, string file_name, bool imageLayoutInMemory = false)
 			: base (stream.value)
 		{
 			image = new Image ();
 			image.Stream = stream;
 			image.FileName = file_name;
+			image.ImageLayoutInMemory = imageLayoutInMemory;
 		}
 
 		void MoveTo (DataDirectory directory)
@@ -316,6 +317,13 @@ namespace Mono.Cecil.PE {
 				throw new BadImageFormatException ();
 
 			image.MetadataSection = section;
+			if (image.ImageLayoutInMemory)
+			{
+				// The image comes from a module loaded in memory or a dump.
+				// The pointer to raw data is used as an offset when reading certain values, but this
+				// is not valid when reading from a dump
+				image.MetadataSection.PointerToRawData = 0;
+			}
 
 			for (int i = 0; i < streams; i++)
 				ReadMetadataStream (section);
@@ -371,7 +379,10 @@ namespace Mono.Cecil.PE {
 		void ReadMetadataStream (Section section)
 		{
 			// Offset		4
-			uint offset = metadata.VirtualAddress - section.VirtualAddress + ReadUInt32 (); // relative to the section start
+			var relativeOffset = ReadUInt32 ();
+			uint offset = image.ImageLayoutInMemory
+				? metadata.VirtualAddress + relativeOffset // relative to the metadata start
+                : metadata.VirtualAddress - section.VirtualAddress + relativeOffset; // relative to the section start
 
 			// Size			4
 			uint size = ReadUInt32 ();
@@ -756,10 +767,10 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static Image ReadImage (Disposable<Stream> stream, string file_name)
+		public static Image ReadImage (Disposable<Stream> stream, string file_name, bool imageLayoutInMemory = false)
 		{
 			try {
-				var reader = new ImageReader (stream, file_name);
+				var reader = new ImageReader (stream, file_name, imageLayoutInMemory);
 				reader.ReadImage ();
 				return reader.image;
 			} catch (EndOfStreamException e) {
@@ -767,10 +778,10 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static Image ReadPortablePdb (Disposable<Stream> stream, string file_name)
+		public static Image ReadPortablePdb (Disposable<Stream> stream, string file_name, bool imageLayoutInMemory = false)
 		{
 			try {
-				var reader = new ImageReader (stream, file_name);
+				var reader = new ImageReader (stream, file_name, imageLayoutInMemory);
 				var length = (uint) stream.value.Length;
 
 				reader.image.Sections = new[] {
