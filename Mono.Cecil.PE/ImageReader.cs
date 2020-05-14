@@ -481,7 +481,7 @@ namespace Mono.Cecil.PE {
 		{
 			uint offset = (uint) BaseStream.Position - table_heap_offset - image.MetadataSection.PointerToRawData; // header
 
-			int stridx_size = image.StringHeap.IndexSize;
+			int stridx_size = image.StringHeap != null ? image.StringHeap.IndexSize : 2;
 			int guididx_size = image.GuidHeap != null ? image.GuidHeap.IndexSize : 2;
 			int blobidx_size = image.BlobHeap != null ? image.BlobHeap.IndexSize : 2;
 
