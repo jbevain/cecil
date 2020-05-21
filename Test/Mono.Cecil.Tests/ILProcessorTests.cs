@@ -77,6 +77,17 @@ namespace Mono.Cecil.Tests {
 			AssertOpCodeSequence (new [] { OpCodes.Ldloc_0, OpCodes.Nop, OpCodes.Ldloc_3 }, method);
 		}
 
+		[Test]
+		public void Clear ()
+		{
+			var method = CreateTestMethod (OpCodes.Ldloc_0, OpCodes.Ldloc_2, OpCodes.Ldloc_3);
+			var il = method.GetILProcessor ();
+
+			il.Clear ();
+
+			AssertOpCodeSequence (new OpCode[] { }, method);
+		}
+
 		static void AssertOpCodeSequence (OpCode [] expected, MethodBody body)
 		{
 			var opcodes = body.Instructions.Select (i => i.OpCode).ToArray ();

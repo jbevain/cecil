@@ -283,5 +283,10 @@ namespace Mono.Cecil.Cil {
 
 			instructions.RemoveAt (index);
 		}
+
+		public void Clear ()
+		{
+			instructions.Clear ();
+		}
 	}
 }
