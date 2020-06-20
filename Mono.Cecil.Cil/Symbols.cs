@@ -231,7 +231,7 @@ namespace Mono.Cecil.Cil {
 
 	public struct VariableIndex {
 		readonly VariableDefinition variable;
-		readonly int? index;
+		internal int? index;
 
 		public int Index {
 			get {
