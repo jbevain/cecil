@@ -189,7 +189,7 @@ namespace Mono.Cecil.Cil {
 
 	public struct InstructionOffset {
 
-		readonly Instruction instruction;
+		internal readonly Instruction instruction;
 		readonly int? offset;
 
 		public int Offset {
