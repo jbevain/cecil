@@ -207,6 +207,8 @@ namespace Mono.Cecil.Cil {
 			get { return instruction == null && !offset.HasValue; }
 		}
 
+		internal bool IsResolved => instruction != null;
+
 		public InstructionOffset (Instruction instruction)
 		{
 			if (instruction == null)
