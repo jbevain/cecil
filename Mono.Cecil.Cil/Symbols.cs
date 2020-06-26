@@ -231,7 +231,7 @@ namespace Mono.Cecil.Cil {
 
 	public struct VariableIndex {
 		readonly VariableDefinition variable;
-		internal int? index;
+		readonly int? index;
 
 		public int Index {
 			get {
@@ -243,6 +243,10 @@ namespace Mono.Cecil.Cil {
 				throw new NotSupportedException ();
 			}
 		}
+
+		internal bool IsResolved => variable != null;
+
+		internal VariableDefinition ResolvedVariable => variable;
 
 		public VariableIndex (VariableDefinition variable)
 		{

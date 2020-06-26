@@ -165,11 +165,11 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnRemove (VariableDefinition item, int index)
 		{
-			UpdateVariableIndices (index + 1, -1, index);
+			UpdateVariableIndices (index + 1, -1, index, item);
 			item.index = -1;
 		}
 
-		void UpdateVariableIndices (int startIndex, int offset, int indexToRemove = -1)
+		void UpdateVariableIndices (int startIndex, int offset, int indexToRemove = -1, VariableDefinition variableToRemove = null)
 		{
 			for (int i = startIndex; i < size; i++)
 				items [i].index = i + offset;
@@ -181,17 +181,22 @@ namespace Mono.Cecil.Cil {
 			foreach (var scope in debug_info.GetScopes ()) {
 				if (scope.HasVariables) {
 					var variables = scope.Variables;
+					int variableDebugInfoIndexToRemove = -1;
 					for (int i = 0; i < variables.Count; i++) {
-						if (variables [i].Index == indexToRemove) {
-							variables.RemoveAt (i);
+						var variable = variables [i];
+						if ((variableToRemove != null && variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
+							(indexToRemove != -1 && variable.Index == indexToRemove)) {
+							variableDebugInfoIndexToRemove = i;
+							continue;
+						}
+
+						if (!variable.index.IsResolved && variable.Index >= startIndex) {
+							variable.index = new VariableIndex (variable.Index + offset);
 						}
 					}
 
-					foreach (var variable in variables) {
-						if (variable.index.index.HasValue && variable.index.index.Value >= startIndex) {
-							variable.index.index += offset;
-						}
-					}
+					if (variableDebugInfoIndexToRemove >= 0)
+						variables.RemoveAt (variableDebugInfoIndexToRemove);
 				}
 			}
 		}
