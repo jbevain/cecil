@@ -189,7 +189,7 @@ namespace Mono.Cecil.Cil {
 
 	public struct InstructionOffset {
 
-		internal readonly Instruction instruction;
+		readonly Instruction instruction;
 		readonly int? offset;
 
 		public int Offset {
@@ -208,6 +208,8 @@ namespace Mono.Cecil.Cil {
 		}
 
 		internal bool IsResolved => instruction != null;
+
+		internal Instruction ResolvedInstruction => instruction;
 
 		public InstructionOffset (Instruction instruction)
 		{

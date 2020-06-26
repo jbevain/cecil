@@ -293,12 +293,12 @@ namespace Mono.Cecil.Cil {
 			//   - if the scope uses instruction reference to an instruction being removed - update it to remove the reference to the removed instruction
 			//   - if the scope uses any other instruction there's really no need to update it.
 			if ((!scope.Start.IsResolved && scope.Start.Offset >= startFromOffset) || 
-				(instructionRemoved != null && scope.Start.instruction == instructionRemoved))
+				(instructionRemoved != null && scope.Start.ResolvedInstruction == instructionRemoved))
 				scope.Start = new InstructionOffset (scope.Start.Offset + offset);
 
 			if (!scope.End.IsEndOfMethod && 
 				((!scope.End.IsResolved && scope.End.Offset >= startFromOffset) ||
-				 (instructionRemoved != null && scope.End.instruction == instructionRemoved)))
+				 (instructionRemoved != null && scope.End.ResolvedInstruction == instructionRemoved)))
 				scope.End = new InstructionOffset (scope.End.Offset + offset);
 
 			if (scope.HasScopes) {
