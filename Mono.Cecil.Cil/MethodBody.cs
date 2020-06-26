@@ -165,11 +165,11 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnRemove (VariableDefinition item, int index)
 		{
-			UpdateVariableIndices (index + 1, -1, index, item);
+			UpdateVariableIndices (index + 1, -1, item);
 			item.index = -1;
 		}
 
-		void UpdateVariableIndices (int startIndex, int offset, int indexToRemove = -1, VariableDefinition variableToRemove = null)
+		void UpdateVariableIndices (int startIndex, int offset, VariableDefinition variableToRemove = null)
 		{
 			for (int i = startIndex; i < size; i++)
 				items [i].index = i + offset;
@@ -184,12 +184,18 @@ namespace Mono.Cecil.Cil {
 					int variableDebugInfoIndexToRemove = -1;
 					for (int i = 0; i < variables.Count; i++) {
 						var variable = variables [i];
-						if ((variableToRemove != null && variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
-							(indexToRemove != -1 && variable.Index == indexToRemove)) {
+
+						// If a variable is being removed detect if it has debug info counterpart, if so remove that as well.
+						// Note that the debug info can be either resolved (has direct reference to the VariableDefinition)
+						// or unresolved (has only the number index of the variable) - this needs to handle both cases.
+						if (variableToRemove != null &&
+							((variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
+							 (!variable.index.IsResolved && variable.Index == variableToRemove.Index))) {
 							variableDebugInfoIndexToRemove = i;
 							continue;
 						}
 
+						// For unresolved debug info updates indeces to keep them pointing to the same variable.
 						if (!variable.index.IsResolved && variable.Index >= startIndex) {
 							variable.index = new VariableIndex (variable.Index + offset);
 						}
