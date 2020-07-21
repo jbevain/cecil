@@ -1,6 +1,8 @@
+using Mono.Cecil.Cil;
 using Mono.Cecil.Mdb;
 
 using NUnit.Framework;
+using System.IO;
 
 namespace Mono.Cecil.Tests {
 
@@ -79,6 +81,20 @@ namespace Mono.Cecil.Tests {
 					Assert.AreEqual(@"C:\tmp\repropartial\BreakpointTest.Portable\TestService.cs", sp.Document.Url);
 
 			}, symbolReaderProvider: typeof(MdbReaderProvider), symbolWriterProvider: typeof(MdbWriterProvider));
+		}
+
+		[Test]
+		public void WriteAndReadAgainModuleWithDeterministicMvid ()
+		{
+			const string resource = "simplemdb.exe";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { SymbolReaderProvider = new DefaultSymbolReaderProvider (true) })) {
+				module.Write (destination, new WriterParameters { WriteSymbols = true, DeterministicMvid = true });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { SymbolReaderProvider = new DefaultSymbolReaderProvider (true) })) {
+			}
 		}
 	}
 }

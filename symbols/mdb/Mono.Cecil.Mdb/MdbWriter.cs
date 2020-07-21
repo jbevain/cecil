@@ -25,7 +25,7 @@ namespace Mono.Cecil.Mdb {
 			Mixin.CheckModule (module);
 			Mixin.CheckFileName (fileName);
 
-			return new MdbWriter (module.Mvid, fileName);
+			return new MdbWriter (module, fileName);
 		}
 
 		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
@@ -36,13 +36,13 @@ namespace Mono.Cecil.Mdb {
 
 	public sealed class MdbWriter : ISymbolWriter {
 
-		readonly Guid mvid;
+		readonly ModuleDefinition module;
 		readonly MonoSymbolWriter writer;
 		readonly Dictionary<string, SourceFile> source_files;
 
-		public MdbWriter (Guid mvid, string assembly)
+		public MdbWriter (ModuleDefinition module, string assembly)
 		{
-			this.mvid = mvid;
+			this.module = module;
 			this.writer = new MonoSymbolWriter (assembly);
 			this.source_files = new Dictionary<string, SourceFile> ();
 		}
@@ -169,7 +169,7 @@ namespace Mono.Cecil.Mdb {
 
 		public void Dispose ()
 		{
-			writer.WriteSymbolFile (mvid);
+			writer.WriteSymbolFile (module.Mvid);
 		}
 
 		class SourceFile : ISourceFile {
