@@ -248,6 +248,10 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
+		internal bool IsResolved => variable != null;
+
+		internal VariableDefinition ResolvedVariable => variable;
+
 		public VariableIndex (VariableDefinition variable)
 		{
 			if (variable == null)

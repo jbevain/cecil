@@ -81,7 +81,7 @@ namespace Mono.Cecil.Cil {
 		public Collection<VariableDefinition> Variables {
 			get {
 				if (variables == null)
-					Interlocked.CompareExchange (ref variables, new VariableDefinitionCollection (), null);
+					Interlocked.CompareExchange (ref variables, new VariableDefinitionCollection (this.method), null);
 
 				return variables;
 			}
@@ -134,13 +134,17 @@ namespace Mono.Cecil.Cil {
 
 	sealed class VariableDefinitionCollection : Collection<VariableDefinition> {
 
-		internal VariableDefinitionCollection ()
+		readonly MethodDefinition method;
+
+		internal VariableDefinitionCollection (MethodDefinition method)
 		{
+			this.method = method;
 		}
 
-		internal VariableDefinitionCollection (int capacity)
+		internal VariableDefinitionCollection (MethodDefinition method, int capacity)
 			: base (capacity)
 		{
+			this.method = method;
 		}
 
 		protected override void OnAdd (VariableDefinition item, int index)
@@ -151,9 +155,7 @@ namespace Mono.Cecil.Cil {
 		protected override void OnInsert (VariableDefinition item, int index)
 		{
 			item.index = index;
-
-			for (int i = index; i < size; i++)
-				items [i].index = i + 1;
+			UpdateVariableIndices (index, 1);
 		}
 
 		protected override void OnSet (VariableDefinition item, int index)
@@ -163,10 +165,47 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnRemove (VariableDefinition item, int index)
 		{
+			UpdateVariableIndices (index + 1, -1, item);
 			item.index = -1;
+		}
 
-			for (int i = index + 1; i < size; i++)
-				items [i].index = i - 1;
+		void UpdateVariableIndices (int startIndex, int offset, VariableDefinition variableToRemove = null)
+		{
+			for (int i = startIndex; i < size; i++)
+				items [i].index = i + offset;
+
+			var debug_info = method == null ? null : method.debug_info;
+			if (debug_info == null || debug_info.Scope == null)
+				return;
+
+			foreach (var scope in debug_info.GetScopes ()) {
+				if (!scope.HasVariables)
+					continue;
+
+				var variables = scope.Variables;
+				int variableDebugInfoIndexToRemove = -1;
+				for (int i = 0; i < variables.Count; i++) {
+					var variable = variables [i];
+
+					// If a variable is being removed detect if it has debug info counterpart, if so remove that as well.
+					// Note that the debug info can be either resolved (has direct reference to the VariableDefinition)
+					// or unresolved (has only the number index of the variable) - this needs to handle both cases.
+					if (variableToRemove != null &&
+						((variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
+							(!variable.index.IsResolved && variable.Index == variableToRemove.Index))) {
+						variableDebugInfoIndexToRemove = i;
+						continue;
+					}
+
+					// For unresolved debug info updates indeces to keep them pointing to the same variable.
+					if (!variable.index.IsResolved && variable.Index >= startIndex) {
+						variable.index = new VariableIndex (variable.Index + offset);
+					}
+				}
+
+				if (variableDebugInfoIndexToRemove >= 0)
+					variables.RemoveAt (variableDebugInfoIndexToRemove);
+			}
 		}
 	}
 

@@ -132,7 +132,7 @@ namespace Mono.Cecil.Cil {
 		public VariableDefinitionCollection ReadVariables (MetadataToken local_var_token)
 		{
 			var position = reader.position;
-			var variables = reader.ReadVariables (local_var_token);
+			var variables = reader.ReadVariables (local_var_token, method);
 			reader.position = position;
 
 			return variables;
