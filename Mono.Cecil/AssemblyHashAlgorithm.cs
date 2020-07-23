@@ -10,12 +10,9 @@
 
 namespace Mono.Cecil {
 
-	/// <summary>
-	/// The hash algorithm used to sign an assembly
-	/// </summary>
 	public enum AssemblyHashAlgorithm : uint {
 		None		= 0x0000,
-		MD5			= 0x8003,
+		MD5		= 0x8003,
 		SHA1		= 0x8004,
 		SHA256		= 0x800C,
 		SHA384		= 0x800D,
