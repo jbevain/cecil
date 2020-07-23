@@ -179,31 +179,32 @@ namespace Mono.Cecil.Cil {
 				return;
 
 			foreach (var scope in debug_info.GetScopes ()) {
-				if (scope.HasVariables) {
-					var variables = scope.Variables;
-					int variableDebugInfoIndexToRemove = -1;
-					for (int i = 0; i < variables.Count; i++) {
-						var variable = variables [i];
+				if (!scope.HasVariables)
+					continue;
 
-						// If a variable is being removed detect if it has debug info counterpart, if so remove that as well.
-						// Note that the debug info can be either resolved (has direct reference to the VariableDefinition)
-						// or unresolved (has only the number index of the variable) - this needs to handle both cases.
-						if (variableToRemove != null &&
-							((variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
-							 (!variable.index.IsResolved && variable.Index == variableToRemove.Index))) {
-							variableDebugInfoIndexToRemove = i;
-							continue;
-						}
+				var variables = scope.Variables;
+				int variableDebugInfoIndexToRemove = -1;
+				for (int i = 0; i < variables.Count; i++) {
+					var variable = variables [i];
 
-						// For unresolved debug info updates indeces to keep them pointing to the same variable.
-						if (!variable.index.IsResolved && variable.Index >= startIndex) {
-							variable.index = new VariableIndex (variable.Index + offset);
-						}
+					// If a variable is being removed detect if it has debug info counterpart, if so remove that as well.
+					// Note that the debug info can be either resolved (has direct reference to the VariableDefinition)
+					// or unresolved (has only the number index of the variable) - this needs to handle both cases.
+					if (variableToRemove != null &&
+						((variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
+							(!variable.index.IsResolved && variable.Index == variableToRemove.Index))) {
+						variableDebugInfoIndexToRemove = i;
+						continue;
 					}
 
-					if (variableDebugInfoIndexToRemove >= 0)
-						variables.RemoveAt (variableDebugInfoIndexToRemove);
+					// For unresolved debug info updates indeces to keep them pointing to the same variable.
+					if (!variable.index.IsResolved && variable.Index >= startIndex) {
+						variable.index = new VariableIndex (variable.Index + offset);
+					}
 				}
+
+				if (variableDebugInfoIndexToRemove >= 0)
+					variables.RemoveAt (variableDebugInfoIndexToRemove);
 			}
 		}
 	}
