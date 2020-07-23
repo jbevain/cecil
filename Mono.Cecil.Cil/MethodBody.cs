@@ -197,25 +197,31 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnInsert (Instruction item, int index)
 		{
-			if (size == 0)
-				return;
+			int startOffset = 0;
+			if (size != 0) {
+				var current = items [index];
+				if (current == null) {
+					var last = items [index - 1];
+					last.next = item;
+					item.previous = last;
+					return;
+				}
 
-			var current = items [index];
-			if (current == null) {
-				var last = items [index - 1];
-				last.next = item;
-				item.previous = last;
-				return;
+				startOffset = current.Offset;
+
+				var previous = current.previous;
+				if (previous != null) {
+					previous.next = item;
+					item.previous = previous;
+				}
+
+				current.previous = item;
+				item.next = current;
 			}
 
-			var previous = current.previous;
-			if (previous != null) {
-				previous.next = item;
-				item.previous = previous;
-			}
-
-			current.previous = item;
-			item.next = current;
+			var scope = GetLocalScope ();
+			if (scope != null)
+				UpdateLocalScope (scope, startOffset, item.GetSize (), instructionRemoved: null);
 		}
 
 		protected override void OnSet (Instruction item, int index)
@@ -227,6 +233,12 @@ namespace Mono.Cecil.Cil {
 
 			current.previous = null;
 			current.next = null;
+
+			var scope = GetLocalScope ();
+			if (scope != null) {
+				var sizeOfCurrent = current.GetSize ();
+				UpdateLocalScope (scope, current.Offset + sizeOfCurrent, item.GetSize () - sizeOfCurrent, current);
+			}
 		}
 
 		protected override void OnRemove (Instruction item, int index)
@@ -240,6 +252,12 @@ namespace Mono.Cecil.Cil {
 				next.previous = item.previous;
 
 			RemoveSequencePoint (item);
+
+			var scope = GetLocalScope ();
+			if (scope != null) {
+				var size = item.GetSize ();
+				UpdateLocalScope (scope, item.Offset + size, -size, item);
+			}
 
 			item.previous = null;
 			item.next = null;
@@ -257,6 +275,39 @@ namespace Mono.Cecil.Cil {
 					sequence_points.RemoveAt (i);
 					return;
 				}
+			}
+		}
+
+		ScopeDebugInformation GetLocalScope ()
+		{
+			var debug_info = method.debug_info;
+			if (debug_info == null)
+				return null;
+
+			return debug_info.Scope;
+		}
+
+		static void UpdateLocalScope (ScopeDebugInformation scope, int startFromOffset, int offset, Instruction instructionRemoved)
+		{
+			// For both start and enf offsets on the scope:
+			// * If the offset is resolved (points to instruction by reference)  only update it if the instruction it points to is being removed.
+			//   For non-removed instructions it remains correct regardless of any updates to the instructions.
+			// * If the offset is not resolved (stores the instruction offset number itself)
+			//   update the number accordingly to keep it pointing to the correct instruction (by offset).
+
+			if ((!scope.Start.IsResolved && scope.Start.Offset >= startFromOffset) || 
+				(instructionRemoved != null && scope.Start.ResolvedInstruction == instructionRemoved))
+				scope.Start = new InstructionOffset (scope.Start.Offset + offset);
+
+			// For end offset only update it if it's not the special sentinel value "EndOfMethod"; that should remain as-is.
+			if (!scope.End.IsEndOfMethod && 
+				((!scope.End.IsResolved && scope.End.Offset >= startFromOffset) ||
+				 (instructionRemoved != null && scope.End.ResolvedInstruction == instructionRemoved)))
+				scope.End = new InstructionOffset (scope.End.Offset + offset);
+
+			if (scope.HasScopes) {
+				foreach (var subScope in scope.Scopes)
+					UpdateLocalScope (subScope, startFromOffset, offset, instructionRemoved);
 			}
 		}
 	}
