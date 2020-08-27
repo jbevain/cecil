@@ -340,32 +340,11 @@ namespace Mono.Cecil.Cil {
 			UpdateLocalScope (debug_info.Scope, removedInstruction, existingInstruction, ref cache);
 		}
 
-		static void UpdateLocalScope (ScopeDebugInformation scope, int startFromOffset, int offset, Instruction instructionRemoved)
-		{
-			// For both start and enf offsets on the scope:
-			// * If the offset is resolved (points to instruction by reference)  only update it if the instruction it points to is being removed.
-			//   For non-removed instructions it remains correct regardless of any updates to the instructions.
-			// * If the offset is not resolved (stores the instruction offset number itself)
-			//   update the number accordingly to keep it pointing to the correct instruction (by offset).
-
-			if ((!scope.Start.IsResolved && scope.Start.Offset >= startFromOffset) || 
-				(instructionRemoved != null && scope.Start.ResolvedInstruction == instructionRemoved))
-				scope.Start = new InstructionOffset (scope.Start.Offset + offset);
-
-			// For end offset only update it if it's not the special sentinel value "EndOfMethod"; that should remain as-is.
-			if (!scope.End.IsEndOfMethod && 
-				((!scope.End.IsResolved && scope.End.Offset >= startFromOffset) ||
-				 (instructionRemoved != null && scope.End.ResolvedInstruction == instructionRemoved)))
-				scope.End = new InstructionOffset (scope.End.Offset + offset);
-
-			if (scope.HasScopes) {
-				foreach (var subScope in scope.Scopes)
-					UpdateLocalScope (subScope, startFromOffset, offset, instructionRemoved);
-			}
-		}
-
 		void UpdateLocalScope (ScopeDebugInformation scope, Instruction removedInstruction, Instruction existingInstruction, ref InstructionOffsetCache cache)
 		{
+			if (scope == null)
+				return;
+
 			if (!scope.Start.IsResolved)
 				scope.Start = ResolveInstructionOffset (scope.Start, ref cache);
 

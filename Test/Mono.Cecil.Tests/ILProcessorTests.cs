@@ -194,6 +194,20 @@ namespace Mono.Cecil.Tests {
 			methodBody.Method.Module.Dispose ();
 		}
 
+		[Test]
+		public void EditWithDebugInfoButNoLocalScopes()
+		{
+			var methodBody = CreateTestMethod (OpCodes.Ret);
+			methodBody.Method.DebugInformation = new MethodDebugInformation (methodBody.Method);
+
+			var il = methodBody.GetILProcessor ();
+			il.Replace (methodBody.Instructions [0], il.Create (OpCodes.Nop));
+
+			Assert.AreEqual (1, methodBody.Instructions.Count);
+			Assert.AreEqual (Code.Nop, methodBody.Instructions [0].OpCode.Code);
+			Assert.Null (methodBody.Method.DebugInformation.Scope);
+		}
+
 		static void AssertOpCodeSequence (OpCode [] expected, MethodBody body)
 		{
 			var opcodes = body.Instructions.Select (i => i.OpCode).ToArray ();
