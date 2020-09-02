@@ -26,6 +26,20 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void ResourceAssembly ()
+		{
+			TestModule ("resource.dll", module => {
+				var name = module.Assembly.Name;
+
+				Assert.AreEqual ("TitleAttribute", name.Culture);
+				Assert.AreEqual (new Version (32772, 0, 20, 5), name.Version);
+				Assert.AreEqual (AssemblyHashAlgorithm.SHA1, name.HashAlgorithm);
+				Assert.IsNotEmpty (name.PublicKey);
+				Assert.IsNotEmpty (name.PublicKeyToken);
+			});
+		}
+
+		[Test]
 		public void ParseLowerCaseNameParts ()
 		{
 			var name = AssemblyNameReference.Parse ("Foo, version=2.0.0.0, culture=fr-FR");
