@@ -81,7 +81,7 @@ namespace Mono.Cecil.Cil {
 		public Collection<VariableDefinition> Variables {
 			get {
 				if (variables == null)
-					Interlocked.CompareExchange (ref variables, new VariableDefinitionCollection (), null);
+					Interlocked.CompareExchange (ref variables, new VariableDefinitionCollection (this.method), null);
 
 				return variables;
 			}
@@ -134,13 +134,17 @@ namespace Mono.Cecil.Cil {
 
 	sealed class VariableDefinitionCollection : Collection<VariableDefinition> {
 
-		internal VariableDefinitionCollection ()
+		readonly MethodDefinition method;
+
+		internal VariableDefinitionCollection (MethodDefinition method)
 		{
+			this.method = method;
 		}
 
-		internal VariableDefinitionCollection (int capacity)
+		internal VariableDefinitionCollection (MethodDefinition method, int capacity)
 			: base (capacity)
 		{
+			this.method = method;
 		}
 
 		protected override void OnAdd (VariableDefinition item, int index)
@@ -151,9 +155,7 @@ namespace Mono.Cecil.Cil {
 		protected override void OnInsert (VariableDefinition item, int index)
 		{
 			item.index = index;
-
-			for (int i = index; i < size; i++)
-				items [i].index = i + 1;
+			UpdateVariableIndices (index, 1);
 		}
 
 		protected override void OnSet (VariableDefinition item, int index)
@@ -163,10 +165,47 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnRemove (VariableDefinition item, int index)
 		{
+			UpdateVariableIndices (index + 1, -1, item);
 			item.index = -1;
+		}
 
-			for (int i = index + 1; i < size; i++)
-				items [i].index = i - 1;
+		void UpdateVariableIndices (int startIndex, int offset, VariableDefinition variableToRemove = null)
+		{
+			for (int i = startIndex; i < size; i++)
+				items [i].index = i + offset;
+
+			var debug_info = method == null ? null : method.debug_info;
+			if (debug_info == null || debug_info.Scope == null)
+				return;
+
+			foreach (var scope in debug_info.GetScopes ()) {
+				if (!scope.HasVariables)
+					continue;
+
+				var variables = scope.Variables;
+				int variableDebugInfoIndexToRemove = -1;
+				for (int i = 0; i < variables.Count; i++) {
+					var variable = variables [i];
+
+					// If a variable is being removed detect if it has debug info counterpart, if so remove that as well.
+					// Note that the debug info can be either resolved (has direct reference to the VariableDefinition)
+					// or unresolved (has only the number index of the variable) - this needs to handle both cases.
+					if (variableToRemove != null &&
+						((variable.index.IsResolved && variable.index.ResolvedVariable == variableToRemove) ||
+							(!variable.index.IsResolved && variable.Index == variableToRemove.Index))) {
+						variableDebugInfoIndexToRemove = i;
+						continue;
+					}
+
+					// For unresolved debug info updates indeces to keep them pointing to the same variable.
+					if (!variable.index.IsResolved && variable.Index >= startIndex) {
+						variable.index = new VariableIndex (variable.Index + offset);
+					}
+				}
+
+				if (variableDebugInfoIndexToRemove >= 0)
+					variables.RemoveAt (variableDebugInfoIndexToRemove);
+			}
 		}
 	}
 
@@ -197,25 +236,31 @@ namespace Mono.Cecil.Cil {
 
 		protected override void OnInsert (Instruction item, int index)
 		{
-			if (size == 0)
-				return;
+			int startOffset = 0;
+			if (size != 0) {
+				var current = items [index];
+				if (current == null) {
+					var last = items [index - 1];
+					last.next = item;
+					item.previous = last;
+					return;
+				}
 
-			var current = items [index];
-			if (current == null) {
-				var last = items [index - 1];
-				last.next = item;
-				item.previous = last;
-				return;
+				startOffset = current.Offset;
+
+				var previous = current.previous;
+				if (previous != null) {
+					previous.next = item;
+					item.previous = previous;
+				}
+
+				current.previous = item;
+				item.next = current;
 			}
 
-			var previous = current.previous;
-			if (previous != null) {
-				previous.next = item;
-				item.previous = previous;
-			}
-
-			current.previous = item;
-			item.next = current;
+			var scope = GetLocalScope ();
+			if (scope != null)
+				UpdateLocalScope (scope, startOffset, item.GetSize (), instructionRemoved: null);
 		}
 
 		protected override void OnSet (Instruction item, int index)
@@ -227,6 +272,12 @@ namespace Mono.Cecil.Cil {
 
 			current.previous = null;
 			current.next = null;
+
+			var scope = GetLocalScope ();
+			if (scope != null) {
+				var sizeOfCurrent = current.GetSize ();
+				UpdateLocalScope (scope, current.Offset + sizeOfCurrent, item.GetSize () - sizeOfCurrent, current);
+			}
 		}
 
 		protected override void OnRemove (Instruction item, int index)
@@ -240,6 +291,12 @@ namespace Mono.Cecil.Cil {
 				next.previous = item.previous;
 
 			RemoveSequencePoint (item);
+
+			var scope = GetLocalScope ();
+			if (scope != null) {
+				var size = item.GetSize ();
+				UpdateLocalScope (scope, item.Offset + size, -size, item);
+			}
 
 			item.previous = null;
 			item.next = null;
@@ -257,6 +314,39 @@ namespace Mono.Cecil.Cil {
 					sequence_points.RemoveAt (i);
 					return;
 				}
+			}
+		}
+
+		ScopeDebugInformation GetLocalScope ()
+		{
+			var debug_info = method.debug_info;
+			if (debug_info == null)
+				return null;
+
+			return debug_info.Scope;
+		}
+
+		static void UpdateLocalScope (ScopeDebugInformation scope, int startFromOffset, int offset, Instruction instructionRemoved)
+		{
+			// For both start and enf offsets on the scope:
+			// * If the offset is resolved (points to instruction by reference)  only update it if the instruction it points to is being removed.
+			//   For non-removed instructions it remains correct regardless of any updates to the instructions.
+			// * If the offset is not resolved (stores the instruction offset number itself)
+			//   update the number accordingly to keep it pointing to the correct instruction (by offset).
+
+			if ((!scope.Start.IsResolved && scope.Start.Offset >= startFromOffset) || 
+				(instructionRemoved != null && scope.Start.ResolvedInstruction == instructionRemoved))
+				scope.Start = new InstructionOffset (scope.Start.Offset + offset);
+
+			// For end offset only update it if it's not the special sentinel value "EndOfMethod"; that should remain as-is.
+			if (!scope.End.IsEndOfMethod && 
+				((!scope.End.IsResolved && scope.End.Offset >= startFromOffset) ||
+				 (instructionRemoved != null && scope.End.ResolvedInstruction == instructionRemoved)))
+				scope.End = new InstructionOffset (scope.End.Offset + offset);
+
+			if (scope.HasScopes) {
+				foreach (var subScope in scope.Scopes)
+					UpdateLocalScope (subScope, startFromOffset, offset, instructionRemoved);
 			}
 		}
 	}

@@ -2141,7 +2141,7 @@ namespace Mono.Cecil {
 			return call_site;
 		}
 
-		public VariableDefinitionCollection ReadVariables (MetadataToken local_var_token)
+		public VariableDefinitionCollection ReadVariables (MetadataToken local_var_token, MethodDefinition method = null)
 		{
 			if (!MoveTo (Table.StandAloneSig, local_var_token.RID))
 				return null;
@@ -2156,7 +2156,7 @@ namespace Mono.Cecil {
 			if (count == 0)
 				return null;
 
-			var variables = new VariableDefinitionCollection ((int) count);
+			var variables = new VariableDefinitionCollection (method, (int) count);
 
 			for (int i = 0; i < count; i++)
 				variables.Add (new VariableDefinition (reader.ReadTypeSignature ()));
