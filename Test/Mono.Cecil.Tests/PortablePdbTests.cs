@@ -755,7 +755,6 @@ class Program
 			var assembly = File.ReadAllBytes (GetAssemblyResourcePath ("Microsoft.AspNetCore.Components.dll"));
 			var pdb = File.ReadAllBytes (GetAssemblyResourcePath ("Microsoft.AspNetCore.Components.pdb"));
 
-			var parameters = ;
 			var module = ModuleDefinition.ReadModule (new MemoryStream (assembly), new ReaderParameters (ReadingMode.Immediate));
 
 			var type = module.GetType ("Microsoft.AspNetCore.Components.Rendering.ComponentState");
