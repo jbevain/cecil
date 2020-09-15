@@ -755,17 +755,16 @@ class Program
 			var assembly = File.ReadAllBytes (GetAssemblyResourcePath ("Microsoft.AspNetCore.Components.dll"));
 			var pdb = File.ReadAllBytes (GetAssemblyResourcePath ("Microsoft.AspNetCore.Components.pdb"));
 
-			ReaderParameters rp = new ReaderParameters( /*ReadingMode.Immediate*/ );
-			rp.ReadingMode = ReadingMode.Immediate;
-			var module = ModuleDefinition.ReadModule(new MemoryStream(assembly), rp);
+			var parameters = ;
+			var module = ModuleDefinition.ReadModule (new MemoryStream (assembly), new ReaderParameters (ReadingMode.Immediate));
 
 			var type = module.GetType ("Microsoft.AspNetCore.Components.Rendering.ComponentState");
 			var main = type.GetMethod ("RenderIntoBatch");
 			var debug_info = main.DebugInformation;
 
-			PdbReaderProvider portablePdbReaderProvider = new PdbReaderProvider();
-			var symbolReader = portablePdbReaderProvider.GetSymbolReader(module,  new MemoryStream(pdb));
-			module.ReadSymbols(symbolReader);
+			var pdbReaderProvider = new PdbReaderProvider ();
+			var symbolReader = pdbReaderProvider.GetSymbolReader (module,  new MemoryStream (pdb));
+			module.ReadSymbols (symbolReader);
 			type = module.GetType ("Microsoft.AspNetCore.Components.Rendering.ComponentState");
 			main = type.GetMethod ("RenderIntoBatch");
 			debug_info = main.DebugInformation;
