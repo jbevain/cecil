@@ -258,9 +258,7 @@ namespace Mono.Cecil.Cil {
 				item.next = current;
 			}
 
-			var scope = GetLocalScope ();
-			if (scope != null)
-				UpdateLocalScope (scope, startOffset, item.GetSize (), instructionRemoved: null);
+			UpdateLocalScopes (null, null);
 		}
 
 		protected override void OnSet (Instruction item, int index)
@@ -273,11 +271,7 @@ namespace Mono.Cecil.Cil {
 			current.previous = null;
 			current.next = null;
 
-			var scope = GetLocalScope ();
-			if (scope != null) {
-				var sizeOfCurrent = current.GetSize ();
-				UpdateLocalScope (scope, current.Offset + sizeOfCurrent, item.GetSize () - sizeOfCurrent, current);
-			}
+			UpdateLocalScopes (item, current);
 		}
 
 		protected override void OnRemove (Instruction item, int index)
@@ -291,12 +285,7 @@ namespace Mono.Cecil.Cil {
 				next.previous = item.previous;
 
 			RemoveSequencePoint (item);
-
-			var scope = GetLocalScope ();
-			if (scope != null) {
-				var size = item.GetSize ();
-				UpdateLocalScope (scope, item.Offset + size, -size, item);
-			}
+			UpdateLocalScopes (item, next ?? previous);
 
 			item.previous = null;
 			item.next = null;
@@ -317,36 +306,113 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		ScopeDebugInformation GetLocalScope ()
+		void UpdateLocalScopes (Instruction removedInstruction, Instruction existingInstruction)
 		{
 			var debug_info = method.debug_info;
 			if (debug_info == null)
-				return null;
+				return;
 
-			return debug_info.Scope;
+			// Local scopes store start/end pair of "instruction offsets". Instruction offset can be either resolved, in which case it 
+			// has a reference to Instruction, or unresolved in which case it stores numerical offset (instruction offset in the body).
+			// Typically local scopes loaded from PE/PDB files will be resolved, but it's not a requirement.
+			// Each instruction has its own offset, which is populated on load, but never updated (this would be pretty expensive to do).
+			// Instructions created during the editting will typically have offset 0 (so incorrect).
+			// Local scopes created during editing will also likely be resolved (so no numerical offsets).
+			// So while local scopes which are unresolved are relatively rare if they appear, manipulating them based
+			// on the offsets allone is pretty hard (since we can't rely on correct offsets of instructions).
+			// On the other hand resolved local scopes are easy to maintain, since they point to instructions and thus inserting
+			// instructions is basically a no-op and removing instructions is as easy as changing the pointer.
+			// For this reason the algorithm here is:
+			//  - First make sure that all instruction offsets are resolved - if not - resolve them
+			//     - First time this will be relatively expensinve as it will walk the entire method body to convert offsets to instruction pointers
+			//       Almost all local scopes are stored in the "right" order (sequentially per start offsets), so the code uses a simple one-item
+			//       cache instruction<->offset to avoid walking instructions multiple times (that would only happen for scopes which are out of order).
+			//     - Subsequent calls should be cheap as it will only walk all local scopes without doing anything
+			//     - If there was an edit on local scope which makes some of them unresolved, the cost is proportional
+			//  - Then update as necessary by manipulaitng instruction references alone
+
+			InstructionOffsetCache cache = new InstructionOffsetCache () {
+				Offset = 0,
+				Index = 0,
+				Instruction = items [0]
+			};
+
+			UpdateLocalScope (debug_info.Scope, removedInstruction, existingInstruction, ref cache);
 		}
 
-		static void UpdateLocalScope (ScopeDebugInformation scope, int startFromOffset, int offset, Instruction instructionRemoved)
+		void UpdateLocalScope (ScopeDebugInformation scope, Instruction removedInstruction, Instruction existingInstruction, ref InstructionOffsetCache cache)
 		{
-			// For both start and enf offsets on the scope:
-			// * If the offset is resolved (points to instruction by reference)  only update it if the instruction it points to is being removed.
-			//   For non-removed instructions it remains correct regardless of any updates to the instructions.
-			// * If the offset is not resolved (stores the instruction offset number itself)
-			//   update the number accordingly to keep it pointing to the correct instruction (by offset).
+			if (scope == null)
+				return;
 
-			if ((!scope.Start.IsResolved && scope.Start.Offset >= startFromOffset) || 
-				(instructionRemoved != null && scope.Start.ResolvedInstruction == instructionRemoved))
-				scope.Start = new InstructionOffset (scope.Start.Offset + offset);
+			if (!scope.Start.IsResolved)
+				scope.Start = ResolveInstructionOffset (scope.Start, ref cache);
 
-			// For end offset only update it if it's not the special sentinel value "EndOfMethod"; that should remain as-is.
-			if (!scope.End.IsEndOfMethod && 
-				((!scope.End.IsResolved && scope.End.Offset >= startFromOffset) ||
-				 (instructionRemoved != null && scope.End.ResolvedInstruction == instructionRemoved)))
-				scope.End = new InstructionOffset (scope.End.Offset + offset);
+			if (!scope.Start.IsEndOfMethod && scope.Start.ResolvedInstruction == removedInstruction)
+				scope.Start = new InstructionOffset (existingInstruction);
 
 			if (scope.HasScopes) {
 				foreach (var subScope in scope.Scopes)
-					UpdateLocalScope (subScope, startFromOffset, offset, instructionRemoved);
+					UpdateLocalScope (subScope, removedInstruction, existingInstruction, ref cache);
+			}
+
+			if (!scope.End.IsResolved)
+				scope.End = ResolveInstructionOffset (scope.End, ref cache);
+
+			if (!scope.End.IsEndOfMethod && scope.End.ResolvedInstruction == removedInstruction)
+				scope.End = new InstructionOffset (existingInstruction);
+		}
+
+		struct InstructionOffsetCache {
+			public int Offset;
+			public int Index;
+			public Instruction Instruction;
+		}
+
+		InstructionOffset ResolveInstructionOffset(InstructionOffset inputOffset, ref InstructionOffsetCache cache)
+		{
+			if (inputOffset.IsResolved)
+				return inputOffset;
+
+			int offset = inputOffset.Offset;
+
+			if (cache.Offset == offset)
+				return new InstructionOffset (cache.Instruction);
+
+			if (cache.Offset > offset) {
+				// This should be rare - we're resolving offset pointing to a place before the current cache position
+				// resolve by walking the instructions from start and don't cache the result.
+				int size = 0;
+				for (int i = 0; i < items.Length; i++) {
+					if (size == offset)
+						return new InstructionOffset (items [i]);
+
+					if (size > offset)
+						return new InstructionOffset (items [i - 1]);
+
+					size += items [i].GetSize ();
+				}
+
+				// Offset is larger than the size of the body - so it points after the end
+				return new InstructionOffset ();
+			} else {
+				// The offset points after the current cache position - so continue counting and update the cache
+				int size = cache.Offset;
+				for (int i = cache.Index; i < items.Length; i++) {
+					cache.Index = i;
+					cache.Offset = size;
+					cache.Instruction = items [i];
+
+					if (cache.Offset == offset)
+						return new InstructionOffset (cache.Instruction);
+
+					if (cache.Offset > offset)
+						return new InstructionOffset (items [i - 1]);
+
+					size += items [i].GetSize ();
+				}
+
+				return new InstructionOffset ();
 			}
 		}
 	}
