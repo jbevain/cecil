@@ -748,5 +748,27 @@ class Program
 			Assert.AreNotEqual (mvid1_in, mvid2_in);
 			Assert.AreNotEqual (mvid1_out, mvid2_out);
 		}
+
+		[Test]
+		public void LoadPdbOnDemand ()
+		{
+			var assembly = File.ReadAllBytes (GetAssemblyResourcePath ("Microsoft.AspNetCore.Components.dll"));
+			var pdb = File.ReadAllBytes (GetAssemblyResourcePath ("Microsoft.AspNetCore.Components.pdb"));
+
+			var module = ModuleDefinition.ReadModule (new MemoryStream (assembly), new ReaderParameters (ReadingMode.Immediate));
+
+			var type = module.GetType ("Microsoft.AspNetCore.Components.Rendering.ComponentState");
+			var main = type.GetMethod ("RenderIntoBatch");
+			var debug_info = main.DebugInformation;
+
+			var pdbReaderProvider = new PdbReaderProvider ();
+			var symbolReader = pdbReaderProvider.GetSymbolReader (module,  new MemoryStream (pdb));
+			module.ReadSymbols (symbolReader);
+			type = module.GetType ("Microsoft.AspNetCore.Components.Rendering.ComponentState");
+			main = type.GetMethod ("RenderIntoBatch");
+			debug_info = main.DebugInformation;
+			Assert.AreEqual (9, debug_info.SequencePoints.Count);
+		}
+
 	}
 }
