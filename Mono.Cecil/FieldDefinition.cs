@@ -68,7 +68,7 @@ namespace Mono.Cecil {
 			set { offset = value; }
 		}
 
-		internal new FieldDefinitionProjection WindowsRuntimeProjection {
+		internal FieldDefinitionProjection WindowsRuntimeProjection {
 			get { return (FieldDefinitionProjection) projection; }
 			set { projection = value; }
 		}

@@ -81,7 +81,7 @@ namespace Mono.Cecil {
 			set { sem_attrs = value; }
 		}
 
-		internal new MethodDefinitionProjection WindowsRuntimeProjection {
+		internal MethodDefinitionProjection WindowsRuntimeProjection {
 			get { return (MethodDefinitionProjection) projection; }
 			set { projection = value; }
 		}
