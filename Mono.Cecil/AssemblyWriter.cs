@@ -1277,7 +1277,7 @@ namespace Mono.Cecil {
 
 		void AttachTypeToken (TypeDefinition type)
 		{
-			var treatment = WindowsRuntimeProjections.RemoveProjection(type);
+			var treatment = WindowsRuntimeProjections.RemoveProjection (type);
 
 			type.token = new MetadataToken (TokenType.TypeDef, type_rid++);
 			type.fields_range.Start = field_rid;
