@@ -770,5 +770,27 @@ class Program
 			Assert.AreEqual (9, debug_info.SequencePoints.Count);
 		}
 
+		[Test]
+		public void ClearSequencePoints ()
+		{
+			TestPortablePdbModule (module => {
+				var type = module.GetType ("PdbTarget.Program");
+				var main = type.GetMethod ("Main");
+
+				main.DebugInformation.SequencePoints.Clear ();
+
+				var destination = Path.Combine (Path.GetTempPath (), "mylib.dll");
+				module.Write(destination, new WriterParameters { WriteSymbols = true });
+
+				Assert.Zero (main.DebugInformation.SequencePoints.Count);
+
+				using (var resultModule = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+					type = resultModule.GetType ("PdbTarget.Program");
+					main = type.GetMethod ("Main");
+
+					Assert.Zero (main.DebugInformation.SequencePoints.Count);
+				}
+			});
+		}
 	}
 }
