@@ -142,11 +142,11 @@ namespace Microsoft.Cci.Pdb {
       return ht;
     }
 
-    private static PdbFunction match = new PdbFunction();
-
     private static int FindFunction(PdbFunction[] funcs, ushort sec, uint off) {
-      match.segment = sec;
-      match.address = off;
+      var match = new PdbFunction {
+         segment = sec,
+         address = off
+      };
 
       return Array.BinarySearch(funcs, match, PdbFunction.byAddress);
     }
