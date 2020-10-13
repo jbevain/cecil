@@ -419,7 +419,7 @@ namespace Mono.Cecil {
 			for (int i = 0; i < methods.Count; i++) {
 				var method = methods [i];
 
-				if (method.HasBody && method.token.RID != 0 && (method.debug_info == null || !method.debug_info.HasSequencePoints))
+				if (method.HasBody && method.token.RID != 0 && method.debug_info == null)
 					method.debug_info = symbol_reader.Read (method);
 			}
 		}
