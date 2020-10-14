@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mono.Cecil.Rocks", "rocks\M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mono.Cecil.Rocks.Tests", "rocks\Test\Mono.Cecil.Rocks.Tests.csproj", "{EF768F7A-3C08-45EE-8A7E-BB5A81BADB7B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cecil.11.3.issue", "repro\Cecil.11.3.issue.csproj", "{BC2C29E7-BE9E-4087-9F7E-D9BCAFCA635E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{EF768F7A-3C08-45EE-8A7E-BB5A81BADB7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF768F7A-3C08-45EE-8A7E-BB5A81BADB7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF768F7A-3C08-45EE-8A7E-BB5A81BADB7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC2C29E7-BE9E-4087-9F7E-D9BCAFCA635E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC2C29E7-BE9E-4087-9F7E-D9BCAFCA635E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC2C29E7-BE9E-4087-9F7E-D9BCAFCA635E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC2C29E7-BE9E-4087-9F7E-D9BCAFCA635E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
