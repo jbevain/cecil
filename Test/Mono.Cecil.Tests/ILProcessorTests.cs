@@ -5,6 +5,7 @@ using System.Linq;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Mdb;
 using Mono.Cecil.Pdb;
 using NUnit.Framework;
 
@@ -43,32 +44,23 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void InsertBeforeIssue697 ()
 		{
-			var here = System.Reflection.Assembly.GetExecutingAssembly ().Location;
-			var target = Path.Combine (
-				Path.GetDirectoryName (here),
-				"../../../Resources/assemblies/Issue697.dll"
-				);
+			var parameters = new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider () };
+			using (var module = GetResourceModule ("Issue697.dll", parameters))
+			{
+				var pathGetterDef = module.MainModule.GetTypes ()
+					.SelectMany (t => t.Methods)
+					.First (m => m.Name.Equals ("get_Defer"));
 
-			var definition = AssemblyDefinition.ReadAssembly (target);
-
-			var provider = new Cecil.Mdb.MdbReaderProvider ();
-			var reader = provider.GetSymbolReader (definition.MainModule, target);
-			definition.MainModule.ReadSymbols (reader);
-
-			var pathGetterDef =
-								 definition.MainModule.GetTypes ().
-									 SelectMany (t => t.Methods).
-									 First (m => m.Name.Equals ("get_Defer"));
-
-			var body = pathGetterDef.Body;
-			var worker = body.GetILProcessor ();
-			var initialBody = body.Instructions.ToList ();
-			var head = initialBody.First ();
-			var opcode = worker.Create (OpCodes.Ldc_I4_1);
-			worker.InsertBefore (head, opcode);
-			worker.InsertBefore (head, worker.Create (OpCodes.Ret));
-			initialBody.ForEach (worker.Remove);
-			AssertOpCodeSequence (new [] { OpCodes.Ldc_I4_1, OpCodes.Ret }, pathGetterDef.body);
+				var body = pathGetterDef.Body;
+				var worker = body.GetILProcessor ();
+				var initialBody = body.Instructions.ToList ();
+				var head = initialBody.First ();
+				var opcode = worker.Create (OpCodes.Ldc_I4_1);
+				worker.InsertBefore (head, opcode);
+				worker.InsertBefore (head, worker.Create (OpCodes.Ret));
+				initialBody.ForEach (worker.Remove);
+				AssertOpCodeSequence (new [] { OpCodes.Ldc_I4_1, OpCodes.Ret }, pathGetterDef.body);	
+			}
 		}
 
 		[Test]
