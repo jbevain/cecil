@@ -401,7 +401,15 @@ namespace Mono.Cecil.Cil {
 				for (int i = cache.Index; i < items.Length; i++) {
 					cache.Index = i;
 					cache.Offset = size;
-					cache.Instruction = items [i];
+
+					var item = items [i];
+
+					// Allow for trailing null values in the case of
+					// instructions.Size < instructions.Capacity
+					if (item == null)
+						break;
+
+					cache.Instruction = item;
 
 					if (cache.Offset == offset)
 						return new InstructionOffset (cache.Instruction);
@@ -409,7 +417,7 @@ namespace Mono.Cecil.Cil {
 					if (cache.Offset > offset)
 						return new InstructionOffset (items [i - 1]);
 
-					size += items [i].GetSize ();
+					size += item.GetSize ();
 				}
 
 				return new InstructionOffset ();
