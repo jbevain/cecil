@@ -47,7 +47,7 @@ namespace Mono.Cecil.Tests {
 			var parameters = new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider () };
 			using (var module = GetResourceModule ("Issue697.dll", parameters))
 			{
-				var pathGetterDef = module.MainModule.GetTypes ()
+				var pathGetterDef = module.GetTypes ()
 					.SelectMany (t => t.Methods)
 					.First (m => m.Name.Equals ("get_Defer"));
 
