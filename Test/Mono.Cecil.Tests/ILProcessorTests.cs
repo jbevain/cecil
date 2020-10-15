@@ -41,6 +41,37 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void InsertBeforeIssue697 ()
+		{
+			var here = System.Reflection.Assembly.GetExecutingAssembly ().Location;
+			var target = Path.Combine (
+				Path.GetDirectoryName (here),
+				"../../../Resources/assemblies/Issue697.dll"
+				);
+
+			var definition = AssemblyDefinition.ReadAssembly (target);
+
+			var provider = new Cecil.Mdb.MdbReaderProvider ();
+			var reader = provider.GetSymbolReader (definition.MainModule, target);
+			definition.MainModule.ReadSymbols (reader);
+
+			var pathGetterDef =
+								 definition.MainModule.GetTypes ().
+									 SelectMany (t => t.Methods).
+									 First (m => m.Name.Equals ("get_Defer"));
+
+			var body = pathGetterDef.Body;
+			var worker = body.GetILProcessor ();
+			var initialBody = body.Instructions.ToList ();
+			var head = initialBody.First ();
+			var opcode = worker.Create (OpCodes.Ldc_I4_1);
+			worker.InsertBefore (head, opcode);
+			worker.InsertBefore (head, worker.Create (OpCodes.Ret));
+			initialBody.ForEach (worker.Remove);
+			AssertOpCodeSequence (new [] { OpCodes.Ldc_I4_1, OpCodes.Ret }, pathGetterDef.body);
+		}
+
+		[Test]
 		public void InsertAfter ()
 		{
 			var method = CreateTestMethod (OpCodes.Ldloc_0, OpCodes.Ldloc_2, OpCodes.Ldloc_3);
