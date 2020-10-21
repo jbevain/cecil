@@ -6,7 +6,7 @@
     <title>Mono.Cecil</title>
     <authors>Jb Evain</authors>
     <owners>Jb Evain</owners>
-    <licenseUrl>http://opensource.org/licenses/mit-license.php</licenseUrl>
+    <license type="expression">MIT</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>http://github.com/jbevain/cecil/</projectUrl>
     <summary>Cecil is a library written by Jb Evain to generate and inspect programs and libraries in the ECMA CIL format.</summary>
