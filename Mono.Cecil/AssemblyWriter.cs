@@ -1625,7 +1625,7 @@ namespace Mono.Cecil {
 				AddCustomAttributes (field);
 
 			if (field.HasConstant)
-				AddConstant (field, field.FieldType);
+				AddConstant (field);
 
 			if (field.HasMarshalInfo)
 				AddMarshalInfo (field);
@@ -1757,7 +1757,7 @@ namespace Mono.Cecil {
 				AddCustomAttributes (parameter);
 
 			if (parameter.HasConstant)
-				AddConstant (parameter, parameter.ParameterType);
+				AddConstant (parameter);
 
 			if (parameter.HasMarshalInfo)
 				AddMarshalInfo (parameter);
@@ -1805,7 +1805,7 @@ namespace Mono.Cecil {
 				AddCustomAttributes (property);
 
 			if (property.HasConstant)
-				AddConstant (property, property.PropertyType);
+				AddConstant (property);
 		}
 
 		void AddOtherSemantic (IMetadataTokenProvider owner, Collection<MethodDefinition> others)
@@ -1862,10 +1862,10 @@ namespace Mono.Cecil {
 				MakeCodedRID (provider, CodedIndex.HasSemantics)));
 		}
 
-		void AddConstant (IConstantProvider owner, TypeReference type)
+		void AddConstant (IConstantProvider owner)
 		{
 			var constant = owner.Constant;
-			var etype = GetConstantType (type, constant);
+			var etype = GetConstantType (constant);
 
 			constant_table.AddRow (new ConstantRow (
 				etype,
@@ -1873,62 +1873,16 @@ namespace Mono.Cecil {
 				GetBlobIndex (GetConstantSignature (etype, constant))));
 		}
 
-		static ElementType GetConstantType (TypeReference constant_type, object constant)
+		static ElementType GetConstantType (object constant)
 		{
+			// The allowed constant types are defined in the informative
+			// text section after §II.22.9 of the ECMA-355 specification.
 			if (constant == null)
 				return ElementType.Class;
 
-			var etype = constant_type.etype;
-			switch (etype) {
-			case ElementType.None:
-				var type = constant_type.CheckedResolve ();
-				if (type.IsEnum)
-					return GetConstantType (type.GetEnumUnderlyingType (), constant);
+			var constType = constant.GetType ();
 
-				return ElementType.Class;
-			case ElementType.String:
-				return ElementType.String;
-			case ElementType.Object:
-				return GetConstantType (constant.GetType ());
-			case ElementType.Array:
-			case ElementType.SzArray:
-			case ElementType.MVar:
-			case ElementType.Var:
-				return ElementType.Class;
-			case ElementType.GenericInst:
-				var generic_instance = (GenericInstanceType) constant_type;
-				if (generic_instance.ElementType.IsTypeOf ("System", "Nullable`1"))
-					return GetConstantType (generic_instance.GenericArguments [0], constant);
-
-				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
-			case ElementType.CModOpt:
-			case ElementType.CModReqD:
-			case ElementType.ByRef:
-			case ElementType.Sentinel:
-				return GetConstantType (((TypeSpecification) constant_type).ElementType, constant);
-			case ElementType.Boolean:
-			case ElementType.Char:
-			case ElementType.I:
-			case ElementType.I1:
-			case ElementType.I2:
-			case ElementType.I4:
-			case ElementType.I8:
-			case ElementType.U:
-			case ElementType.U1:
-			case ElementType.U2:
-			case ElementType.U4:
-			case ElementType.U8:
-			case ElementType.R4:
-			case ElementType.R8:
-				return GetConstantType (constant.GetType ());
-			default:
-				return etype;
-			}
-		}
-
-		static ElementType GetConstantType (Type type)
-		{
-			switch (Type.GetTypeCode (type)) {
+			switch (Type.GetTypeCode (constType)) {
 			case TypeCode.Boolean:
 				return ElementType.Boolean;
 			case TypeCode.Byte:
@@ -1956,7 +1910,8 @@ namespace Mono.Cecil {
 			case TypeCode.String:
 				return ElementType.String;
 			default:
-				throw new NotSupportedException (type.FullName);
+				throw new NotSupportedException (
+					$"Only primitive types, strings and null references are permitted in constant fields; objects of type {constType.FullName} are not.");
 			}
 		}
 
@@ -2532,7 +2487,7 @@ namespace Mono.Cecil {
 				break;
 			case ImportTargetKind.ImportXmlNamespaceWithAlias:
 				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
-				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));	
+				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.@namespace));
 				break;
 			case ImportTargetKind.ImportAlias:
 				signature.WriteCompressedUInt32 (GetUTF8StringBlobIndex (target.alias));
