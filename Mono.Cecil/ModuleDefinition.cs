@@ -544,9 +544,12 @@ namespace Mono.Cecil {
 					return entry_point;
 
 				if (HasImage)
-					return Read (ref entry_point, this, (_, reader) => reader.ReadEntryPoint ());
+					Read (ref entry_point, this, (_, reader) => reader.ReadEntryPoint ());
+				else
+					entry_point = null;
 
-				return entry_point = null;
+				entry_point_set = true;
+				return entry_point;
 			}
 			set {
 				entry_point = value;
