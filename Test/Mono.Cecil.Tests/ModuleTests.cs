@@ -41,6 +41,12 @@ namespace Mono.Cecil.Tests {
 				Assert.IsNotNull (entry_point);
 
 				Assert.AreEqual ("System.Void Program::Main()", entry_point.ToString ());
+
+				module.EntryPoint = null;
+				Assert.IsNull (module.EntryPoint);
+
+				module.EntryPoint = entry_point;
+				Assert.IsNotNull (module.EntryPoint);
 			});
 		}
 
