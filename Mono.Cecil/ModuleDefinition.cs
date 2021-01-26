@@ -921,6 +921,15 @@ namespace Mono.Cecil {
 		{
 			return Read (token, (t, reader) => reader.LookupToken (t));
 		}
+		
+		public void ImmediateRead ()
+		{
+			if (!HasImage)
+				return;
+			ReadingMode = ReadingMode.Immediate;
+			var moduleReader = new ImmediateModuleReader (Image);
+			moduleReader.ReadModule (this, resolve_attributes: true);
+		}
 
 		readonly object module_lock = new object();
 
