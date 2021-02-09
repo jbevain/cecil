@@ -1437,25 +1437,6 @@ namespace Mono.Cecil {
 
 			if (type.HasLayoutInfo)
 				AddLayoutInfo (type);
-			else
-			if (type.IsValueType)
-			{
-				var no_instance_fields = !type.HasFields;
-				if (!no_instance_fields)
-				{
-					var fields = type.Fields;
-
-					for (int i = 0; i < fields.Count; i++)
-						if (!fields [i].IsStatic)
-						{
-							no_instance_fields = false;
-							break;
-						}
-				}
-
-				if (no_instance_fields)
-					GetTable<ClassLayoutTable> (Table.ClassLayout).AddRow (new ClassLayoutRow (0, 1, type.token.RID));
-			}
 
 			if (type.HasFields)
 				AddFields (type);
