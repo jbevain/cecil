@@ -31,19 +31,6 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
-		public void EmptyStructLayout ()
-		{
-			TestModule ("hello.exe", module =>
-			{
-				var foo = new TypeDefinition ("", "Foo",
-					TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit | TypeAttributes.SequentialLayout,
-					module.ImportReference (typeof (ValueType))) ;
-
-				module.Types.Add (foo) ;
-			}) ;
-		}
-
-		[Test]
 		public void SimpleInterfaces ()
 		{
 			TestIL ("types.il", module => {

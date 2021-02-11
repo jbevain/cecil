@@ -1435,7 +1435,8 @@ namespace Mono.Cecil {
 			if (type.HasInterfaces)
 				AddInterfaces (type);
 
-			AddLayoutInfo (type);
+			if (type.HasLayoutInfo)
+				AddLayoutInfo (type);
 
 			if (type.HasFields)
 				AddFields (type);
@@ -1554,36 +1555,12 @@ namespace Mono.Cecil {
 
 		void AddLayoutInfo (TypeDefinition type)
 		{
-			if (type.HasLayoutInfo) {
-				var table = GetTable<ClassLayoutTable> (Table.ClassLayout);
+			var table = GetTable<ClassLayoutTable> (Table.ClassLayout);
 
-				table.AddRow (new ClassLayoutRow (
-					(ushort) type.PackingSize,
-					(uint) type.ClassSize,
-					type.token.RID));
-
-				return;
-			}
-
-			if (type.IsValueType && HasNoInstanceField (type)) {
-				var table = GetTable<ClassLayoutTable> (Table.ClassLayout);
-
-				table.AddRow (new ClassLayoutRow (0, 1, type.token.RID));
-			}
-		}
-
-		static bool HasNoInstanceField (TypeDefinition type)
-		{
-			if (!type.HasFields)
-				return true;
-
-			var fields = type.Fields;
-
-			for (int i = 0; i < fields.Count; i++)
-				if (!fields [i].IsStatic)
-					return false;
-
-			return true;
+			table.AddRow (new ClassLayoutRow (
+				(ushort) type.PackingSize,
+				(uint) type.ClassSize,
+				type.token.RID));
 		}
 
 		void AddNestedTypes (TypeDefinition type)
