@@ -389,7 +389,7 @@ namespace Mono.Cecil {
 			return true;
 		}
 
-		static bool IsClrImplementationType (TypeDefinition type)
+		public static bool IsClrImplementationType (TypeDefinition type)
 		{
 			if ((type.Attributes & (TypeAttributes.VisibilityMask | TypeAttributes.SpecialName)) != TypeAttributes.SpecialName)
 				return false;

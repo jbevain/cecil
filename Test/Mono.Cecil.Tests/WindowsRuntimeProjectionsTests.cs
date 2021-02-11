@@ -131,6 +131,24 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (TypeDefinitionTreatment.PrefixWindowsRuntimeName, winrtSomeOtherClassType.WindowsRuntimeProjection.Treatment);
 			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
 		}
+
+		[Test]
+		public void VerifyTypeReferenceToProjectedTypeInAttributeArgumentReferencesUnmangledTypeName()
+		{
+			if (Platform.OnMono)
+				return;
+
+			TestModule(ModuleName, (module) =>
+			{
+				var type = module.Types.Single(t => t.Name == "ClassWithAsyncMethod");
+				var method = type.Methods.Single(m => m.Name == "DoStuffAsync");
+
+				var attribute = method.CustomAttributes.Single(a => a.AttributeType.Name == "AsyncStateMachineAttribute");
+				var attributeArgument = (TypeReference)attribute.ConstructorArguments[0].Value;
+
+				Assert.AreEqual("ManagedWinmd.ClassWithAsyncMethod/<DoStuffAsync>d__0", attributeArgument.FullName);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance(), applyWindowsRuntimeProjections: true);
+		}
 	}
 
 	[TestFixture]
