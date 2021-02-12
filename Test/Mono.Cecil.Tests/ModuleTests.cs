@@ -283,6 +283,27 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
+		
+		[Test]
+		public void OpenModuleDeferredAndThenPerformImmediateRead ()
+		{
+			using (var module = GetResourceModule ("hello.exe", ReadingMode.Deferred)) {
+				Assert.AreEqual (ReadingMode.Deferred, module.ReadingMode);
+				module.ImmediateRead ();
+				Assert.AreEqual (ReadingMode.Immediate, module.ReadingMode);
+			}
+		}
+		
+		[Test]
+		public void ImmediateReadDoesNothingForModuleWithNoImage ()
+		{
+			using (var module = new ModuleDefinition ()) {
+				var initialReadingMode = module.ReadingMode;
+				module.ImmediateRead ();
+				Assert.AreEqual (initialReadingMode, module.ReadingMode);
+			}
+		}
+
 		[Test]
 		public void OwnedStreamModuleFileName ()
 		{
