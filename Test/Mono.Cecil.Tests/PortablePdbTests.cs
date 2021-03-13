@@ -457,6 +457,24 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void GenericInstConstantRecord ()
+		{
+			using (var module = GetResourceModule ("ReproConstGenericInst.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				var type = module.GetType ("ReproConstGenericInst.Program");
+				var method = type.GetMethod ("Main");
+				var symbol = method.DebugInformation;
+
+				Assert.IsNotNull (symbol);
+				Assert.AreEqual (1, symbol.Scope.Constants.Count);
+
+				var list = symbol.Scope.Constants [0];
+				Assert.AreEqual ("list", list.Name);
+
+				Assert.AreEqual ("System.Collections.Generic.List`1<System.String>", list.ConstantType.FullName);
+			}
+		}
+
+		[Test]
 		public void SourceLink ()
 		{
 			TestModule ("TargetLib.dll", module => {
