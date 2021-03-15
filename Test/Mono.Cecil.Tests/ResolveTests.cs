@@ -247,6 +247,24 @@ namespace Mono.Cecil.Tests {
 			}
 		}
 
+		[Test]
+		public void ResolveModuleReferenceFromMemberReferenceTest ()
+		{
+			var resolver = new DefaultAssemblyResolver ();
+			var parameters = new ReaderParameters { AssemblyResolver = resolver };
+			var mma = AssemblyDefinition.ReadAssembly (GetAssemblyResourcePath ("mma.exe"), parameters);
+
+			var modB = mma.Modules [2];
+			var bazType = modB.GetType ("Module.B.Baz");
+			var gazonkMethod = bazType.Methods.First (m => m.Name.Equals ("Gazonk"));
+			var callInstr = gazonkMethod.Body.Instructions[1];
+
+			var methodRef = callInstr.Operand as MethodReference;
+			var methodTypeRef = methodRef.DeclaringType;
+
+			Assert.DoesNotThrow (() => methodTypeRef.Resolve ());
+		}
+
 		TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
