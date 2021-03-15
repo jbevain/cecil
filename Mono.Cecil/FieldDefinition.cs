@@ -114,6 +114,13 @@ namespace Mono.Cecil {
 			set {
 				initial_value = value;
 				rva = 0;
+				if (value.IsNullOrEmpty()) {
+					// We no longer have InitialValue data, so we clear the HasFieldRVA attribute.
+					Attributes &= ~FieldAttributes.HasFieldRVA;
+				} else {
+					// We have RVA data for this field, so make sure the HasFieldRVA flag is set.
+					Attributes |= FieldAttributes.HasFieldRVA;
+				}
 			}
 		}
 
