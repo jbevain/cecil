@@ -115,6 +115,9 @@ namespace Mono.Cecil {
 			case MetadataScopeType.ModuleDefinition:
 				return GetType ((ModuleDefinition) scope, type);
 			case MetadataScopeType.ModuleReference:
+				if (type.Module.Assembly == null)
+					return null;
+
 				var modules = type.Module.Assembly.Modules;
 				var module_ref = (ModuleReference) scope;
 				for (int i = 0; i < modules.Count; i++) {

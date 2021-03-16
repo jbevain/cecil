@@ -250,21 +250,38 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ResolveModuleReferenceFromMemberReferenceTest ()
 		{
-			var resolver = new DefaultAssemblyResolver ();
-			var parameters = new ReaderParameters { AssemblyResolver = resolver };
-			var mma = AssemblyDefinition.ReadAssembly (GetAssemblyResourcePath ("mma.exe"), parameters);
+			using (var mma = AssemblyDefinition.ReadAssembly (GetAssemblyResourcePath ("mma.exe"))) {
+				var modB = mma.Modules [2];
+				var bazType = modB.GetType ("Module.B.Baz");
+				var gazonkMethod = bazType.Methods.First (m => m.Name.Equals ("Gazonk"));
+				var callInstr = gazonkMethod.Body.Instructions [1];
 
-			var modB = mma.Modules [2];
-			var bazType = modB.GetType ("Module.B.Baz");
-			var gazonkMethod = bazType.Methods.First (m => m.Name.Equals ("Gazonk"));
-			var callInstr = gazonkMethod.Body.Instructions[1];
+				var methodRef = callInstr.Operand as MethodReference;
+				var methodTypeRef = methodRef.DeclaringType;
 
-			var methodRef = callInstr.Operand as MethodReference;
-			var methodTypeRef = methodRef.DeclaringType;
+				Assert.AreEqual (mma, methodTypeRef.Module.Assembly);
 
-			Assert.DoesNotThrow (() => methodTypeRef.Resolve ());
+				var def = methodTypeRef.Resolve ();
+				Assert.IsNotNull (def);
+				Assert.AreEqual ("Module.A.Foo", def.FullName);
+			}
 		}
 
+		[Test]
+		public void ResolveModuleReferenceFromMemberReferenceOfSingleNetModuleTest ()
+		{
+			using (var modb = ModuleDefinition.ReadModule (GetAssemblyResourcePath ("modb.netmodule"))) {
+				var bazType = modb.GetType ("Module.B.Baz");
+				var gazonkMethod = bazType.Methods.First (m => m.Name.Equals ("Gazonk"));
+				var callInstr = gazonkMethod.Body.Instructions [1];
+
+				var methodRef = callInstr.Operand as MethodReference;
+				var methodTypeRef = methodRef.DeclaringType;
+
+				Assert.IsNull (methodTypeRef.Module.Assembly);
+				Assert.IsNull (methodTypeRef.Resolve ());
+			}
+		}
 		TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
