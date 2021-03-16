@@ -113,6 +113,7 @@ namespace Mono.Cecil {
 			}
 			set {
 				initial_value = value;
+				HasFieldRVA = !initial_value.IsNullOrEmpty ();
 				rva = 0;
 			}
 		}
@@ -243,6 +244,11 @@ namespace Mono.Cecil {
 		public bool HasDefault {
 			get { return attributes.GetAttributes ((ushort) FieldAttributes.HasDefault); }
 			set { attributes = attributes.SetAttributes ((ushort) FieldAttributes.HasDefault, value); }
+		}
+
+		public bool HasFieldRVA {
+			get { return attributes.GetAttributes ((ushort) FieldAttributes.HasFieldRVA); }
+			set { attributes = attributes.SetAttributes ((ushort) FieldAttributes.HasFieldRVA, value); }
 		}
 
 		#endregion

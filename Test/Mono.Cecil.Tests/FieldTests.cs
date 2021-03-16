@@ -122,6 +122,14 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (2, buffer.ReadUInt32 ());
 				Assert.AreEqual (3, buffer.ReadUInt32 ());
 				Assert.AreEqual (4, buffer.ReadUInt32 ());
+
+				var intialValue = field.InitialValue;
+				field.InitialValue = null;
+				Assert.False (field.Attributes.HasFlag (FieldAttributes.HasFieldRVA));
+
+				field.InitialValue = intialValue;
+
+				Assert.True (field.Attributes.HasFlag (FieldAttributes.HasFieldRVA));
 			});
 		}
 
