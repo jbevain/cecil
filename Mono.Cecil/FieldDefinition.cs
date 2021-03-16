@@ -113,14 +113,8 @@ namespace Mono.Cecil {
 			}
 			set {
 				initial_value = value;
+				HasFieldRVA = !initial_value.IsNullOrEmpty ();
 				rva = 0;
-				if (value.IsNullOrEmpty()) {
-					// We no longer have InitialValue data, so we clear the HasFieldRVA attribute.
-					Attributes &= ~FieldAttributes.HasFieldRVA;
-				} else {
-					// We have RVA data for this field, so make sure the HasFieldRVA flag is set.
-					Attributes |= FieldAttributes.HasFieldRVA;
-				}
 			}
 		}
 
@@ -250,6 +244,11 @@ namespace Mono.Cecil {
 		public bool HasDefault {
 			get { return attributes.GetAttributes ((ushort) FieldAttributes.HasDefault); }
 			set { attributes = attributes.SetAttributes ((ushort) FieldAttributes.HasDefault, value); }
+		}
+
+		public bool HasFieldRVA {
+			get { return attributes.GetAttributes ((ushort) FieldAttributes.HasFieldRVA); }
+			set { attributes = attributes.SetAttributes ((ushort) FieldAttributes.HasFieldRVA, value); }
 		}
 
 		#endregion
