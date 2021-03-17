@@ -301,7 +301,11 @@ namespace Mono.Cecil.Cil {
 			// PDB Age
 			buffer.WriteUInt32 (1);
 			// PDB Path
-			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (writer.BaseStream.GetFileName ()));
+			var fileName = writer.BaseStream.GetFileName ();
+			if (string.IsNullOrEmpty (fileName)) {
+				fileName = module.Assembly.Name.Name + ".pdb";
+			}
+			buffer.WriteBytes (System.Text.Encoding.UTF8.GetBytes (fileName));
 			buffer.WriteByte (0);
 
 			var data = new byte [buffer.length];
