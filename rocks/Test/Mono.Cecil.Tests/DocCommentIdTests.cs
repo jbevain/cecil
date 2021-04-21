@@ -98,14 +98,14 @@ namespace N
         /// </summary>
         public static explicit operator int(X x) { return 1; }
 
-		public static void Linq (IEnumerable<string> enumerable, Func<string> selector)
-		{
-		}
+	    public static void Linq (IEnumerable<string> enumerable, Func<string> selector)
+	    {
+	    }
 
-		/// <summary>
+        /// <summary>
 		/// ID string generated is "M:N.X.N#IX{N#KVP{System#String,System#Int32}}#IXA(N.KVP{System.String,System.Int32})"
-		/// </summary>
-		void IX<KVP<string, int>>.IXA (KVP<string, int> k) { }
+        /// </summary>
+        void IX<KVP<string, int>>.IXA (KVP<string, int> k) { }
 	}
 
 	public interface IX<K>
