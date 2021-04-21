@@ -10,16 +10,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Mono.Cecil.Rocks {
 
 	public class DocCommentId
 	{
+		IMemberDefinition commentMember;
 		StringBuilder id;
 
-		DocCommentId ()
+		DocCommentId (IMemberDefinition member)
 		{
+			commentMember = member;
 			id = new StringBuilder ();
 		}
 
@@ -103,6 +106,8 @@ namespace Mono.Cecil.Rocks {
 					WriteGenericInstanceTypeSignature ((GenericInstanceType) type);
 					break;
 				case MetadataType.Var:
+					if (IsGenericMethodTypeParameter (type))
+						id.Append ('`');
 					id.Append ('`');
 					id.Append (((GenericParameter) type).Position);
 					break;
@@ -126,15 +131,36 @@ namespace Mono.Cecil.Rocks {
 			}
 		}
 
+		bool IsGenericMethodTypeParameter (TypeReference type)
+		{
+			if (commentMember is MethodDefinition methodDefinition && type is GenericParameter genericParameter)
+				return methodDefinition.GenericParameters.Any (i => i.Name == genericParameter.Name);
+
+			return false;
+		}
+
 		void WriteGenericInstanceTypeSignature (GenericInstanceType type)
 		{
 			if (type.ElementType.IsTypeSpecification ())
 				throw new NotSupportedException ();
 
-			WriteTypeFullName (type.ElementType, stripGenericArity: true);
-			id.Append ('{');
-			WriteList (type.GenericArguments, WriteTypeSignature);
-			id.Append ('}');
+			GenericTypeOptions options = new GenericTypeOptions {
+				StripGenericArity = true,
+				IsNestedType = type.IsNested,
+				Arguments = type.GenericArguments
+			};
+
+			WriteTypeFullName (type.ElementType, options);
+			WriteGenericInstanceTypeArguments (type);
+		}
+
+		void WriteGenericInstanceTypeArguments (GenericInstanceType type)
+		{
+			if (!type.IsNested) {
+				id.Append ('{');
+				WriteList (type.GenericArguments, WriteTypeSignature);
+				id.Append ('}');
+			}
 		}
 
 		void WriteList<T> (IList<T> list, Action<T> action)
@@ -197,10 +223,15 @@ namespace Mono.Cecil.Rocks {
 			WriteItemName (member.Name);
 		}
 
-		void WriteTypeFullName (TypeReference type, bool stripGenericArity = false)
+		void WriteTypeFullName (TypeReference type)
+		{
+			WriteTypeFullName (type, GenericTypeOptions.Empty ());
+		}
+
+		void WriteTypeFullName (TypeReference type, GenericTypeOptions options)
 		{
 			if (type.DeclaringType != null) {
-				WriteTypeFullName (type.DeclaringType);
+				WriteTypeFullName (type.DeclaringType, options);
 				id.Append ('.');
 			}
 
@@ -211,13 +242,61 @@ namespace Mono.Cecil.Rocks {
 
 			var name = type.Name;
 
-			if (stripGenericArity) {
+			if (options.StripGenericArity) {
 				var index = name.LastIndexOf ('`');
 				if (index > 0)
 					name = name.Substring (0, index);
 			}
 
 			id.Append (name);
+
+			WriteNestedGenericTypeParameters (type, options);
+		}
+
+		void WriteNestedGenericTypeParameters (TypeReference type, GenericTypeOptions options)
+		{
+			var isNestedGenericType = options.IsNestedType && IsGenericType (type);
+			if (isNestedGenericType) {
+				id.Append ('{');
+				WriteList (GetNestedGenericTypeArguments (type, options), WriteTypeSignature);
+				id.Append ('}');
+			}
+		}
+
+		static bool IsGenericType (TypeReference type)
+		{
+			// When the nested type is defined in a generic class,
+			// the nested type will have generic parameters but maybe it is not a generic type.
+			if (type.HasGenericParameters) {
+				var name = string.Empty;
+				var index = type.Name.LastIndexOf ('`');
+				if (index >= 0)
+					name = type.Name.Substring (0, index);
+
+				return type.Name.LastIndexOf ('`') == name.Length;
+			}
+
+			return false;
+		}
+
+		IList<TypeReference> GetNestedGenericTypeArguments (TypeReference type, GenericTypeOptions options)
+		{
+			var typeParameterCount = GetNestedGenericTypeParameterCount (type);
+			var typeGenericArguments = options.Arguments.Skip (options.ArgumentIndex).Take (typeParameterCount).ToList ();
+
+			options.ArgumentIndex += typeParameterCount;
+
+			return typeGenericArguments;
+		}
+
+		int GetNestedGenericTypeParameterCount (TypeReference type)
+		{
+			var returnValue = 0;
+			var index = type.Name.LastIndexOf ('`');
+			if (index >= 0)
+				returnValue = int.Parse (type.Name.Substring (index + 1));
+
+			return returnValue;
 		}
 
 		void WriteItemName (string name)
@@ -235,7 +314,7 @@ namespace Mono.Cecil.Rocks {
 			if (member == null)
 				throw new ArgumentNullException ("member");
 
-			var documentId = new DocCommentId ();
+			var documentId = new DocCommentId (member);
 
 			switch (member.MetadataToken.TokenType)
 			{
@@ -259,6 +338,21 @@ namespace Mono.Cecil.Rocks {
 			}
 
 			return documentId.ToString ();
+		}
+
+		class GenericTypeOptions {
+			public bool StripGenericArity { get; set; }
+
+			public bool IsNestedType { get; set; }
+
+			public IList<TypeReference> Arguments { get; set; }
+
+			public int ArgumentIndex { get; set; }
+
+			public static GenericTypeOptions Empty ()
+			{
+				return new GenericTypeOptions ();
+			}
 		}
 	}
 }
