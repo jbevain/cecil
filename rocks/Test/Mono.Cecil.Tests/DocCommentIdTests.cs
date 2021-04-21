@@ -167,7 +167,7 @@ namespace N
 
 
 			/// <summary>
-			/// 
+			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericType(System.Collections.Generic.Dictionary{`0,`1})"
 			/// </summary>
 			public void WithTypeParameterOfGenericType (Dictionary<T, NT> dict) { }
 
