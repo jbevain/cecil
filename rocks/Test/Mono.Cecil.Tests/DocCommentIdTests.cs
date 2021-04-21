@@ -157,31 +157,31 @@ namespace N
 	{
 		public class NestedType { }
 
-		public class NestedGenericType<NT> {
+		public class NestedGenericType<TNested> {
 			public class NestedType { }
 
 			/// <summary>
 			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericMethod``1(System.Collections.Generic.List{``0})"
 			/// </summary>
-			public void WithTypeParameterOfGenericMethod<GT> (List<GT> list) { }
+			public void WithTypeParameterOfGenericMethod<TMethod> (List<TMethod> list) { }
 
 
 			/// <summary>
 			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericType(System.Collections.Generic.Dictionary{`0,`1})"
 			/// </summary>
-			public void WithTypeParameterOfGenericType (Dictionary<T, NT> dict) { }
+			public void WithTypeParameterOfGenericType (Dictionary<T, TNested> dict) { }
 
 
 			/// <summary>
 			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericType``1(System.Collections.Generic.List{`1})"
 			/// </summary>
-			public void WithTypeParameterOfNestedGenericType<GT> (List<NT> list) { }
+			public void WithTypeParameterOfNestedGenericType<TMethod> (List<TNested> list) { }
 
 
 			/// <summary>
 			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericTypeAndGenericMethod``1(System.Collections.Generic.Dictionary{`1,``0})"
 			/// </summary>
-			public void WithTypeParameterOfGenericTypeAndGenericMethod<GT> (Dictionary<NT, GT> dict) { }
+			public void WithTypeParameterOfGenericTypeAndGenericMethod<TMethod> (Dictionary<TNested, TMethod> dict) { }
 		}
 	}
 }
