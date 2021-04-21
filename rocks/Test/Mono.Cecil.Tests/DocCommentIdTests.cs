@@ -106,7 +106,7 @@ namespace N
 		/// ID string generated is "M:N.X.N#IX{N#KVP{System#String,System#Int32}}#IXA(N.KVP{System.String,System.Int32})"
         /// </summary>
         void IX<KVP<string, int>>.IXA (KVP<string, int> k) { }
-	}
+    }
 
 	public interface IX<K>
 	{
