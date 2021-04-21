@@ -7,71 +7,71 @@ using Mono.Cecil.Rocks;
 namespace N
 {
 
-	/// <summary>
-	/// ID string generated is "T:N.X". 
-	/// </summary>
-	public class X : IX<KVP<string, int>>
-	{
-		/// <summary>
-		/// ID string generated is "M:N.X.#ctor".
-		/// </summary>
-		public X() { }
+    /// <summary>
+    /// ID string generated is "T:N.X". 
+    /// </summary>
+    public class X : IX<KVP<string, int>>
+    {
+        /// <summary>
+        /// ID string generated is "M:N.X.#ctor".
+        /// </summary>
+        public X() { }
 
 
-		/// <summary>
-		/// ID string generated is "M:N.X.#ctor(System.Int32)".
-		/// </summary>
-		/// <param name="i">Describe parameter.</param>
-		public X(int i) { }
+        /// <summary>
+        /// ID string generated is "M:N.X.#ctor(System.Int32)".
+        /// </summary>
+        /// <param name="i">Describe parameter.</param>
+        public X(int i) { }
 
 
-		/// <summary>
-		/// ID string generated is "F:N.X.q".
-		/// </summary>
-		public string q;
+        /// <summary>
+        /// ID string generated is "F:N.X.q".
+        /// </summary>
+        public string q;
 
 
-		/// <summary>
-		/// ID string generated is "F:N.X.PI".
-		/// </summary>
-		public const double PI = 3.14;
+        /// <summary>
+        /// ID string generated is "F:N.X.PI".
+        /// </summary>
+        public const double PI = 3.14;
 
 
-		/// <summary>
-		/// ID string generated is "M:N.X.f".
-		/// </summary>
-		public int f() { return 1; }
+        /// <summary>
+        /// ID string generated is "M:N.X.f".
+        /// </summary>
+        public int f() { return 1; }
 
 
-		/// <summary>
-		/// ID string generated is "M:N.X.bb(System.String,System.Int32@)".
-		/// </summary>
-		public int bb(string s, ref int y) { return 1; }
+        /// <summary>
+        /// ID string generated is "M:N.X.bb(System.String,System.Int32@)".
+        /// </summary>
+        public int bb(string s, ref int y) { return 1; }
 
 
-		/// <summary>
-		/// ID string generated is "M:N.X.gg(System.Int16[],System.Int32[0:,0:])". 
-		/// </summary>
-		public int gg(short[] array1, int[,] array) { return 0; }
+        /// <summary>
+        /// ID string generated is "M:N.X.gg(System.Int16[],System.Int32[0:,0:])". 
+        /// </summary>
+        public int gg(short[] array1, int[,] array) { return 0; }
 
 
-		/// <summary>
-		/// ID string generated is "M:N.X.op_Addition(N.X,N.X)". 
-		/// </summary>
-		public static X operator +(X x, X xx) { return x; }
+        /// <summary>
+        /// ID string generated is "M:N.X.op_Addition(N.X,N.X)". 
+        /// </summary>
+        public static X operator +(X x, X xx) { return x; }
 
 
-		/// <summary>
-		/// ID string generated is "P:N.X.prop".
-		/// </summary>
-		public int prop { get { return 1; } set { } }
+        /// <summary>
+        /// ID string generated is "P:N.X.prop".
+        /// </summary>
+        public int prop { get { return 1; } set { } }
 
 
-		/// <summary>
-		/// ID string generated is "E:N.X.d".
-		/// </summary>
+        /// <summary>
+        /// ID string generated is "E:N.X.d".
+        /// </summary>
 #pragma warning disable 67
-		public event D d;
+        public event D d;
 #pragma warning restore 67
 
 
@@ -81,32 +81,32 @@ namespace N
 		public int this[string s] { get { return 1; } }
 
 
-		/// <summary>
-		/// ID string generated is "T:N.X.Nested".
-		/// </summary>
-		public class Nested { }
+        /// <summary>
+        /// ID string generated is "T:N.X.Nested".
+        /// </summary>
+        public class Nested { }
 
 
-		/// <summary>
-		/// ID string generated is "T:N.X.D". 
-		/// </summary>
-		public delegate void D(int i);
+        /// <summary>
+        /// ID string generated is "T:N.X.D". 
+        /// </summary>
+        public delegate void D(int i);
 
 
-		/// <summary>
-		/// ID string generated is "M:N.X.op_Explicit(N.X)~System.Int32".
-		/// </summary>
-		public static explicit operator int(X x) { return 1; }
+        /// <summary>
+        /// ID string generated is "M:N.X.op_Explicit(N.X)~System.Int32".
+        /// </summary>
+        public static explicit operator int(X x) { return 1; }
 
 
 		public static void Linq (IEnumerable<string> enumerable, Func<string> selector) { }
 
 
-		/// <summary>
+        /// <summary>
 		/// ID string generated is "M:N.X.N#IX{N#KVP{System#String,System#Int32}}#IXA(N.KVP{System.String,System.Int32})"
-		/// </summary>
-		void IX<KVP<string, int>>.IXA (KVP<string, int> k) { }
-	}
+        /// </summary>
+        void IX<KVP<string, int>>.IXA (KVP<string, int> k) { }
+    }
 
 	public interface IX<K>
 	{
@@ -250,7 +250,7 @@ namespace Mono.Cecil.Tests {
 
 			AssertDocumentID ("M:N.X.bb(System.String,System.Int32@)", method);
 		}
-
+		
 		[Test]
 		public void MethodWithArrayParameters ()
 		{
