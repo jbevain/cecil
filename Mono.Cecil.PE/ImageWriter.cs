@@ -784,7 +784,7 @@ namespace Mono.Cecil.PE {
 
 		int GetStrongNameLength ()
 		{
-			if (module.Assembly == null)
+			if (module.kind == ModuleKind.NetModule || module.Assembly == null)
 				return 0;
 
 			var public_key = module.Assembly.Name.PublicKey;

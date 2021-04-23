@@ -182,7 +182,7 @@ namespace Mono.Cecil {
 			ReadCustomAttributes (module);
 
 			var assembly = module.Assembly;
-			if (assembly == null)
+			if (module.kind == ModuleKind.NetModule || assembly == null)
 				return;
 
 			ReadCustomAttributes (assembly);
@@ -667,8 +667,10 @@ namespace Mono.Cecil {
 					AssemblyResolver = module.AssemblyResolver
 				};
 
-				modules.Add (ModuleDefinition.ReadModule (
-					GetModuleFileName (name), parameters));
+				var netmodule = ModuleDefinition.ReadModule (GetModuleFileName (name), parameters);
+				netmodule.assembly = this.module.assembly;
+
+				modules.Add (netmodule);
 			}
 
 			return modules;
