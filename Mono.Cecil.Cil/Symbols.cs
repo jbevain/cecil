@@ -808,7 +808,7 @@ namespace Mono.Cecil.Cil {
 
 	public interface ISymbolReaderProvider {
 		ISymbolReader GetSymbolReader (ModuleDefinition module, string fileName);
-		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream);
+		ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string symbolFileName);
 	}
 
 #if !NET_CORE
@@ -903,7 +903,7 @@ namespace Mono.Cecil.Cil {
 			return null;
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			if (module.Image.HasDebugTables ())
 				return null;
@@ -927,7 +927,7 @@ namespace Mono.Cecil.Cil {
 			symbolStream.Position = position;
 
 			if (intHeader == portablePdbHeader) {
-				return new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream);
+				return new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream, symbolFileName);
 			}
 
 			const string nativePdbHeader = "Microsoft C/C++ MSF 7.00";
@@ -945,7 +945,7 @@ namespace Mono.Cecil.Cil {
 
 			if (isNativePdb) {
 				try {
-					return SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, symbolStream);
+					return SymbolProvider.GetReaderProvider (SymbolKind.NativePdb).GetSymbolReader (module, symbolStream, symbolFileName);
 				} catch (Exception) {
 					// We might not include support for native pdbs.
 				}
@@ -958,7 +958,7 @@ namespace Mono.Cecil.Cil {
 
 			if (longHeader == mdbHeader) {
 				try {
-					return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, symbolStream);
+					return SymbolProvider.GetReaderProvider (SymbolKind.Mdb).GetSymbolReader (module, symbolStream, symbolFileName);
 				} catch (Exception) {
 					// We might not include support for mdbs.
 				}
@@ -1070,7 +1070,7 @@ namespace Mono.Cecil.Cil {
 	public interface ISymbolWriterProvider {
 
 		ISymbolWriter GetSymbolWriter (ModuleDefinition module, string fileName);
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream);
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName);
 	}
 
 	public class DefaultSymbolWriterProvider : ISymbolWriterProvider {
@@ -1087,7 +1087,7 @@ namespace Mono.Cecil.Cil {
 			return reader.GetWriterProvider ().GetSymbolWriter (module, fileName);
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			throw new NotSupportedException ();
 		}

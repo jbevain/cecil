@@ -608,9 +608,9 @@ class Program
 				return new SymbolWriter (writer_provider.GetSymbolWriter (module, fileName));
 			}
 
-			public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+			public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 			{
-				return new SymbolWriter (writer_provider.GetSymbolWriter (module, symbolStream));
+				return new SymbolWriter (writer_provider.GetSymbolWriter (module, symbolStream, symbolFileName));
 			}
 		}
 
