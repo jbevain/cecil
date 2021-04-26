@@ -145,22 +145,12 @@ namespace Mono.Cecil.Rocks {
 				throw new NotSupportedException ();
 
 			GenericTypeOptions options = new GenericTypeOptions {
-				StripGenericArity = true,
+				IsArgument = true,
 				IsNestedType = type.IsNested,
 				Arguments = type.GenericArguments
 			};
 
 			WriteTypeFullName (type.ElementType, options);
-			WriteGenericInstanceTypeArguments (type);
-		}
-
-		void WriteGenericInstanceTypeArguments (GenericInstanceType type)
-		{
-			if (!type.IsNested) {
-				id.Append ('{');
-				WriteList (type.GenericArguments, WriteTypeSignature);
-				id.Append ('}');
-			}
 		}
 
 		void WriteList<T> (IList<T> list, Action<T> action)
@@ -242,7 +232,7 @@ namespace Mono.Cecil.Rocks {
 
 			var name = type.Name;
 
-			if (options.StripGenericArity) {
+			if (options.IsArgument) {
 				var index = name.LastIndexOf ('`');
 				if (index > 0)
 					name = name.Substring (0, index);
@@ -250,23 +240,22 @@ namespace Mono.Cecil.Rocks {
 
 			id.Append (name);
 
-			WriteNestedGenericTypeParameters (type, options);
+			WriteGenericTypeParameters (type, options);
 		}
 
-		void WriteNestedGenericTypeParameters (TypeReference type, GenericTypeOptions options)
+		void WriteGenericTypeParameters (TypeReference type, GenericTypeOptions options)
 		{
-			var isNestedGenericType = options.IsNestedType && IsGenericType (type);
-			if (isNestedGenericType) {
+			if (options.IsArgument && IsGenericType (type)) {
 				id.Append ('{');
-				WriteList (GetNestedGenericTypeArguments (type, options), WriteTypeSignature);
+				WriteList (GetGenericTypeArguments (type, options), WriteTypeSignature);
 				id.Append ('}');
 			}
 		}
 
 		static bool IsGenericType (TypeReference type)
 		{
-			// When the nested type is defined in a generic class,
-			// the nested type will have generic parameters but maybe it is not a generic type.
+			// When the type is a nested type and that is defined in a generic class,
+			// the nested type will have generic parameters but sometimes that is not a generic type.
 			if (type.HasGenericParameters) {
 				var name = string.Empty;
 				var index = type.Name.LastIndexOf ('`');
@@ -279,17 +268,21 @@ namespace Mono.Cecil.Rocks {
 			return false;
 		}
 
-		IList<TypeReference> GetNestedGenericTypeArguments (TypeReference type, GenericTypeOptions options)
+		IList<TypeReference> GetGenericTypeArguments (TypeReference type, GenericTypeOptions options)
 		{
-			var typeParameterCount = GetNestedGenericTypeParameterCount (type);
-			var typeGenericArguments = options.Arguments.Skip (options.ArgumentIndex).Take (typeParameterCount).ToList ();
+			if (options.IsNestedType) {
+				var typeParameterCount = GetGenericTypeParameterCount (type);
+				var typeGenericArguments = options.Arguments.Skip (options.ArgumentIndex).Take (typeParameterCount).ToList ();
 
-			options.ArgumentIndex += typeParameterCount;
+				options.ArgumentIndex += typeParameterCount;
 
-			return typeGenericArguments;
+				return typeGenericArguments;
+			}
+
+			return options.Arguments;
 		}
 
-		int GetNestedGenericTypeParameterCount (TypeReference type)
+		int GetGenericTypeParameterCount (TypeReference type)
 		{
 			var returnValue = 0;
 			var index = type.Name.LastIndexOf ('`');
@@ -341,7 +334,7 @@ namespace Mono.Cecil.Rocks {
 		}
 
 		class GenericTypeOptions {
-			public bool StripGenericArity { get; set; }
+			public bool IsArgument { get; set; }
 
 			public bool IsNestedType { get; set; }
 
