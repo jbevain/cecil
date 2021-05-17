@@ -424,7 +424,6 @@ namespace Mono.Cecil.Cil {
 		{
 			switch (instruction.opcode.FlowControl) {
 			case FlowControl.Branch:
-			case FlowControl.Break:
 			case FlowControl.Throw:
 			case FlowControl.Return:
 				stack_size = 0;
