@@ -215,7 +215,7 @@ namespace Mono.Cecil.Cil {
 			case OperandType.ShortInlineBrTarget: {
 				var target = (Instruction) operand;
 				var offset = target != null ? GetTargetOffset (target) : body.code_size;
-				WriteSByte ((sbyte) (offset - (instruction.Offset + opcode.Size + 1)));
+				WriteSByte (checked ((sbyte) (offset - (instruction.Offset + opcode.Size + 1))));
 				break;
 			}
 			case OperandType.InlineBrTarget: {
@@ -225,16 +225,16 @@ namespace Mono.Cecil.Cil {
 				break;
 			}
 			case OperandType.ShortInlineVar:
-				WriteByte ((byte) GetVariableIndex ((VariableDefinition) operand));
+				WriteByte (checked ((byte) GetVariableIndex ((VariableDefinition) operand)));
 				break;
 			case OperandType.ShortInlineArg:
-				WriteByte ((byte) GetParameterIndex ((ParameterDefinition) operand));
+				WriteByte (checked ((byte) GetParameterIndex ((ParameterDefinition) operand)));
 				break;
 			case OperandType.InlineVar:
-				WriteInt16 ((short) GetVariableIndex ((VariableDefinition) operand));
+				WriteInt16 (checked ((short) GetVariableIndex ((VariableDefinition) operand)));
 				break;
 			case OperandType.InlineArg:
-				WriteInt16 ((short) GetParameterIndex ((ParameterDefinition) operand));
+				WriteInt16 (checked ((short) GetParameterIndex ((ParameterDefinition) operand)));
 				break;
 			case OperandType.InlineSig:
 				WriteMetadataToken (GetStandAloneSignature ((CallSite) operand));
