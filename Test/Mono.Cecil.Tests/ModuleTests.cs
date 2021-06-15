@@ -351,5 +351,20 @@ namespace Mono.Cecil.Tests {
 			// Ensure you can still delete the file
 			File.Delete (path);
 		}
+
+		class StreamWithAName : MemoryStream, IHaveAFileName {
+			public string GetFileName ()
+			{
+				return "Yes I have!";
+			}
+		}
+
+		[Test]
+		public void StreamImplementingIHaveAFileNameShouldReturnItAsIs ()
+		{
+			using (Stream stream = new StreamWithAName ()) {
+				Assert.AreEqual ("Yes I have!", stream.GetFileName ());
+			}
+		}
 	}
 }
