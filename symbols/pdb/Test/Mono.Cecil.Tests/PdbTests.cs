@@ -465,5 +465,13 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual ("temp", method.DebugInformation.Scope.Variables [0].Name);
 		}
+
+		[Test]
+		public void TypeNameExceedingMaxPdbPath ()
+		{
+			TestModule ("longtypename.dll", module => {
+				Assert.IsTrue (module.HasSymbols);
+			}, symbolReaderProvider: typeof (NativePdbReaderProvider), symbolWriterProvider: typeof (NativePdbWriterProvider));
+		}
 	}
 }
