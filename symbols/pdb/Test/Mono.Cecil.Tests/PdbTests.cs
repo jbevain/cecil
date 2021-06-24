@@ -469,6 +469,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void TypeNameExceedingMaxPdbPath ()
 		{
+			if (!Platform.HasNativePdbSupport)
+				Assert.Ignore ();
+
 			TestModule ("longtypename.dll", module => {
 				Assert.IsTrue (module.HasSymbols);
 			}, symbolReaderProvider: typeof (NativePdbReaderProvider), symbolWriterProvider: typeof (NativePdbWriterProvider));
