@@ -128,5 +128,14 @@ namespace Mono.Cecil.Tests {
 				}
 			}
 		}
+
+		[Test]
+		public void MultipleCodeViewEntries ()
+		{
+			using (var module = GetResourceModule ("System.Private.Xml.dll", new ReaderParameters { ReadSymbols = true })) {
+				Assert.IsTrue (module.HasSymbols);
+				Assert.IsNotNull (module.SymbolReader);
+			}
+		}
 	}
 }

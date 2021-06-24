@@ -22,7 +22,6 @@ namespace Mono.Cecil.Pdb {
 
 	public class NativePdbReader : ISymbolReader {
 
-		int age;
 		Guid guid;
 
 		readonly Disposable<Stream> pdb_file;
@@ -52,13 +51,26 @@ namespace Mono.Cecil.Pdb {
 			if (!header.HasEntries)
 				return false;
 
-			var entry = header.GetCodeViewEntry ();
-			if (entry == null)
-				return false;
+			using (pdb_file) {
+				var info = PdbFile.LoadFunctions (pdb_file.value);
 
-			var directory = entry.Directory;
+				foreach (var entry in header.Entries) {
+					if (!IsMatchingEntry (info, entry))
+						continue;
 
-			if (directory.Type != ImageDebugType.CodeView)
+					foreach (var function in info.Functions)
+						functions.Add (function.token, function);
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		static bool IsMatchingEntry (PdbInfo info, ImageDebugHeaderEntry entry)
+		{
+			if (entry.Directory.Type != ImageDebugType.CodeView)
 				return false;
 
 			var data = entry.Data;
@@ -73,10 +85,7 @@ namespace Mono.Cecil.Pdb {
 			var guid_bytes = new byte [16];
 			Buffer.BlockCopy (data, 4, guid_bytes, 0, 16);
 
-			this.guid = new Guid (guid_bytes);
-			this.age = ReadInt32 (data, 20);
-
-			return PopulateFunctions ();
+			return info.Guid == new Guid (guid_bytes);
 		}
 
 		static int ReadInt32 (byte [] bytes, int start)
@@ -87,20 +96,6 @@ namespace Mono.Cecil.Pdb {
 				| (bytes [start + 3] << 24));
 		}
 
-		bool PopulateFunctions ()
-		{
-			using (pdb_file) {
-				var info = PdbFile.LoadFunctions (pdb_file.value);
-
-				if (this.guid != info.Guid)
-					return false;
-
-				foreach (PdbFunction function in info.Functions)
-					functions.Add (function.token, function);
-			}
-
-			return true;
-		}
 
 		public MethodDebugInformation Read (MethodDefinition method)
 		{
