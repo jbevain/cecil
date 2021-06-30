@@ -491,9 +491,12 @@ namespace Mono.Cecil.Tests {
 		public void EmbeddedSource ()
 		{
 			TestModule ("embedcs.exe", module => {
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+
+			TestModule ("embedcs.exe", module => {
 				var program = GetDocument (module.GetType ("Program"));
 				var program_src = GetSourceDebugInfo (program);
-				Assert.IsTrue (program_src.compress);
+				Assert.IsTrue (program_src.Compress);
 				var program_src_content = Encoding.UTF8.GetString (program_src.Content);
 				Assert.AreEqual (Normalize (@"using System;
 
@@ -533,7 +536,7 @@ class Program
 
 				var a = GetDocument (module.GetType ("A"));
 				var a_src = GetSourceDebugInfo (a);
-				Assert.IsFalse (a_src.compress);
+				Assert.IsFalse (a_src.Compress);
 				var a_src_content = Encoding.UTF8.GetString (a_src.Content);
 				Assert.AreEqual (Normalize (@"class A
 {

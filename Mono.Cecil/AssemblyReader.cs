@@ -3223,28 +3223,7 @@ namespace Mono.Cecil {
 
 					infos.Add (async_body);
 				} else if (rows [i].Col1 == EmbeddedSourceDebugInformation.KindIdentifier) {
-					var signature = ReadSignature (rows [i].Col2);
-					var format = signature.ReadInt32 ();
-					var length = signature.sig_length - 4;
-
-					var info = null as CustomDebugInformation;
-
-					if (format == 0) {
-						info = new EmbeddedSourceDebugInformation (signature.ReadBytes ((int) length), compress: false);
-					} else if (format > 0) {
-						var compressed_stream = new MemoryStream (signature.ReadBytes ((int) length));
-						var decompressed_document = new byte [format]; // if positive, format is the decompressed length of the document
-						var decompressed_stream = new MemoryStream (decompressed_document);
-
-						using (var deflate_stream = new DeflateStream (compressed_stream, CompressionMode.Decompress, leaveOpen: true))
-							deflate_stream.CopyTo (decompressed_stream);
-
-						info = new EmbeddedSourceDebugInformation (decompressed_document, compress: true);
-					} else if (format < 0) {
-						info = new BinaryCustomDebugInformation (rows [i].Col1, ReadBlob (rows [i].Col2));
-					}
-
-					infos.Add (info);
+					infos.Add (new EmbeddedSourceDebugInformation (rows [i].Col2, this));
 				} else if (rows [i].Col1 == SourceLinkDebugInformation.KindIdentifier) {
 					infos.Add (new SourceLinkDebugInformation (Encoding.UTF8.GetString (ReadBlob (rows [i].Col2))));
 				} else {
@@ -3255,6 +3234,33 @@ namespace Mono.Cecil {
 			}
 
 			return infos;
+		}
+
+		public byte [] ReadRawEmbeddedSourceDebugInformation (uint index)
+		{
+			var signature = ReadSignature (index);
+			return signature.ReadBytes ((int) signature.sig_length);
+		}
+
+		public Row<byte [], bool> ReadEmbeddedSourceDebugInformation (uint index)
+		{
+			var signature = ReadSignature (index);
+			var format = signature.ReadInt32 ();
+			var length = signature.sig_length - 4;
+
+			if (format == 0) {
+				return new Row<byte [], bool> (signature.ReadBytes ((int) length), false);
+			} else if (format > 0) {
+				var compressed_stream = new MemoryStream (signature.ReadBytes ((int) length));
+				var decompressed_document = new byte [format]; // if positive, format is the decompressed length of the document
+				var decompressed_stream = new MemoryStream (decompressed_document);
+
+				using (var deflate_stream = new DeflateStream (compressed_stream, CompressionMode.Decompress, leaveOpen: true))
+					deflate_stream.CopyTo (decompressed_stream);
+
+				return new Row<byte [], bool> (decompressed_document, true);
+			} else
+				throw new NotSupportedException ();
 		}
 	}
 

@@ -619,17 +619,36 @@ namespace Mono.Cecil.Cil {
 
 	public sealed class EmbeddedSourceDebugInformation : CustomDebugInformation {
 
+		internal uint index;
+		internal MetadataReader debug_reader;
+		internal bool resolved;
 		internal byte [] content;
 		internal bool compress;
 
 		public byte [] Content {
-			get { return content; }
-			set { content = value; }
+			get {
+				if (!resolved)
+					Resolve ();
+
+				return content;
+			}
+			set {
+				content = value;
+				resolved = true;
+			}
 		}
 
 		public bool Compress {
-			get { return compress; }
-			set { compress = value; }
+			get {
+				if (!resolved)
+					Resolve ();
+
+				return compress;
+			}
+			set {
+				compress = value;
+				resolved = true;
+			}
 		}
 
 		public override CustomDebugInformationKind Kind {
@@ -638,11 +657,41 @@ namespace Mono.Cecil.Cil {
 
 		public static Guid KindIdentifier = new Guid ("{0E8A571B-6926-466E-B4AD-8AB04611F5FE}");
 
+		internal EmbeddedSourceDebugInformation (uint index, MetadataReader debug_reader)
+			: base (KindIdentifier)
+		{
+			this.index = index;
+			this.debug_reader = debug_reader;
+		}
+
 		public EmbeddedSourceDebugInformation (byte [] content, bool compress)
 			: base (KindIdentifier)
 		{
+			this.resolved = true;
 			this.content = content;
 			this.compress = compress;
+		}
+
+		internal byte [] ReadRawEmbeddedSourceDebugInformation ()
+		{
+			if (debug_reader == null)
+				throw new InvalidOperationException ();
+
+			return debug_reader.ReadRawEmbeddedSourceDebugInformation (index);
+		}
+
+		void Resolve ()
+		{
+			if (resolved)
+				return;
+
+			if (debug_reader == null)
+				throw new InvalidOperationException ();
+
+			var row = debug_reader.ReadEmbeddedSourceDebugInformation (index);
+			content = row.Col1;
+			compress = row.Col2;
+			resolved = true;
 		}
 	}
 
