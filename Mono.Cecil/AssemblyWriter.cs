@@ -2422,6 +2422,13 @@ namespace Mono.Cecil {
 		void AddEmbeddedSourceDebugInformation (ICustomDebugInformationProvider provider, EmbeddedSourceDebugInformation embedded_source)
 		{
 			var signature = CreateSignatureWriter ();
+
+			if (!embedded_source.resolved) {
+				signature.WriteBytes (embedded_source.ReadRawEmbeddedSourceDebugInformation ());
+				AddCustomDebugInformation (provider, embedded_source, signature);
+				return;
+			}
+
 			var content = embedded_source.content ?? Empty<byte>.Array;
 			if (embedded_source.compress) {
 				signature.WriteInt32 (content.Length);
