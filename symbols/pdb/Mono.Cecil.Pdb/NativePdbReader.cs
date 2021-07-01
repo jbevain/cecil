@@ -22,8 +22,6 @@ namespace Mono.Cecil.Pdb {
 
 	public class NativePdbReader : ISymbolReader {
 
-		Guid guid;
-
 		readonly Disposable<Stream> pdb_file;
 		readonly Dictionary<string, Document> documents = new Dictionary<string, Document> ();
 		readonly Dictionary<uint, PdbFunction> functions = new Dictionary<uint, PdbFunction> ();
