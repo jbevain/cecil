@@ -3005,7 +3005,7 @@ namespace Mono.Cecil {
 
 			object value;
 			if (type.etype == ElementType.String) {
-				if (signature.buffer [signature.position] != 0xff) {
+				if (signature.CanReadMore () && signature.buffer [signature.position] != 0xff) {
 					var bytes = signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start)));
 					value = Encoding.Unicode.GetString (bytes, 0, bytes.Length);
 				} else
