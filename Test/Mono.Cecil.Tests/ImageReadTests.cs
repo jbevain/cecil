@@ -101,6 +101,14 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void AnyCPU32BitPreferred ()
+		{
+			TestModule ("anycpu32bitpreferred.exe", module => {
+				Assert.AreNotEqual (0, module.Image.Characteristics & 0x0020);
+			});
+		}
+
+		[Test]
 		public void X64ModuleTextOnlySection ()
 		{
 			TestModule ("hello.textonly.x64.exe", module => {

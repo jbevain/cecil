@@ -194,12 +194,18 @@ namespace Mono.Cecil.PE {
 			WriteUInt32 (metadata.timestamp);
 			WriteUInt32 (0);	// PointerToSymbolTable
 			WriteUInt32 (0);	// NumberOfSymbols
-			WriteUInt16 (SizeOfOptionalHeader ());	// SizeOfOptionalHeader
+			WriteUInt16 (SizeOfOptionalHeader ());  // SizeOfOptionalHeader
 
-			// ExecutableImage | (pe64 ? 32BitsMachine : LargeAddressAware)
-			var characteristics = (ushort) (0x0002 | (!pe64 ? 0x0100 : 0x0020));
+			const ushort LargeAddressAware = 0x0020;
+
+			// ExecutableImage | (!pe64 ? 32BitsMachine : LargeAddressAware)
+			var characteristics = (ushort) (0x0002 | (!pe64 ? 0x0100 : LargeAddressAware));
 			if (module.Kind == ModuleKind.Dll || module.Kind == ModuleKind.NetModule)
 				characteristics |= 0x2000;
+
+			if (module.Image != null && (module.Image.Characteristics & LargeAddressAware) != 0)
+				characteristics |= LargeAddressAware;
+
 			WriteUInt16 (characteristics);	// Characteristics
 		}
 

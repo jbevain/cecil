@@ -586,7 +586,7 @@ namespace Mono.Cecil {
 			this.RuntimeVersion = image.RuntimeVersion;
 			this.architecture = image.Architecture;
 			this.attributes = image.Attributes;
-			this.characteristics = image.Characteristics;
+			this.characteristics = image.DllCharacteristics;
 			this.linker_version = image.LinkerVersion;
 			this.subsystem_major = image.SubSystemMajor;
 			this.subsystem_minor = image.SubSystemMinor;
