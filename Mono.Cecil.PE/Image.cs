@@ -25,9 +25,10 @@ namespace Mono.Cecil.PE {
 		public string FileName;
 
 		public ModuleKind Kind;
+		public uint Characteristics;
 		public string RuntimeVersion;
 		public TargetArchitecture Architecture;
-		public ModuleCharacteristics Characteristics;
+		public ModuleCharacteristics DllCharacteristics;
 		public ushort LinkerVersion;
 		public ushort SubSystemMajor;
 		public ushort SubSystemMinor;

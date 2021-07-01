@@ -88,8 +88,9 @@ namespace Mono.Cecil.PE {
 			ReadMetadata ();
 			ReadDebugHeader ();
 
+			image.Characteristics = characteristics;
 			image.Kind = GetModuleKind (characteristics, subsystem);
-			image.Characteristics = (ModuleCharacteristics) dll_characteristics;
+			image.DllCharacteristics = (ModuleCharacteristics) dll_characteristics;
 		}
 
 		TargetArchitecture ReadArchitecture ()
