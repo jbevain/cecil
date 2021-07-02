@@ -475,6 +475,23 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void EmptyStringLocalConstant ()
+		{
+			TestModule ("empty-str-const.exe", module => {
+				var type = module.GetType ("<Program>$");
+				var method = type.GetMethod ("<Main>$");
+				var symbol = method.DebugInformation;
+
+				Assert.IsNotNull (symbol);
+				Assert.AreEqual (1, symbol.Scope.Constants.Count);
+
+				var a = symbol.Scope.Constants [0];
+				Assert.AreEqual ("value", a.Name);
+				Assert.AreEqual ("", a.Value);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void SourceLink ()
 		{
 			TestModule ("TargetLib.dll", module => {
