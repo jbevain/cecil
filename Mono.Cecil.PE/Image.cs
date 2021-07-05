@@ -23,6 +23,7 @@ namespace Mono.Cecil.PE {
 
 		public Disposable<Stream> Stream;
 		public string FileName;
+		public bool ImageLayoutInMemory;
 
 		public ModuleKind Kind;
 		public uint Characteristics;
@@ -91,6 +92,9 @@ namespace Mono.Cecil.PE {
 
 		public uint ResolveVirtualAddress (RVA rva)
 		{
+			if (ImageLayoutInMemory)
+				return rva;
+
 			var section = GetSectionAtVirtualAddress (rva);
 			if (section == null)
 				throw new ArgumentOutOfRangeException ();
@@ -100,6 +104,9 @@ namespace Mono.Cecil.PE {
 
 		public uint ResolveVirtualAddressInSection (RVA rva, Section section)
 		{
+			if (ImageLayoutInMemory)
+				return rva;
+
 			return rva + section.PointerToRawData - section.VirtualAddress;
 		}
 
