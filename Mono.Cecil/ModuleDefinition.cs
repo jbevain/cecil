@@ -28,18 +28,25 @@ namespace Mono.Cecil {
 
 	public sealed class ReaderParameters {
 
+		string file_name;
 		ReadingMode reading_mode;
 		internal IAssemblyResolver assembly_resolver;
 		internal IMetadataResolver metadata_resolver;
 		internal IMetadataImporterProvider metadata_importer_provider;
 		internal IReflectionImporterProvider reflection_importer_provider;
 		Stream symbol_stream;
+		string symbol_file_name;
 		ISymbolReaderProvider symbol_reader_provider;
 		bool read_symbols;
 		bool throw_symbols_mismatch;
 		bool projections;
 		bool in_memory;
 		bool read_write;
+
+		public string FileName {
+			get { return file_name; }
+			set { file_name = value; }
+		}
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
@@ -74,6 +81,11 @@ namespace Mono.Cecil {
 		public Stream SymbolStream {
 			get { return symbol_stream; }
 			set { symbol_stream = value; }
+		}
+
+		public string SymbolFileName {
+			get { return symbol_file_name; }
+			set { symbol_file_name = value; }
 		}
 
 		public ISymbolReaderProvider SymbolReaderProvider {
@@ -179,13 +191,20 @@ namespace Mono.Cecil {
 
 	public sealed class WriterParameters {
 
+		string file_name;
 		uint? timestamp;
 		Stream symbol_stream;
+		string symbol_file_name;
 		ISymbolWriterProvider symbol_writer_provider;
 		bool write_symbols;
 		byte [] key_blob;
 		string key_container;
 		SR.StrongNameKeyPair key_pair;
+
+		public string FileName {
+			get { return file_name; }
+			set { file_name = value; }
+		}
 
 		public uint? Timestamp {
 			get { return timestamp; }
@@ -195,6 +214,11 @@ namespace Mono.Cecil {
 		public Stream SymbolStream {
 			get { return symbol_stream; }
 			set { symbol_stream = value; }
+		}
+
+		public string SymbolFileName {
+			get { return symbol_file_name; }
+			set { symbol_file_name = value; }
 		}
 
 		public ISymbolWriterProvider SymbolWriterProvider {
@@ -1131,7 +1155,7 @@ namespace Mono.Cecil {
 			Mixin.CheckStream (stream);
 			Mixin.CheckReadSeek (stream);
 
-			return ReadModule (Disposable.NotOwned (stream), stream.GetFileName (), parameters);
+			return ReadModule (Disposable.NotOwned (stream), stream.GetFileName (parameters.FileName), parameters);
 		}
 
 		static ModuleDefinition ReadModule (Disposable<Stream> stream, string fileName, ReaderParameters parameters)
@@ -1287,8 +1311,11 @@ namespace Mono.Cecil {
 			return self != null && self.HasImage;
 		}
 
-		public static string GetFileName (this Stream self)
+		public static string GetFileName (this Stream self, string file_name)
 		{
+			if (!string.IsNullOrEmpty (file_name))
+				return file_name;
+
 			var file_stream = self as FileStream;
 			if (file_stream == null)
 				return string.Empty;

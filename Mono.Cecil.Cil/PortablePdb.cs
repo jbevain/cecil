@@ -29,12 +29,12 @@ namespace Mono.Cecil.Cil {
 			return GetSymbolReader (module, Disposable.Owned (file as Stream), file.Name);
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			return GetSymbolReader (module, Disposable.NotOwned (symbolStream), symbolStream.GetFileName ());
+			return GetSymbolReader (module, Disposable.NotOwned (symbolStream), symbolStream.GetFileName (symbolFileName));
 		}
 
 		ISymbolReader GetSymbolReader (ModuleDefinition module, Disposable<Stream> symbolStream, string fileName)
@@ -171,7 +171,7 @@ namespace Mono.Cecil.Cil {
 				throw new InvalidOperationException ();
 
 			return new EmbeddedPortablePdbReader (
-				(PortablePdbReader) new PortablePdbReaderProvider ().GetSymbolReader (module, GetPortablePdbStream (entry)));
+				(PortablePdbReader) new PortablePdbReaderProvider ().GetSymbolReader (module, GetPortablePdbStream (entry), fileName));
 		}
 
 		static Stream GetPortablePdbStream (ImageDebugHeaderEntry entry)
@@ -188,7 +188,7 @@ namespace Mono.Cecil.Cil {
 			return decompressed_stream;
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			throw new NotSupportedException ();
 		}
@@ -235,23 +235,23 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckFileName (fileName);
 
 			var file = File.OpenWrite (Mixin.GetPdbFileName (fileName));
-			return GetSymbolWriter (module, Disposable.Owned (file as Stream));
+			return GetSymbolWriter (module, Disposable.Owned (file as Stream), file.Name);
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 
-			return GetSymbolWriter (module, Disposable.NotOwned (symbolStream));
+			return GetSymbolWriter (module, Disposable.NotOwned (symbolStream), symbolFileName);
 		}
 
-		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Disposable<Stream> stream)
+		ISymbolWriter GetSymbolWriter (ModuleDefinition module, Disposable<Stream> stream, string fileName)
 		{
 			var metadata = new MetadataBuilder (module, this);
 			var writer = ImageWriter.CreateDebugWriter (module, metadata, stream);
 
-			return new PortablePdbWriter (metadata, module, writer);
+			return new PortablePdbWriter (metadata, module, writer, fileName);
 		}
 	}
 
@@ -260,15 +260,17 @@ namespace Mono.Cecil.Cil {
 		readonly MetadataBuilder pdb_metadata;
 		readonly ModuleDefinition module;
 		readonly ImageWriter writer;
+		readonly string file_name;
 
 		MetadataBuilder module_metadata;
 
 		bool IsEmbedded { get { return writer == null; } }
 
-		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module)
+		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module, string fileName)
 		{
 			this.pdb_metadata = pdb_metadata;
 			this.module = module;
+			this.file_name = fileName;
 
 			this.module_metadata = module.metadata_builder;
 
@@ -278,8 +280,8 @@ namespace Mono.Cecil.Cil {
 			pdb_metadata.AddCustomDebugInformations (module);
 		}
 
-		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module, ImageWriter writer)
-			: this (pdb_metadata, module)
+		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module, ImageWriter writer, string fileName)
+			: this (pdb_metadata, module, fileName)
 		{
 			this.writer = writer;
 		}
@@ -309,7 +311,7 @@ namespace Mono.Cecil.Cil {
 			// PDB Age
 			buffer.WriteUInt32 (1);
 			// PDB Path
-			var fileName = writer.BaseStream.GetFileName ();
+			var fileName = writer.BaseStream.GetFileName (file_name);
 			if (string.IsNullOrEmpty (fileName)) {
 				fileName = module.Assembly.Name.Name + ".pdb";
 			}
@@ -409,11 +411,11 @@ namespace Mono.Cecil.Cil {
 			Mixin.CheckFileName (fileName);
 
 			var stream = new MemoryStream ();
-			var pdb_writer = (PortablePdbWriter) new PortablePdbWriterProvider ().GetSymbolWriter (module, stream);
+			var pdb_writer = (PortablePdbWriter) new PortablePdbWriterProvider ().GetSymbolWriter (module, stream, fileName);
 			return new EmbeddedPortablePdbWriter (stream, pdb_writer);
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			throw new NotSupportedException ();
 		}

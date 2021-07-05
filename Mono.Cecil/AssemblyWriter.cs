@@ -95,7 +95,7 @@ namespace Mono.Cecil {
 				module.symbol_reader.Dispose ();
 
 			var name = module.assembly != null && module.kind != ModuleKind.NetModule ? module.assembly.Name : null;
-			var fq_name = stream.value.GetFileName ();
+			var fq_name = stream.value.GetFileName (parameters.FileName);
 			var timestamp = parameters.Timestamp ?? module.timestamp;
 			var symbol_writer_provider = parameters.SymbolWriterProvider;
 
@@ -152,7 +152,7 @@ namespace Mono.Cecil {
 				return null;
 
 			if (parameters.SymbolStream != null)
-				return symbol_writer_provider.GetSymbolWriter (module, parameters.SymbolStream);
+				return symbol_writer_provider.GetSymbolWriter (module, parameters.SymbolStream, parameters.SymbolFileName);
 
 			return symbol_writer_provider.GetSymbolWriter (module, fq_name);
 		}
@@ -956,7 +956,7 @@ namespace Mono.Cecil {
 			symbol_writer = writer;
 
 			if (symbol_writer == null && module.HasImage && module.Image.HasDebugTables ())
-				symbol_writer = new PortablePdbWriter (this, module);
+				symbol_writer = new PortablePdbWriter (this, module, "");
 		}
 
 		TextMap CreateTextMap ()
