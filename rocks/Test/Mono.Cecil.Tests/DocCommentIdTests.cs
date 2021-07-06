@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using NUnit.Framework;
-
 using Mono.Cecil.Rocks;
 
 namespace N
@@ -116,6 +114,76 @@ namespace N
 	}
 
 	public class KVP<K, T> { }
+
+	public class GenericMethod
+	{
+		/// <summary>
+		/// ID string generated is "M:N.GenericMethod.WithNestedType``1(N.GenericType{``0}.NestedType)".
+		/// </summary>
+		public void WithNestedType<T> (GenericType<T>.NestedType nestedType) { }
+
+
+		/// <summary>
+		/// ID string generated is "M:N.GenericMethod.WithIntOfNestedType``1(N.GenericType{System.Int32}.NestedType)".
+		/// </summary>
+		public void WithIntOfNestedType<T> (GenericType<int>.NestedType nestedType) { }
+
+
+		/// <summary>
+		/// ID string generated is "M:N.GenericMethod.WithNestedGenericType``1(N.GenericType{``0}.NestedGenericType{``0}.NestedType)".
+		/// </summary>
+		public void WithNestedGenericType<T> (GenericType<T>.NestedGenericType<T>.NestedType nestedType) { }
+
+
+		/// <summary>
+		/// ID string generated is "M:N.GenericMethod.WithIntOfNestedGenericType``1(N.GenericType{System.Int32}.NestedGenericType{System.Int32}.NestedType)".
+		/// </summary>
+		public void WithIntOfNestedGenericType<T> (GenericType<int>.NestedGenericType<int>.NestedType nestedType) { }
+
+
+		/// <summary>
+		/// ID string generated is "M:N.GenericMethod.WithMultipleTypeParameterAndNestedGenericType``2(N.GenericType{``0}.NestedGenericType{``1}.NestedType)".
+		/// </summary>
+		public void WithMultipleTypeParameterAndNestedGenericType<T1, T2> (GenericType<T1>.NestedGenericType<T2>.NestedType nestedType) { }
+
+
+		/// <summary>
+		/// ID string generated is "M:N.GenericMethod.WithMultipleTypeParameterAndIntOfNestedGenericType``2(N.GenericType{System.Int32}.NestedGenericType{System.Int32}.NestedType)".
+		/// </summary>
+		public void WithMultipleTypeParameterAndIntOfNestedGenericType<T1, T2> (GenericType<int>.NestedGenericType<int>.NestedType nestedType) { }
+	}
+
+	public class GenericType<T>
+	{
+		public class NestedType { }
+
+		public class NestedGenericType<TNested> {
+			public class NestedType { }
+
+			/// <summary>
+			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericMethod``1(System.Collections.Generic.List{``0})"
+			/// </summary>
+			public void WithTypeParameterOfGenericMethod<TMethod> (List<TMethod> list) { }
+
+
+			/// <summary>
+			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericType(System.Collections.Generic.Dictionary{`0,`1})"
+			/// </summary>
+			public void WithTypeParameterOfGenericType (Dictionary<T, TNested> dict) { }
+
+
+			/// <summary>
+			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericType``1(System.Collections.Generic.List{`1})"
+			/// </summary>
+			public void WithTypeParameterOfNestedGenericType<TMethod> (List<TNested> list) { }
+
+
+			/// <summary>
+			/// ID string generated is "M:N.GenericType`1.NestedGenericType`1.WithTypeParameterOfGenericTypeAndGenericMethod``1(System.Collections.Generic.Dictionary{`1,``0})"
+			/// </summary>
+			public void WithTypeParameterOfGenericTypeAndGenericMethod<TMethod> (Dictionary<TNested, TMethod> dict) { }
+		}
+	}
 }
 
 namespace Mono.Cecil.Tests {
@@ -190,6 +258,32 @@ namespace Mono.Cecil.Tests {
 			var method = type.Methods.Single (m => m.Name == "gg");
 
 			AssertDocumentID ("M:N.X.gg(System.Int16[],System.Int32[0:,0:])", method);
+		}
+
+		[TestCase ("WithNestedType", "WithNestedType``1(N.GenericType{``0}.NestedType)")]
+		[TestCase ("WithIntOfNestedType", "WithIntOfNestedType``1(N.GenericType{System.Int32}.NestedType)")]
+		[TestCase ("WithNestedGenericType", "WithNestedGenericType``1(N.GenericType{``0}.NestedGenericType{``0}.NestedType)")]
+		[TestCase ("WithIntOfNestedGenericType", "WithIntOfNestedGenericType``1(N.GenericType{System.Int32}.NestedGenericType{System.Int32}.NestedType)")]
+		[TestCase ("WithMultipleTypeParameterAndNestedGenericType", "WithMultipleTypeParameterAndNestedGenericType``2(N.GenericType{``0}.NestedGenericType{``1}.NestedType)")]
+		[TestCase ("WithMultipleTypeParameterAndIntOfNestedGenericType", "WithMultipleTypeParameterAndIntOfNestedGenericType``2(N.GenericType{System.Int32}.NestedGenericType{System.Int32}.NestedType)")]
+		public void GenericMethodWithNestedTypeParameters (string methodName, string docCommentId)
+		{
+			var type = GetTestType (typeof (N.GenericMethod));
+			var method = type.Methods.Single (m => m.Name == methodName);
+
+			AssertDocumentID ($"M:N.GenericMethod.{docCommentId}", method);
+		}
+
+		[TestCase ("WithTypeParameterOfGenericMethod", "WithTypeParameterOfGenericMethod``1(System.Collections.Generic.List{``0})")]
+		[TestCase ("WithTypeParameterOfGenericType", "WithTypeParameterOfGenericType(System.Collections.Generic.Dictionary{`0,`1})")]
+		[TestCase ("WithTypeParameterOfNestedGenericType", "WithTypeParameterOfNestedGenericType``1(System.Collections.Generic.List{`1})")]
+		[TestCase ("WithTypeParameterOfGenericTypeAndGenericMethod", "WithTypeParameterOfGenericTypeAndGenericMethod``1(System.Collections.Generic.Dictionary{`1,``0})")]
+		public void GenericTypeWithTypeParameters (string methodName, string docCommentId)
+		{
+			var type = GetTestType (typeof (N.GenericType<>.NestedGenericType<>));
+			var method = type.Methods.Single (m => m.Name == methodName);
+
+			AssertDocumentID ($"M:N.GenericType`1.NestedGenericType`1.{docCommentId}", method);
 		}
 
 		[Test]
@@ -276,6 +370,11 @@ namespace Mono.Cecil.Tests {
 		TypeDefinition GetTestType ()
 		{
 			return typeof (N.X).ToDefinition ();
+		}
+
+		TypeDefinition GetTestType (Type type)
+		{
+			return type.ToDefinition ();
 		}
 
 		static void AssertDocumentID (string docId, IMemberDefinition member)
