@@ -698,6 +698,11 @@ class Program
 				symbol_writer.Write (info);
 			}
 
+			public void Write ()
+			{
+				symbol_writer.Write ();
+			}
+
 			public void Dispose ()
 			{
 				symbol_writer.Dispose ();

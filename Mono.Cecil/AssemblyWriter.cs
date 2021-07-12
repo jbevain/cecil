@@ -121,6 +121,9 @@ namespace Mono.Cecil {
 					if (parameters.DeterministicMvid)
 						metadata.ComputeDeterministicMvid ();
 
+					if (symbol_writer != null)
+						symbol_writer.Write ();
+
 					var writer = ImageWriter.CreateWriter (module, metadata, stream);
 					stream.value.SetLength (0);
 					writer.WriteImage ();

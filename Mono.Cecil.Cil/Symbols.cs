@@ -39,6 +39,7 @@ namespace Mono.Cecil.Cil {
 		CodeView = 2,
 		Deterministic = 16,
 		EmbeddedPortablePdb = 17,
+		PdbChecksum = 19,
 	}
 
 	public sealed class ImageDebugHeader {
@@ -1114,6 +1115,7 @@ namespace Mono.Cecil.Cil {
 		ISymbolReaderProvider GetReaderProvider ();
 		ImageDebugHeader GetDebugHeader ();
 		void Write (MethodDebugInformation info);
+		void Write ();
 	}
 
 	public interface ISymbolWriterProvider {
