@@ -354,6 +354,8 @@ namespace Mono.Cecil.Cil {
 			if (scope.HasScopes) {
 				foreach (var subScope in scope.Scopes)
 					UpdateLocalScope (subScope, removedInstruction, existingInstruction, ref cache);
+				var dead = scope.Scopes.Where (s => s.Start.IsEndOfMethod).ToList ();
+				dead.ForEach (d => scope.Scopes.Remove (d));
 			}
 
 			if (!scope.End.IsResolved)
