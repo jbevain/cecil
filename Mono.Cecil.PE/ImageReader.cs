@@ -764,7 +764,7 @@ namespace Mono.Cecil.PE {
 				reader.ReadImage ();
 				return reader.image;
 			} catch (EndOfStreamException e) {
-				throw new BadImageFormatException (stream.value.GetFileName (), e);
+				throw new BadImageFormatException (file_name, e);
 			}
 		}
 
@@ -787,7 +787,7 @@ namespace Mono.Cecil.PE {
 				reader.ReadMetadata ();
 				return reader.image;
 			} catch (EndOfStreamException e) {
-				throw new BadImageFormatException (stream.value.GetFileName (), e);
+				throw new BadImageFormatException (file_name, e);
 			}
 		}
 	}

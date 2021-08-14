@@ -28,7 +28,7 @@ namespace Mono.Cecil.Mdb {
 			return new MdbWriter (module, fileName);
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			throw new NotImplementedException ();
 		}

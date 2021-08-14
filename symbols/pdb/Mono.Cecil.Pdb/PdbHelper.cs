@@ -25,7 +25,7 @@ namespace Mono.Cecil.Pdb {
 			return new NativePdbReader (Disposable.Owned (File.OpenRead (Mixin.GetPdbFileName (fileName)) as Stream));
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
@@ -54,15 +54,15 @@ namespace Mono.Cecil.Pdb {
 				: new NativePdbReaderProvider ().GetSymbolReader (module, fileName);
 		}
 
-		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream)
+		public ISymbolReader GetSymbolReader (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 			Mixin.CheckReadSeek (symbolStream);
 
 			return Mixin.IsPortablePdb (symbolStream)
-				? new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream)
-				: new NativePdbReaderProvider ().GetSymbolReader (module, symbolStream);
+				? new PortablePdbReaderProvider ().GetSymbolReader (module, symbolStream, symbolFileName)
+				: new NativePdbReaderProvider ().GetSymbolReader (module, symbolStream, symbolFileName);
 		}
 	}
 
@@ -88,7 +88,7 @@ namespace Mono.Cecil.Pdb {
 			return writer;
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			throw new NotImplementedException ();
 		}
@@ -112,16 +112,16 @@ namespace Mono.Cecil.Pdb {
 			return module.symbol_reader != null && module.symbol_reader is PortablePdbReader;
 		}
 
-		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream)
+		public ISymbolWriter GetSymbolWriter (ModuleDefinition module, Stream symbolStream, string symbolFileName)
 		{
 			Mixin.CheckModule (module);
 			Mixin.CheckStream (symbolStream);
 			Mixin.CheckReadSeek (symbolStream);
 
 			if (HasPortablePdbSymbols (module))
-				return new PortablePdbWriterProvider ().GetSymbolWriter (module, symbolStream);
+				return new PortablePdbWriterProvider ().GetSymbolWriter (module, symbolStream, symbolFileName);
 
-			return new NativePdbWriterProvider ().GetSymbolWriter (module, symbolStream);
+			return new NativePdbWriterProvider ().GetSymbolWriter (module, symbolStream, symbolFileName);
 		}
 	}
 }
