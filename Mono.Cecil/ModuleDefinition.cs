@@ -40,6 +40,7 @@ namespace Mono.Cecil {
 		bool projections;
 		bool in_memory;
 		bool read_write;
+		bool image_layout_in_memory;
 
 		public ReadingMode ReadingMode {
 			get { return reading_mode; }
@@ -99,6 +100,11 @@ namespace Mono.Cecil {
 		public bool ApplyWindowsRuntimeProjections {
 			get { return projections; }
 			set { projections = value; }
+		}
+
+		public bool ImageLayoutInMemory {
+			get { return image_layout_in_memory; }
+			set { image_layout_in_memory = value; }
 		}
 
 		public ReaderParameters ()
@@ -1139,7 +1145,7 @@ namespace Mono.Cecil {
 			Mixin.CheckParameters (parameters);
 
 			return ModuleReader.CreateModule (
-				ImageReader.ReadImage (stream, fileName),
+				ImageReader.ReadImage (stream, fileName, parameters.ImageLayoutInMemory),
 				parameters);
 		}
 
