@@ -269,7 +269,7 @@ namespace Mono.Cecil.Rocks {
 		IList<TypeReference> GetGenericTypeArguments (TypeReference type, GenericTypeOptions options)
 		{
 			if (options.IsNestedType) {
-				var typeParameterCount = GetGenericTypeParameterCount (type);
+				var typeParameterCount = type.GenericParameters.Count;
 				var typeGenericArguments = options.Arguments.Skip (options.ArgumentIndex).Take (typeParameterCount).ToList ();
 
 				options.ArgumentIndex += typeParameterCount;
@@ -280,15 +280,15 @@ namespace Mono.Cecil.Rocks {
 			return options.Arguments;
 		}
 
-		int GetGenericTypeParameterCount (TypeReference type)
-		{
-			var returnValue = 0;
-			var index = type.Name.LastIndexOf ('`');
-			if (index >= 0)
-				returnValue = int.Parse (type.Name.Substring (index + 1));
+		//int GetGenericTypeParameterCount (TypeReference type)
+		//{
+		//	var returnValue = 0;
+		//	var index = type.Name.LastIndexOf ('`');
+		//	if (index >= 0)
+		//		returnValue = int.Parse (type.Name.Substring (index + 1));
 
-			return returnValue;
-		}
+		//	return returnValue;
+		//}
 
 		void WriteItemName (string name)
 		{
