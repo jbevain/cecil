@@ -225,9 +225,21 @@ namespace Mono.Cecil {
 			return FullName;
 		}
 
+		private bool reentrancyGuard = false;
+
 		public TypeDefinition Resolve ()
 		{
-			return module.Resolve (CreateReference ());
+			if (reentrancyGuard) {
+				throw new InvalidOperationException ($"Circularity when resolving exported type {this}");
+			}
+
+			reentrancyGuard = true;
+			try {
+				return module.Resolve (CreateReference ());
+			}
+			finally {
+				reentrancyGuard = false;
+			}
 		}
 
 		internal TypeReference CreateReference ()
