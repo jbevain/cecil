@@ -138,6 +138,14 @@ namespace Mono.Cecil {
 			this.token = new MetadataToken (TokenType.Param);
 		}
 
+		public ParameterDefinition (string name, ParameterAttributes attributes, TypeReference parameterType, int index)
+			: base (name, parameterType)
+		{
+			this.attributes = (ushort) attributes;
+			this.token = new MetadataToken (TokenType.Param);
+			this.index = index;
+		}
+
 		public override ParameterDefinition Resolve ()
 		{
 			return this;
