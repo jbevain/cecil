@@ -21,6 +21,12 @@ namespace Mono.Cecil.Cil {
 		{
 		}
 
+		public VariableDefinition (TypeReference variableType, int index)
+			: base (variableType)
+		{
+			this.index = index;
+		}
+
 		public override VariableDefinition Resolve ()
 		{
 			return this;
