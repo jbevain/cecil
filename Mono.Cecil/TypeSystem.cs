@@ -9,7 +9,7 @@
 //
 
 using System;
-
+using System.Collections.Generic;
 using Mono.Cecil.Metadata;
 
 namespace Mono.Cecil {
@@ -151,6 +151,8 @@ namespace Mono.Cecil {
 		TypeReference type_string;
 		TypeReference type_typedref;
 
+		internal static List<string> custom_corelibs;
+
 		TypeSystem (ModuleDefinition module)
 		{
 			this.module = module;
@@ -187,6 +189,19 @@ namespace Mono.Cecil {
 				type.KnownValueType ();
 				return typeRef = type;
 			}
+		}
+
+		public static void AddCustomCoreLib(string libraryName)
+		{
+			if (custom_corelibs == null)
+				custom_corelibs = new List<string>();
+			custom_corelibs.Add(libraryName);
+		}
+
+		public static void RemoveCustomCoreLib(string libraryName)
+		{
+			if (custom_corelibs != null)
+				custom_corelibs.Remove(libraryName);
 		}
 
 		[Obsolete ("Use CoreLibrary")]
@@ -322,10 +337,24 @@ namespace Mono.Cecil {
 		static bool IsCoreLibrary (AssemblyNameReference reference)
 		{
 			var name = reference.Name;
-			return name == mscorlib
+
+			// well known core libraries
+			if (name == mscorlib
 				|| name == system_runtime
 				|| name == system_private_corelib
-				|| name == netstandard;
+				|| name == netstandard) {
+				return true;
+			}
+
+			// custom core libraries
+			if (TypeSystem.custom_corelibs != null) {
+				foreach (string libName in TypeSystem.custom_corelibs) {
+					if (libName == name)
+						return true;
+				}
+			}
+
+			return false;
 		}
 	}
 }
