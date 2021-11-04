@@ -266,6 +266,11 @@ namespace Mono.Cecil {
 			return this;
 		}
 
+		public virtual void SetElementType (TypeReference element)
+		{
+			// do nothing...
+		}
+
 		protected override IMemberDefinition ResolveDefinition ()
 		{
 			return this.Resolve ();

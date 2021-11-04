@@ -107,5 +107,10 @@ namespace Mono.Cecil {
 		{
 			return this;
 		}
+
+		public override void SetElementType (TypeReference element)
+		{
+			// do nothing...
+		}
 	}
 }

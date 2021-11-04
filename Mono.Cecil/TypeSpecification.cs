@@ -16,7 +16,7 @@ namespace Mono.Cecil {
 
 	public abstract class TypeSpecification : TypeReference {
 
-		readonly TypeReference element_type;
+		TypeReference element_type;
 
 		public TypeReference ElementType {
 			get { return element_type; }
@@ -63,6 +63,11 @@ namespace Mono.Cecil {
 		public override TypeReference GetElementType ()
 		{
 			return element_type.GetElementType ();
+		}
+
+		public override void SetElementType (TypeReference element)
+		{
+			element_type = element;
 		}
 	}
 }
