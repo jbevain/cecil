@@ -237,9 +237,16 @@ namespace Mono.Cecil.Tests {
 
 				var header = module.GetDebugHeader ();
 
-				Assert.AreEqual (2, header.Entries.Length);
+				Assert.IsTrue (header.Entries.Length >= 2);
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.CodeView));
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.Deterministic));
+
+				// If read directly from a file the PdbChecksum may not be persent (in this test case it isn't)
+				// but when written through Cecil it will always be there.
+				if (header.Entries.Length > 2) {
+					Assert.AreEqual (3, header.Entries.Length);
+					Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.PdbChecksum));
+				}
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
@@ -251,10 +258,17 @@ namespace Mono.Cecil.Tests {
 
 				var header = module.GetDebugHeader ();
 
-				Assert.AreEqual (3, header.Entries.Length);
+				Assert.IsTrue (header.Entries.Length >= 3);
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.CodeView));
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.Deterministic));
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.EmbeddedPortablePdb));
+
+				// If read directly from a file the PdbChecksum may not be persent (in this test case it isn't)
+				// but when written through Cecil it will always be there.
+				if (header.Entries.Length > 3) {
+					Assert.AreEqual (4, header.Entries.Length);
+					Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.PdbChecksum));
+				}
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 	}

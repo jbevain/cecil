@@ -39,6 +39,7 @@ namespace Mono.Cecil.Cil {
 		CodeView = 2,
 		Deterministic = 16,
 		EmbeddedPortablePdb = 17,
+		PdbChecksum = 19,
 	}
 
 	public sealed class ImageDebugHeader {
@@ -1172,6 +1173,11 @@ namespace Mono.Cecil {
 		public static ImageDebugHeaderEntry GetEmbeddedPortablePdbEntry (this ImageDebugHeader header)
 		{
 			return GetEntry (header, ImageDebugType.EmbeddedPortablePdb);
+		}
+
+		public static ImageDebugHeaderEntry GetPdbChecksumEntry (this ImageDebugHeader header)
+		{
+			return GetEntry (header, ImageDebugType.PdbChecksum);
 		}
 
 		private static ImageDebugHeaderEntry GetEntry (this ImageDebugHeader header, ImageDebugType type)
