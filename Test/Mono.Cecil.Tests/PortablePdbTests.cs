@@ -886,7 +886,7 @@ class Program
 				GetPdbChecksumData (module.GetDebugHeader (), out string algorithmName, out byte [] checksum);
 				Assert.AreEqual ("SHA256", algorithmName);
 
-				string pdbPath = GetDebugHeaderPdbPath (module);
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
 				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] pdbId);
 
 				CollectionAssert.AreEqual (expectedChecksum, checksum);
@@ -924,7 +924,7 @@ class Program
 				GetPdbChecksumData (module.GetDebugHeader (), out string algorithmName, out byte [] checksum);
 				Assert.AreEqual ("SHA256", algorithmName);
 
-				string pdbPath = GetDebugHeaderPdbPath (module);
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
 				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] pdbId);
 
 				CollectionAssert.AreEqual (expectedChecksum, checksum);
@@ -961,7 +961,7 @@ class Program
 
 			byte [] pdbIdOne;
 			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
-				string pdbPath = GetDebugHeaderPdbPath (module);
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
 				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out pdbIdOne);
 			}
 
@@ -971,7 +971,7 @@ class Program
 
 			byte [] pdbIdTwo;
 			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
-				string pdbPath = GetDebugHeaderPdbPath (module);
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
 				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out pdbIdTwo);
 			}
 
