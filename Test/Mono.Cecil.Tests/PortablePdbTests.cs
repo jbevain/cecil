@@ -885,11 +885,13 @@ class Program
 			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
 				GetPdbChecksumData (module.GetDebugHeader (), out string algorithmName, out byte [] checksum);
 				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte[] pdbId);
 
 				string pdbPath = Mixin.GetPdbFileName (module.FileName);
-				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] pdbId);
+				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] expectedPdbId);
 
 				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
 			}
 		}
 
@@ -902,11 +904,13 @@ class Program
 				var debugHeader = module.GetDebugHeader ();
 				GetPdbChecksumData (debugHeader, out string algorithmName, out byte [] checksum);
 				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte [] pdbId);
 
 				GetEmbeddedPdb (debugHeader, out byte [] embeddedPdb);
-				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out byte [] pdbId);
+				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out byte [] expectedPdbId);
 
 				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
 			}
 		}
 
@@ -923,11 +927,13 @@ class Program
 			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
 				GetPdbChecksumData (module.GetDebugHeader (), out string algorithmName, out byte [] checksum);
 				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte [] pdbId);
 
 				string pdbPath = Mixin.GetPdbFileName (module.FileName);
-				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] pdbId);
+				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] expectedPdbId);
 
 				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
 			}
 		}
 
@@ -992,11 +998,13 @@ class Program
 				var debugHeader = module.GetDebugHeader ();
 				GetPdbChecksumData (debugHeader, out string algorithmName, out byte [] checksum);
 				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte [] pdbId);
 
 				GetEmbeddedPdb (debugHeader, out byte [] embeddedPdb);
-				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out byte [] pdbId);
+				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out byte [] expectedPdbId);
 
 				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
 			}
 		}
 
@@ -1101,6 +1109,20 @@ class Program
 
 			var sha256 = SHA256.Create ();
 			pdbChecksum = sha256.ComputeHash (bytes);
+		}
+
+		static void GetCodeViewPdbId (ModuleDefinition module, out byte[] pdbId)
+		{
+			var header = module.GetDebugHeader ();
+			var cv = Mixin.GetCodeViewEntry (header);
+			Assert.IsNotNull (cv);
+
+			CollectionAssert.AreEqual (new byte [] { 0x52, 0x53, 0x44, 0x53 }, cv.Data.Take (4));
+
+			ByteBuffer buffer = new ByteBuffer (20);
+			buffer.WriteBytes (cv.Data.Skip (4).Take (16).ToArray ());
+			buffer.WriteInt32 (cv.Directory.TimeDateStamp);
+			pdbId = buffer.buffer;
 		}
 	}
 }

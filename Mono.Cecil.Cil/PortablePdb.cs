@@ -269,7 +269,7 @@ namespace Mono.Cecil.Cil {
 
 		internal byte [] pdb_checksum;
 		internal Guid pdb_id_guid;
-		internal uint pdb_id_age;
+		internal uint pdb_id_stamp;
 
 		bool IsEmbedded { get { return writer == null; } }
 
@@ -324,7 +324,7 @@ namespace Mono.Cecil.Cil {
 					MajorVersion = 256,
 					MinorVersion = 20557,
 					Type = ImageDebugType.CodeView,
-					TimeDateStamp = (int)module.timestamp,
+					TimeDateStamp = (int)pdb_id_stamp,
 				};
 
 				var buffer = new ByteBuffer ();
@@ -333,7 +333,7 @@ namespace Mono.Cecil.Cil {
 				// Module ID
 				buffer.WriteBytes (pdb_id_guid.ToByteArray ());
 				// PDB Age
-				buffer.WriteUInt32 (pdb_id_age);
+				buffer.WriteUInt32 (1);
 				// PDB Path
 				var fileName = writer.BaseStream.GetFileName ();
 				if (string.IsNullOrEmpty (fileName)) {
@@ -462,7 +462,7 @@ namespace Mono.Cecil.Cil {
 
 			var hashBytes = new ByteBuffer (pdb_checksum);
 			pdb_id_guid = new Guid (hashBytes.ReadBytes (16));
-			pdb_id_age = hashBytes.ReadUInt32 ();
+			pdb_id_stamp = hashBytes.ReadUInt32 ();
 		}
 
 		void WritePdbId ()
@@ -470,7 +470,7 @@ namespace Mono.Cecil.Cil {
 			// PDB ID is the first 20 bytes of the PdbHeap
 			writer.MoveToRVA (TextSegment.PdbHeap);
 			writer.WriteBytes (pdb_id_guid.ToByteArray ());
-			writer.WriteUInt32 (pdb_id_age);
+			writer.WriteUInt32 (pdb_id_stamp);
 		}
 	}
 
