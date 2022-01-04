@@ -266,6 +266,8 @@ namespace Mono.Cecil.Metadata {
 		void Align (int align)
 		{
 			align--;
+                        // Compute the number of bytes to align the current position.
+                        // Values of 0 will be written.
 			WriteBytes (((position + align) & ~align) - position);
 		}
 
