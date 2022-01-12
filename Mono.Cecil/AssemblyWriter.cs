@@ -1616,12 +1616,14 @@ namespace Mono.Cecil {
 
 			// To allow for safe implementation of metadata rewriters for code which uses CreateSpan<T>
 			// if the Field RVA refers to a locally defined type with a pack > 1, align the InitialValue
-			// to pack boundary.
+			// to pack boundary. This logic is restricted to only being affected by metadata local to the module
+			// as PackingSize is only used when examining a type local to the module being written.
 
 			int align = 1;
 			if (field.FieldType.IsDefinition && !field.FieldType.IsGenericInstance) {
 				var type = field.FieldType.Resolve ();
-				if (type.PackingSize > 1)
+
+				if ((type.Module == module) && (type.PackingSize > 1))
 					align = type.PackingSize;
 			}
 			table.AddRow (new FieldRVARow (
