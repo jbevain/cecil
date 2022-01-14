@@ -28,6 +28,9 @@ namespace Mono.Cecil.Pdb {
 		readonly Dictionary<string, SymDocumentWriter> documents;
 		readonly Dictionary<ImportDebugInformation, MetadataToken> import_info_to_parent;
 
+		ImageDebugDirectory debug_directory;
+		byte [] debug_info;
+
 		internal NativePdbWriter (ModuleDefinition module, SymWriter writer)
 		{
 			this.module = module;
@@ -44,16 +47,7 @@ namespace Mono.Cecil.Pdb {
 
 		public ImageDebugHeader GetDebugHeader ()
 		{
-			var entry_point = module.EntryPoint;
-			if (entry_point != null)
-				writer.SetUserEntryPoint (entry_point.MetadataToken.ToInt32 ());
-
-			ImageDebugDirectory directory;
-			var data = writer.GetDebugInfo (out directory);
-			directory.TimeDateStamp = (int) module.timestamp;
-
-			writer.Close ();
-			return new ImageDebugHeader (new ImageDebugHeaderEntry (directory, data));
+			return new ImageDebugHeader (new ImageDebugHeaderEntry (debug_directory, debug_info));
 		}
 
 		public void Write (MethodDebugInformation info)
@@ -257,6 +251,18 @@ namespace Mono.Cecil.Pdb {
 
 			documents [document.Url] = doc_writer;
 			return doc_writer;
+		}
+
+		public void Write ()
+		{
+			var entry_point = module.EntryPoint;
+			if (entry_point != null)
+				writer.SetUserEntryPoint (entry_point.MetadataToken.ToInt32 ());
+
+			debug_info = writer.GetDebugInfo (out debug_directory);
+			debug_directory.TimeDateStamp = (int)module.timestamp;
+
+			writer.Close ();
 		}
 
 		public void Dispose ()

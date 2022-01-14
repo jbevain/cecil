@@ -118,11 +118,10 @@ namespace Mono.Cecil {
 					metadata.SetSymbolWriter (symbol_writer);
 					BuildMetadata (module, metadata);
 
-					ImageDebugHeader debugHeader = null;
 					if (symbol_writer != null)
-						debugHeader = symbol_writer.GetDebugHeader ();
+						symbol_writer.Write ();
 
-					var writer = ImageWriter.CreateWriter (module, metadata, stream, debugHeader);
+					var writer = ImageWriter.CreateWriter (module, metadata, stream);
 					stream.value.SetLength (0);
 					writer.WriteImage ();
 

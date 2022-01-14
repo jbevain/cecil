@@ -305,10 +305,10 @@ namespace Mono.Cecil.Cil {
 			pdb_metadata.AddMethodDebugInformation (info);
 		}
 
-		public ImageDebugHeader GetDebugHeader ()
+		public void Write ()
 		{
 			if (IsEmbedded)
-				return new ImageDebugHeader ();
+				return;
 
 			WritePdbFile ();
 
@@ -317,6 +317,12 @@ namespace Mono.Cecil.Cil {
 				var buffer = new byte [8192];
 				CryptoService.CopyStreamChunk (writer.BaseStream, final_stream.value, buffer, (int)writer.BaseStream.Length);
 			}
+		}
+
+		public ImageDebugHeader GetDebugHeader ()
+		{
+			if (IsEmbedded)
+				return new ImageDebugHeader ();
 
 			ImageDebugHeaderEntry codeViewEntry;
 			{
@@ -548,8 +554,14 @@ namespace Mono.Cecil.Cil {
 			return new ImageDebugHeader (debugHeaderEntries);
 		}
 
+		public void Write ()
+		{
+			writer.Write ();
+		}
+
 		public void Dispose ()
 		{
+			writer.Dispose ();
 		}
 	}
 

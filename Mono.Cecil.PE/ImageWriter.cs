@@ -50,7 +50,7 @@ namespace Mono.Cecil.PE {
 
 		internal long debug_header_entries_position;
 
-		ImageWriter (ModuleDefinition module, string runtime_version, MetadataBuilder metadata, Disposable<Stream> stream, bool metadataOnly = false, ImageDebugHeader debugHeader = null)
+		ImageWriter (ModuleDefinition module, string runtime_version, MetadataBuilder metadata, Disposable<Stream> stream, bool metadataOnly = false)
 			: base (stream.value)
 		{
 			this.module = module;
@@ -63,18 +63,26 @@ namespace Mono.Cecil.PE {
 
 			this.pe64 = module.Architecture == TargetArchitecture.AMD64 || module.Architecture == TargetArchitecture.IA64 || module.Architecture == TargetArchitecture.ARM64;
 			this.has_reloc = module.Architecture == TargetArchitecture.I386;
+			this.GetDebugHeader ();
 			this.GetWin32Resources ();
+			this.BuildTextMap ();
+			this.sections = (ushort)(has_reloc ? 2 : 1); // text + reloc?
+		}
 
-			debug_header = debugHeader;
+		void GetDebugHeader ()
+		{
+			var symbol_writer = metadata.symbol_writer;
+			if (symbol_writer != null)
+				debug_header = symbol_writer.GetDebugHeader ();
+
 			if (module.HasDebugHeader) {
 				var header = module.GetDebugHeader ();
 				var deterministic = header.GetDeterministicEntry ();
-				if (deterministic != null)
-					debug_header = debug_header.AddDeterministicEntry ();
-			}
+				if (deterministic == null)
+					return;
 
-			this.BuildTextMap ();
-			this.sections = (ushort)(has_reloc ? 2 : 1); // text + reloc?
+				debug_header = debug_header.AddDeterministicEntry ();
+			}
 		}
 
 		void GetWin32Resources ()
@@ -90,9 +98,9 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Disposable<Stream> stream, ImageDebugHeader debugHeader)
+		public static ImageWriter CreateWriter (ModuleDefinition module, MetadataBuilder metadata, Disposable<Stream> stream)
 		{
-			var writer = new ImageWriter (module, module.runtime_version, metadata, stream, metadataOnly: false, debugHeader: debugHeader);
+			var writer = new ImageWriter (module, module.runtime_version, metadata, stream, metadataOnly: false);
 			writer.BuildSections ();
 			return writer;
 		}

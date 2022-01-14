@@ -167,6 +167,12 @@ namespace Mono.Cecil.Mdb {
 			return new ImageDebugHeader ();
 		}
 
+		public void Write ()
+		{
+			// Can't write it here since we need the final module MVID - which is only computed
+			// after the entire image of the assembly is written (since it's computed from the hash of that)
+		}
+
 		public void Dispose ()
 		{
 			writer.WriteSymbolFile (module.Mvid);
