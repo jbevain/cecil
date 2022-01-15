@@ -286,6 +286,20 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportCecilTests/Generic`1<TS> Mono.Cecil.Tests.ImportCecilTests/Generic`1<System.String>::ComplexGenericMethod<TS>(T,TS)", method.FullName);
 		}
 
+		[Test]
+		public void ImportTypeFromOtherModule ()
+		{
+			var fooModule = ModuleDefinition.CreateModule("Foo", ModuleKind.NetModule);
+			var foo = new TypeDefinition("", "Foo", 0, fooModule.TypeSystem.Object);
+			fooModule.Types.Add(foo);
+
+			var mainModule = ModuleDefinition.CreateModule("Main", ModuleKind.NetModule);
+			mainModule.ModuleReferences.Add(fooModule);
+			var program = new TypeDefinition("", "Program", TypeAttributes.Class, mainModule.TypeSystem.Object);
+			var importedFooType = mainModule.ImportReference(foo);
+			Assert.AreEqual ("Foo", importedFooType.FullName);
+		}
+
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
 		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName] string testMethodName = null)
