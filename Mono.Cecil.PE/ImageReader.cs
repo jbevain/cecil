@@ -27,6 +27,7 @@ namespace Mono.Cecil.PE {
 		DataDirectory metadata;
 
 		uint table_heap_offset;
+		uint pdb_heap_offset;
 
 		public ImageReader (Disposable<Stream> stream, string file_name)
 			: base (stream.value)
@@ -400,6 +401,7 @@ namespace Mono.Cecil.PE {
 				break;
 			case "#Pdb":
 				image.PdbHeap = new PdbHeap (data);
+				pdb_heap_offset = offset;
 				break;
 			}
 		}
@@ -768,7 +770,7 @@ namespace Mono.Cecil.PE {
 			}
 		}
 
-		public static Image ReadPortablePdb (Disposable<Stream> stream, string file_name)
+		public static Image ReadPortablePdb (Disposable<Stream> stream, string file_name, out uint pdb_heap_offset)
 		{
 			try {
 				var reader = new ImageReader (stream, file_name);
@@ -785,6 +787,7 @@ namespace Mono.Cecil.PE {
 
 				reader.metadata = new DataDirectory (0, length);
 				reader.ReadMetadata ();
+				pdb_heap_offset = reader.pdb_heap_offset;
 				return reader.image;
 			} catch (EndOfStreamException e) {
 				throw new BadImageFormatException (stream.value.GetFileName (), e);
