@@ -384,11 +384,16 @@ namespace Mono.Cecil.Cil {
 				// resolve by walking the instructions from start and don't cache the result.
 				int size = 0;
 				for (int i = 0; i < items.Length; i++) {
+					// The array can be larger than the actual size, in which case its padded with nulls at the end
+					// so when we reach null, treat it as an end of the IL.
+					if (items [i] == null)
+						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+
 					if (size == offset)
 						return new InstructionOffset (items [i]);
 
 					if (size > offset)
-						return new InstructionOffset (items [i - 1]);
+						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
 
 					size += items [i].GetSize ();
 				}
@@ -407,15 +412,15 @@ namespace Mono.Cecil.Cil {
 					// Allow for trailing null values in the case of
 					// instructions.Size < instructions.Capacity
 					if (item == null)
-						return new InstructionOffset (items [i - 1]);
+						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
 
 					cache.Instruction = item;
 
 					if (cache.Offset == offset)
 						return new InstructionOffset (cache.Instruction);
 
-					if (cache.Offset > offset)
-						return new InstructionOffset (items [i - 1]);
+					if (cache.Offset > offset) 
+						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
 
 					size += item.GetSize ();
 				}
