@@ -694,7 +694,7 @@ namespace Mono.Cecil.PE {
 
 			map.AddMap (TextSegment.Code, metadata.code.length, !pe64 ? 4 : 16);
 			map.AddMap (TextSegment.Resources, metadata.resources.length, 8);
-			map.AddMap (TextSegment.Data, metadata.data.length, 4);
+			map.AddMap (TextSegment.Data, metadata.data.length, metadata.data.BufferAlign);
 			if (metadata.data.length > 0)
 				metadata.table_heap.FixupData (map.GetRVA (TextSegment.Data));
 			map.AddMap (TextSegment.StrongNameSignature, GetStrongNameLength (), 4);

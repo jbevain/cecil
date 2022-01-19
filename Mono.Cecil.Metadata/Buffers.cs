@@ -256,17 +256,33 @@ namespace Mono.Cecil.Metadata {
 
 	sealed class DataBuffer : ByteBuffer {
 
+		int buffer_align = 4;
+
 		public DataBuffer ()
 			: base (0)
 		{
 		}
 
-		public RVA AddData (byte [] data)
+		void Align (int align)
 		{
+			align--;
+                        // Compute the number of bytes to align the current position.
+                        // Values of 0 will be written.
+			WriteBytes (((position + align) & ~align) - position);
+		}
+
+		public RVA AddData (byte [] data, int align)
+		{
+			if (buffer_align < align)
+				buffer_align = align;
+
+			Align (align);
 			var rva = (RVA) position;
 			WriteBytes (data);
 			return rva;
 		}
+
+		public int BufferAlign => buffer_align;
 	}
 
 	abstract class HeapBuffer : ByteBuffer {

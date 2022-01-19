@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using Mono.Cecil.PE;
 
@@ -130,6 +131,49 @@ namespace Mono.Cecil.Tests {
 				field.InitialValue = intialValue;
 
 				Assert.True (field.Attributes.HasFlag (FieldAttributes.HasFieldRVA));
+			});
+		}
+
+		int AlignmentOfInteger(int input)
+		{
+			if (input == 0)
+				return 0x40000000;
+			if (input < 0)
+				Assert.Fail ();
+			int alignment = 1;
+			while ((input & alignment) == 0)
+				alignment *= 2;
+
+			return alignment;
+		}
+
+		[Test]
+		public void FieldRVAAlignment ()
+		{
+			TestIL ("FieldRVAAlignment.il", ilmodule => {
+
+				var path = Path.GetTempFileName ();
+
+				ilmodule.Write (path);
+
+				using (var module = ModuleDefinition.ReadModule (path, new ReaderParameters { ReadWrite = true })) {
+					var priv_impl = GetPrivateImplementationType (module);
+					Assert.IsNotNull (priv_impl);
+
+					Assert.AreEqual (6, priv_impl.Fields.Count);
+
+					foreach (var field in priv_impl.Fields)
+					{
+						Assert.IsNotNull (field);
+
+						Assert.AreNotEqual (0, field.RVA);
+						Assert.IsNotNull (field.InitialValue);
+
+						int rvaAlignment = AlignmentOfInteger (field.RVA);
+						int desiredAlignment = Math.Min(8, AlignmentOfInteger (field.InitialValue.Length));
+						Assert.GreaterOrEqual (rvaAlignment, desiredAlignment);
+					}
+				}
 			});
 		}
 
