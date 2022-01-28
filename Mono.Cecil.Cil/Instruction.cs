@@ -60,6 +60,11 @@ namespace Mono.Cecil.Cil {
 			this.operand = operand;
 		}
 
+		public Instruction GetPrototype ()
+		{
+			return new Instruction (opcode, operand);
+		}
+
 		public int GetSize ()
 		{
 			int size = opcode.Size;
