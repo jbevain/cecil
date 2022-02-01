@@ -3598,6 +3598,12 @@ namespace Mono.Cecil {
 		object ReadCustomAttributeElementValue (TypeReference type)
 		{
 			var etype = type.etype;
+			if (etype == ElementType.GenericInst) {
+				// The only way to get a generic here is that it's an enum on a generic type
+				// so for enum we don't need to know the generic arguments (they have no effect)
+				type = type.GetElementType ();
+				etype = type.etype;
+			}
 
 			switch (etype) {
 			case ElementType.String:
