@@ -546,6 +546,7 @@ namespace Mono.Cecil.Tests {
 			module.Dispose ();
 		}
 
+#if NET_CORE
 		[Test]
 		public void BoxedEnumOnGenericArgumentOnType ()
 		{
@@ -642,6 +643,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (1, (int)argumentValues [1].Value);
 			});
 		}
+#endif
 
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
 		{

@@ -176,6 +176,7 @@ class Parent {
 class NullCharInString {
 }
 
+#if NET_CORE
 [Foo (GenericWithEnum<int>.OnGenericNumber.One, GenericWithEnum<string>.OnGenericNumber.Two)]
 class BoxedValueEnumOnGenericType {
 }
@@ -195,3 +196,4 @@ class PropertyEnumOnGenericType {
 [Foo(Pan = new[] { GenericWithEnum<string>.OnGenericNumber.One, GenericWithEnum<string>.OnGenericNumber.Two })]
 class WithAttributeUsingNestedEnumArray {
 }
+#endif

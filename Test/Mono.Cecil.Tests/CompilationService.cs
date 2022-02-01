@@ -186,7 +186,7 @@ namespace Mono.Cecil.Tests {
 			case ".cs":
 				return CS.CSharpCompilation.Create (
 					assemblyName, 
-					new [] { CS.SyntaxFactory.ParseSyntaxTree (source) },
+					new [] { CS.SyntaxFactory.ParseSyntaxTree (source, new CS.CSharpParseOptions (preprocessorSymbols: new string [] { "NET_CORE" })) },
 					references, 
 					new CS.CSharpCompilationOptions (OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release));
 			default:
