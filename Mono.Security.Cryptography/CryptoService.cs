@@ -11,7 +11,7 @@
 using System;
 using System.IO;
 #if (NETSTANDARD)
-using StrongNameKeyPair=Mono.Cecil.StrongNameKeyPair;
+using StrongNameKeyPair=Mono.Security.Cryptography.StrongNameKeyPair;
 #else
 using StrongNameKeyPair=System.Reflection.StrongNameKeyPair;
 #endif

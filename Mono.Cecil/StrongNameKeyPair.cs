@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Cryptography;
 
-namespace Mono.Cecil {
+namespace Mono.Security.Cryptography {
 	[Serializable]
 	public class StrongNameKeyPair : ISerializable {
 		bool _keyPairExported;
