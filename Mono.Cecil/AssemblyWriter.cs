@@ -118,12 +118,15 @@ namespace Mono.Cecil {
 					metadata.SetSymbolWriter (symbol_writer);
 					BuildMetadata (module, metadata);
 
-					if (parameters.DeterministicMvid)
-						metadata.ComputeDeterministicMvid ();
+					if (symbol_writer != null)
+						symbol_writer.Write ();
 
 					var writer = ImageWriter.CreateWriter (module, metadata, stream);
 					stream.value.SetLength (0);
 					writer.WriteImage ();
+
+					if (parameters.DeterministicMvid)
+						ComputeDeterministicMvid (writer, module);
 
 					if (parameters.HasStrongNameKey)
 						CryptoService.StrongName (stream.value, writer, parameters);
@@ -155,6 +158,26 @@ namespace Mono.Cecil {
 				return symbol_writer_provider.GetSymbolWriter (module, parameters.SymbolStream);
 
 			return symbol_writer_provider.GetSymbolWriter (module, fq_name);
+		}
+
+		static void ComputeDeterministicMvid (ImageWriter writer, ModuleDefinition module)
+		{
+			long previousPosition = writer.BaseStream.Position;
+			writer.BaseStream.Seek(0, SeekOrigin.Begin);
+
+			// The hash should be computed with the MVID set to all zeroes
+			// which it is - we explicitly write all zeroes GUID into the heap
+			// as the MVID.
+			// Same goes for strong name signature, which also already in the image but all zeroes right now.
+			Guid guid = CryptoService.ComputeGuid (CryptoService.ComputeHash (writer.BaseStream));
+
+			// The MVID GUID is always the first GUID in the GUID heap
+			writer.MoveToRVA (TextSegment.GuidHeap);
+			writer.WriteBytes (guid.ToByteArray ());
+			writer.Flush ();
+			module.Mvid = guid;
+
+			writer.BaseStream.Seek(previousPosition, SeekOrigin.Begin);
 		}
 	}
 
@@ -1613,8 +1636,21 @@ namespace Mono.Cecil {
 		void AddFieldRVA (FieldDefinition field)
 		{
 			var table = GetTable<FieldRVATable> (Table.FieldRVA);
+
+			// To allow for safe implementation of metadata rewriters for code which uses CreateSpan<T>
+			// if the Field RVA refers to a locally defined type with a pack > 1, align the InitialValue
+			// to pack boundary. This logic is restricted to only being affected by metadata local to the module
+			// as PackingSize is only used when examining a type local to the module being written.
+
+			int align = 1;
+			if (field.FieldType.IsDefinition && !field.FieldType.IsGenericInstance) {
+				var type = field.FieldType.Resolve ();
+
+				if ((type.Module == module) && (type.PackingSize > 1))
+					align = type.PackingSize;
+			}
 			table.AddRow (new FieldRVARow (
-				data.AddData (field.InitialValue),
+				data.AddData (field.InitialValue, align),
 				field.token.RID));
 		}
 
@@ -2635,25 +2671,6 @@ namespace Mono.Cecil {
 			signature.WriteSequencePoints (info);
 
 			method_debug_information_table.rows [rid - 1].Col2 = GetBlobIndex (signature);
-		}
-
-		public void ComputeDeterministicMvid ()
-		{
-			var guid = CryptoService.ComputeGuid (CryptoService.ComputeHash (
-				data,
-				resources,
-				string_heap,
-				user_string_heap,
-				blob_heap,
-				table_heap,
-				code));
-
-			var position = guid_heap.position;
-			guid_heap.position = 0;
-			guid_heap.WriteBytes (guid.ToByteArray ());
-			guid_heap.position = position;
-
-			module.Mvid = guid;
 		}
 	}
 

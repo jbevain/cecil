@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using NUnit.Framework;
 
@@ -357,15 +359,23 @@ namespace Mono.Cecil.Tests {
 				var header = module.GetDebugHeader ();
 
 				Assert.IsNotNull (header);
-				Assert.AreEqual (2, header.Entries.Length);
+				Assert.IsTrue (header.Entries.Length >= 2);
 
-				var cv = header.Entries [0];
+				int i = 0;
+				var cv = header.Entries [i++];
 				Assert.AreEqual (ImageDebugType.CodeView, cv.Directory.Type);
 
-				var eppdb = header.Entries [1];
+				if (header.Entries.Length > 2) {
+					Assert.AreEqual (3, header.Entries.Length);
+					var pdbChecksum = header.Entries [i++];
+					Assert.AreEqual (ImageDebugType.PdbChecksum, pdbChecksum.Directory.Type);
+				}
+
+				var eppdb = header.Entries [i++];
 				Assert.AreEqual (ImageDebugType.EmbeddedPortablePdb, eppdb.Directory.Type);
 				Assert.AreEqual (0x0100, eppdb.Directory.MajorVersion);
 				Assert.AreEqual (0x0100, eppdb.Directory.MinorVersion);
+
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 
@@ -400,7 +410,7 @@ namespace Mono.Cecil.Tests {
 		{
 			TestModule ("PdbTarget.exe", test, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 			TestModule ("EmbeddedPdbTarget.exe", test, verify: !Platform.OnMono);
-			TestModule ("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof(EmbeddedPortablePdbWriterProvider));
+			TestModule ("EmbeddedCompressedPdbTarget.exe", test, symbolReaderProvider: typeof(EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
 
 		[Test]
@@ -604,7 +614,7 @@ class Program
 		}
 
 		[Test]
-		public void PortablePdbLineInfo  ()
+		public void PortablePdbLineInfo()
 		{
 			TestModule ("line.exe", module => {
 				var type = module.GetType ("Tests");
@@ -696,6 +706,11 @@ class Program
 			public void Write (MethodDebugInformation info)
 			{
 				symbol_writer.Write (info);
+			}
+
+			public void Write ()
+			{
+				symbol_writer.Write ();
 			}
 
 			public void Dispose ()
@@ -808,6 +823,311 @@ class Program
 					Assert.Zero (main.DebugInformation.SequencePoints.Count);
 				}
 			});
+		}
+
+		[Test]
+		public void DoubleWriteAndReadWithDeterministicMvidAndVariousChanges ()
+		{
+			Guid mvidIn, mvidARM64Out, mvidX64Out;
+
+			const string resource = "mylib.dll";
+			{
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+					mvidIn = module.Mvid;
+					module.Architecture = TargetArchitecture.ARM64; // Can't use I386 as it writes different import table size -> differnt MVID
+					module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+				}
+
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+					mvidARM64Out = module.Mvid;
+				}
+
+				Assert.AreNotEqual (mvidIn, mvidARM64Out);
+			}
+
+			{
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+					Assert.AreEqual (mvidIn, module.Mvid);
+					module.Architecture = TargetArchitecture.AMD64;
+					module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+				}
+
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+					mvidX64Out = module.Mvid;
+				}
+
+				Assert.AreNotEqual (mvidARM64Out, mvidX64Out);
+			}
+
+			{
+				string destination = Path.GetTempFileName ();
+
+				using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+					Assert.AreEqual (mvidIn, module.Mvid);
+					module.Architecture = TargetArchitecture.AMD64;
+					module.timestamp = 42;
+					module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+				}
+
+				Guid mvidDifferentTimeStamp;
+				using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+					mvidDifferentTimeStamp = module.Mvid;
+				}
+
+				Assert.AreNotEqual (mvidX64Out, mvidDifferentTimeStamp);
+			}
+		}
+
+		[Test]
+		public void ReadPortablePdbChecksum ()
+		{
+			const string resource = "PdbChecksumLib.dll";
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				GetPdbChecksumData (module.GetDebugHeader (), out string algorithmName, out byte [] checksum);
+				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte[] pdbId);
+
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
+				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] expectedPdbId);
+
+				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
+			}
+		}
+
+		[Test]
+		public void ReadEmbeddedPortablePdbChecksum ()
+		{
+			const string resource = "EmbeddedPdbChecksumLib.dll";
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				var debugHeader = module.GetDebugHeader ();
+				GetPdbChecksumData (debugHeader, out string algorithmName, out byte [] checksum);
+				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte [] pdbId);
+
+				GetEmbeddedPdb (debugHeader, out byte [] embeddedPdb);
+				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out byte [] expectedPdbId);
+
+				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
+			}
+		}
+
+		[Test]
+		public void WritePortablePdbChecksum ()
+		{
+			const string resource = "PdbChecksumLib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				GetPdbChecksumData (module.GetDebugHeader (), out string algorithmName, out byte [] checksum);
+				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte [] pdbId);
+
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
+				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out byte [] expectedPdbId);
+
+				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
+			}
+		}
+
+		[Test]
+		public void WritePortablePdbToWriteOnlyStream ()
+		{
+			const string resource = "PdbChecksumLib.dll";
+			string destination = Path.GetTempFileName ();
+
+			// Note that the module stream already requires read access even on writing to be able to compute strong name
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true }))
+			using (var pdbStream = new FileStream (destination + ".pdb", FileMode.Create, FileAccess.Write)) {
+				module.Write (destination, new WriterParameters {
+					DeterministicMvid = true,
+					WriteSymbols = true,
+					SymbolWriterProvider = new PortablePdbWriterProvider (),
+					SymbolStream = pdbStream
+				});
+			}
+		}
+
+		[Test]
+		public void DoubleWritePortablePdbDeterministicPdbId ()
+		{
+			const string resource = "PdbChecksumLib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+			}
+
+			byte [] pdbIdOne;
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
+				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out pdbIdOne);
+			}
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+			}
+
+			byte [] pdbIdTwo;
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				string pdbPath = Mixin.GetPdbFileName (module.FileName);
+				CalculatePdbChecksumAndId (pdbPath, out byte [] expectedChecksum, out pdbIdTwo);
+			}
+
+			CollectionAssert.AreEqual (pdbIdOne, pdbIdTwo);
+		}
+
+		[Test]
+		public void WriteEmbeddedPortablePdbChecksum ()
+		{
+			const string resource = "EmbeddedPdbChecksumLib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				var debugHeader = module.GetDebugHeader ();
+				GetPdbChecksumData (debugHeader, out string algorithmName, out byte [] checksum);
+				Assert.AreEqual ("SHA256", algorithmName);
+				GetCodeViewPdbId (module, out byte [] pdbId);
+
+				GetEmbeddedPdb (debugHeader, out byte [] embeddedPdb);
+				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out byte [] expectedPdbId);
+
+				CollectionAssert.AreEqual (expectedChecksum, checksum);
+				CollectionAssert.AreEqual (expectedPdbId, pdbId);
+			}
+		}
+
+		[Test]
+		public void DoubleWriteEmbeddedPortablePdbChecksum ()
+		{
+			const string resource = "EmbeddedPdbChecksumLib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+			}
+
+			byte [] pdbIdOne;
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				var debugHeader = module.GetDebugHeader ();
+				GetEmbeddedPdb (debugHeader, out byte [] embeddedPdb);
+				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out pdbIdOne);
+			}
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { DeterministicMvid = true, WriteSymbols = true });
+			}
+
+			byte [] pdbIdTwo;
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				var debugHeader = module.GetDebugHeader ();
+				GetEmbeddedPdb (debugHeader, out byte [] embeddedPdb);
+				CalculatePdbChecksumAndId (embeddedPdb, out byte [] expectedChecksum, out pdbIdTwo);
+			}
+
+			CollectionAssert.AreEqual (pdbIdOne, pdbIdTwo);
+		}
+
+		private void GetEmbeddedPdb (ImageDebugHeader debugHeader, out byte [] embeddedPdb)
+		{
+			var entry = Mixin.GetEmbeddedPortablePdbEntry (debugHeader);
+			Assert.IsNotNull (entry);
+
+			var compressed_stream = new MemoryStream (entry.Data);
+			var reader = new BinaryStreamReader (compressed_stream);
+			Assert.AreEqual (0x4244504D, reader.ReadInt32 ());
+			var length = reader.ReadInt32 ();
+			var decompressed_stream = new MemoryStream (length);
+
+			using (var deflate = new DeflateStream (compressed_stream, CompressionMode.Decompress, leaveOpen: true))
+				deflate.CopyTo (decompressed_stream);
+
+			embeddedPdb = decompressed_stream.ToArray ();
+		}
+
+		private void GetPdbChecksumData (ImageDebugHeader debugHeader, out string algorithmName, out byte [] checksum)
+		{
+			var entry = Mixin.GetPdbChecksumEntry (debugHeader);
+			Assert.IsNotNull (entry);
+
+			var length = Array.IndexOf (entry.Data, (byte)0, 0);
+			var bytes = new byte [length];
+			Buffer.BlockCopy (entry.Data, 0, bytes, 0, length);
+			algorithmName = Encoding.UTF8.GetString (bytes);
+			int checksumSize = 0;
+			switch (algorithmName) {
+			case "SHA256": checksumSize = 32; break;
+			case "SHA384": checksumSize = 48; break;
+			case "SHA512": checksumSize = 64; break;
+			}
+			checksum = new byte [checksumSize];
+			Buffer.BlockCopy (entry.Data, length + 1, checksum, 0, checksumSize);
+		}
+
+		private void CalculatePdbChecksumAndId (string filePath, out byte [] pdbChecksum, out byte [] pdbId)
+		{
+			using (var fs = File.OpenRead (filePath))
+				CalculatePdbChecksumAndId (fs, out pdbChecksum, out pdbId);
+		}
+
+		private void CalculatePdbChecksumAndId (byte [] data, out byte [] pdbChecksum, out byte [] pdbId)
+		{
+			using (var pdb = new MemoryStream (data))
+				CalculatePdbChecksumAndId (pdb, out pdbChecksum, out pdbId);
+		}
+
+		private void CalculatePdbChecksumAndId (Stream pdbStream, out byte [] pdbChecksum, out byte [] pdbId)
+		{
+			// Get the offset of the PDB heap (this requires parsing several headers
+			// so it's easier to use the ImageReader directly for this)
+			Image image = ImageReader.ReadPortablePdb (new Disposable<Stream> (pdbStream, false), "test.pdb", out uint pdbHeapOffset);
+			pdbId = new byte [20];
+			Array.Copy (image.PdbHeap.data, 0, pdbId, 0, 20);
+
+			pdbStream.Seek (0, SeekOrigin.Begin);
+			byte [] rawBytes = pdbStream.ReadAll ();
+
+			var bytes = new byte [rawBytes.Length];
+
+			Array.Copy (rawBytes, 0, bytes, 0, pdbHeapOffset);
+
+			// Zero out the PDB ID (20 bytes)
+			for (int i = 0; i < 20; bytes [i + pdbHeapOffset] = 0, i++) ;
+
+			Array.Copy (rawBytes, pdbHeapOffset + 20, bytes, pdbHeapOffset + 20, rawBytes.Length - pdbHeapOffset - 20);
+
+			var sha256 = SHA256.Create ();
+			pdbChecksum = sha256.ComputeHash (bytes);
+		}
+
+		static void GetCodeViewPdbId (ModuleDefinition module, out byte[] pdbId)
+		{
+			var header = module.GetDebugHeader ();
+			var cv = Mixin.GetCodeViewEntry (header);
+			Assert.IsNotNull (cv);
+
+			CollectionAssert.AreEqual (new byte [] { 0x52, 0x53, 0x44, 0x53 }, cv.Data.Take (4));
+
+			ByteBuffer buffer = new ByteBuffer (20);
+			buffer.WriteBytes (cv.Data.Skip (4).Take (16).ToArray ());
+			buffer.WriteInt32 (cv.Directory.TimeDateStamp);
+			pdbId = buffer.buffer;
 		}
 	}
 }

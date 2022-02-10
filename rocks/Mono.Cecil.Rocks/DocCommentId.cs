@@ -10,16 +10,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Mono.Cecil.Rocks {
 
-	public class DocCommentId
-	{
+	public class DocCommentId {
+		IMemberDefinition commentMember;
 		StringBuilder id;
 
-		DocCommentId ()
+		DocCommentId (IMemberDefinition member)
 		{
+			commentMember = member;
 			id = new StringBuilder ();
 		}
 
@@ -87,43 +89,52 @@ namespace Mono.Cecil.Rocks {
 
 		void WriteTypeSignature (TypeReference type)
 		{
-			switch (type.MetadataType)
-			{
-				case MetadataType.Array:
-					WriteArrayTypeSignature ((ArrayType) type);
-					break;
-				case MetadataType.ByReference:
-					WriteTypeSignature (((ByReferenceType) type).ElementType);
-					id.Append ('@');
-					break;
-				case MetadataType.FunctionPointer:
-					WriteFunctionPointerTypeSignature ((FunctionPointerType) type);
-					break;
-				case MetadataType.GenericInstance:
-					WriteGenericInstanceTypeSignature ((GenericInstanceType) type);
-					break;
-				case MetadataType.Var:
+			switch (type.MetadataType) {
+			case MetadataType.Array:
+				WriteArrayTypeSignature ((ArrayType)type);
+				break;
+			case MetadataType.ByReference:
+				WriteTypeSignature (((ByReferenceType)type).ElementType);
+				id.Append ('@');
+				break;
+			case MetadataType.FunctionPointer:
+				WriteFunctionPointerTypeSignature ((FunctionPointerType)type);
+				break;
+			case MetadataType.GenericInstance:
+				WriteGenericInstanceTypeSignature ((GenericInstanceType)type);
+				break;
+			case MetadataType.Var:
+				if (IsGenericMethodTypeParameter (type))
 					id.Append ('`');
-					id.Append (((GenericParameter) type).Position);
-					break;
-				case MetadataType.MVar:
-					id.Append ('`').Append ('`');
-					id.Append (((GenericParameter) type).Position);
-					break;
-				case MetadataType.OptionalModifier:
-					WriteModiferTypeSignature ((OptionalModifierType) type, '!');
-					break;
-				case MetadataType.RequiredModifier:
-					WriteModiferTypeSignature ((RequiredModifierType) type, '|');
-					break;
-				case MetadataType.Pointer:
-					WriteTypeSignature (((PointerType) type).ElementType);
-					id.Append ('*');
-					break;
-				default:
-					WriteTypeFullName (type);
-					break;
+				id.Append ('`');
+				id.Append (((GenericParameter)type).Position);
+				break;
+			case MetadataType.MVar:
+				id.Append ('`').Append ('`');
+				id.Append (((GenericParameter)type).Position);
+				break;
+			case MetadataType.OptionalModifier:
+				WriteModiferTypeSignature ((OptionalModifierType)type, '!');
+				break;
+			case MetadataType.RequiredModifier:
+				WriteModiferTypeSignature ((RequiredModifierType)type, '|');
+				break;
+			case MetadataType.Pointer:
+				WriteTypeSignature (((PointerType)type).ElementType);
+				id.Append ('*');
+				break;
+			default:
+				WriteTypeFullName (type);
+				break;
 			}
+		}
+
+		bool IsGenericMethodTypeParameter (TypeReference type)
+		{
+			if (commentMember is MethodDefinition methodDefinition && type is GenericParameter genericParameter)
+				return methodDefinition.GenericParameters.Any (i => i.Name == genericParameter.Name);
+
+			return false;
 		}
 
 		void WriteGenericInstanceTypeSignature (GenericInstanceType type)
@@ -131,10 +142,13 @@ namespace Mono.Cecil.Rocks {
 			if (type.ElementType.IsTypeSpecification ())
 				throw new NotSupportedException ();
 
-			WriteTypeFullName (type.ElementType, stripGenericArity: true);
-			id.Append ('{');
-			WriteList (type.GenericArguments, WriteTypeSignature);
-			id.Append ('}');
+			GenericTypeOptions options = new GenericTypeOptions {
+				IsArgument = true,
+				IsNestedType = type.IsNested,
+				Arguments = type.GenericArguments
+			};
+
+			WriteTypeFullName (type.ElementType, options);
 		}
 
 		void WriteList<T> (IList<T> list, Action<T> action)
@@ -197,10 +211,15 @@ namespace Mono.Cecil.Rocks {
 			WriteItemName (member.Name);
 		}
 
-		void WriteTypeFullName (TypeReference type, bool stripGenericArity = false)
+		void WriteTypeFullName (TypeReference type)
+		{
+			WriteTypeFullName (type, GenericTypeOptions.Empty ());
+		}
+
+		void WriteTypeFullName (TypeReference type, GenericTypeOptions options)
 		{
 			if (type.DeclaringType != null) {
-				WriteTypeFullName (type.DeclaringType);
+				WriteTypeFullName (type.DeclaringType, options);
 				id.Append ('.');
 			}
 
@@ -211,18 +230,69 @@ namespace Mono.Cecil.Rocks {
 
 			var name = type.Name;
 
-			if (stripGenericArity) {
+			if (options.IsArgument) {
 				var index = name.LastIndexOf ('`');
 				if (index > 0)
 					name = name.Substring (0, index);
 			}
 
 			id.Append (name);
+
+			WriteGenericTypeParameters (type, options);
 		}
+
+		void WriteGenericTypeParameters (TypeReference type, GenericTypeOptions options)
+		{
+			if (options.IsArgument && IsGenericType (type)) {
+				id.Append ('{');
+				WriteList (GetGenericTypeArguments (type, options), WriteTypeSignature);
+				id.Append ('}');
+			}
+		}
+
+		static bool IsGenericType (TypeReference type)
+		{
+			// When the type is a nested type and that is defined in a generic class,
+			// the nested type will have generic parameters but sometimes that is not a generic type.
+			if (type.HasGenericParameters) {
+				var name = string.Empty;
+				var index = type.Name.LastIndexOf ('`');
+				if (index >= 0)
+					name = type.Name.Substring (0, index);
+
+				return type.Name.LastIndexOf ('`') == name.Length;
+			}
+
+			return false;
+		}
+
+		IList<TypeReference> GetGenericTypeArguments (TypeReference type, GenericTypeOptions options)
+		{
+			if (options.IsNestedType) {
+				var typeParameterCount = type.GenericParameters.Count;
+				var typeGenericArguments = options.Arguments.Skip (options.ArgumentIndex).Take (typeParameterCount).ToList ();
+
+				options.ArgumentIndex += typeParameterCount;
+
+				return typeGenericArguments;
+			}
+
+			return options.Arguments;
+		}
+
+		//int GetGenericTypeParameterCount (TypeReference type)
+		//{
+		//	var returnValue = 0;
+		//	var index = type.Name.LastIndexOf ('`');
+		//	if (index >= 0)
+		//		returnValue = int.Parse (type.Name.Substring (index + 1));
+
+		//	return returnValue;
+		//}
 
 		void WriteItemName (string name)
 		{
-			id.Append (name.Replace ('.', '#').Replace('<', '{').Replace('>', '}'));
+			id.Append (name.Replace('.', '#').Replace('<', '{').Replace('>', '}'));
 		}
 
 		public override string ToString ()
@@ -235,30 +305,44 @@ namespace Mono.Cecil.Rocks {
 			if (member == null)
 				throw new ArgumentNullException ("member");
 
-			var documentId = new DocCommentId ();
+			var documentId = new DocCommentId (member);
 
-			switch (member.MetadataToken.TokenType)
-			{
-				case TokenType.Field:
-					documentId.WriteField ((FieldDefinition) member);
-					break;
-				case TokenType.Method:
-					documentId.WriteMethod ((MethodDefinition) member);
-					break;
-				case TokenType.TypeDef:
-					documentId.WriteType ((TypeDefinition) member);
-					break;
-				case TokenType.Event:
-					documentId.WriteEvent ((EventDefinition) member);
-					break;
-				case TokenType.Property:
-					documentId.WriteProperty ((PropertyDefinition) member);
-					break;
-				default:
-					throw new NotSupportedException (member.FullName);
+			switch (member.MetadataToken.TokenType) {
+			case TokenType.Field:
+				documentId.WriteField ((FieldDefinition)member);
+				break;
+			case TokenType.Method:
+				documentId.WriteMethod ((MethodDefinition)member);
+				break;
+			case TokenType.TypeDef:
+				documentId.WriteType ((TypeDefinition)member);
+				break;
+			case TokenType.Event:
+				documentId.WriteEvent ((EventDefinition)member);
+				break;
+			case TokenType.Property:
+				documentId.WriteProperty ((PropertyDefinition)member);
+				break;
+			default:
+				throw new NotSupportedException (member.FullName);
 			}
 
 			return documentId.ToString ();
+		}
+
+		class GenericTypeOptions {
+			public bool IsArgument { get; set; }
+
+			public bool IsNestedType { get; set; }
+
+			public IList<TypeReference> Arguments { get; set; }
+
+			public int ArgumentIndex { get; set; }
+
+			public static GenericTypeOptions Empty ()
+			{
+				return new GenericTypeOptions ();
+			}
 		}
 	}
 }
