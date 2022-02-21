@@ -11,6 +11,14 @@ enum Bingo : short {
 	Binga = 4,
 }
 
+class GenericWithEnum<T> {
+	public enum OnGenericNumber
+    {
+		One,
+		Two
+    }
+}
+
 /*
 in System.Security.AccessControl
 
@@ -70,6 +78,10 @@ class FooAttribute : Attribute {
 	{
 	}
 
+	public FooAttribute (GenericWithEnum<Bingo>.OnGenericNumber number)
+    {
+    }
+
 	public int Bang { get { return 0; } set {} }
 	public string Fiou { get { return "fiou"; } set {} }
 
@@ -77,6 +89,9 @@ class FooAttribute : Attribute {
 	public string [] PanPan;
 
 	public Type Chose;
+
+	public GenericWithEnum<byte>.OnGenericNumber NumberEnumField;
+	public GenericWithEnum<byte>.OnGenericNumber NumberEnumProperty { get; set; }
 }
 
 [Foo ("bar")]
@@ -160,3 +175,25 @@ class Parent {
 [Foo ("Foo\0Bar\0")]
 class NullCharInString {
 }
+
+#if NET_CORE
+[Foo (GenericWithEnum<int>.OnGenericNumber.One, GenericWithEnum<string>.OnGenericNumber.Two)]
+class BoxedValueEnumOnGenericType {
+}
+
+[Foo (GenericWithEnum<Bingo>.OnGenericNumber.Two)]
+class ValueEnumOnGenericType {
+}
+
+[Foo (NumberEnumField = GenericWithEnum<byte>.OnGenericNumber.One)]
+class FieldEnumOnGenericType {
+}
+
+[Foo(NumberEnumProperty = GenericWithEnum<byte>.OnGenericNumber.Two)]
+class PropertyEnumOnGenericType {
+}
+
+[Foo(Pan = new[] { GenericWithEnum<string>.OnGenericNumber.One, GenericWithEnum<string>.OnGenericNumber.Two })]
+class WithAttributeUsingNestedEnumArray {
+}
+#endif

@@ -2993,6 +2993,10 @@ namespace Mono.Cecil {
 				else
 					WriteCustomAttributeEnumValue (type, value);
 				break;
+			case ElementType.GenericInst:
+				// Generic instantiation can only happen for an enum (no other generic like types can appear in attribute value)
+				WriteCustomAttributeEnumValue (type, value);
+				break;
 			default:
 				WritePrimitiveValue (value);
 				break;
@@ -3098,6 +3102,14 @@ namespace Mono.Cecil {
 					WriteElementType (ElementType.Enum);
 					WriteTypeReference (type);
 				}
+				return;
+			case ElementType.GenericInst:
+				// Generic instantiation can really only happen if it's an enum type since no other
+				// types are allowed in the attribute value.
+				// Enums are special in attribute data, they're encoded as ElementType.Enum followed by a typeref
+				// followed by the value.
+				WriteElementType (ElementType.Enum);
+				WriteTypeReference (type);
 				return;
 			default:
 				WriteElementType (etype);

@@ -546,6 +546,105 @@ namespace Mono.Cecil.Tests {
 			module.Dispose ();
 		}
 
+#if NET_CORE
+		[Test]
+		public void BoxedEnumOnGenericArgumentOnType ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var valueEnumGenericType = module.GetType ("BoxedValueEnumOnGenericType");
+
+				Assert.IsTrue (valueEnumGenericType.HasCustomAttributes);
+				Assert.AreEqual (1, valueEnumGenericType.CustomAttributes.Count);
+
+				var attribute = valueEnumGenericType.CustomAttributes [0];
+				Assert.AreEqual ("System.Void FooAttribute::.ctor(System.Object,System.Object)",
+					attribute.Constructor.FullName);
+
+				Assert.IsTrue (attribute.HasConstructorArguments);
+				Assert.AreEqual (2, attribute.ConstructorArguments.Count);
+
+				AssertCustomAttributeArgument ("(Object:(GenericWithEnum`1/OnGenericNumber<System.Int32>:0))", attribute.ConstructorArguments [0]);
+				AssertCustomAttributeArgument ("(Object:(GenericWithEnum`1/OnGenericNumber<System.String>:1))", attribute.ConstructorArguments [1]);
+			});
+		}
+
+		[Test]
+		public void EnumOnGenericArgumentOnType ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var valueEnumGenericType = module.GetType ("ValueEnumOnGenericType");
+
+				Assert.IsTrue (valueEnumGenericType.HasCustomAttributes);
+				Assert.AreEqual (1, valueEnumGenericType.CustomAttributes.Count);
+
+				var attribute = valueEnumGenericType.CustomAttributes [0];
+				Assert.AreEqual ("System.Void FooAttribute::.ctor(GenericWithEnum`1/OnGenericNumber<Bingo>)",
+					attribute.Constructor.FullName);
+
+				Assert.IsTrue (attribute.HasConstructorArguments);
+				Assert.AreEqual (1, attribute.ConstructorArguments.Count);
+
+				AssertCustomAttributeArgument ("(GenericWithEnum`1/OnGenericNumber<Bingo>:1)", attribute.ConstructorArguments [0]);
+			});
+		}
+
+		[Test]
+		public void EnumOnGenericFieldOnType ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var valueEnumGenericType = module.GetType ("FieldEnumOnGenericType");
+
+				Assert.IsTrue (valueEnumGenericType.HasCustomAttributes);
+				Assert.AreEqual (1, valueEnumGenericType.CustomAttributes.Count);
+
+				var attribute = valueEnumGenericType.CustomAttributes [0];
+				var argument = attribute.Fields.Where (a => a.Name == "NumberEnumField").First ().Argument;
+
+				AssertCustomAttributeArgument ("(GenericWithEnum`1/OnGenericNumber<System.Byte>:0)", argument);
+			});
+		}
+
+		[Test]
+		public void EnumOnGenericPropertyOnType ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var valueEnumGenericType = module.GetType ("PropertyEnumOnGenericType");
+
+				Assert.IsTrue (valueEnumGenericType.HasCustomAttributes);
+				Assert.AreEqual (1, valueEnumGenericType.CustomAttributes.Count);
+
+				var attribute = valueEnumGenericType.CustomAttributes [0];
+				var argument = attribute.Properties.Where (a => a.Name == "NumberEnumProperty").First ().Argument;
+
+				AssertCustomAttributeArgument ("(GenericWithEnum`1/OnGenericNumber<System.Byte>:1)", argument);
+			});
+		}
+
+		[Test]
+		public void EnumDeclaredInGenericTypeArray ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var type = module.GetType ("WithAttributeUsingNestedEnumArray");
+				var attributes = type.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				var attribute = attributes [0];
+				Assert.AreEqual (1, attribute.Fields.Count);
+				var arg = attribute.Fields [0].Argument;
+				Assert.AreEqual ("System.Object", arg.Type.FullName);
+
+				var argumentValue = (CustomAttributeArgument)arg.Value;
+				Assert.AreEqual ("GenericWithEnum`1/OnGenericNumber<System.String>[]", argumentValue.Type.FullName);
+				var argumentValues = (CustomAttributeArgument [])argumentValue.Value;
+
+				Assert.AreEqual ("GenericWithEnum`1/OnGenericNumber<System.String>", argumentValues [0].Type.FullName);
+				Assert.AreEqual (0, (int)argumentValues [0].Value);
+
+				Assert.AreEqual ("GenericWithEnum`1/OnGenericNumber<System.String>", argumentValues [1].Type.FullName);
+				Assert.AreEqual (1, (int)argumentValues [1].Value);
+			});
+		}
+#endif
+
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));
@@ -643,7 +742,7 @@ namespace Mono.Cecil.Tests {
 			if (type.IsArray) {
 				ArrayType array = (ArrayType) type;
 				signature.AppendFormat ("{0}[]", array.ElementType.etype.ToString ());
-			} else if (type.etype == ElementType.None) {
+			} else if (type.etype == ElementType.None || type.etype == ElementType.GenericInst) {
 				signature.Append (type.FullName);
 			} else
 				signature.Append (type.etype.ToString ());
