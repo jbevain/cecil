@@ -67,9 +67,9 @@ namespace Microsoft.Cci.Pdb {
       bits.ReadInt32(out max);
 
       BitSet present = new BitSet(bits);
-      BitSet deleted = new BitSet (bits);
+      BitSet deleted = new BitSet(bits);
       //if (!deleted.IsEmpty) {
-      //  throw new PdbDebugException ("Unsupported PDB deleted bitset is not empty.");
+      //  throw new PdbDebugException("Unsupported PDB deleted bitset is not empty.");
       //}
 
       int j = 0;
