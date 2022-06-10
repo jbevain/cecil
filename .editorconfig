@@ -9,3 +9,15 @@ csharp_space_before_open_square_brackets = true
 csharp_new_line_before_open_brace = methods
 csharp_new_line_before_else = false
 csharp_indent_switch_labels = false
+
+trim_trailing_whitespace = false
+
+dotnet_naming_symbols.fields_locals_and_parameters.applicable_kinds = field, local, parameter
+dotnet_naming_symbols.fields_locals_and_parameters.applicable_accessibilities = *
+
+dotnet_naming_style.snake_case.capitalization = all_lower
+dotnet_naming_style.snake_case.word_separator = _
+
+dotnet_naming_rule.fields_locals_and_parameters_use_snake_case.symbols = fields_locals_and_parameters
+dotnet_naming_rule.fields_locals_and_parameters_use_snake_case.style = snake_case
+dotnet_naming_rule.fields_locals_and_parameters_use_snake_case.severity = suggestion
