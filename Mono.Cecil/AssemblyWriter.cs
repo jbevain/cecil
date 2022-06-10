@@ -3302,8 +3302,15 @@ namespace Mono.Cecil {
 			if (!info.TryGetUniqueDocument (out previous_document))
 				previous_document = null;
 
-			for (int i = 0; i < info.SequencePoints.Count; i++) {
-				var sequence_point = info.SequencePoints [i];
+			// The sequence points need to be emitted in strict ascending offset order, which is not guaranteed to be the case for
+			// info.SequencePoints.
+			var sequencePoints = new SortedDictionary<int, SequencePoint> ();
+			foreach (var sequence_point in info.SequencePoints) {
+				sequencePoints [sequence_point.Offset] = sequence_point;
+			}
+
+			var previous_offset = 0;
+			foreach (var sequence_point in sequencePoints.Values) {
 
 				var document = sequence_point.Document;
 				if (previous_document != document) {
@@ -3316,13 +3323,12 @@ namespace Mono.Cecil {
 					previous_document = document;
 				}
 
-				if (i > 0)
-					WriteCompressedUInt32 ((uint) (sequence_point.Offset - info.SequencePoints [i - 1].Offset));
-				else
-					WriteCompressedUInt32 ((uint) sequence_point.Offset);
+				WriteCompressedUInt32 ((uint) (sequence_point.Offset - previous_offset));
+				previous_offset = sequence_point.Offset;
 
 				if (sequence_point.IsHidden) {
-					WriteInt16 (0);
+					WriteCompressedUInt32 (0);
+					WriteCompressedUInt32 (0);
 					continue;
 				}
 
