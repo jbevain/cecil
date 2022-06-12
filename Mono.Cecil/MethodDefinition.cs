@@ -440,6 +440,11 @@ namespace Mono.Cecil {
 			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.AggressiveInlining, value); }
 		}
 
+		public bool AggressiveOptimization {
+			get { return impl_attributes.GetAttributes ((ushort) MethodImplAttributes.AggressiveOptimization); }
+			set { impl_attributes = impl_attributes.SetAttributes ((ushort) MethodImplAttributes.AggressiveOptimization, value); }
+		}
+
 		#endregion
 
 		#region MethodSemanticsAttributes
