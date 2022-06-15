@@ -1,6 +1,5 @@
 using System.IO;
 using System.Linq;
-
 using Mono.Cecil.Cil;
 using Mono.Cecil.Pdb;
 
@@ -56,7 +55,7 @@ namespace Mono.Cecil.Tests {
 	IL_0020: ldloc.1
 	IL_0021: ret
 ", main);
-			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -82,7 +81,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual ("i", variables [0].Name);
 				Assert.IsFalse (variables [0].IsDebuggerHidden);
-			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -103,7 +102,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (new byte [] { 228, 176, 152, 54, 82, 238, 238, 68, 237, 156, 5, 142, 118, 160, 118, 245 }, document.Hash);
 				Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -124,7 +123,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (new byte [] { 184, 188, 100, 23, 27, 123, 187, 201, 175, 206, 110, 198, 242, 139, 154, 119 }, document.Hash);
 				Assert.AreEqual (DocumentLanguage.Basic, document.Language);
 				Assert.AreEqual (DocumentLanguageVendor.Microsoft, document.LanguageVendor);
-			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof(PdbReaderProvider), symbolWriterProvider: typeof(PdbWriterProvider));
+			}, readOnly: !Platform.HasNativePdbSupport, symbolReaderProvider: typeof (PdbReaderProvider), symbolWriterProvider: typeof (PdbWriterProvider));
 		}
 
 		[Test]
@@ -248,7 +247,7 @@ namespace Mono.Cecil.Tests {
 
 				constant = scope.Constants [1];
 				Assert.AreEqual ("c", constant.Name);
-				Assert.AreEqual ((decimal) 74, constant.Value);
+				Assert.AreEqual ((decimal)74, constant.Value);
 				Assert.AreEqual (MetadataType.ValueType, constant.ConstantType.MetadataType);
 
 				method = type.GetMethod ("Foo");
@@ -448,7 +447,7 @@ namespace Mono.Cecil.Tests {
 
 			method.DebugInformation.SequencePoints.Add (sequence_point);
 
-			method.DebugInformation.Scope = new ScopeDebugInformation  (body.Instructions [0], null) {
+			method.DebugInformation.Scope = new ScopeDebugInformation (body.Instructions [0], null) {
 				Variables = { new VariableDebugInformation (temp, "temp") }
 			};
 
@@ -476,5 +475,15 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (module.HasSymbols);
 			}, symbolReaderProvider: typeof (NativePdbReaderProvider), symbolWriterProvider: typeof (NativePdbWriterProvider));
 		}
+
+		[Test]
+		public void ReadPdbMixedNativeCLIModule ()
+		{
+			// MixedNativeCLI.exe was copy/pasted from from https://docs.microsoft.com/en-us/cpp/preprocessor/managed-unmanaged?view=msvc-170#example
+			TestModule ("MixedNativeCLI.exe", module => {
+				module.ReadSymbols ();
+			}, readOnly: true);
+		}
+
 	}
 }
