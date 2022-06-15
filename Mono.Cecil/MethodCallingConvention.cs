@@ -17,6 +17,7 @@ namespace Mono.Cecil {
 		ThisCall	= 0x3,
 		FastCall	= 0x4,
 		VarArg		= 0x5,
+		Unmanaged	= 0x9,
 		Generic		= 0x10,
 	}
 }
