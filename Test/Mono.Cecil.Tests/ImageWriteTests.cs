@@ -2,6 +2,8 @@
 using System.Linq;
 using NUnit.Framework;
 
+#if NETCOREAPP
+
 namespace Mono.Cecil.Tests {
 	[TestFixture]
 	public class ImageWriteTests : BaseTestFixture {
@@ -42,3 +44,5 @@ namespace Mono.Cecil.Tests {
 		}
 	}
 }
+
+#endif
