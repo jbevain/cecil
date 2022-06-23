@@ -258,7 +258,7 @@ namespace Mono.Cecil.Cil {
 				item.next = current;
 			}
 
-			UpdateLocalScopes (null, null);
+			UpdateDebugInformation (null, null);
 		}
 
 		protected override void OnSet (Instruction item, int index)
@@ -271,7 +271,7 @@ namespace Mono.Cecil.Cil {
 			current.previous = null;
 			current.next = null;
 
-			UpdateLocalScopes (item, current);
+			UpdateDebugInformation (item, current);
 		}
 
 		protected override void OnRemove (Instruction item, int index)
@@ -285,7 +285,7 @@ namespace Mono.Cecil.Cil {
 				next.previous = item.previous;
 
 			RemoveSequencePoint (item);
-			UpdateLocalScopes (item, next ?? previous);
+			UpdateDebugInformation (item, next ?? previous);
 
 			item.previous = null;
 			item.next = null;
@@ -306,126 +306,189 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		void UpdateLocalScopes (Instruction removedInstruction, Instruction existingInstruction)
+		void UpdateDebugInformation (Instruction removedInstruction, Instruction existingInstruction)
 		{
-			var debug_info = method.debug_info;
-			if (debug_info == null)
-				return;
-
-			// Local scopes store start/end pair of "instruction offsets". Instruction offset can be either resolved, in which case it
+			// Various bits of debug information store instruction offsets (as "pointers" to the IL)
+			// Instruction offset can be either resolved, in which case it
 			// has a reference to Instruction, or unresolved in which case it stores numerical offset (instruction offset in the body).
-			// Typically local scopes loaded from PE/PDB files will be resolved, but it's not a requirement.
+			// Depending on where the InstructionOffset comes from (loaded from PE/PDB or constructed) it can be in either state.
 			// Each instruction has its own offset, which is populated on load, but never updated (this would be pretty expensive to do).
 			// Instructions created during the editting will typically have offset 0 (so incorrect).
-			// Local scopes created during editing will also likely be resolved (so no numerical offsets).
-			// So while local scopes which are unresolved are relatively rare if they appear, manipulating them based
-			// on the offsets allone is pretty hard (since we can't rely on correct offsets of instructions).
-			// On the other hand resolved local scopes are easy to maintain, since they point to instructions and thus inserting
+			// Manipulating unresolved InstructionOffsets is pretty hard (since we can't rely on correct offsets of instructions).
+			// On the other hand resolved InstructionOffsets are easy to maintain, since they point to instructions and thus inserting
 			// instructions is basically a no-op and removing instructions is as easy as changing the pointer.
 			// For this reason the algorithm here is:
 			//  - First make sure that all instruction offsets are resolved - if not - resolve them
-			//     - First time this will be relatively expensinve as it will walk the entire method body to convert offsets to instruction pointers
-			//       Almost all local scopes are stored in the "right" order (sequentially per start offsets), so the code uses a simple one-item
-			//       cache instruction<->offset to avoid walking instructions multiple times (that would only happen for scopes which are out of order).
-			//     - Subsequent calls should be cheap as it will only walk all local scopes without doing anything
-			//     - If there was an edit on local scope which makes some of them unresolved, the cost is proportional
+			//     - First time this will be relatively expensive as it will walk the entire method body to convert offsets to instruction pointers
+			//       Within the same debug info, IL offsets are typically stored in the "right" order (sequentially per start offsets),
+			//       so the code uses a simple one-item cache instruction<->offset to avoid walking instructions multiple times
+			//       (that would only happen for scopes which are out of order).
+			//     - Subsequent calls should be cheap as it will only walk all local scopes without doing anything (as it checks that they're resolved)
+			//     - If there was an edit which adds some unresolved, the cost is proportional (the code will only resolve those)
 			//  - Then update as necessary by manipulaitng instruction references alone
 
-			InstructionOffsetCache cache = new InstructionOffsetCache () {
-				Offset = 0,
-				Index = 0,
-				Instruction = items [0]
-			};
+			InstructionOffsetResolver resolver = new InstructionOffsetResolver (items, removedInstruction, existingInstruction);
 
-			UpdateLocalScope (debug_info.Scope, removedInstruction, existingInstruction, ref cache);
+			if (method.debug_info != null)
+				UpdateLocalScope (method.debug_info.Scope, ref resolver);
+
+			var custom_debug_infos = method.custom_infos ?? method.debug_info?.custom_infos;
+			if (custom_debug_infos != null) {
+				foreach (var custom_debug_info in custom_debug_infos) {
+					switch (custom_debug_info) {
+					case StateMachineScopeDebugInformation state_machine_scope:
+						UpdateStateMachineScope (state_machine_scope, ref resolver);
+						break;
+
+					case AsyncMethodBodyDebugInformation async_method_body:
+						UpdateAsyncMethodBody (async_method_body, ref resolver);
+						break;
+
+					default:
+						// No need to update the other debug info as they don't store instruction references
+						break;
+					}
+				}
+			}
 		}
 
-		void UpdateLocalScope (ScopeDebugInformation scope, Instruction removedInstruction, Instruction existingInstruction, ref InstructionOffsetCache cache)
+		void UpdateLocalScope (ScopeDebugInformation scope, ref InstructionOffsetResolver resolver)
 		{
 			if (scope == null)
 				return;
 
-			if (!scope.Start.IsResolved)
-				scope.Start = ResolveInstructionOffset (scope.Start, ref cache);
-
-			if (!scope.Start.IsEndOfMethod && scope.Start.ResolvedInstruction == removedInstruction)
-				scope.Start = new InstructionOffset (existingInstruction);
+			scope.Start = resolver.Resolve (scope.Start);
 
 			if (scope.HasScopes) {
 				foreach (var subScope in scope.Scopes)
-					UpdateLocalScope (subScope, removedInstruction, existingInstruction, ref cache);
+					UpdateLocalScope (subScope, ref resolver);
 			}
 
-			if (!scope.End.IsResolved)
-				scope.End = ResolveInstructionOffset (scope.End, ref cache);
-
-			if (!scope.End.IsEndOfMethod && scope.End.ResolvedInstruction == removedInstruction)
-				scope.End = new InstructionOffset (existingInstruction);
+			scope.End = resolver.Resolve (scope.End);
 		}
 
-		struct InstructionOffsetCache {
-			public int Offset;
-			public int Index;
-			public Instruction Instruction;
-		}
-
-		InstructionOffset ResolveInstructionOffset(InstructionOffset inputOffset, ref InstructionOffsetCache cache)
+		void UpdateStateMachineScope (StateMachineScopeDebugInformation debugInfo, ref InstructionOffsetResolver resolver)
 		{
-			if (inputOffset.IsResolved)
-				return inputOffset;
+			resolver.Restart ();
+			foreach (var scope in debugInfo.Scopes) {
+				scope.Start = resolver.Resolve (scope.Start);
+				scope.End = resolver.Resolve (scope.End);
+			}
+		}
 
-			int offset = inputOffset.Offset;
+		void UpdateAsyncMethodBody (AsyncMethodBodyDebugInformation debugInfo, ref InstructionOffsetResolver resolver)
+		{
+			if (!debugInfo.CatchHandler.IsResolved) {
+				resolver.Restart ();
+				debugInfo.CatchHandler = resolver.Resolve (debugInfo.CatchHandler);
+			}
 
-			if (cache.Offset == offset)
-				return new InstructionOffset (cache.Instruction);
+			resolver.Restart ();
+			for (int i = 0; i < debugInfo.Yields.Count; i++) {
+				debugInfo.Yields [i] = resolver.Resolve (debugInfo.Yields [i]);
+			}
 
-			if (cache.Offset > offset) {
-				// This should be rare - we're resolving offset pointing to a place before the current cache position
-				// resolve by walking the instructions from start and don't cache the result.
-				int size = 0;
-				for (int i = 0; i < items.Length; i++) {
-					// The array can be larger than the actual size, in which case its padded with nulls at the end
-					// so when we reach null, treat it as an end of the IL.
-					if (items [i] == null)
-						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+			resolver.Restart ();
+			for (int i = 0; i < debugInfo.Resumes.Count; i++) {
+				debugInfo.Resumes [i] = resolver.Resolve (debugInfo.Resumes [i]);
+			}
+		}
 
-					if (size == offset)
-						return new InstructionOffset (items [i]);
+		struct InstructionOffsetResolver {
+			readonly Instruction [] items;
+			readonly Instruction removed_instruction;
+			readonly Instruction existing_instruction;
 
-					if (size > offset)
-						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+			int cache_offset;
+			int cache_index;
+			Instruction cache_instruction;
 
-					size += items [i].GetSize ();
+			public int LastOffset { get => cache_offset; }
+
+			public InstructionOffsetResolver (Instruction[] instructions, Instruction removedInstruction, Instruction existingInstruction)
+			{
+				items = instructions;
+				removed_instruction = removedInstruction;
+				existing_instruction = existingInstruction;
+				cache_offset = 0;
+				cache_index = 0;
+				cache_instruction = items [0];
+			}
+
+			public void Restart ()
+			{
+				cache_offset = 0;
+				cache_index = 0;
+				cache_instruction = items [0];
+			}
+
+			public InstructionOffset Resolve (InstructionOffset inputOffset)
+			{
+				var result = ResolveInstructionOffset (inputOffset);
+				if (!result.IsEndOfMethod && result.ResolvedInstruction == removed_instruction)
+					result = new InstructionOffset (existing_instruction);
+
+				return result;
+			}
+
+			InstructionOffset ResolveInstructionOffset (InstructionOffset inputOffset)
+			{
+				if (inputOffset.IsResolved)
+					return inputOffset;
+
+				int offset = inputOffset.Offset;
+
+				if (cache_offset == offset)
+					return new InstructionOffset (cache_instruction);
+
+				if (cache_offset > offset) {
+					// This should be rare - we're resolving offset pointing to a place before the current cache position
+					// resolve by walking the instructions from start and don't cache the result.
+					int size = 0;
+					for (int i = 0; i < items.Length; i++) {
+						// The array can be larger than the actual size, in which case its padded with nulls at the end
+						// so when we reach null, treat it as an end of the IL.
+						if (items [i] == null)
+							return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+
+						if (size == offset)
+							return new InstructionOffset (items [i]);
+
+						if (size > offset)
+							return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+
+						size += items [i].GetSize ();
+					}
+
+					// Offset is larger than the size of the body - so it points after the end
+					return new InstructionOffset ();
+				} else {
+					// The offset points after the current cache position - so continue counting and update the cache
+					int size = cache_offset;
+					for (int i = cache_index; i < items.Length; i++) {
+						cache_index = i;
+						cache_offset = size;
+
+						var item = items [i];
+
+						// Allow for trailing null values in the case of
+						// instructions.Size < instructions.Capacity
+						if (item == null)
+							return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+
+						cache_instruction = item;
+
+						if (cache_offset == offset)
+							return new InstructionOffset (cache_instruction);
+
+						if (cache_offset > offset)
+							return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
+
+						size += item.GetSize ();
+					}
+
+					return new InstructionOffset ();
 				}
-
-				// Offset is larger than the size of the body - so it points after the end
-				return new InstructionOffset ();
-			} else {
-				// The offset points after the current cache position - so continue counting and update the cache
-				int size = cache.Offset;
-				for (int i = cache.Index; i < items.Length; i++) {
-					cache.Index = i;
-					cache.Offset = size;
-
-					var item = items [i];
-
-					// Allow for trailing null values in the case of
-					// instructions.Size < instructions.Capacity
-					if (item == null)
-						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
-
-					cache.Instruction = item;
-
-					if (cache.Offset == offset)
-						return new InstructionOffset (cache.Instruction);
-
-					if (cache.Offset > offset) 
-						return new InstructionOffset (i == 0 ? items [0] : items [i - 1]);
-
-					size += item.GetSize ();
-				}
-
-				return new InstructionOffset ();
 			}
 		}
 	}
