@@ -21,8 +21,7 @@ namespace Mono.Cecil {
 	public delegate AssemblyDefinition AssemblyResolveEventHandler (object sender, AssemblyNameReference reference);
 
 	public sealed class AssemblyResolveEventArgs : EventArgs {
-
-		readonly AssemblyNameReference reference;
+		private readonly AssemblyNameReference reference;
 
 		public AssemblyNameReference AssemblyReference {
 			get { return reference; }
@@ -37,9 +36,9 @@ namespace Mono.Cecil {
 #if !NET_CORE
 	[Serializable]
 #endif
-	public sealed class AssemblyResolutionException : FileNotFoundException {
 
-		readonly AssemblyNameReference reference;
+	public sealed class AssemblyResolutionException : FileNotFoundException {
+		private readonly AssemblyNameReference reference;
 
 		public AssemblyNameReference AssemblyReference {
 			get { return reference; }
@@ -67,18 +66,15 @@ namespace Mono.Cecil {
 	}
 
 	public abstract class BaseAssemblyResolver : IAssemblyResolver {
+		private static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
 
-		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
+		private readonly Collection<string> directories;
 
-		readonly Collection<string> directories;
-
-#if NET_CORE
 		// Maps file names of available trusted platform assemblies to their full paths.
 		// Internal for testing.
 		internal static readonly Lazy<Dictionary<string, string>> TrustedPlatformAssemblies = new Lazy<Dictionary<string, string>> (CreateTrustedPlatformAssemblyMap);
-#else
-		Collection<string> gac_paths;
-#endif
+
+		private Collection<string> gac_paths;
 
 		public void AddSearchDirectory (string directory)
 		{
@@ -104,7 +100,7 @@ namespace Mono.Cecil {
 			directories = new Collection<string> (2) { ".", "bin" };
 		}
 
-		AssemblyDefinition GetAssembly (string file, ReaderParameters parameters)
+		private AssemblyDefinition GetAssembly (string file, ReaderParameters parameters)
 		{
 			if (parameters.AssemblyResolver == null)
 				parameters.AssemblyResolver = this;
@@ -138,6 +134,31 @@ namespace Mono.Cecil {
 			if (assembly != null)
 				return assembly;
 #else
+			assembly = SearchFrameworkAssemblies (name, parameters);
+			if (assembly != null)
+				return assembly;
+
+#endif
+
+			assembly = LastChanceResolution (assembly, name, parameters);
+			if (assembly != null)
+				return assembly;
+
+			throw new AssemblyResolutionException (name);
+		}
+
+		protected AssemblyDefinition LastChanceResolution (AssemblyDefinition assembly, AssemblyNameReference name, ReaderParameters parameters)
+		{
+			if (ResolveFailure != null) {
+				assembly = ResolveFailure (this, name);
+			}
+
+			return assembly;
+		}
+
+		protected AssemblyDefinition SearchFrameworkAssemblies (AssemblyNameReference name, ReaderParameters parameters)
+		{
+			AssemblyDefinition assembly = null;
 			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
 			var framework_dirs = on_mono
 				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
@@ -160,20 +181,10 @@ namespace Mono.Cecil {
 				return assembly;
 
 			assembly = SearchDirectory (name, framework_dirs, parameters);
-			if (assembly != null)
-				return assembly;
-#endif
-			if (ResolveFailure != null) {
-				assembly = ResolveFailure (this, name);
-				if (assembly != null)
-					return assembly;
-			}
-
-			throw new AssemblyResolutionException (name);
+			return assembly;
 		}
 
-#if NET_CORE
-		AssemblyDefinition SearchTrustedPlatformAssemblies (AssemblyNameReference name, ReaderParameters parameters)
+		protected AssemblyDefinition SearchTrustedPlatformAssemblies (AssemblyNameReference name, ReaderParameters parameters)
 		{
 			if (name.IsWindowsRuntime)
 				return null;
@@ -184,15 +195,16 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static Dictionary<string, string> CreateTrustedPlatformAssemblyMap ()
+		private static Dictionary<string, string> CreateTrustedPlatformAssemblyMap ()
 		{
 			var result = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase);
 
 			string paths;
 
 			try {
-				paths = (string) AppDomain.CurrentDomain.GetData ("TRUSTED_PLATFORM_ASSEMBLIES");
-			} catch {
+				paths = (string)AppDomain.CurrentDomain.GetData ("TRUSTED_PLATFORM_ASSEMBLIES");
+			}
+			catch {
 				paths = null;
 			}
 
@@ -205,7 +217,6 @@ namespace Mono.Cecil {
 
 			return result;
 		}
-#endif
 
 		protected virtual AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
 		{
@@ -217,7 +228,8 @@ namespace Mono.Cecil {
 						continue;
 					try {
 						return GetAssembly (file, parameters);
-					} catch (System.BadImageFormatException) {
+					}
+					catch (System.BadImageFormatException) {
 						continue;
 					}
 				}
@@ -226,13 +238,12 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static bool IsZero (Version version)
+		private static bool IsZero (Version version)
 		{
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
-#if !NET_CORE
-		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
+		private AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
 			var corlib = typeof (object).Assembly.GetName ();
@@ -264,12 +275,15 @@ namespace Mono.Cecil {
 					else
 						path = Path.Combine (path, "v1.1.4322");
 					break;
+
 				case 2:
 					path = Path.Combine (path, "v2.0.50727");
 					break;
+
 				case 4:
 					path = Path.Combine (path, "v4.0.30319");
 					break;
+
 				default:
 					throw new NotSupportedException ("Version not supported: " + version);
 				}
@@ -288,7 +302,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static Collection<string> GetGacPaths ()
+		private static Collection<string> GetGacPaths ()
 		{
 			if (on_mono)
 				return GetDefaultMonoGacPaths ();
@@ -303,7 +317,7 @@ namespace Mono.Cecil {
 			return paths;
 		}
 
-		static Collection<string> GetDefaultMonoGacPaths ()
+		private static Collection<string> GetDefaultMonoGacPaths ()
 		{
 			var paths = new Collection<string> (1);
 			var gac = GetCurrentMonoGac ();
@@ -327,7 +341,7 @@ namespace Mono.Cecil {
 			return paths;
 		}
 
-		static string GetCurrentMonoGac ()
+		private static string GetCurrentMonoGac ()
 		{
 			return Path.Combine (
 				Directory.GetParent (
@@ -335,7 +349,7 @@ namespace Mono.Cecil {
 				"gac");
 		}
 
-		AssemblyDefinition GetAssemblyInGac (AssemblyNameReference reference, ReaderParameters parameters)
+		private AssemblyDefinition GetAssemblyInGac (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			if (reference.PublicKeyToken == null || reference.PublicKeyToken.Length == 0)
 				return null;
@@ -349,7 +363,7 @@ namespace Mono.Cecil {
 			return GetAssemblyInNetGac (reference, parameters);
 		}
 
-		AssemblyDefinition GetAssemblyInMonoGac (AssemblyNameReference reference, ReaderParameters parameters)
+		private AssemblyDefinition GetAssemblyInMonoGac (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			for (int i = 0; i < gac_paths.Count; i++) {
 				var gac_path = gac_paths [i];
@@ -361,7 +375,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		AssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference, ReaderParameters parameters)
+		private AssemblyDefinition GetAssemblyInNetGac (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var gacs = new [] { "GAC_MSIL", "GAC_32", "GAC_64", "GAC" };
 			var prefixes = new [] { string.Empty, "v4.0_" };
@@ -378,7 +392,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
+		private static string GetAssemblyFile (AssemblyNameReference reference, string prefix, string gac)
 		{
 			var gac_folder = new StringBuilder ()
 				.Append (prefix)
@@ -393,7 +407,7 @@ namespace Mono.Cecil {
 					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
 				reference.Name + ".dll");
 		}
-#endif
+
 		public void Dispose ()
 		{
 			Dispose (true);
