@@ -147,7 +147,7 @@ namespace Mono.Cecil {
 			throw new AssemblyResolutionException (name);
 		}
 
-		protected AssemblyDefinition LastChanceResolution (AssemblyDefinition assembly, AssemblyNameReference name, ReaderParameters parameters)
+		protected virtual AssemblyDefinition LastChanceResolution (AssemblyDefinition assembly, AssemblyNameReference name, ReaderParameters parameters)
 		{
 			if (ResolveFailure != null) {
 				assembly = ResolveFailure (this, name);
