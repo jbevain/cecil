@@ -86,6 +86,12 @@ namespace Mono.Cecil {
 			directories.Remove (directory);
 		}
 
+		protected bool NetCore { get; set; }
+
+		protected bool AsMono { get; set; }
+
+		protected Module CoreModule { get; set; }
+
 		public string [] GetSearchDirectories ()
 		{
 			var directories = new string [this.directories.size];
@@ -98,6 +104,14 @@ namespace Mono.Cecil {
 		protected BaseAssemblyResolver ()
 		{
 			directories = new Collection<string> (2) { ".", "bin" };
+#if NET_CORE
+			NetCore = true;
+#else
+			NetCore = false;
+#endif
+
+			AsMono = on_mono;
+			CoreModule = typeof (object).Module;
 		}
 
 		private AssemblyDefinition GetAssembly (string file, ReaderParameters parameters)
@@ -129,16 +143,10 @@ namespace Mono.Cecil {
 				};
 			}
 
-#if NET_CORE
-			assembly = SearchTrustedPlatformAssemblies (name, parameters);
+			assembly = NetCore ? SearchTrustedPlatformAssemblies (name, parameters) :
+								 SearchFrameworkAssemblies (name, parameters);
 			if (assembly != null)
 				return assembly;
-#else
-			assembly = SearchFrameworkAssemblies (name, parameters);
-			if (assembly != null)
-				return assembly;
-
-#endif
 
 			assembly = LastChanceResolution (assembly, name, parameters);
 			if (assembly != null)
@@ -159,8 +167,9 @@ namespace Mono.Cecil {
 		protected AssemblyDefinition SearchFrameworkAssemblies (AssemblyNameReference name, ReaderParameters parameters)
 		{
 			AssemblyDefinition assembly = null;
-			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
-			var framework_dirs = on_mono
+
+			var framework_dir = Path.GetDirectoryName (CoreModule.FullyQualifiedName);
+			var framework_dirs = AsMono
 				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
 				: new [] { framework_dir };
 
@@ -246,16 +255,16 @@ namespace Mono.Cecil {
 		private AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
-			var corlib = typeof (object).Assembly.GetName ();
+			var corlib = CoreModule.Assembly.GetName (); // GetFramework
 			if (corlib.Version == version || IsZero (version))
-				return GetAssembly (typeof (object).Module.FullyQualifiedName, parameters);
+				return GetAssembly (CoreModule.FullyQualifiedName, parameters);
 
 			var path = Directory.GetParent (
 				Directory.GetParent (
-					typeof (object).Module.FullyQualifiedName).FullName
+					CoreModule.FullyQualifiedName).FullName
 				).FullName;
 
-			if (on_mono) {
+			if (AsMono) {
 				if (version.Major == 1)
 					path = Path.Combine (path, "1.0");
 				else if (version.Major == 2) {
@@ -293,7 +302,7 @@ namespace Mono.Cecil {
 			if (File.Exists (file))
 				return GetAssembly (file, parameters);
 
-			if (on_mono && Directory.Exists (path + "-api")) {
+			if (AsMono && Directory.Exists (path + "-api")) {
 				file = Path.Combine (path + "-api", "mscorlib.dll");
 				if (File.Exists (file))
 					return GetAssembly (file, parameters);
@@ -302,10 +311,10 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		private static Collection<string> GetGacPaths ()
+		private static Collection<string> GetGacPaths (bool mono, Module core)
 		{
-			if (on_mono)
-				return GetDefaultMonoGacPaths ();
+			if (mono)
+				return GetDefaultMonoGacPaths (core);
 
 			var paths = new Collection<string> (2);
 			var windir = Environment.GetEnvironmentVariable ("WINDIR");
@@ -317,10 +326,10 @@ namespace Mono.Cecil {
 			return paths;
 		}
 
-		private static Collection<string> GetDefaultMonoGacPaths ()
+		private static Collection<string> GetDefaultMonoGacPaths (Module core)
 		{
 			var paths = new Collection<string> (1);
-			var gac = GetCurrentMonoGac ();
+			var gac = GetCurrentMonoGac (core);
 			if (gac != null)
 				paths.Add (gac);
 
@@ -341,11 +350,11 @@ namespace Mono.Cecil {
 			return paths;
 		}
 
-		private static string GetCurrentMonoGac ()
+		private static string GetCurrentMonoGac (Module core)
 		{
 			return Path.Combine (
 				Directory.GetParent (
-					Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName)).FullName,
+					Path.GetDirectoryName (core.FullyQualifiedName)).FullName,  // GetFrameworkDirectory
 				"gac");
 		}
 
@@ -355,9 +364,9 @@ namespace Mono.Cecil {
 				return null;
 
 			if (gac_paths == null)
-				gac_paths = GetGacPaths ();
+				gac_paths = GetGacPaths (AsMono, CoreModule);
 
-			if (on_mono)
+			if (AsMono)
 				return GetAssemblyInMonoGac (reference, parameters);
 
 			return GetAssemblyInNetGac (reference, parameters);
