@@ -14,12 +14,18 @@ using System.Collections.Generic;
 namespace Mono.Cecil {
 
 	public class DefaultAssemblyResolver : BaseAssemblyResolver {
-
-		readonly IDictionary<string, AssemblyDefinition> cache;
+		private readonly IDictionary<string, AssemblyDefinition> cache;
 
 		public DefaultAssemblyResolver ()
 		{
 			cache = new Dictionary<string, AssemblyDefinition> (StringComparer.Ordinal);
+		}
+
+		public DefaultAssemblyResolver (bool asNetCore, bool asMono, System.Reflection.Module core) : this ()
+		{
+			base.NetCore = asNetCore;
+			base.AsMono = asMono;
+			base.CoreModule = core;
 		}
 
 		public override AssemblyDefinition Resolve (AssemblyNameReference name)
