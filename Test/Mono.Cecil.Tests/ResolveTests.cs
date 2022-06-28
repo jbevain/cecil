@@ -248,6 +248,9 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void ResolveFrameworkGACReference ()
 		{
+			// only makes sense on Windows
+			OnlyOnWindows ();
+
 			var resolver = new AdaptiveAssemblyResolverProvider ();
 			var parameters = new ReaderParameters { AssemblyResolverProvider = resolver };
 
