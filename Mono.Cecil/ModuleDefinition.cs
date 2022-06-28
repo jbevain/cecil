@@ -50,6 +50,8 @@ namespace Mono.Cecil {
 			set { in_memory = value; }
 		}
 
+		public IAssemblyResolverProvider AssemblyResolverProvider { get; set; }
+
 		public IAssemblyResolver AssemblyResolver {
 			get { return assembly_resolver; }
 			set { assembly_resolver = value; }
@@ -380,7 +382,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		private IAssemblyResolverProvider AssemblyResolverProvider { get; set; }
+		public IAssemblyResolverProvider AssemblyResolverProvider { get; internal set; }
 
 		public IAssemblyResolver AssemblyResolver {
 			get {
