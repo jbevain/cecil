@@ -13,6 +13,13 @@ using System.Collections.Generic;
 
 namespace Mono.Cecil {
 
+	public class DefaultAssemblyResolverProvider : IAssemblyResolverProvider {
+		public IAssemblyResolver Create (AssemblyDefinition assembly)
+		{
+			return new DefaultAssemblyResolver ();
+		}
+	}
+
 	public class DefaultAssemblyResolver : BaseAssemblyResolver {
 		private readonly IDictionary<string, AssemblyDefinition> cache;
 
