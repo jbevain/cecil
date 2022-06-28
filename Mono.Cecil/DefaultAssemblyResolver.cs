@@ -10,16 +10,30 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mono.Cecil {
 
-	public class DefaultAssemblyResolver : BaseAssemblyResolver {
+	public class DefaultAssemblyResolverProvider : IAssemblyResolverProvider {
+		public IAssemblyResolver Create (AssemblyDefinition assembly)
+		{
+			return new DefaultAssemblyResolver ();
+		}
+	}
 
-		readonly IDictionary<string, AssemblyDefinition> cache;
+	public class DefaultAssemblyResolver : BaseAssemblyResolver {
+		private readonly IDictionary<string, AssemblyDefinition> cache;
 
 		public DefaultAssemblyResolver ()
 		{
 			cache = new Dictionary<string, AssemblyDefinition> (StringComparer.Ordinal);
+		}
+
+		public DefaultAssemblyResolver (bool asNetCore, bool asMono, System.Reflection.Module core) : this ()
+		{
+			base.NetCore = asNetCore;
+			base.AsMono = asMono;
+			base.CoreModule = core;
 		}
 
 		public override AssemblyDefinition Resolve (AssemblyNameReference name)
@@ -56,6 +70,40 @@ namespace Mono.Cecil {
 			cache.Clear ();
 
 			base.Dispose (disposing);
+		}
+	}
+
+	public class AdaptiveAssemblyResolverProvider : IAssemblyResolverProvider {
+		public IAssemblyResolver Create (AssemblyDefinition assembly)
+		{
+			var blob = assembly.CustomAttributes
+				.Where (a => a.AttributeType.FullName.Equals ("System.Runtime.Versioning.TargetFrameworkAttribute", StringComparison.Ordinal))
+				.FirstOrDefault ()?.GetBlob ();
+			var core = !System.Text.Encoding.ASCII.GetString ((blob ?? new byte [3]).Skip (3).ToArray ()).StartsWith (".NETFramework");
+			return new AdaptiveAssemblyResolver (core);
+		}
+	}
+
+	public class AdaptiveAssemblyResolver : DefaultAssemblyResolver {
+		public AdaptiveAssemblyResolver (bool core) :
+			base (core, false, typeof (object).Module) // harmless by experiment
+		{
+		}
+
+		protected override AssemblyDefinition LastChanceResolution (AssemblyDefinition assembly, AssemblyNameReference name, ReaderParameters parameters)
+		{
+			if (!base.NetCore) {
+				try // the mono gac
+				{
+					base.AsMono = true;
+					assembly = base.SearchFrameworkAssemblies (name, parameters);
+					if (assembly != null)
+						return assembly;
+				}
+				finally { base.AsMono = false; }
+			}
+
+			return base.LastChanceResolution (assembly, name, parameters);
 		}
 	}
 }

@@ -12,7 +12,6 @@ namespace Mono.Cecil.Tests {
 
 	[TestFixture]
 	public class ResolveTests : BaseTestFixture {
-
 		[Test]
 		public void StringEmpty ()
 		{
@@ -26,11 +25,11 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (definition);
 
 			Assert.AreEqual ("System.String System.String::Empty", definition.FullName);
-			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", 
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib",
 				definition.Module.Assembly.Name.Name);
 		}
 
-		delegate string GetSubstring (string str, int start, int length);
+		private delegate string GetSubstring (string str, int start, int length);
 
 		[Test]
 		public void StringSubstring ()
@@ -58,7 +57,7 @@ namespace Mono.Cecil.Tests {
 
 			Assert.AreEqual ("get_Length", definition.Name);
 			Assert.AreEqual ("System.String", definition.DeclaringType.FullName);
-			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib", 
+			Assert.AreEqual (Platform.OnCoreClr ? "System.Private.CoreLib" : "mscorlib",
 				definition.Module.Assembly.Name.Name);
 		}
 
@@ -100,8 +99,7 @@ namespace Mono.Cecil.Tests {
 				 definition.Module.Assembly.Name.Name);
 		}
 
-		class CustomResolver : DefaultAssemblyResolver {
-
+		private class CustomResolver : DefaultAssemblyResolver {
 			public void Register (AssemblyDefinition assembly)
 			{
 				this.RegisterAssembly (assembly);
@@ -173,7 +171,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void RectangularArrayResolveGetMethod ()
 		{
-			var get_a_b = GetReference<Func<int[,], int>, MethodReference> (matrix => matrix [2, 2]);
+			var get_a_b = GetReference<Func<int [,], int>, MethodReference> (matrix => matrix [2, 2]);
 
 			Assert.AreEqual ("Get", get_a_b.Name);
 			Assert.IsNotNull (get_a_b.Module);
@@ -201,7 +199,7 @@ namespace Mono.Cecil.Tests {
 			var field = global.GetField ("__onexitbegin_app_domain");
 
 			var type = field.FieldType as PointerType;
-			Assert.IsNotNull(type);
+			Assert.IsNotNull (type);
 
 			var fnptr = type.ElementType as FunctionPointerType;
 			Assert.IsNotNull (fnptr);
@@ -248,6 +246,25 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void ResolveFrameworkGACReference ()
+		{
+			// only makes sense on Windows
+			OnlyOnWindows ();
+
+			var resolver = new AdaptiveAssemblyResolverProvider ();
+			var parameters = new ReaderParameters { AssemblyResolverProvider = resolver };
+
+			using (var module = GetResourceModule ("FrameworkWPF.dll", parameters)) {
+				var rt_folder = Path.Combine (Path.GetTempPath (), "FrameworkWPF");
+				if (!Directory.Exists (rt_folder))
+					Directory.CreateDirectory (rt_folder);
+				var rt_module = Path.Combine (rt_folder, Path.GetFileName ("FrameworkWPF.dll"));
+				var writer_parameters = new WriterParameters ();
+				module.Write (rt_module, writer_parameters);
+			}
+		}
+
+		[Test]
 		public void ResolveModuleReferenceFromMemberReferenceTest ()
 		{
 			using (var mma = AssemblyDefinition.ReadAssembly (GetAssemblyResourcePath ("mma.exe"))) {
@@ -282,20 +299,21 @@ namespace Mono.Cecil.Tests {
 				Assert.IsNull (methodTypeRef.Resolve ());
 			}
 		}
-		TRet GetReference<TDel, TRet> (TDel code)
+
+		private TRet GetReference<TDel, TRet> (TDel code)
 		{
 			var @delegate = code as Delegate;
 			if (@delegate == null)
 				throw new InvalidOperationException ();
 
-			var reference = (TRet) GetReturnee (GetMethodFromDelegate (@delegate));
+			var reference = (TRet)GetReturnee (GetMethodFromDelegate (@delegate));
 
 			Assert.IsNotNull (reference);
 
 			return reference;
 		}
 
-		static object GetReturnee (MethodDefinition method)
+		private static object GetReturnee (MethodDefinition method)
 		{
 			Assert.IsTrue (method.HasBody);
 
@@ -311,6 +329,7 @@ namespace Mono.Cecil.Tests {
 				case OperandType.InlineType:
 				case OperandType.InlineMethod:
 					return instruction.Operand;
+
 				default:
 					instruction = instruction.Previous;
 					break;
@@ -320,10 +339,10 @@ namespace Mono.Cecil.Tests {
 			throw new InvalidOperationException ();
 		}
 
-		MethodDefinition GetMethodFromDelegate (Delegate @delegate)
+		private MethodDefinition GetMethodFromDelegate (Delegate @delegate)
 		{
 			var method = @delegate.Method;
-			var type = (TypeDefinition) TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);
+			var type = (TypeDefinition)TypeParser.ParseType (GetCurrentModule (), method.DeclaringType.FullName);
 
 			Assert.IsNotNull (type);
 

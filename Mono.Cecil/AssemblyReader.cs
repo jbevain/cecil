@@ -23,9 +23,8 @@ using RVA = System.UInt32;
 
 namespace Mono.Cecil {
 
-	abstract class ModuleReader {
-
-		readonly protected ModuleDefinition module;
+	internal abstract class ModuleReader {
+		protected readonly ModuleDefinition module;
 
 		protected ModuleReader (Image image, ReadingMode mode)
 		{
@@ -34,6 +33,7 @@ namespace Mono.Cecil {
 		}
 
 		protected abstract void ReadModule ();
+
 		public abstract void ReadSymbols (ModuleDefinition module);
 
 		protected void ReadModuleManifest (MetadataReader reader)
@@ -43,7 +43,7 @@ namespace Mono.Cecil {
 			ReadAssembly (reader);
 		}
 
-		void ReadAssembly (MetadataReader reader)
+		private void ReadAssembly (MetadataReader reader)
 		{
 			var name = reader.ReadAssemblyNameDefinition ();
 			if (name == null) {
@@ -62,6 +62,9 @@ namespace Mono.Cecil {
 		{
 			var reader = CreateModuleReader (image, parameters.ReadingMode);
 			var module = reader.module;
+
+			if (parameters.AssemblyResolverProvider != null)
+				module.AssemblyResolverProvider = parameters.AssemblyResolverProvider;
 
 			if (parameters.assembly_resolver != null)
 				module.assembly_resolver = Disposable.NotOwned (parameters.assembly_resolver);
@@ -89,7 +92,7 @@ namespace Mono.Cecil {
 			return module;
 		}
 
-		static void ReadSymbols (ModuleDefinition module, ReaderParameters parameters)
+		private static void ReadSymbols (ModuleDefinition module, ReaderParameters parameters)
 		{
 			var symbol_reader_provider = parameters.SymbolReaderProvider;
 
@@ -106,7 +109,8 @@ namespace Mono.Cecil {
 				if (reader != null) {
 					try {
 						module.ReadSymbols (reader, parameters.ThrowIfSymbolsAreNotMatching);
-					} catch (Exception) {
+					}
+					catch (Exception) {
 						reader.Dispose ();
 						throw;
 					}
@@ -117,7 +121,7 @@ namespace Mono.Cecil {
 				module.ReadSymbols (new PortablePdbReader (module.Image, module));
 		}
 
-		static void GetMetadataKind (ModuleDefinition module, ReaderParameters parameters)
+		private static void GetMetadataKind (ModuleDefinition module, ReaderParameters parameters)
 		{
 			if (!parameters.ApplyWindowsRuntimeProjections) {
 				module.MetadataKind = MetadataKind.Ecma335;
@@ -134,22 +138,23 @@ namespace Mono.Cecil {
 				module.MetadataKind = MetadataKind.WindowsMetadata;
 		}
 
-		static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
+		private static ModuleReader CreateModuleReader (Image image, ReadingMode mode)
 		{
 			switch (mode) {
 			case ReadingMode.Immediate:
 				return new ImmediateModuleReader (image);
+
 			case ReadingMode.Deferred:
 				return new DeferredModuleReader (image);
+
 			default:
 				throw new ArgumentException ();
 			}
 		}
 	}
 
-	sealed class ImmediateModuleReader : ModuleReader {
-
-		bool resolve_attributes;
+	internal sealed class ImmediateModuleReader : ModuleReader {
+		private bool resolve_attributes;
 
 		public ImmediateModuleReader (Image image)
 			: base (image, ReadingMode.Immediate)
@@ -189,13 +194,13 @@ namespace Mono.Cecil {
 			ReadSecurityDeclarations (assembly);
 		}
 
-		void ReadTypes (Collection<TypeDefinition> types)
+		private void ReadTypes (Collection<TypeDefinition> types)
 		{
 			for (int i = 0; i < types.Count; i++)
 				ReadType (types [i]);
 		}
 
-		void ReadType (TypeDefinition type)
+		private void ReadType (TypeDefinition type)
 		{
 			ReadGenericParameters (type);
 
@@ -224,7 +229,7 @@ namespace Mono.Cecil {
 			ReadCustomAttributes (type);
 		}
 
-		void ReadInterfaces (TypeDefinition type)
+		private void ReadInterfaces (TypeDefinition type)
 		{
 			var interfaces = type.Interfaces;
 
@@ -232,7 +237,7 @@ namespace Mono.Cecil {
 				ReadCustomAttributes (interfaces [i]);
 		}
 
-		void ReadGenericParameters (IGenericParameterProvider provider)
+		private void ReadGenericParameters (IGenericParameterProvider provider)
 		{
 			if (!provider.HasGenericParameters)
 				return;
@@ -249,7 +254,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadGenericParameterConstraints (GenericParameter parameter)
+		private void ReadGenericParameterConstraints (GenericParameter parameter)
 		{
 			var constraints = parameter.Constraints;
 
@@ -257,7 +262,7 @@ namespace Mono.Cecil {
 				ReadCustomAttributes (constraints [i]);
 		}
 
-		void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
+		private void ReadSecurityDeclarations (ISecurityDeclarationProvider provider)
 		{
 			if (!provider.HasSecurityDeclarations)
 				return;
@@ -274,7 +279,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadCustomAttributes (ICustomAttributeProvider provider)
+		private void ReadCustomAttributes (ICustomAttributeProvider provider)
 		{
 			if (!provider.HasCustomAttributes)
 				return;
@@ -291,7 +296,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadFields (TypeDefinition type)
+		private void ReadFields (TypeDefinition type)
 		{
 			var fields = type.Fields;
 
@@ -314,7 +319,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadMethods (TypeDefinition type)
+		private void ReadMethods (TypeDefinition type)
 		{
 			var methods = type.Methods;
 
@@ -346,7 +351,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadParameters (MethodDefinition method)
+		private void ReadParameters (MethodDefinition method)
 		{
 			var parameters = method.Parameters;
 
@@ -363,7 +368,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadProperties (TypeDefinition type)
+		private void ReadProperties (TypeDefinition type)
 		{
 			var properties = type.Properties;
 
@@ -379,7 +384,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadEvents (TypeDefinition type)
+		private void ReadEvents (TypeDefinition type)
 		{
 			var events = type.Events;
 
@@ -400,7 +405,7 @@ namespace Mono.Cecil {
 			ReadTypesSymbols (module.Types, module.symbol_reader);
 		}
 
-		void ReadTypesSymbols (Collection<TypeDefinition> types, ISymbolReader symbol_reader)
+		private void ReadTypesSymbols (Collection<TypeDefinition> types, ISymbolReader symbol_reader)
 		{
 			for (int i = 0; i < types.Count; i++) {
 				var type = types [i];
@@ -413,7 +418,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadMethodsSymbols (TypeDefinition type, ISymbolReader symbol_reader)
+		private void ReadMethodsSymbols (TypeDefinition type, ISymbolReader symbol_reader)
 		{
 			var methods = type.Methods;
 			for (int i = 0; i < methods.Count; i++) {
@@ -425,8 +430,7 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class DeferredModuleReader : ModuleReader {
-
+	internal sealed class DeferredModuleReader : ModuleReader {
 		public DeferredModuleReader (Image image)
 			: base (image, ReadingMode.Deferred)
 		{
@@ -442,16 +446,15 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class MetadataReader : ByteBuffer {
-
-		readonly internal Image image;
-		readonly internal ModuleDefinition module;
-		readonly internal MetadataSystem metadata;
+	internal sealed class MetadataReader : ByteBuffer {
+		internal readonly Image image;
+		internal readonly ModuleDefinition module;
+		internal readonly MetadataSystem metadata;
 
 		internal CodeReader code;
 		internal IGenericContext context;
 
-		readonly MetadataReader metadata_reader;
+		private readonly MetadataReader metadata_reader;
 
 		public MetadataReader (ModuleDefinition module)
 			: base (module.Image.TableHeap.data)
@@ -471,12 +474,12 @@ namespace Mono.Cecil {
 			this.metadata_reader = metadata_reader;
 		}
 
-		int GetCodedIndexSize (CodedIndex index)
+		private int GetCodedIndexSize (CodedIndex index)
 		{
 			return image.GetCodedIndexSize (index);
 		}
 
-		uint ReadByIndexSize (int size)
+		private uint ReadByIndexSize (int size)
 		{
 			if (size == 4)
 				return ReadUInt32 ();
@@ -484,7 +487,7 @@ namespace Mono.Cecil {
 				return ReadUInt16 ();
 		}
 
-		byte [] ReadBlob ()
+		private byte [] ReadBlob ()
 		{
 			var blob_heap = image.BlobHeap;
 			if (blob_heap == null) {
@@ -495,7 +498,7 @@ namespace Mono.Cecil {
 			return blob_heap.Read (ReadBlobIndex ());
 		}
 
-		byte [] ReadBlob (uint signature)
+		private byte [] ReadBlob (uint signature)
 		{
 			var blob_heap = image.BlobHeap;
 			if (blob_heap == null)
@@ -504,13 +507,13 @@ namespace Mono.Cecil {
 			return blob_heap.Read (signature);
 		}
 
-		uint ReadBlobIndex ()
+		private uint ReadBlobIndex ()
 		{
 			var blob_heap = image.BlobHeap;
 			return ReadByIndexSize (blob_heap != null ? blob_heap.IndexSize : 2);
 		}
 
-		void GetBlobView (uint signature, out byte [] blob, out int index, out int count)
+		private void GetBlobView (uint signature, out byte [] blob, out int index, out int count)
 		{
 			var blob_heap = image.BlobHeap;
 			if (blob_heap == null) {
@@ -522,48 +525,48 @@ namespace Mono.Cecil {
 			blob_heap.GetView (signature, out blob, out index, out count);
 		}
 
-		string ReadString ()
+		private string ReadString ()
 		{
 			return image.StringHeap.Read (ReadByIndexSize (image.StringHeap.IndexSize));
 		}
 
-		uint ReadStringIndex ()
+		private uint ReadStringIndex ()
 		{
 			return ReadByIndexSize (image.StringHeap.IndexSize);
 		}
 
-		Guid ReadGuid ()
+		private Guid ReadGuid ()
 		{
 			return image.GuidHeap.Read (ReadByIndexSize (image.GuidHeap.IndexSize));
 		}
 
-		uint ReadTableIndex (Table table)
+		private uint ReadTableIndex (Table table)
 		{
 			return ReadByIndexSize (image.GetTableIndexSize (table));
 		}
 
-		MetadataToken ReadMetadataToken (CodedIndex index)
+		private MetadataToken ReadMetadataToken (CodedIndex index)
 		{
 			return index.GetMetadataToken (ReadByIndexSize (GetCodedIndexSize (index)));
 		}
 
-		int MoveTo (Table table)
+		private int MoveTo (Table table)
 		{
 			var info = image.TableHeap [table];
 			if (info.Length != 0)
-				this.position = (int) info.Offset;
+				this.position = (int)info.Offset;
 
-			return (int) info.Length;
+			return (int)info.Length;
 		}
 
-		bool MoveTo (Table table, uint row)
+		private bool MoveTo (Table table, uint row)
 		{
 			var info = image.TableHeap [table];
 			var length = info.Length;
 			if (length == 0 || row > length)
 				return false;
 
-			this.position = (int) (info.Offset + (info.RowSize * (row - 1)));
+			this.position = (int)(info.Offset + (info.RowSize * (row - 1)));
 			return true;
 		}
 
@@ -574,7 +577,7 @@ namespace Mono.Cecil {
 
 			var name = new AssemblyNameDefinition ();
 
-			name.HashAlgorithm = (AssemblyHashAlgorithm) ReadUInt32 ();
+			name.HashAlgorithm = (AssemblyHashAlgorithm)ReadUInt32 ();
 
 			PopulateVersionAndFlags (name);
 
@@ -598,7 +601,7 @@ namespace Mono.Cecil {
 			return module;
 		}
 
-		void InitializeAssemblyReferences ()
+		private void InitializeAssemblyReferences ()
 		{
 			if (metadata.AssemblyReferences != null)
 				return;
@@ -654,7 +657,7 @@ namespace Mono.Cecil {
 
 			int length = MoveTo (Table.File);
 			for (uint i = 1; i <= length; i++) {
-				var attributes = (FileAttributes) ReadUInt32 ();
+				var attributes = (FileAttributes)ReadUInt32 ();
 				var name = ReadString ();
 				ReadBlobIndex ();
 
@@ -664,7 +667,8 @@ namespace Mono.Cecil {
 				var parameters = new ReaderParameters {
 					ReadingMode = module.ReadingMode,
 					SymbolReaderProvider = module.SymbolReaderProvider,
-					AssemblyResolver = module.AssemblyResolver
+					AssemblyResolver = module.AssemblyResolver,
+					AssemblyResolverProvider = module.AssemblyResolverProvider
 				};
 
 				var netmodule = ModuleDefinition.ReadModule (GetModuleFileName (name), parameters);
@@ -676,7 +680,7 @@ namespace Mono.Cecil {
 			return modules;
 		}
 
-		string GetModuleFileName (string name)
+		private string GetModuleFileName (string name)
 		{
 			if (module.FileName == null)
 				throw new NotSupportedException ();
@@ -685,7 +689,7 @@ namespace Mono.Cecil {
 			return Path.Combine (path, name);
 		}
 
-		void InitializeModuleReferences ()
+		private void InitializeModuleReferences ()
 		{
 			if (metadata.ModuleReferences != null)
 				return;
@@ -728,7 +732,7 @@ namespace Mono.Cecil {
 
 			for (int i = 1; i <= length; i++) {
 				var offset = ReadUInt32 ();
-				var flags = (ManifestResourceAttributes) ReadUInt32 ();
+				var flags = (ManifestResourceAttributes)ReadUInt32 ();
 				var name = ReadString ();
 				var implementation = ReadMetadataToken (CodedIndex.Implementation);
 
@@ -738,7 +742,7 @@ namespace Mono.Cecil {
 					resource = new EmbeddedResource (name, flags, offset, this);
 				} else if (implementation.TokenType == TokenType.AssemblyRef) {
 					resource = new AssemblyLinkedResource (name, flags) {
-						Assembly = (AssemblyNameReference) GetTypeReferenceScope (implementation),
+						Assembly = (AssemblyNameReference)GetTypeReferenceScope (implementation),
 					};
 				} else if (implementation.TokenType == TokenType.File) {
 					var file_record = ReadFileRecord (implementation.RID);
@@ -756,7 +760,7 @@ namespace Mono.Cecil {
 			return resources;
 		}
 
-		Row<FileAttributes, string, uint> ReadFileRecord (uint rid)
+		private Row<FileAttributes, string, uint> ReadFileRecord (uint rid)
 		{
 			var position = this.position;
 
@@ -764,7 +768,7 @@ namespace Mono.Cecil {
 				throw new ArgumentException ();
 
 			var record = new Row<FileAttributes, string, uint> (
-				(FileAttributes) ReadUInt32 (),
+				(FileAttributes)ReadUInt32 (),
 				ReadString (),
 				ReadBlobIndex ());
 
@@ -776,12 +780,12 @@ namespace Mono.Cecil {
 		public byte [] GetManagedResource (uint offset)
 		{
 			return image.GetReaderAt (image.Resources.VirtualAddress, offset, (o, reader) => {
-				reader.Advance ((int) o);
+				reader.Advance ((int)o);
 				return reader.ReadBytes (reader.ReadInt32 ());
 			}) ?? Empty<byte>.Array;
 		}
 
-		void PopulateVersionAndFlags (AssemblyNameReference name)
+		private void PopulateVersionAndFlags (AssemblyNameReference name)
 		{
 			name.Version = new Version (
 				ReadUInt16 (),
@@ -789,10 +793,10 @@ namespace Mono.Cecil {
 				ReadUInt16 (),
 				ReadUInt16 ());
 
-			name.Attributes = (AssemblyAttributes) ReadUInt32 ();
+			name.Attributes = (AssemblyAttributes)ReadUInt32 ();
 		}
 
-		void PopulateNameAndCulture (AssemblyNameReference name)
+		private void PopulateNameAndCulture (AssemblyNameReference name)
 		{
 			name.Name = ReadString ();
 			name.Culture = ReadString ();
@@ -819,7 +823,7 @@ namespace Mono.Cecil {
 			return types;
 		}
 
-		void CompleteTypes ()
+		private void CompleteTypes ()
 		{
 			var types = metadata.Types;
 
@@ -831,7 +835,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void InitializeTypeDefinitions ()
+		private void InitializeTypeDefinitions ()
 		{
 			if (metadata.Types != null)
 				return;
@@ -857,7 +861,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static bool IsNested (TypeAttributes attributes)
+		private static bool IsNested (TypeAttributes attributes)
 		{
 			switch (attributes & TypeAttributes.VisibilityMask) {
 			case TypeAttributes.NestedAssembly:
@@ -867,6 +871,7 @@ namespace Mono.Cecil {
 			case TypeAttributes.NestedPrivate:
 			case TypeAttributes.NestedPublic:
 				return true;
+
 			default:
 				return false;
 			}
@@ -904,7 +909,7 @@ namespace Mono.Cecil {
 			return nested_types;
 		}
 
-		void InitializeNestedTypes ()
+		private void InitializeNestedTypes ()
 		{
 			if (metadata.NestedTypes != null)
 				return;
@@ -925,13 +930,13 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddNestedMapping (uint declaring, uint nested)
+		private void AddNestedMapping (uint declaring, uint nested)
 		{
 			metadata.SetNestedTypeMapping (declaring, AddMapping (metadata.NestedTypes, declaring, nested));
 			metadata.SetReverseNestedTypeMapping (nested, declaring);
 		}
 
-		static Collection<TValue> AddMapping<TKey, TValue> (Dictionary<TKey, Collection<TValue>> cache, TKey key, TValue value)
+		private static Collection<TValue> AddMapping<TKey, TValue> (Dictionary<TKey, Collection<TValue>> cache, TKey key, TValue value)
 		{
 			Collection<TValue> mapped;
 			if (!cache.TryGetValue (key, out mapped)) {
@@ -941,12 +946,12 @@ namespace Mono.Cecil {
 			return mapped;
 		}
 
-		TypeDefinition ReadType (uint rid)
+		private TypeDefinition ReadType (uint rid)
 		{
 			if (!MoveTo (Table.TypeDef, rid))
 				return null;
 
-			var attributes = (TypeAttributes) ReadUInt32 ();
+			var attributes = (TypeAttributes)ReadUInt32 ();
 			var name = ReadString ();
 			var @namespace = ReadString ();
 			var type = new TypeDefinition (@namespace, name, attributes);
@@ -969,7 +974,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		TypeDefinition GetNestedTypeDeclaringType (TypeDefinition type)
+		private TypeDefinition GetNestedTypeDeclaringType (TypeDefinition type)
 		{
 			uint declaring_rid;
 			if (!metadata.TryGetReverseNestedTypeMapping (type, out declaring_rid))
@@ -979,7 +984,7 @@ namespace Mono.Cecil {
 			return GetTypeDefinition (declaring_rid);
 		}
 
-		Range ReadListRange (uint current_index, Table current, Table target)
+		private Range ReadListRange (uint current_index, Table current, Table target)
 		{
 			var list = new Range ();
 
@@ -994,7 +999,7 @@ namespace Mono.Cecil {
 				next_index = image.TableHeap [target].Length + 1;
 			else {
 				var position = this.position;
-				this.position += (int) (current_table.RowSize - image.GetTableIndexSize (target));
+				this.position += (int)(current_table.RowSize - image.GetTableIndexSize (target));
 				next_index = ReadTableIndex (target);
 				this.position = position;
 			}
@@ -1013,15 +1018,15 @@ namespace Mono.Cecil {
 			if (!metadata.ClassLayouts.TryGetValue (rid, out class_layout))
 				return new Row<short, int> (Mixin.NoDataMarker, Mixin.NoDataMarker);
 
-			type.PackingSize = (short) class_layout.Col1;
-			type.ClassSize = (int) class_layout.Col2;
+			type.PackingSize = (short)class_layout.Col1;
+			type.ClassSize = (int)class_layout.Col2;
 
 			metadata.ClassLayouts.Remove (rid);
 
-			return new Row<short, int> ((short) class_layout.Col1, (int) class_layout.Col2);
+			return new Row<short, int> ((short)class_layout.Col1, (int)class_layout.Col2);
 		}
 
-		void InitializeTypeLayouts ()
+		private void InitializeTypeLayouts ()
 		{
 			if (metadata.ClassLayouts != null)
 				return;
@@ -1042,7 +1047,7 @@ namespace Mono.Cecil {
 
 		public TypeReference GetTypeDefOrRef (MetadataToken token)
 		{
-			return (TypeReference) LookupToken (token);
+			return (TypeReference)LookupToken (token);
 		}
 
 		public TypeDefinition GetTypeDefinition (uint rid)
@@ -1061,7 +1066,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		TypeDefinition ReadTypeDefinition (uint rid)
+		private TypeDefinition ReadTypeDefinition (uint rid)
 		{
 			if (!MoveTo (Table.TypeDef, rid))
 				return null;
@@ -1069,7 +1074,7 @@ namespace Mono.Cecil {
 			return ReadType (rid);
 		}
 
-		void InitializeTypeReferences ()
+		private void InitializeTypeReferences ()
 		{
 			if (metadata.TypeReferences != null)
 				return;
@@ -1099,7 +1104,7 @@ namespace Mono.Cecil {
 			return null;
 		}
 
-		TypeReference GetTypeReference (uint rid)
+		private TypeReference GetTypeReference (uint rid)
 		{
 			InitializeTypeReferences ();
 
@@ -1110,7 +1115,7 @@ namespace Mono.Cecil {
 			return ReadTypeReference (rid);
 		}
 
-		TypeReference ReadTypeReference (uint rid)
+		private TypeReference ReadTypeReference (uint rid)
 		{
 			if (!MoveTo (Table.TypeRef, rid))
 				return null;
@@ -1156,22 +1161,24 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		IMetadataScope GetTypeReferenceScope (MetadataToken scope)
+		private IMetadataScope GetTypeReferenceScope (MetadataToken scope)
 		{
 			if (scope.TokenType == TokenType.Module)
 				return module;
 
-			IMetadataScope[] scopes;
+			IMetadataScope [] scopes;
 
 			switch (scope.TokenType) {
 			case TokenType.AssemblyRef:
 				InitializeAssemblyReferences ();
 				scopes = metadata.AssemblyReferences;
 				break;
+
 			case TokenType.ModuleRef:
 				InitializeModuleReferences ();
 				scopes = metadata.ModuleReferences;
 				break;
+
 			default:
 				throw new NotSupportedException ();
 			}
@@ -1197,7 +1204,7 @@ namespace Mono.Cecil {
 			return type_references;
 		}
 
-		TypeReference GetTypeSpecification (uint rid)
+		private TypeReference GetTypeSpecification (uint rid)
 		{
 			if (!MoveTo (Table.TypeSpec, rid))
 				return null;
@@ -1210,7 +1217,7 @@ namespace Mono.Cecil {
 			return type;
 		}
 
-		SignatureReader ReadSignature (uint signature)
+		private SignatureReader ReadSignature (uint signature)
 		{
 			return new SignatureReader (signature, this);
 		}
@@ -1239,7 +1246,7 @@ namespace Mono.Cecil {
 				interfaces.Add (
 					new InterfaceImplementation (
 						GetTypeDefOrRef (mapping [i].Col2),
-						new MetadataToken(TokenType.InterfaceImpl, mapping [i].Col1)));
+						new MetadataToken (TokenType.InterfaceImpl, mapping [i].Col1)));
 			}
 
 			metadata.RemoveInterfaceMapping (type);
@@ -1247,7 +1254,7 @@ namespace Mono.Cecil {
 			return interfaces;
 		}
 
-		void InitializeInterfaces ()
+		private void InitializeInterfaces ()
 		{
 			if (metadata.Interfaces != null)
 				return;
@@ -1264,7 +1271,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddInterfaceMapping (uint type, Row<uint, MetadataToken> @interface)
+		private void AddInterfaceMapping (uint type, Row<uint, MetadataToken> @interface)
 		{
 			metadata.SetInterfaceMapping (type, AddMapping (metadata.Interfaces, type, @interface));
 		}
@@ -1275,7 +1282,7 @@ namespace Mono.Cecil {
 			if (fields_range.Length == 0)
 				return new MemberDefinitionCollection<FieldDefinition> (type);
 
-			var fields = new MemberDefinitionCollection<FieldDefinition> (type, (int) fields_range.Length);
+			var fields = new MemberDefinitionCollection<FieldDefinition> (type, (int)fields_range.Length);
 			this.context = type;
 
 			if (!MoveTo (Table.FieldPtr, fields_range.Start)) {
@@ -1290,9 +1297,9 @@ namespace Mono.Cecil {
 			return fields;
 		}
 
-		void ReadField (uint field_rid, Collection<FieldDefinition> fields)
+		private void ReadField (uint field_rid, Collection<FieldDefinition> fields)
 		{
-			var attributes = (FieldAttributes) ReadUInt16 ();
+			var attributes = (FieldAttributes)ReadUInt16 ();
 			var name = ReadString ();
 			var signature = ReadBlobIndex ();
 
@@ -1309,7 +1316,7 @@ namespace Mono.Cecil {
 				WindowsRuntimeProjections.Project (field);
 		}
 
-		void InitializeFields ()
+		private void InitializeFields ()
 		{
 			if (metadata.Fields != null)
 				return;
@@ -1317,7 +1324,7 @@ namespace Mono.Cecil {
 			metadata.Fields = new FieldDefinition [image.GetTableLength (Table.Field)];
 		}
 
-		TypeReference ReadFieldType (uint signature)
+		private TypeReference ReadFieldType (uint signature)
 		{
 			var reader = ReadSignature (signature);
 
@@ -1347,15 +1354,15 @@ namespace Mono.Cecil {
 
 			field.InitialValue = GetFieldInitializeValue (size, rva);
 
-			return (int) rva;
+			return (int)rva;
 		}
 
-		byte [] GetFieldInitializeValue (int size, RVA rva)
+		private byte [] GetFieldInitializeValue (int size, RVA rva)
 		{
 			return image.GetReaderAt (rva, size, (s, reader) => reader.ReadBytes (s)) ?? Empty<byte>.Array;
 		}
 
-		static int GetFieldTypeSize (TypeReference type)
+		private static int GetFieldTypeSize (TypeReference type)
 		{
 			int size = 0;
 
@@ -1365,28 +1372,34 @@ namespace Mono.Cecil {
 			case ElementType.I1:
 				size = 1;
 				break;
+
 			case ElementType.U2:
 			case ElementType.I2:
 			case ElementType.Char:
 				size = 2;
 				break;
+
 			case ElementType.U4:
 			case ElementType.I4:
 			case ElementType.R4:
 				size = 4;
 				break;
+
 			case ElementType.U8:
 			case ElementType.I8:
 			case ElementType.R8:
 				size = 8;
 				break;
+
 			case ElementType.Ptr:
 			case ElementType.FnPtr:
 				size = IntPtr.Size;
 				break;
+
 			case ElementType.CModOpt:
 			case ElementType.CModReqD:
-				return GetFieldTypeSize (((IModifierType) type).ElementType);
+				return GetFieldTypeSize (((IModifierType)type).ElementType);
+
 			default:
 				var field_type = type.Resolve ();
 				if (field_type != null && field_type.HasLayoutInfo)
@@ -1398,7 +1411,7 @@ namespace Mono.Cecil {
 			return size;
 		}
 
-		void InitializeFieldRVAs ()
+		private void InitializeFieldRVAs ()
 		{
 			if (metadata.FieldRVAs != null)
 				return;
@@ -1425,10 +1438,10 @@ namespace Mono.Cecil {
 
 			metadata.FieldLayouts.Remove (rid);
 
-			return (int) offset;
+			return (int)offset;
 		}
 
-		void InitializeFieldLayouts ()
+		private void InitializeFieldLayouts ()
 		{
 			if (metadata.FieldLayouts != null)
 				return;
@@ -1464,7 +1477,7 @@ namespace Mono.Cecil {
 			if (!metadata.TryGetEventsRange (type, out range))
 				return new MemberDefinitionCollection<EventDefinition> (type);
 
-			var events = new MemberDefinitionCollection<EventDefinition> (type, (int) range.Length);
+			var events = new MemberDefinitionCollection<EventDefinition> (type, (int)range.Length);
 
 			metadata.RemoveEventsRange (type);
 
@@ -1485,9 +1498,9 @@ namespace Mono.Cecil {
 			return events;
 		}
 
-		void ReadEvent (uint event_rid, Collection<EventDefinition> events)
+		private void ReadEvent (uint event_rid, Collection<EventDefinition> events)
 		{
-			var attributes = (EventAttributes) ReadUInt16 ();
+			var attributes = (EventAttributes)ReadUInt16 ();
 			var name = ReadString ();
 			var event_type = GetTypeDefOrRef (ReadMetadataToken (CodedIndex.TypeDefOrRef));
 
@@ -1500,7 +1513,7 @@ namespace Mono.Cecil {
 			events.Add (@event);
 		}
 
-		void InitializeEvents ()
+		private void InitializeEvents ()
 		{
 			if (metadata.Events != null)
 				return;
@@ -1538,7 +1551,7 @@ namespace Mono.Cecil {
 
 			metadata.RemovePropertiesRange (type);
 
-			var properties = new MemberDefinitionCollection<PropertyDefinition> (type, (int) range.Length);
+			var properties = new MemberDefinitionCollection<PropertyDefinition> (type, (int)range.Length);
 
 			if (range.Length == 0)
 				return properties;
@@ -1556,9 +1569,9 @@ namespace Mono.Cecil {
 			return properties;
 		}
 
-		void ReadProperty (uint property_rid, Collection<PropertyDefinition> properties)
+		private void ReadProperty (uint property_rid, Collection<PropertyDefinition> properties)
 		{
-			var attributes = (PropertyAttributes) ReadUInt16 ();
+			var attributes = (PropertyAttributes)ReadUInt16 ();
 			var name = ReadString ();
 			var signature = ReadBlobIndex ();
 
@@ -1584,7 +1597,7 @@ namespace Mono.Cecil {
 			properties.Add (property);
 		}
 
-		void InitializeProperties ()
+		private void InitializeProperties ()
 		{
 			if (metadata.Properties != null)
 				return;
@@ -1600,7 +1613,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		MethodSemanticsAttributes ReadMethodSemantics (MethodDefinition method)
+		private MethodSemanticsAttributes ReadMethodSemantics (MethodDefinition method)
 		{
 			InitializeMethodSemantics ();
 			Row<MethodSemanticsAttributes, MetadataToken> row;
@@ -1613,41 +1626,47 @@ namespace Mono.Cecil {
 			case MethodSemanticsAttributes.AddOn:
 				GetEvent (type, row.Col2).add_method = method;
 				break;
+
 			case MethodSemanticsAttributes.Fire:
 				GetEvent (type, row.Col2).invoke_method = method;
 				break;
+
 			case MethodSemanticsAttributes.RemoveOn:
 				GetEvent (type, row.Col2).remove_method = method;
 				break;
+
 			case MethodSemanticsAttributes.Getter:
 				GetProperty (type, row.Col2).get_method = method;
 				break;
+
 			case MethodSemanticsAttributes.Setter:
 				GetProperty (type, row.Col2).set_method = method;
 				break;
+
 			case MethodSemanticsAttributes.Other:
 				switch (row.Col2.TokenType) {
 				case TokenType.Event: {
-					var @event = GetEvent (type, row.Col2);
-					if (@event.other_methods == null)
-						@event.other_methods = new Collection<MethodDefinition> ();
+						var @event = GetEvent (type, row.Col2);
+						if (@event.other_methods == null)
+							@event.other_methods = new Collection<MethodDefinition> ();
 
-					@event.other_methods.Add (method);
-					break;
-				}
+						@event.other_methods.Add (method);
+						break;
+					}
 				case TokenType.Property: {
-					var property = GetProperty (type, row.Col2);
-					if (property.other_methods == null)
-						property.other_methods = new Collection<MethodDefinition> ();
+						var property = GetProperty (type, row.Col2);
+						if (property.other_methods == null)
+							property.other_methods = new Collection<MethodDefinition> ();
 
-					property.other_methods.Add (method);
+						property.other_methods.Add (method);
 
-					break;
-				}
+						break;
+					}
 				default:
 					throw new NotSupportedException ();
 				}
 				break;
+
 			default:
 				throw new NotSupportedException ();
 			}
@@ -1657,7 +1676,7 @@ namespace Mono.Cecil {
 			return row.Col1;
 		}
 
-		static EventDefinition GetEvent (TypeDefinition type, MetadataToken token)
+		private static EventDefinition GetEvent (TypeDefinition type, MetadataToken token)
 		{
 			if (token.TokenType != TokenType.Event)
 				throw new ArgumentException ();
@@ -1665,7 +1684,7 @@ namespace Mono.Cecil {
 			return GetMember (type.Events, token);
 		}
 
-		static PropertyDefinition GetProperty (TypeDefinition type, MetadataToken token)
+		private static PropertyDefinition GetProperty (TypeDefinition type, MetadataToken token)
 		{
 			if (token.TokenType != TokenType.Property)
 				throw new ArgumentException ();
@@ -1673,7 +1692,7 @@ namespace Mono.Cecil {
 			return GetMember (type.Properties, token);
 		}
 
-		static TMember GetMember<TMember> (Collection<TMember> members, MetadataToken token) where TMember : IMemberDefinition
+		private static TMember GetMember<TMember> (Collection<TMember> members, MetadataToken token) where TMember : IMemberDefinition
 		{
 			for (int i = 0; i < members.Count; i++) {
 				var member = members [i];
@@ -1684,7 +1703,7 @@ namespace Mono.Cecil {
 			throw new ArgumentException ();
 		}
 
-		void InitializeMethodSemantics ()
+		private void InitializeMethodSemantics ()
 		{
 			if (metadata.Semantics != null)
 				return;
@@ -1694,7 +1713,7 @@ namespace Mono.Cecil {
 			var semantics = metadata.Semantics = new Dictionary<uint, Row<MethodSemanticsAttributes, MetadataToken>> (0);
 
 			for (uint i = 0; i < length; i++) {
-				var attributes = (MethodSemanticsAttributes) ReadUInt16 ();
+				var attributes = (MethodSemanticsAttributes)ReadUInt16 ();
 				var method_rid = ReadTableIndex (Table.Method);
 				var association = ReadMetadataToken (CodedIndex.HasSemantics);
 
@@ -1717,7 +1736,7 @@ namespace Mono.Cecil {
 			ReadAllSemantics (method.DeclaringType);
 		}
 
-		void ReadAllSemantics (TypeDefinition type)
+		private void ReadAllSemantics (TypeDefinition type)
 		{
 			var methods = type.Methods;
 			for (int i = 0; i < methods.Count; i++) {
@@ -1736,7 +1755,7 @@ namespace Mono.Cecil {
 			if (methods_range.Length == 0)
 				return new MemberDefinitionCollection<MethodDefinition> (type);
 
-			var methods = new MemberDefinitionCollection<MethodDefinition> (type, (int) methods_range.Length);
+			var methods = new MemberDefinitionCollection<MethodDefinition> (type, (int)methods_range.Length);
 			if (!MoveTo (Table.MethodPtr, methods_range.Start)) {
 				if (!MoveTo (Table.Method, methods_range.Start))
 					return methods;
@@ -1749,7 +1768,7 @@ namespace Mono.Cecil {
 			return methods;
 		}
 
-		void ReadPointers<TMember> (Table ptr, Table table, Range range, Collection<TMember> members, Action<uint, Collection<TMember>> reader)
+		private void ReadPointers<TMember> (Table ptr, Table table, Range range, Collection<TMember> members, Action<uint, Collection<TMember>> reader)
 			where TMember : IMemberDefinition
 		{
 			for (uint i = 0; i < range.Length; i++) {
@@ -1762,12 +1781,12 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static bool IsDeleted (IMemberDefinition member)
+		private static bool IsDeleted (IMemberDefinition member)
 		{
 			return member.IsSpecialName && member.Name == "_Deleted";
 		}
 
-		void InitializeMethods ()
+		private void InitializeMethods ()
 		{
 			if (metadata.Methods != null)
 				return;
@@ -1775,12 +1794,12 @@ namespace Mono.Cecil {
 			metadata.Methods = new MethodDefinition [image.GetTableLength (Table.Method)];
 		}
 
-		void ReadMethod (uint method_rid, Collection<MethodDefinition> methods)
+		private void ReadMethod (uint method_rid, Collection<MethodDefinition> methods)
 		{
 			var method = new MethodDefinition ();
 			method.rva = ReadUInt32 ();
-			method.ImplAttributes = (MethodImplAttributes) ReadUInt16 ();
-			method.Attributes = (MethodAttributes) ReadUInt16 ();
+			method.ImplAttributes = (MethodImplAttributes)ReadUInt16 ();
+			method.Attributes = (MethodAttributes)ReadUInt16 ();
 			method.Name = ReadString ();
 			method.token = new MetadataToken (TokenType.Method, method_rid);
 
@@ -1807,7 +1826,7 @@ namespace Mono.Cecil {
 				WindowsRuntimeProjections.Project (method);
 		}
 
-		void ReadParameters (MethodDefinition method, Range param_range)
+		private void ReadParameters (MethodDefinition method, Range param_range)
 		{
 			if (!MoveTo (Table.ParamPtr, param_range.Start)) {
 				if (!MoveTo (Table.Param, param_range.Start))
@@ -1819,7 +1838,7 @@ namespace Mono.Cecil {
 				ReadParameterPointers (method, param_range);
 		}
 
-		void ReadParameterPointers (MethodDefinition method, Range range)
+		private void ReadParameterPointers (MethodDefinition method, Range range)
 		{
 			for (uint i = 0; i < range.Length; i++) {
 				MoveTo (Table.ParamPtr, range.Start + i);
@@ -1832,9 +1851,9 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadParameter (uint param_rid, MethodDefinition method)
+		private void ReadParameter (uint param_rid, MethodDefinition method)
 		{
-			var attributes = (ParameterAttributes) ReadUInt16 ();
+			var attributes = (ParameterAttributes)ReadUInt16 ();
 			var sequence = ReadUInt16 ();
 			var name = ReadString ();
 
@@ -1847,7 +1866,7 @@ namespace Mono.Cecil {
 			parameter.Attributes = attributes;
 		}
 
-		void ReadMethodSignature (uint signature, IMethodSignature method)
+		private void ReadMethodSignature (uint signature, IMethodSignature method)
 		{
 			var reader = ReadSignature (signature);
 			reader.ReadMethodSignature (method);
@@ -1868,10 +1887,10 @@ namespace Mono.Cecil {
 			return new PInvokeInfo (
 				row.Col1,
 				image.StringHeap.Read (row.Col2),
-				module.ModuleReferences [(int) row.Col3 - 1]);
+				module.ModuleReferences [(int)row.Col3 - 1]);
 		}
 
-		void InitializePInvokes ()
+		private void InitializePInvokes ()
 		{
 			if (metadata.PInvokes != null)
 				return;
@@ -1881,7 +1900,7 @@ namespace Mono.Cecil {
 			var pinvokes = metadata.PInvokes = new Dictionary<uint, Row<PInvokeAttributes, uint, uint>> (length);
 
 			for (int i = 1; i <= length; i++) {
-				var attributes = (PInvokeAttributes) ReadUInt16 ();
+				var attributes = (PInvokeAttributes)ReadUInt16 ();
 				var method = ReadMetadataToken (CodedIndex.MemberForwarded);
 				var name = ReadStringIndex ();
 				var scope = ReadTableIndex (Table.File);
@@ -1922,14 +1941,14 @@ namespace Mono.Cecil {
 			return generic_parameters;
 		}
 
-		void ReadGenericParametersRange (Range range, IGenericParameterProvider provider, GenericParameterCollection generic_parameters)
+		private void ReadGenericParametersRange (Range range, IGenericParameterProvider provider, GenericParameterCollection generic_parameters)
 		{
 			if (!MoveTo (Table.GenericParam, range.Start))
 				return;
 
 			for (uint i = 0; i < range.Length; i++) {
 				ReadUInt16 (); // index
-				var flags = (GenericParameterAttributes) ReadUInt16 ();
+				var flags = (GenericParameterAttributes)ReadUInt16 ();
 				ReadMetadataToken (CodedIndex.TypeOrMethodDef);
 				var name = ReadString ();
 
@@ -1941,7 +1960,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void InitializeGenericParameters ()
+		private void InitializeGenericParameters ()
 		{
 			if (metadata.GenericParameters != null)
 				return;
@@ -1952,10 +1971,10 @@ namespace Mono.Cecil {
 					var next = ReadMetadataToken (CodedIndex.TypeOrMethodDef);
 					ReadStringIndex ();
 					return next;
-			});
+				});
 		}
 
-		Dictionary<MetadataToken, Range []> InitializeRanges (Table table, Func<MetadataToken> get_next)
+		private Dictionary<MetadataToken, Range []> InitializeRanges (Table table, Func<MetadataToken> get_next)
 		{
 			int length = MoveTo (table);
 			var ranges = new Dictionary<MetadataToken, Range []> (length);
@@ -1985,7 +2004,7 @@ namespace Mono.Cecil {
 			return ranges;
 		}
 
-		static void AddRange (Dictionary<MetadataToken, Range []> ranges, MetadataToken owner, Range range)
+		private static void AddRange (Dictionary<MetadataToken, Range []> ranges, MetadataToken owner, Range range)
 		{
 			if (owner.RID == 0)
 				return;
@@ -1996,7 +2015,7 @@ namespace Mono.Cecil {
 				return;
 			}
 
-			ranges [owner] = slots.Add(range);
+			ranges [owner] = slots.Add (range);
 		}
 
 		public bool HasGenericConstraints (GenericParameter generic_parameter)
@@ -2020,7 +2039,7 @@ namespace Mono.Cecil {
 
 			var constraints = new GenericParameterConstraintCollection (generic_parameter, mapping.Count);
 
-			this.context = (IGenericContext) generic_parameter.Owner;
+			this.context = (IGenericContext)generic_parameter.Owner;
 
 			for (int i = 0; i < mapping.Count; i++) {
 				constraints.Add (
@@ -2034,7 +2053,7 @@ namespace Mono.Cecil {
 			return constraints;
 		}
 
-		void InitializeGenericConstraints ()
+		private void InitializeGenericConstraints ()
 		{
 			if (metadata.GenericConstraints != null)
 				return;
@@ -2050,7 +2069,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddGenericConstraintMapping (uint generic_parameter, Row<uint, MetadataToken> constraint)
+		private void AddGenericConstraintMapping (uint generic_parameter, Row<uint, MetadataToken> constraint)
 		{
 			metadata.SetGenericConstraintMapping (
 				generic_parameter,
@@ -2081,14 +2100,14 @@ namespace Mono.Cecil {
 			this.context = method;
 
 			for (int i = 0; i < mapping.Count; i++)
-				overrides.Add ((MethodReference) LookupToken (mapping [i]));
+				overrides.Add ((MethodReference)LookupToken (mapping [i]));
 
 			metadata.RemoveOverrideMapping (method);
 
 			return overrides;
 		}
 
-		void InitializeOverrides ()
+		private void InitializeOverrides ()
 		{
 			if (metadata.Overrides != null)
 				return;
@@ -2110,7 +2129,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void AddOverrideMapping (uint method_rid, MetadataToken @override)
+		private void AddOverrideMapping (uint method_rid, MetadataToken @override)
 		{
 			metadata.SetOverrideMapping (
 				method_rid,
@@ -2158,7 +2177,7 @@ namespace Mono.Cecil {
 			if (count == 0)
 				return null;
 
-			var variables = new VariableDefinitionCollection (method, (int) count);
+			var variables = new VariableDefinitionCollection (method, (int)count);
 
 			for (int i = 0; i < count; i++)
 				variables.Add (new VariableDefinition (reader.ReadTypeSignature ()));
@@ -2184,24 +2203,31 @@ namespace Mono.Cecil {
 			case TokenType.TypeDef:
 				element = GetTypeDefinition (rid);
 				break;
+
 			case TokenType.TypeRef:
 				element = GetTypeReference (rid);
 				break;
+
 			case TokenType.TypeSpec:
 				element = GetTypeSpecification (rid);
 				break;
+
 			case TokenType.Field:
 				element = GetFieldDefinition (rid);
 				break;
+
 			case TokenType.Method:
 				element = GetMethodDefinition (rid);
 				break;
+
 			case TokenType.MemberRef:
 				element = GetMemberReference (rid);
 				break;
+
 			case TokenType.MethodSpec:
 				element = GetMethodSpecification (rid);
 				break;
+
 			default:
 				return null;
 			}
@@ -2223,7 +2249,7 @@ namespace Mono.Cecil {
 			return LookupField (rid);
 		}
 
-		FieldDefinition LookupField (uint rid)
+		private FieldDefinition LookupField (uint rid)
 		{
 			var type = metadata.GetFieldDeclaringType (rid);
 			if (type == null)
@@ -2245,7 +2271,7 @@ namespace Mono.Cecil {
 			return LookupMethod (rid);
 		}
 
-		MethodDefinition LookupMethod (uint rid)
+		private MethodDefinition LookupMethod (uint rid)
 		{
 			var type = metadata.GetMethodDeclaringType (rid);
 			if (type == null)
@@ -2256,12 +2282,12 @@ namespace Mono.Cecil {
 			return metadata.GetMethodDefinition (rid);
 		}
 
-		MethodSpecification GetMethodSpecification (uint rid)
+		private MethodSpecification GetMethodSpecification (uint rid)
 		{
 			if (!MoveTo (Table.MethodSpec, rid))
 				return null;
 
-			var element_method = (MethodReference) LookupToken (
+			var element_method = (MethodReference)LookupToken (
 				ReadMetadataToken (CodedIndex.MethodDefOrRef));
 			var signature = ReadBlobIndex ();
 
@@ -2270,7 +2296,7 @@ namespace Mono.Cecil {
 			return method_spec;
 		}
 
-		MethodSpecification ReadMethodSpecSignature (uint signature, MethodReference method)
+		private MethodSpecification ReadMethodSpecSignature (uint signature, MethodReference method)
 		{
 			var reader = ReadSignature (signature);
 			const byte methodspec_sig = 0x0a;
@@ -2282,14 +2308,14 @@ namespace Mono.Cecil {
 
 			var arity = reader.ReadCompressedUInt32 ();
 
-			var instance = new GenericInstanceMethod (method, (int) arity);
+			var instance = new GenericInstanceMethod (method, (int)arity);
 
 			reader.ReadGenericInstanceSignature (method, instance, arity);
 
 			return instance;
 		}
 
-		MemberReference GetMemberReference (uint rid)
+		private MemberReference GetMemberReference (uint rid)
 		{
 			InitializeMemberReferences ();
 
@@ -2303,7 +2329,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		MemberReference ReadMemberReference (uint rid)
+		private MemberReference ReadMemberReference (uint rid)
 		{
 			if (!MoveTo (Table.MemberRef, rid))
 				return null;
@@ -2320,9 +2346,11 @@ namespace Mono.Cecil {
 			case TokenType.TypeSpec:
 				member = ReadTypeMemberReference (token, name, signature);
 				break;
+
 			case TokenType.Method:
 				member = ReadMethodMemberReference (token, name, signature);
 				break;
+
 			default:
 				throw new NotSupportedException ();
 			}
@@ -2331,7 +2359,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		MemberReference ReadTypeMemberReference (MetadataToken type, string name, uint signature)
+		private MemberReference ReadTypeMemberReference (MetadataToken type, string name, uint signature)
 		{
 			var declaring_type = GetTypeDefOrRef (type);
 
@@ -2344,7 +2372,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		MemberReference ReadMemberReferenceSignature (uint signature, TypeReference declaring_type)
+		private MemberReference ReadMemberReferenceSignature (uint signature, TypeReference declaring_type)
 		{
 			var reader = ReadSignature (signature);
 			const byte field_sig = 0x6;
@@ -2363,7 +2391,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		MemberReference ReadMethodMemberReference (MetadataToken token, string name, uint signature)
+		private MemberReference ReadMethodMemberReference (MetadataToken token, string name, uint signature)
 		{
 			var method = GetMethodDefinition (token.RID);
 
@@ -2375,7 +2403,7 @@ namespace Mono.Cecil {
 			return member;
 		}
 
-		void InitializeMemberReferences ()
+		private void InitializeMemberReferences ()
 		{
 			if (metadata.MemberReferences != null)
 				return;
@@ -2404,7 +2432,7 @@ namespace Mono.Cecil {
 			return member_references;
 		}
 
-		void InitializeConstants ()
+		private void InitializeConstants ()
 		{
 			if (metadata.Constants != null)
 				return;
@@ -2414,7 +2442,7 @@ namespace Mono.Cecil {
 			var constants = metadata.Constants = new Dictionary<MetadataToken, Row<ElementType, uint>> (length);
 
 			for (uint i = 1; i <= length; i++) {
-				var type = (ElementType) ReadUInt16 ();
+				var type = (ElementType)ReadUInt16 ();
 				var owner = ReadMetadataToken (CodedIndex.HasConstant);
 				var signature = ReadBlobIndex ();
 
@@ -2449,20 +2477,22 @@ namespace Mono.Cecil {
 			return ReadConstantValue (row.Col1, row.Col2);
 		}
 
-		object ReadConstantValue (ElementType etype, uint signature)
+		private object ReadConstantValue (ElementType etype, uint signature)
 		{
 			switch (etype) {
 			case ElementType.Class:
 			case ElementType.Object:
 				return null;
+
 			case ElementType.String:
 				return ReadConstantString (signature);
+
 			default:
 				return ReadConstantPrimitive (etype, signature);
 			}
 		}
 
-		string ReadConstantString (uint signature)
+		private string ReadConstantString (uint signature)
 		{
 			byte [] blob;
 			int index, count;
@@ -2477,7 +2507,7 @@ namespace Mono.Cecil {
 			return Encoding.Unicode.GetString (blob, index, count);
 		}
 
-		object ReadConstantPrimitive (ElementType type, uint signature)
+		private object ReadConstantPrimitive (ElementType type, uint signature)
 		{
 			var reader = ReadSignature (signature);
 			return reader.ReadConstantSignature (type);
@@ -2494,7 +2524,7 @@ namespace Mono.Cecil {
 					ReadMetadataToken (CodedIndex.CustomAttributeType);
 					ReadBlobIndex ();
 					return next;
-			});
+				});
 		}
 
 		public bool HasCustomAttributes (ICustomAttributeProvider owner)
@@ -2530,7 +2560,7 @@ namespace Mono.Cecil {
 			return custom_attributes;
 		}
 
-		void ReadCustomAttributeRange (Range range, Collection<CustomAttribute> custom_attributes)
+		private void ReadCustomAttributeRange (Range range, Collection<CustomAttribute> custom_attributes)
 		{
 			if (!MoveTo (Table.CustomAttribute, range.Start))
 				return;
@@ -2538,7 +2568,7 @@ namespace Mono.Cecil {
 			for (var i = 0; i < range.Length; i++) {
 				ReadMetadataToken (CodedIndex.HasCustomAttribute);
 
-				var constructor = (MethodReference) LookupToken (
+				var constructor = (MethodReference)LookupToken (
 					ReadMetadataToken (CodedIndex.CustomAttributeType));
 
 				var signature = ReadBlobIndex ();
@@ -2547,13 +2577,13 @@ namespace Mono.Cecil {
 			}
 		}
 
-		static int RangesSize (Range [] ranges)
+		private static int RangesSize (Range [] ranges)
 		{
 			uint size = 0;
 			for (int i = 0; i < ranges.Length; i++)
 				size += ranges [i].Length;
 
-			return (int) size;
+			return (int)size;
 		}
 
 		public IEnumerable<CustomAttribute> GetCustomAttributes ()
@@ -2561,7 +2591,7 @@ namespace Mono.Cecil {
 			InitializeTypeDefinitions ();
 
 			var length = image.TableHeap [Table.CustomAttribute].Length;
-			var custom_attributes = new Collection<CustomAttribute> ((int) length);
+			var custom_attributes = new Collection<CustomAttribute> ((int)length);
 			ReadCustomAttributeRange (new Range (1, length), custom_attributes);
 
 			return custom_attributes;
@@ -2597,7 +2627,7 @@ namespace Mono.Cecil {
 			reader.ReadCustomAttributeNamedArguments (named, ref attribute.fields, ref attribute.properties);
 		}
 
-		void InitializeMarshalInfos ()
+		private void InitializeMarshalInfos ()
 		{
 			if (metadata.FieldMarshals != null)
 				return;
@@ -2638,7 +2668,7 @@ namespace Mono.Cecil {
 			return reader.ReadMarshalInfo ();
 		}
 
-		void InitializeSecurityDeclarations ()
+		private void InitializeSecurityDeclarations ()
 		{
 			if (metadata.SecurityDeclarations != null)
 				return;
@@ -2649,7 +2679,7 @@ namespace Mono.Cecil {
 					var next = ReadMetadataToken (CodedIndex.HasDeclSecurity);
 					ReadBlobIndex ();
 					return next;
-			});
+				});
 		}
 
 		public bool HasSecurityDeclarations (ISecurityDeclarationProvider owner)
@@ -2681,13 +2711,13 @@ namespace Mono.Cecil {
 			return security_declarations;
 		}
 
-		void ReadSecurityDeclarationRange (Range range, Collection<SecurityDeclaration> security_declarations)
+		private void ReadSecurityDeclarationRange (Range range, Collection<SecurityDeclaration> security_declarations)
 		{
 			if (!MoveTo (Table.DeclSecurity, range.Start))
 				return;
 
 			for (int i = 0; i < range.Length; i++) {
-				var action = (SecurityAction) ReadUInt16 ();
+				var action = (SecurityAction)ReadUInt16 ();
 				ReadMetadataToken (CodedIndex.HasDeclSecurity);
 				var signature = ReadBlobIndex ();
 
@@ -2712,7 +2742,7 @@ namespace Mono.Cecil {
 
 			reader.position++;
 			var count = reader.ReadCompressedUInt32 ();
-			var attributes = new Collection<SecurityAttribute> ((int) count);
+			var attributes = new Collection<SecurityAttribute> ((int)count);
 
 			for (int i = 0; i < count; i++)
 				attributes.Add (reader.ReadSecurityAttribute ());
@@ -2720,7 +2750,7 @@ namespace Mono.Cecil {
 			declaration.security_attributes = attributes;
 		}
 
-		void ReadXmlSecurityDeclaration (uint signature, SecurityDeclaration declaration)
+		private void ReadXmlSecurityDeclaration (uint signature, SecurityDeclaration declaration)
 		{
 			var attributes = new Collection<SecurityAttribute> (1);
 
@@ -2749,7 +2779,7 @@ namespace Mono.Cecil {
 			var exported_types = new Collection<ExportedType> (length);
 
 			for (int i = 1; i <= length; i++) {
-				var attributes = (TypeAttributes) ReadUInt32 ();
+				var attributes = (TypeAttributes)ReadUInt32 ();
 				var identifier = ReadUInt32 ();
 				var name = ReadString ();
 				var @namespace = ReadString ();
@@ -2763,15 +2793,16 @@ namespace Mono.Cecil {
 				case TokenType.File:
 					scope = GetExportedTypeScope (implementation);
 					break;
+
 				case TokenType.ExportedType:
 					// FIXME: if the table is not properly sorted
-					declaring_type = exported_types [(int) implementation.RID - 1];
+					declaring_type = exported_types [(int)implementation.RID - 1];
 					break;
 				}
 
 				var exported_type = new ExportedType (@namespace, name, module, scope) {
 					Attributes = attributes,
-					Identifier = (int) identifier,
+					Identifier = (int)identifier,
 					DeclaringType = declaring_type,
 				};
 				exported_type.token = new MetadataToken (TokenType.ExportedType, i);
@@ -2782,7 +2813,7 @@ namespace Mono.Cecil {
 			return exported_types;
 		}
 
-		IMetadataScope GetExportedTypeScope (MetadataToken token)
+		private IMetadataScope GetExportedTypeScope (MetadataToken token)
 		{
 			var position = this.position;
 			IMetadataScope scope;
@@ -2792,10 +2823,12 @@ namespace Mono.Cecil {
 				InitializeAssemblyReferences ();
 				scope = metadata.GetAssemblyNameReference (token.RID);
 				break;
+
 			case TokenType.File:
 				InitializeModuleReferences ();
 				scope = GetModuleReferenceFromFile (token);
 				break;
+
 			default:
 				throw new NotSupportedException ();
 			}
@@ -2804,7 +2837,7 @@ namespace Mono.Cecil {
 			return scope;
 		}
 
-		ModuleReference GetModuleReferenceFromFile (MetadataToken token)
+		private ModuleReference GetModuleReferenceFromFile (MetadataToken token)
 		{
 			if (!MoveTo (Table.File, token.RID))
 				return null;
@@ -2825,7 +2858,7 @@ namespace Mono.Cecil {
 			return reference;
 		}
 
-		void InitializeDocuments ()
+		private void InitializeDocuments ()
 		{
 			if (metadata.Documents != null)
 				return;
@@ -2880,7 +2913,7 @@ namespace Mono.Cecil {
 			return document;
 		}
 
-		void InitializeLocalScopes ()
+		private void InitializeLocalScopes ()
 		{
 			if (metadata.LocalScopes != null)
 				return;
@@ -2929,7 +2962,7 @@ namespace Mono.Cecil {
 			return method_scope;
 		}
 
-		static bool AddScope (Collection<ScopeDebugInformation> scopes, ScopeDebugInformation scope)
+		private static bool AddScope (Collection<ScopeDebugInformation> scopes, ScopeDebugInformation scope)
 		{
 			if (scopes.IsNullOrEmpty ())
 				return false;
@@ -2947,12 +2980,11 @@ namespace Mono.Cecil {
 			return false;
 		}
 
-		ScopeDebugInformation ReadLocalScope (Row<uint, Range, Range, uint, uint, uint> record)
+		private ScopeDebugInformation ReadLocalScope (Row<uint, Range, Range, uint, uint, uint> record)
 		{
-			var scope = new ScopeDebugInformation
-			{
-				start = new InstructionOffset ((int) record.Col4),
-				end = new InstructionOffset ((int) (record.Col4 + record.Col5)),
+			var scope = new ScopeDebugInformation {
+				start = new InstructionOffset ((int)record.Col4),
+				end = new InstructionOffset ((int)(record.Col4 + record.Col5)),
 				token = new MetadataToken (TokenType.LocalScope, record.Col6),
 			};
 
@@ -2960,7 +2992,7 @@ namespace Mono.Cecil {
 				scope.import = metadata.GetImportScope (record.Col1);
 
 			if (record.Col2.Length > 0) {
-				scope.variables = new Collection<VariableDebugInformation> ((int) record.Col2.Length);
+				scope.variables = new Collection<VariableDebugInformation> ((int)record.Col2.Length);
 				for (uint i = 0; i < record.Col2.Length; i++) {
 					var variable = ReadLocalVariable (record.Col2.Start + i);
 					if (variable != null)
@@ -2969,7 +3001,7 @@ namespace Mono.Cecil {
 			}
 
 			if (record.Col3.Length > 0) {
-				scope.constants = new Collection<ConstantDebugInformation> ((int) record.Col3.Length);
+				scope.constants = new Collection<ConstantDebugInformation> ((int)record.Col3.Length);
 				for (uint i = 0; i < record.Col3.Length; i++) {
 					var constant = ReadLocalConstant (record.Col3.Start + i);
 					if (constant != null)
@@ -2980,12 +3012,12 @@ namespace Mono.Cecil {
 			return scope;
 		}
 
-		VariableDebugInformation ReadLocalVariable (uint rid)
+		private VariableDebugInformation ReadLocalVariable (uint rid)
 		{
 			if (!MoveTo (Table.LocalVariable, rid))
 				return null;
 
-			var attributes = (VariableAttributes) ReadUInt16 ();
+			var attributes = (VariableAttributes)ReadUInt16 ();
 			var index = ReadUInt16 ();
 			var name = ReadString ();
 
@@ -2994,7 +3026,7 @@ namespace Mono.Cecil {
 			return variable;
 		}
 
-		ConstantDebugInformation ReadLocalConstant (uint rid)
+		private ConstantDebugInformation ReadLocalConstant (uint rid)
 		{
 			if (!MoveTo (Table.LocalConstant, rid))
 				return null;
@@ -3008,15 +3040,15 @@ namespace Mono.Cecil {
 				if (!signature.CanReadMore ())
 					value = "";
 				else if (signature.buffer [signature.position] != 0xff) {
-					var bytes = signature.ReadBytes ((int) (signature.sig_length - (signature.position - signature.start)));
+					var bytes = signature.ReadBytes ((int)(signature.sig_length - (signature.position - signature.start)));
 					value = Encoding.Unicode.GetString (bytes, 0, bytes.Length);
 				} else
 					value = null;
 			} else if (type.IsTypeOf ("System", "Decimal")) {
 				var b = signature.ReadByte ();
-				value = new decimal (signature.ReadInt32 (), signature.ReadInt32 (), signature.ReadInt32 (), (b & 0x80) != 0, (byte) (b & 0x7f));
+				value = new decimal (signature.ReadInt32 (), signature.ReadInt32 (), signature.ReadInt32 (), (b & 0x80) != 0, (byte)(b & 0x7f));
 			} else if (type.IsTypeOf ("System", "DateTime")) {
-				value = new DateTime (signature.ReadInt64());
+				value = new DateTime (signature.ReadInt64 ());
 			} else if (type.etype == ElementType.Object || type.etype == ElementType.None || type.etype == ElementType.Class || type.etype == ElementType.Array || type.etype == ElementType.GenericInst) {
 				value = null;
 			} else
@@ -3027,7 +3059,7 @@ namespace Mono.Cecil {
 			return constant;
 		}
 
-		void InitializeImportScopes ()
+		private void InitializeImportScopes ()
 		{
 			if (metadata.ImportScopes != null)
 				return;
@@ -3066,12 +3098,12 @@ namespace Mono.Cecil {
 			return ReadStringBlob (signature, Encoding.UTF8);
 		}
 
-		string ReadUnicodeStringBlob (uint signature)
+		private string ReadUnicodeStringBlob (uint signature)
 		{
 			return ReadStringBlob (signature, Encoding.Unicode);
 		}
 
-		string ReadStringBlob (uint signature, Encoding encoding)
+		private string ReadStringBlob (uint signature, Encoding encoding)
 		{
 			byte [] blob;
 			int index, count;
@@ -3083,45 +3115,53 @@ namespace Mono.Cecil {
 			return encoding.GetString (blob, index, count);
 		}
 
-		ImportTarget ReadImportTarget (SignatureReader signature)
+		private ImportTarget ReadImportTarget (SignatureReader signature)
 		{
 			AssemblyNameReference reference = null;
 			string @namespace = null;
 			string alias = null;
 			TypeReference type = null;
 
-			var kind = (ImportTargetKind) signature.ReadCompressedUInt32 ();
+			var kind = (ImportTargetKind)signature.ReadCompressedUInt32 ();
 			switch (kind) {
 			case ImportTargetKind.ImportNamespace:
 				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.ImportNamespaceInAssembly:
 				reference = metadata.GetAssemblyNameReference (signature.ReadCompressedUInt32 ());
 				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.ImportType:
 				type = signature.ReadTypeToken ();
 				break;
+
 			case ImportTargetKind.ImportXmlNamespaceWithAlias:
 				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.ImportAlias:
 				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.DefineAssemblyAlias:
 				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				reference = metadata.GetAssemblyNameReference (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.DefineNamespaceAlias:
 				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.DefineNamespaceInAssemblyAlias:
 				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				reference = metadata.GetAssemblyNameReference (signature.ReadCompressedUInt32 ());
 				@namespace = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				break;
+
 			case ImportTargetKind.DefineTypeAlias:
 				alias = ReadUTF8StringBlob (signature.ReadCompressedUInt32 ());
 				type = signature.ReadTypeToken ();
@@ -3136,7 +3176,7 @@ namespace Mono.Cecil {
 			};
 		}
 
-		void InitializeStateMachineMethods ()
+		private void InitializeStateMachineMethods ()
 		{
 			if (metadata.StateMachineMethods != null)
 				return;
@@ -3160,7 +3200,7 @@ namespace Mono.Cecil {
 			return GetMethodDefinition (rid);
 		}
 
-		void InitializeCustomDebugInformations ()
+		private void InitializeCustomDebugInformations ()
 		{
 			if (metadata.CustomDebugInformations != null)
 				return;
@@ -3241,7 +3281,7 @@ namespace Mono.Cecil {
 		public byte [] ReadRawEmbeddedSourceDebugInformation (uint index)
 		{
 			var signature = ReadSignature (index);
-			return signature.ReadBytes ((int) signature.sig_length);
+			return signature.ReadBytes ((int)signature.sig_length);
 		}
 
 		public Row<byte [], bool> ReadEmbeddedSourceDebugInformation (uint index)
@@ -3251,9 +3291,9 @@ namespace Mono.Cecil {
 			var length = signature.sig_length - 4;
 
 			if (format == 0) {
-				return new Row<byte [], bool> (signature.ReadBytes ((int) length), false);
+				return new Row<byte [], bool> (signature.ReadBytes ((int)length), false);
 			} else if (format > 0) {
-				var compressed_stream = new MemoryStream (signature.ReadBytes ((int) length));
+				var compressed_stream = new MemoryStream (signature.ReadBytes ((int)length));
 				var decompressed_document = new byte [format]; // if positive, format is the decompressed length of the document
 				var decompressed_stream = new MemoryStream (decompressed_document);
 
@@ -3266,12 +3306,11 @@ namespace Mono.Cecil {
 		}
 	}
 
-	sealed class SignatureReader : ByteBuffer {
+	internal sealed class SignatureReader : ByteBuffer {
+		private readonly MetadataReader reader;
+		internal readonly uint start, sig_length;
 
-		readonly MetadataReader reader;
-		readonly internal uint start, sig_length;
-
-		TypeSystem TypeSystem {
+		private TypeSystem TypeSystem {
 			get { return reader.module.TypeSystem; }
 		}
 
@@ -3279,20 +3318,20 @@ namespace Mono.Cecil {
 			: base (reader.image.BlobHeap.data)
 		{
 			this.reader = reader;
-			this.position = (int) blob;
-			this.sig_length = ReadCompressedUInt32();
-			this.start = (uint) this.position;
+			this.position = (int)blob;
+			this.sig_length = ReadCompressedUInt32 ();
+			this.start = (uint)this.position;
 		}
 
-		MetadataToken ReadTypeTokenSignature ()
+		private MetadataToken ReadTypeTokenSignature ()
 		{
 			return CodedIndex.TypeDefOrRef.GetMetadataToken (ReadCompressedUInt32 ());
 		}
 
-		GenericParameter GetGenericParameter (GenericParameterType type, uint var)
+		private GenericParameter GetGenericParameter (GenericParameterType type, uint var)
 		{
 			var context = reader.context;
-			int index = (int) var;
+			int index = (int)var;
 
 			if (context == null)
 				return GetUnboundGenericParameter (type, index);
@@ -3303,9 +3342,11 @@ namespace Mono.Cecil {
 			case GenericParameterType.Type:
 				provider = context.Type;
 				break;
+
 			case GenericParameterType.Method:
 				provider = context.Method;
 				break;
+
 			default:
 				throw new NotSupportedException ();
 			}
@@ -3319,12 +3360,12 @@ namespace Mono.Cecil {
 			return provider.GenericParameters [index];
 		}
 
-		GenericParameter GetUnboundGenericParameter (GenericParameterType type, int index)
+		private GenericParameter GetUnboundGenericParameter (GenericParameterType type, int index)
 		{
 			return new GenericParameter (index, type, reader.module);
 		}
 
-		static void CheckGenericContext (IGenericParameterProvider owner, int index)
+		private static void CheckGenericContext (IGenericParameterProvider owner, int index)
 		{
 			var owner_parameters = owner.GenericParameters;
 
@@ -3335,7 +3376,7 @@ namespace Mono.Cecil {
 		public void ReadGenericInstanceSignature (IGenericParameterProvider provider, IGenericInstance instance, uint arity)
 		{
 			if (!provider.IsDefinition)
-				CheckGenericContext (provider, (int) arity - 1);
+				CheckGenericContext (provider, (int)arity - 1);
 
 			var instance_arguments = instance.GenericArguments;
 
@@ -3343,7 +3384,7 @@ namespace Mono.Cecil {
 				instance_arguments.Add (ReadTypeSignature ());
 		}
 
-		ArrayType ReadArrayTypeSignature ()
+		private ArrayType ReadArrayTypeSignature ()
 		{
 			var array = new ArrayType (ReadTypeSignature ());
 
@@ -3366,7 +3407,7 @@ namespace Mono.Cecil {
 					lower = low_bounds [i];
 
 				if (i < sizes.Length)
-					upper = lower + (int) sizes [i] - 1;
+					upper = lower + (int)sizes [i] - 1;
 
 				array.Dimensions.Add (new ArrayDimension (lower, upper));
 			}
@@ -3374,14 +3415,14 @@ namespace Mono.Cecil {
 			return array;
 		}
 
-		TypeReference GetTypeDefOrRef (MetadataToken token)
+		private TypeReference GetTypeDefOrRef (MetadataToken token)
 		{
 			return reader.GetTypeDefOrRef (token);
 		}
 
 		public TypeReference ReadTypeSignature ()
 		{
-			return ReadTypeSignature ((ElementType) ReadByte ());
+			return ReadTypeSignature ((ElementType)ReadByte ());
 		}
 
 		public TypeReference ReadTypeToken ()
@@ -3389,59 +3430,70 @@ namespace Mono.Cecil {
 			return GetTypeDefOrRef (ReadTypeTokenSignature ());
 		}
 
-		TypeReference ReadTypeSignature (ElementType etype)
+		private TypeReference ReadTypeSignature (ElementType etype)
 		{
 			switch (etype) {
 			case ElementType.ValueType: {
-				var value_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
-				value_type.KnownValueType ();
-				return value_type;
-			}
+					var value_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
+					value_type.KnownValueType ();
+					return value_type;
+				}
 			case ElementType.Class:
 				return GetTypeDefOrRef (ReadTypeTokenSignature ());
+
 			case ElementType.Ptr:
 				return new PointerType (ReadTypeSignature ());
+
 			case ElementType.FnPtr: {
-				var fptr = new FunctionPointerType ();
-				ReadMethodSignature (fptr);
-				return fptr;
-			}
+					var fptr = new FunctionPointerType ();
+					ReadMethodSignature (fptr);
+					return fptr;
+				}
 			case ElementType.ByRef:
 				return new ByReferenceType (ReadTypeSignature ());
+
 			case ElementType.Pinned:
 				return new PinnedType (ReadTypeSignature ());
+
 			case ElementType.SzArray:
 				return new ArrayType (ReadTypeSignature ());
+
 			case ElementType.Array:
 				return ReadArrayTypeSignature ();
+
 			case ElementType.CModOpt:
 				return new OptionalModifierType (
 					GetTypeDefOrRef (ReadTypeTokenSignature ()), ReadTypeSignature ());
+
 			case ElementType.CModReqD:
 				return new RequiredModifierType (
 					GetTypeDefOrRef (ReadTypeTokenSignature ()), ReadTypeSignature ());
+
 			case ElementType.Sentinel:
 				return new SentinelType (ReadTypeSignature ());
+
 			case ElementType.Var:
 				return GetGenericParameter (GenericParameterType.Type, ReadCompressedUInt32 ());
+
 			case ElementType.MVar:
 				return GetGenericParameter (GenericParameterType.Method, ReadCompressedUInt32 ());
+
 			case ElementType.GenericInst: {
-				var is_value_type = ReadByte () == (byte) ElementType.ValueType;
-				var element_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
+					var is_value_type = ReadByte () == (byte)ElementType.ValueType;
+					var element_type = GetTypeDefOrRef (ReadTypeTokenSignature ());
 
-				var arity = ReadCompressedUInt32 ();
-				var generic_instance = new GenericInstanceType (element_type, (int) arity);
+					var arity = ReadCompressedUInt32 ();
+					var generic_instance = new GenericInstanceType (element_type, (int)arity);
 
-				ReadGenericInstanceSignature (element_type, generic_instance, arity);
+					ReadGenericInstanceSignature (element_type, generic_instance, arity);
 
-				if (is_value_type) {
-					generic_instance.KnownValueType ();
-					element_type.GetElementType ().KnownValueType ();
+					if (is_value_type) {
+						generic_instance.KnownValueType ();
+						element_type.GetElementType ().KnownValueType ();
+					}
+
+					return generic_instance;
 				}
-
-				return generic_instance;
-			}
 			case ElementType.Object: return TypeSystem.Object;
 			case ElementType.Void: return TypeSystem.Void;
 			case ElementType.TypedByRef: return TypeSystem.TypedReference;
@@ -3460,15 +3512,15 @@ namespace Mono.Cecil {
 
 			if ((calling_convention & has_this) != 0) {
 				method.HasThis = true;
-				calling_convention = (byte) (calling_convention & ~has_this);
+				calling_convention = (byte)(calling_convention & ~has_this);
 			}
 
 			if ((calling_convention & explicit_this) != 0) {
 				method.ExplicitThis = true;
-				calling_convention = (byte) (calling_convention & ~explicit_this);
+				calling_convention = (byte)(calling_convention & ~explicit_this);
 			}
 
-			method.CallingConvention = (MethodCallingConvention) calling_convention;
+			method.CallingConvention = (MethodCallingConvention)calling_convention;
 
 			var generic_context = method as MethodReference;
 			if (generic_context != null && !generic_context.DeclaringType.IsArray)
@@ -3478,7 +3530,7 @@ namespace Mono.Cecil {
 				var arity = ReadCompressedUInt32 ();
 
 				if (generic_context != null && !generic_context.IsDefinition)
-					CheckGenericContext (generic_context, (int) arity -1 );
+					CheckGenericContext (generic_context, (int)arity - 1);
 			}
 
 			var param_count = ReadCompressedUInt32 ();
@@ -3492,7 +3544,7 @@ namespace Mono.Cecil {
 
 			var method_ref = method as MethodReference;
 			if (method_ref != null)
-				parameters = method_ref.parameters = new ParameterDefinitionCollection (method, (int) param_count);
+				parameters = method_ref.parameters = new ParameterDefinitionCollection (method, (int)param_count);
 			else
 				parameters = method.Parameters;
 
@@ -3518,10 +3570,10 @@ namespace Mono.Cecil {
 					ReadCustomAttributeFixedArgument (parameters [i].ParameterType));
 		}
 
-		CustomAttributeArgument ReadCustomAttributeFixedArgument (TypeReference type)
+		private CustomAttributeArgument ReadCustomAttributeFixedArgument (TypeReference type)
 		{
 			if (type.IsArray)
-				return ReadCustomAttributeFixedArrayArgument ((ArrayType) type);
+				return ReadCustomAttributeFixedArrayArgument ((ArrayType)type);
 
 			return ReadCustomAttributeElement (type);
 		}
@@ -3535,7 +3587,7 @@ namespace Mono.Cecil {
 			}
 		}
 
-		void ReadCustomAttributeNamedArgument (ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
+		private void ReadCustomAttributeNamedArgument (ref Collection<CustomAttributeNamedArgument> fields, ref Collection<CustomAttributeNamedArgument> properties)
 		{
 			var kind = ReadByte ();
 			var type = ReadCustomAttributeFieldOrPropType ();
@@ -3546,9 +3598,11 @@ namespace Mono.Cecil {
 			case 0x53:
 				container = GetCustomAttributeNamedArgumentCollection (ref fields);
 				break;
+
 			case 0x54:
 				container = GetCustomAttributeNamedArgumentCollection (ref properties);
 				break;
+
 			default:
 				throw new NotSupportedException ();
 			}
@@ -3556,7 +3610,7 @@ namespace Mono.Cecil {
 			container.Add (new CustomAttributeNamedArgument (name, ReadCustomAttributeFixedArgument (type)));
 		}
 
-		static Collection<CustomAttributeNamedArgument> GetCustomAttributeNamedArgumentCollection (ref Collection<CustomAttributeNamedArgument> collection)
+		private static Collection<CustomAttributeNamedArgument> GetCustomAttributeNamedArgumentCollection (ref Collection<CustomAttributeNamedArgument> collection)
 		{
 			if (collection != null)
 				return collection;
@@ -3564,7 +3618,7 @@ namespace Mono.Cecil {
 			return collection = new Collection<CustomAttributeNamedArgument> ();
 		}
 
-		CustomAttributeArgument ReadCustomAttributeFixedArrayArgument (ArrayType type)
+		private CustomAttributeArgument ReadCustomAttributeFixedArrayArgument (ArrayType type)
 		{
 			var length = ReadUInt32 ();
 
@@ -3583,10 +3637,10 @@ namespace Mono.Cecil {
 			return new CustomAttributeArgument (type, arguments);
 		}
 
-		CustomAttributeArgument ReadCustomAttributeElement (TypeReference type)
+		private CustomAttributeArgument ReadCustomAttributeElement (TypeReference type)
 		{
 			if (type.IsArray)
-				return ReadCustomAttributeFixedArrayArgument ((ArrayType) type);
+				return ReadCustomAttributeFixedArrayArgument ((ArrayType)type);
 
 			return new CustomAttributeArgument (
 				type,
@@ -3595,7 +3649,7 @@ namespace Mono.Cecil {
 					: ReadCustomAttributeElementValue (type));
 		}
 
-		object ReadCustomAttributeElementValue (TypeReference type)
+		private object ReadCustomAttributeElementValue (TypeReference type)
 		{
 			var etype = type.etype;
 			if (etype == ElementType.GenericInst) {
@@ -3608,95 +3662,126 @@ namespace Mono.Cecil {
 			switch (etype) {
 			case ElementType.String:
 				return ReadUTF8String ();
+
 			case ElementType.None:
 				if (type.IsTypeOf ("System", "Type"))
 					return ReadTypeReference ();
 
 				return ReadCustomAttributeEnum (type);
+
 			default:
 				return ReadPrimitiveValue (etype);
 			}
 		}
 
-		object ReadPrimitiveValue (ElementType type)
+		private object ReadPrimitiveValue (ElementType type)
 		{
 			switch (type) {
 			case ElementType.Boolean:
 				return ReadByte () == 1;
+
 			case ElementType.I1:
-				return (sbyte) ReadByte ();
+				return (sbyte)ReadByte ();
+
 			case ElementType.U1:
 				return ReadByte ();
+
 			case ElementType.Char:
-				return (char) ReadUInt16 ();
+				return (char)ReadUInt16 ();
+
 			case ElementType.I2:
 				return ReadInt16 ();
+
 			case ElementType.U2:
 				return ReadUInt16 ();
+
 			case ElementType.I4:
 				return ReadInt32 ();
+
 			case ElementType.U4:
 				return ReadUInt32 ();
+
 			case ElementType.I8:
 				return ReadInt64 ();
+
 			case ElementType.U8:
 				return ReadUInt64 ();
+
 			case ElementType.R4:
 				return ReadSingle ();
+
 			case ElementType.R8:
 				return ReadDouble ();
+
 			default:
 				throw new NotImplementedException (type.ToString ());
 			}
 		}
 
-		TypeReference GetPrimitiveType (ElementType etype)
+		private TypeReference GetPrimitiveType (ElementType etype)
 		{
 			switch (etype) {
 			case ElementType.Boolean:
 				return TypeSystem.Boolean;
+
 			case ElementType.Char:
 				return TypeSystem.Char;
+
 			case ElementType.I1:
 				return TypeSystem.SByte;
+
 			case ElementType.U1:
 				return TypeSystem.Byte;
+
 			case ElementType.I2:
 				return TypeSystem.Int16;
+
 			case ElementType.U2:
 				return TypeSystem.UInt16;
+
 			case ElementType.I4:
 				return TypeSystem.Int32;
+
 			case ElementType.U4:
 				return TypeSystem.UInt32;
+
 			case ElementType.I8:
 				return TypeSystem.Int64;
+
 			case ElementType.U8:
 				return TypeSystem.UInt64;
+
 			case ElementType.R4:
 				return TypeSystem.Single;
+
 			case ElementType.R8:
 				return TypeSystem.Double;
+
 			case ElementType.String:
 				return TypeSystem.String;
+
 			default:
 				throw new NotImplementedException (etype.ToString ());
 			}
 		}
 
-		TypeReference ReadCustomAttributeFieldOrPropType ()
+		private TypeReference ReadCustomAttributeFieldOrPropType ()
 		{
-			var etype = (ElementType) ReadByte ();
+			var etype = (ElementType)ReadByte ();
 
 			switch (etype) {
 			case ElementType.Boxed:
 				return TypeSystem.Object;
+
 			case ElementType.SzArray:
 				return new ArrayType (ReadCustomAttributeFieldOrPropType ());
+
 			case ElementType.Enum:
 				return ReadTypeReference ();
+
 			case ElementType.Type:
 				return TypeSystem.LookupType ("System", "Type");
+
 			default:
 				return GetPrimitiveType (etype);
 			}
@@ -3707,7 +3792,7 @@ namespace Mono.Cecil {
 			return TypeParser.ParseType (reader.module, ReadUTF8String ());
 		}
 
-		object ReadCustomAttributeEnum (TypeReference enum_type)
+		private object ReadCustomAttributeEnum (TypeReference enum_type)
 		{
 			var type = enum_type.CheckedResolve ();
 			if (!type.IsEnum)
@@ -3723,7 +3808,7 @@ namespace Mono.Cecil {
 			ReadCompressedUInt32 ();
 
 			ReadCustomAttributeNamedArguments (
-				(ushort) ReadCompressedUInt32 (),
+				(ushort)ReadCompressedUInt32 (),
 				ref attribute.fields,
 				ref attribute.properties);
 
@@ -3735,69 +3820,69 @@ namespace Mono.Cecil {
 			var native = ReadNativeType ();
 			switch (native) {
 			case NativeType.Array: {
-				var array = new ArrayMarshalInfo ();
-				if (CanReadMore ())
-					array.element_type = ReadNativeType ();
-				if (CanReadMore ())
-					array.size_parameter_index = (int) ReadCompressedUInt32 ();
-				if (CanReadMore ())
-					array.size = (int) ReadCompressedUInt32 ();
-				if (CanReadMore ())
-					array.size_parameter_multiplier = (int) ReadCompressedUInt32 ();
-				return array;
-			}
+					var array = new ArrayMarshalInfo ();
+					if (CanReadMore ())
+						array.element_type = ReadNativeType ();
+					if (CanReadMore ())
+						array.size_parameter_index = (int)ReadCompressedUInt32 ();
+					if (CanReadMore ())
+						array.size = (int)ReadCompressedUInt32 ();
+					if (CanReadMore ())
+						array.size_parameter_multiplier = (int)ReadCompressedUInt32 ();
+					return array;
+				}
 			case NativeType.SafeArray: {
-				var array = new SafeArrayMarshalInfo ();
-				if (CanReadMore ())
-					array.element_type = ReadVariantType ();
-				return array;
-			}
+					var array = new SafeArrayMarshalInfo ();
+					if (CanReadMore ())
+						array.element_type = ReadVariantType ();
+					return array;
+				}
 			case NativeType.FixedArray: {
-				var array = new FixedArrayMarshalInfo ();
-				if (CanReadMore ())
-					array.size = (int) ReadCompressedUInt32 ();
-				if (CanReadMore ())
-					array.element_type = ReadNativeType ();
-				return array;
-			}
+					var array = new FixedArrayMarshalInfo ();
+					if (CanReadMore ())
+						array.size = (int)ReadCompressedUInt32 ();
+					if (CanReadMore ())
+						array.element_type = ReadNativeType ();
+					return array;
+				}
 			case NativeType.FixedSysString: {
-				var sys_string = new FixedSysStringMarshalInfo ();
-				if (CanReadMore ())
-					sys_string.size = (int) ReadCompressedUInt32 ();
-				return sys_string;
-			}
+					var sys_string = new FixedSysStringMarshalInfo ();
+					if (CanReadMore ())
+						sys_string.size = (int)ReadCompressedUInt32 ();
+					return sys_string;
+				}
 			case NativeType.CustomMarshaler: {
-				var marshaler = new CustomMarshalInfo ();
-				var guid_value = ReadUTF8String ();
-				marshaler.guid = !string.IsNullOrEmpty (guid_value) ? new Guid (guid_value) : Guid.Empty;
-				marshaler.unmanaged_type = ReadUTF8String ();
-				marshaler.managed_type = ReadTypeReference ();
-				marshaler.cookie = ReadUTF8String ();
-				return marshaler;
-			}
+					var marshaler = new CustomMarshalInfo ();
+					var guid_value = ReadUTF8String ();
+					marshaler.guid = !string.IsNullOrEmpty (guid_value) ? new Guid (guid_value) : Guid.Empty;
+					marshaler.unmanaged_type = ReadUTF8String ();
+					marshaler.managed_type = ReadTypeReference ();
+					marshaler.cookie = ReadUTF8String ();
+					return marshaler;
+				}
 			default:
 				return new MarshalInfo (native);
 			}
 		}
 
-		NativeType ReadNativeType ()
+		private NativeType ReadNativeType ()
 		{
-			return (NativeType) ReadByte ();
+			return (NativeType)ReadByte ();
 		}
 
-		VariantType ReadVariantType ()
+		private VariantType ReadVariantType ()
 		{
-			return (VariantType) ReadByte ();
+			return (VariantType)ReadByte ();
 		}
 
-		string ReadUTF8String ()
+		private string ReadUTF8String ()
 		{
 			if (buffer [position] == 0xff) {
 				position++;
 				return null;
 			}
 
-			var length = (int) ReadCompressedUInt32 ();
+			var length = (int)ReadCompressedUInt32 ();
 			if (length == 0)
 				return string.Empty;
 
@@ -3812,7 +3897,7 @@ namespace Mono.Cecil {
 
 		public string ReadDocumentName ()
 		{
-			var separator = (char) buffer [position];
+			var separator = (char)buffer [position];
 			position++;
 
 			var builder = new StringBuilder ();
@@ -3846,9 +3931,9 @@ namespace Mono.Cecil {
 			var bytes_remaining_for_sequencepoints = sig_length - (position - start);
 			var estimated_sequencepoint_amount = (int)bytes_remaining_for_sequencepoints / 5;
 			var sequence_points = new Collection<SequencePoint> (estimated_sequencepoint_amount);
-			
+
 			for (var i = 0; CanReadMore (); i++) {
-				var delta_il = (int) ReadCompressedUInt32 ();
+				var delta_il = (int)ReadCompressedUInt32 ();
 				if (i > 0 && delta_il == 0) {
 					document = reader.GetDocument (ReadCompressedUInt32 ());
 					continue;
@@ -3856,9 +3941,9 @@ namespace Mono.Cecil {
 
 				offset += delta_il;
 
-				var delta_lines = (int) ReadCompressedUInt32 ();
+				var delta_lines = (int)ReadCompressedUInt32 ();
 				var delta_columns = delta_lines == 0
-					? (int) ReadCompressedUInt32 ()
+					? (int)ReadCompressedUInt32 ()
 					: ReadCompressedInt32 ();
 
 				if (delta_lines == 0 && delta_columns == 0) {
@@ -3872,8 +3957,8 @@ namespace Mono.Cecil {
 				}
 
 				if (first_non_hidden) {
-					start_line = (int) ReadCompressedUInt32 ();
-					start_column = (int) ReadCompressedUInt32 ();
+					start_line = (int)ReadCompressedUInt32 ();
+					start_column = (int)ReadCompressedUInt32 ();
 				} else {
 					start_line += ReadCompressedInt32 ();
 					start_column += ReadCompressedInt32 ();
