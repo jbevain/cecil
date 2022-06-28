@@ -71,4 +71,14 @@ namespace Mono.Cecil {
 			base.Dispose (disposing);
 		}
 	}
+
+	public class AdaptiveAssemblyResolverProvider : IAssemblyResolverProvider {
+		public IAssemblyResolver Create (AssemblyDefinition assembly)
+		{
+			return new AdaptiveAssemblyResolver ();
+		}
+	}
+
+	public class AdaptiveAssemblyResolver : DefaultAssemblyResolver {
+	}
 }
