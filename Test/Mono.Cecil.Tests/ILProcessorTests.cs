@@ -470,7 +470,8 @@ namespace Mono.Cecil.Tests {
 			};
 
 			// For some reason the Native PDB reader/writer store the custom info on the method.DebugInfo.CustomInfo, while portable PDB stores it on method.CustomInfo.
-			var customDebugInfo = roundtripType == RoundtripType.Pdb ? method.DebugInformation.CustomDebugInformations : method.CustomDebugInformations;
+			var customDebugInfo = (roundtripType == RoundtripType.Pdb && Platform.HasNativePdbSupport)
+				? method.DebugInformation.CustomDebugInformations : method.CustomDebugInformations;
 			customDebugInfo.Add (new StateMachineScopeDebugInformation () {
 				Scopes = {
 					new StateMachineScope(instructions[1], instructions[6])
