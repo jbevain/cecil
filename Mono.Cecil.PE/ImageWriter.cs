@@ -719,7 +719,7 @@ namespace Mono.Cecil.PE {
 					entry.Directory = directory;
 
 					data_len += entry.Data.Length;
-					data_address += data_len;
+					data_address += entry.Data.Length;
 				}
 
 				debug_dir_len = directories_len + data_len;
