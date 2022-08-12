@@ -9,6 +9,7 @@
 //
 
 using System;
+using System.Globalization;
 using System.Text;
 
 namespace Mono.Cecil.Cil {
@@ -122,11 +123,11 @@ namespace Mono.Cecil.Cil {
 				break;
 			case OperandType.InlineString:
 				instruction.Append ('\"');
-				instruction.Append (operand);
+				instruction.Append (Convert.ToString(operand, CultureInfo.InvariantCulture));
 				instruction.Append ('\"');
 				break;
 			default:
-				instruction.Append (operand);
+				instruction.Append (Convert.ToString(operand, CultureInfo.InvariantCulture));
 				break;
 			}
 
