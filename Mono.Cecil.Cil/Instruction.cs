@@ -123,7 +123,7 @@ namespace Mono.Cecil.Cil {
 				break;
 			case OperandType.InlineString:
 				instruction.Append ('\"');
-				instruction.Append (Convert.ToString(operand, CultureInfo.InvariantCulture));
+				instruction.Append (operand);
 				instruction.Append ('\"');
 				break;
 			default:
