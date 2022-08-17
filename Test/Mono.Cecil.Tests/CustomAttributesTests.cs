@@ -465,6 +465,80 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void GenericAttributeString ()
+		{
+			TestModule ("GenericAttributes.dll", module => {
+				var type = module.GetType ("WithGenericAttribute_OfString");
+				Assert.IsTrue (type.HasCustomAttributes);
+				var attributes = type.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("GenericAttribute`1<System.String>", attributes [0].AttributeType.FullName);
+				var attribute = attributes [0];
+				// constructor arguments
+				Assert.AreEqual (true, attribute.HasConstructorArguments);
+				var argument = attribute.ConstructorArguments.Single ();
+				Assert.AreEqual ("System.String", argument.Type.FullName);
+				Assert.AreEqual ("t", argument.Value);
+				// named field argument
+				Assert.AreEqual (true, attribute.HasFields);
+				var field = attribute.Fields.Single ();
+				Assert.AreEqual ("F", field.Name);
+				Assert.AreEqual ("System.String", field.Argument.Type.FullName);
+				Assert.AreEqual ("f", field.Argument.Value);
+				// named property argument
+				Assert.AreEqual (true, attribute.HasProperties);
+				var property = attribute.Properties.Single ();
+				Assert.AreEqual ("P", property.Name);
+				Assert.AreEqual ("System.String", property.Argument.Type.FullName);
+				Assert.AreEqual ("p", property.Argument.Value);
+				
+			}, verify: !Platform.OnMono);
+		}
+
+		[Test]
+		public void GenericAttributeInt ()
+		{
+			TestModule ("GenericAttributes.dll", module => {
+				var type = module.GetType ("WithGenericAttribute_OfInt");
+				Assert.IsTrue (type.HasCustomAttributes);
+				var attributes = type.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				Assert.AreEqual ("GenericAttribute`1<System.Int32>", attributes [0].AttributeType.FullName);
+				var attribute = attributes [0];
+				// constructor arguments
+				Assert.AreEqual (true, attribute.HasConstructorArguments);
+				var argument = attribute.ConstructorArguments.Single ();
+				Assert.AreEqual ("System.Int32", argument.Type.FullName);
+				Assert.AreEqual (1, argument.Value);
+				// named field argument
+				Assert.AreEqual (true, attribute.HasFields);
+				var field = attribute.Fields.Single ();
+				Assert.AreEqual ("F", field.Name);
+				Assert.AreEqual ("System.Int32", field.Argument.Type.FullName);
+				Assert.AreEqual (2, field.Argument.Value);
+				// named property argument
+				Assert.AreEqual (true, attribute.HasProperties);
+				var property = attribute.Properties.Single ();
+				Assert.AreEqual ("P", property.Name);
+				Assert.AreEqual ("System.Int32", property.Argument.Type.FullName);
+				Assert.AreEqual (3, property.Argument.Value);				
+			}, verify: !Platform.OnMono);
+		}
+
+		[Test]
+		public void ConstrainedGenericAttribute ()
+		{
+			TestModule ("GenericAttributes.dll", module => {
+				var type = module.GetType ("WithConstrainedGenericAttribute");
+				Assert.IsTrue (type.HasCustomAttributes);
+				var attributes = type.CustomAttributes;
+				Assert.AreEqual (1, attributes.Count);
+				var attribute = attributes [0];
+				Assert.AreEqual ("ConstrainedGenericAttribute`1<DerivedFromConstraintType>", attribute.AttributeType.FullName);
+			}, verify: !Platform.OnMono);
+		}
+
+		[Test]
 		public void NullCharInString ()
 		{
 			TestCSharp ("CustomAttributes.cs", module => {
