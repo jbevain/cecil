@@ -2160,7 +2160,7 @@ namespace Mono.Cecil {
 				signature.WriteInt32 (0);
 				break;
 			case ElementType.String:
-				signature.WriteConstantString ((string)value);
+				signature.WriteConstantString ((string) value);
 				break;
 			default:
 				signature.WriteConstantPrimitive (value);
