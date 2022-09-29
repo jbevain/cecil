@@ -163,7 +163,7 @@ namespace Mono.Cecil.Tests {
 		[TestCase (RoundtripType.PortablePdb, true, true, false)]
 		public void InsertAfterWithSymbolRoundtrip (RoundtripType roundtripType, bool forceUnresolved, bool reverseScopes, bool padIL)
 		{
-			var methodBody = CreateTestMethodWithLocalScopes (padIL);
+			var methodBody = CreateTestMethodWithLocalScopes (roundtripType, padIL);
 			methodBody = RoundtripMethodBody (methodBody, roundtripType, forceUnresolved, reverseScopes);
 
 			var il = methodBody.GetILProcessor ();
@@ -174,6 +174,10 @@ namespace Mono.Cecil.Tests {
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [0], 1, 3);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1], 4, null);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1].Scopes [0], 5, 6);
+			AssertStateMachineScope (methodBody, 1, 7);
+			AssertAsyncMethodSteppingInfo (methodBody, 0, 1, 1);
+			AssertAsyncMethodSteppingInfo (methodBody, 1, 5, 6);
+			AssertAsyncMethodSteppingInfo (methodBody, 2, 7, 7);
 
 			methodBody.Method.Module.Dispose ();
 		}
@@ -189,7 +193,7 @@ namespace Mono.Cecil.Tests {
 		[TestCase (RoundtripType.PortablePdb, true, true, false)]
 		public void RemoveWithSymbolRoundtrip (RoundtripType roundtripType, bool forceUnresolved, bool reverseScopes, bool padIL)
 		{
-			var methodBody = CreateTestMethodWithLocalScopes (padIL);
+			var methodBody = CreateTestMethodWithLocalScopes (roundtripType, padIL);
 			methodBody = RoundtripMethodBody (methodBody, roundtripType, forceUnresolved, reverseScopes);
 
 			var il = methodBody.GetILProcessor ();
@@ -200,6 +204,10 @@ namespace Mono.Cecil.Tests {
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [0], 1, 1);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1], 2, null);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1].Scopes [0], 3, 4);
+			AssertStateMachineScope (methodBody, 1, 5);
+			AssertAsyncMethodSteppingInfo (methodBody, 0, 1, 1);
+			AssertAsyncMethodSteppingInfo (methodBody, 1, 3, 4);
+			AssertAsyncMethodSteppingInfo (methodBody, 2, 5, 5);
 
 			methodBody.Method.Module.Dispose ();
 		}
@@ -215,7 +223,7 @@ namespace Mono.Cecil.Tests {
 		[TestCase (RoundtripType.PortablePdb, true, true, false)]
 		public void ReplaceWithSymbolRoundtrip (RoundtripType roundtripType, bool forceUnresolved, bool reverseScopes, bool padIL)
 		{
-			var methodBody = CreateTestMethodWithLocalScopes (padIL);
+			var methodBody = CreateTestMethodWithLocalScopes (roundtripType, padIL);
 			methodBody = RoundtripMethodBody (methodBody, roundtripType, forceUnresolved, reverseScopes);
 
 			var il = methodBody.GetILProcessor ();
@@ -226,6 +234,10 @@ namespace Mono.Cecil.Tests {
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [0], 1, 2);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1], 3, null);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1].Scopes [0], 4, 5);
+			AssertStateMachineScope (methodBody, 1, 6);
+			AssertAsyncMethodSteppingInfo (methodBody, 0, 1, 1);
+			AssertAsyncMethodSteppingInfo (methodBody, 1, 4, 5);
+			AssertAsyncMethodSteppingInfo (methodBody, 2, 6, 6);
 
 			methodBody.Method.Module.Dispose ();
 		}
@@ -241,7 +253,7 @@ namespace Mono.Cecil.Tests {
 		[TestCase (RoundtripType.PortablePdb, true, true, false)]
 		public void EditBodyWithScopesAndSymbolRoundtrip (RoundtripType roundtripType, bool forceUnresolved, bool reverseScopes, bool padIL)
 		{
-			var methodBody = CreateTestMethodWithLocalScopes (padIL);
+			var methodBody = CreateTestMethodWithLocalScopes (roundtripType, padIL);
 			methodBody = RoundtripMethodBody (methodBody, roundtripType, forceUnresolved, reverseScopes);
 
 			var il = methodBody.GetILProcessor ();
@@ -260,6 +272,10 @@ namespace Mono.Cecil.Tests {
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1], 3, null);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1].Scopes [0], 4, 5);
 			AssertLocalScope (methodBody, wholeBodyScope.Scopes [1].Scopes [1], 5, 6);
+			AssertStateMachineScope (methodBody, 1, 7);
+			AssertAsyncMethodSteppingInfo (methodBody, 0, 1, 1);
+			AssertAsyncMethodSteppingInfo (methodBody, 1, 4, 5);
+			AssertAsyncMethodSteppingInfo (methodBody, 2, 7, 7);
 
 			methodBody.Method.Module.Dispose ();
 		}
@@ -310,6 +326,21 @@ namespace Mono.Cecil.Tests {
 			return method.Body;
 		}
 
+		static MethodDefinition CreateEmptyTestMethod (ModuleDefinition module, string name)
+		{
+			var method = new MethodDefinition {
+				Name = name,
+				Attributes = MethodAttributes.Public | MethodAttributes.Static
+			};
+
+			var il = method.Body.GetILProcessor ();
+			il.Emit (OpCodes.Ret);
+
+			method.ReturnType = module.ImportReference (typeof (void));
+
+			return method;
+		}
+
 		static ScopeDebugInformation VerifyWholeBodyScope (MethodBody body)
 		{
 			var debug_info = body.Method.DebugInformation;
@@ -318,17 +349,51 @@ namespace Mono.Cecil.Tests {
 			return debug_info.Scope;
 		}
 
+		static void AssertInstructionOffset (Instruction instruction, InstructionOffset instructionOffset)
+		{
+			if (instructionOffset.IsResolved)
+				Assert.AreEqual (instruction, instructionOffset.ResolvedInstruction);
+			else
+				Assert.AreEqual (instruction.Offset, instructionOffset.Offset);
+		}
+
+		static void AssertEndOfScopeOffset (MethodBody methodBody, InstructionOffset instructionOffset, int? index)
+		{
+			if (index.HasValue)
+				AssertInstructionOffset (methodBody.Instructions [index.Value], instructionOffset);
+			else
+				Assert.IsTrue (instructionOffset.IsEndOfMethod);
+		}
+
 		static void AssertLocalScope (MethodBody methodBody, ScopeDebugInformation scope, int startIndex, int? endIndex)
 		{
 			Assert.IsNotNull (scope);
-			Assert.AreEqual (methodBody.Instructions [startIndex], scope.Start.ResolvedInstruction);
-			if (endIndex.HasValue)
-				Assert.AreEqual (methodBody.Instructions [endIndex.Value], scope.End.ResolvedInstruction);
-			else
-				Assert.IsTrue (scope.End.IsEndOfMethod);
+			AssertInstructionOffset (methodBody.Instructions [startIndex], scope.Start);
+			AssertEndOfScopeOffset (methodBody, scope.End, endIndex);
 		}
 
-		static MethodBody CreateTestMethodWithLocalScopes (bool padILWithNulls)
+		static void AssertStateMachineScope (MethodBody methodBody, int startIndex, int? endIndex)
+		{
+			var customDebugInfo = methodBody.Method.HasCustomDebugInformations ? methodBody.Method.CustomDebugInformations : methodBody.Method.DebugInformation.CustomDebugInformations;
+			var stateMachineScope = customDebugInfo.OfType<StateMachineScopeDebugInformation> ().SingleOrDefault ();
+			Assert.IsNotNull (stateMachineScope);
+			Assert.AreEqual (1, stateMachineScope.Scopes.Count);
+			AssertInstructionOffset (methodBody.Instructions [startIndex], stateMachineScope.Scopes [0].Start);
+			AssertEndOfScopeOffset (methodBody, stateMachineScope.Scopes [0].End, endIndex);
+		}
+
+		static void AssertAsyncMethodSteppingInfo (MethodBody methodBody, int infoNumber, int yieldIndex, int resumeIndex)
+		{
+			var customDebugInfo = methodBody.Method.HasCustomDebugInformations ? methodBody.Method.CustomDebugInformations : methodBody.Method.DebugInformation.CustomDebugInformations;
+			var asyncMethodInfo = customDebugInfo.OfType<AsyncMethodBodyDebugInformation> ().SingleOrDefault ();
+			Assert.IsNotNull (asyncMethodInfo);
+			Assert.Greater (asyncMethodInfo.Yields.Count, infoNumber);
+			Assert.AreEqual (asyncMethodInfo.Yields.Count, asyncMethodInfo.Resumes.Count);
+			AssertInstructionOffset (methodBody.Instructions [yieldIndex], asyncMethodInfo.Yields [infoNumber]);
+			AssertInstructionOffset (methodBody.Instructions [resumeIndex], asyncMethodInfo.Resumes [infoNumber]);
+		}
+
+		static MethodBody CreateTestMethodWithLocalScopes (RoundtripType roundtripType, bool padILWithNulls)
 		{
 			var module = ModuleDefinition.CreateModule ("TestILProcessor", ModuleKind.Dll);
 			var type = new TypeDefinition ("NS", "TestType", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.ImportReference (typeof (object)));
@@ -341,6 +406,9 @@ namespace Mono.Cecil.Tests {
 			var method = methodBody.Method;
 			method.ReturnType = module.ImportReference (typeof (void));
 			type.Methods.Add (method);
+
+			var emptyMethod = CreateEmptyTestMethod (module, "empty");
+			type.Methods.Add (emptyMethod);
 
 			methodBody.InitLocals = true;
 			var tempVar1 = new VariableDefinition (module.ImportReference (typeof (string)));
@@ -363,6 +431,7 @@ namespace Mono.Cecil.Tests {
 			}
 
 			// The method looks like this:
+			// Scopes
 			//            | Scope | Scope.Scopes[0] | Scope.Scopes[1] | Scope.Scopes[1].Scopes[0]
 			// #0 Nop     | >     |                 |                 |
 			// #1 Ldloc_0 | .     | >               |                 |
@@ -372,6 +441,17 @@ namespace Mono.Cecil.Tests {
 			// #5 Ldloc_2 | .     |                 | .               | <
 			// #6 Nop     | .     |                 | .               |
 			// <end of m> | <     |                 | <               |  
+			//
+			// Async and state machine infos
+			//            | Catch handler | Yields | Resumes | State machine |
+			// #0 Nop     |               |        |         |               |
+			// #1 Ldloc_0 |               | 0      | 0       | >             |
+			// #2 Nop     |               |        |         | .             |
+			// #3 Ldloc_1 |               |        |         | .             |
+			// #4 Nop     |               | 1      |         | .             |
+			// #5 Ldloc_2 |               |        | 1       | .             |
+			// #6 Nop     | *             | 2      | 2       | <             |
+			// <end of m> |               |        |         |               |
 
 			var instructions = methodBody.Instructions;
 			debug_info.Scope = new ScopeDebugInformation (instructions[0], null) {
@@ -388,6 +468,33 @@ namespace Mono.Cecil.Tests {
 					}
 				}
 			};
+
+			// For some reason the Native PDB reader/writer store the custom info on the method.DebugInfo.CustomInfo, while portable PDB stores it on method.CustomInfo.
+			var customDebugInfo = (roundtripType == RoundtripType.Pdb && Platform.HasNativePdbSupport)
+				? method.DebugInformation.CustomDebugInformations : method.CustomDebugInformations;
+			customDebugInfo.Add (new StateMachineScopeDebugInformation () {
+				Scopes = {
+					new StateMachineScope(instructions[1], instructions[6])
+				}
+			});
+			customDebugInfo.Add (new AsyncMethodBodyDebugInformation () {
+				CatchHandler = new InstructionOffset (instructions [6]),
+				Yields = { 
+					new InstructionOffset (instructions [1]),
+					new InstructionOffset (instructions [4]),
+					new InstructionOffset (instructions [6])
+				},
+				Resumes = {
+					new InstructionOffset (instructions [1]),
+					new InstructionOffset (instructions [5]),
+					new InstructionOffset (instructions [6]),
+				},
+				ResumeMethods = {
+					emptyMethod,
+					emptyMethod,
+					emptyMethod
+				}
+			});
 
 			return methodBody;
 		}
