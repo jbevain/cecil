@@ -2922,8 +2922,11 @@ namespace Mono.Cecil {
 			if (parameters.Count != arguments.Count)
 				throw new InvalidOperationException ();
 
-			for (int i = 0; i < arguments.Count; i++)
-				WriteCustomAttributeFixedArgument (parameters [i].ParameterType, arguments [i]);
+			for (int i = 0; i < arguments.Count; i++) {
+				var parameterType = GenericParameterResolver.ResolveParameterTypeIfNeeded (
+					attribute.Constructor, parameters [i]);
+				WriteCustomAttributeFixedArgument (parameterType, arguments [i]);
+			}
 		}
 
 		void WriteCustomAttributeFixedArgument (TypeReference type, CustomAttributeArgument argument)

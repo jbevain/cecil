@@ -3513,9 +3513,12 @@ namespace Mono.Cecil {
 
 			attribute.arguments = new Collection<CustomAttributeArgument> (count);
 
-			for (int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++) {
+				var parameterType = GenericParameterResolver.ResolveParameterTypeIfNeeded (
+					attribute.Constructor, parameters [i]);
 				attribute.arguments.Add (
-					ReadCustomAttributeFixedArgument (parameters [i].ParameterType));
+					ReadCustomAttributeFixedArgument (parameterType));
+			}
 		}
 
 		CustomAttributeArgument ReadCustomAttributeFixedArgument (TypeReference type)
