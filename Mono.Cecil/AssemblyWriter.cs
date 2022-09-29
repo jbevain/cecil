@@ -2148,12 +2148,22 @@ namespace Mono.Cecil {
 		{
 			var signature = CreateSignatureWriter ();
 
-			if (type == ElementType.String) {
-				signature.WriteConstantString ((string)value);
-			} else if (type.IsPrimitive ()) {
-				signature.WriteConstantPrimitive (value);
-			} else {
+			switch (type) {
+			case ElementType.Array:
+			case ElementType.SzArray:
+			case ElementType.Class:
+			case ElementType.Object:
+			case ElementType.None:
+			case ElementType.Var:
+			case ElementType.MVar:
+			case ElementType.GenericInst:
 				signature.WriteInt32 (0);
+				break;
+			case ElementType.String:
+				signature.WriteConstantString ((string)value);
+				break;
+			default:
+				throw new NotSupportedException ();
 			}
 
 			return signature;
