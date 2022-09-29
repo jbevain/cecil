@@ -454,6 +454,23 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void NullGenericInstConstant ()
+		{
+			TestModule ("NullConst.dll", module => {
+				var type = module.GetType ("NullConst.Program");
+				var method = type.GetMethod ("MakeConst");
+				var symbol = method.DebugInformation;
+
+				Assert.IsNotNull (symbol);
+				Assert.AreEqual (1, symbol.Scope.Constants.Count);
+
+				var a = symbol.Scope.Constants [0];
+				Assert.AreEqual ("thing", a.Name);
+				Assert.AreEqual (null, a.Value);
+			}, verify: false, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void InvalidConstantRecord ()
 		{
 			using (var module = GetResourceModule ("mylib.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {

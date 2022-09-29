@@ -2192,6 +2192,7 @@ namespace Mono.Cecil {
 			case ElementType.None:
 			case ElementType.Var:
 			case ElementType.MVar:
+			case ElementType.GenericInst:
 				signature.WriteInt32 (0);
 				break;
 			case ElementType.String:
