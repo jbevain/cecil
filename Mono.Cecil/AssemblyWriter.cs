@@ -2163,7 +2163,8 @@ namespace Mono.Cecil {
 				signature.WriteConstantString ((string)value);
 				break;
 			default:
-				throw new NotSupportedException ();
+				signature.WriteConstantPrimitive (value);
+				break;
 			}
 
 			return signature;
