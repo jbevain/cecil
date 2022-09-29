@@ -899,8 +899,6 @@ namespace Mono.Cecil {
 					nested_types.Add (nested_type);
 			}
 
-			metadata.RemoveNestedTypeMapping (type);
-
 			return nested_types;
 		}
 
@@ -975,7 +973,6 @@ namespace Mono.Cecil {
 			if (!metadata.TryGetReverseNestedTypeMapping (type, out declaring_rid))
 				return null;
 
-			metadata.RemoveReverseNestedTypeMapping (type);
 			return GetTypeDefinition (declaring_rid);
 		}
 
@@ -1242,8 +1239,6 @@ namespace Mono.Cecil {
 						new MetadataToken(TokenType.InterfaceImpl, mapping [i].Col1)));
 			}
 
-			metadata.RemoveInterfaceMapping (type);
-
 			return interfaces;
 		}
 
@@ -1466,8 +1461,6 @@ namespace Mono.Cecil {
 
 			var events = new MemberDefinitionCollection<EventDefinition> (type, (int) range.Length);
 
-			metadata.RemoveEventsRange (type);
-
 			if (range.Length == 0)
 				return events;
 
@@ -1535,8 +1528,6 @@ namespace Mono.Cecil {
 
 			if (!metadata.TryGetPropertiesRange (type, out range))
 				return new MemberDefinitionCollection<PropertyDefinition> (type);
-
-			metadata.RemovePropertiesRange (type);
 
 			var properties = new MemberDefinitionCollection<PropertyDefinition> (type, (int) range.Length);
 
@@ -1912,8 +1903,6 @@ namespace Mono.Cecil {
 			if (!metadata.TryGetGenericParameterRanges (provider, out ranges))
 				return new GenericParameterCollection (provider);
 
-			metadata.RemoveGenericParameterRange (provider);
-
 			var generic_parameters = new GenericParameterCollection (provider, RangesSize (ranges));
 
 			for (int i = 0; i < ranges.Length; i++)
@@ -2029,8 +2018,6 @@ namespace Mono.Cecil {
 						new MetadataToken (TokenType.GenericParamConstraint, mapping [i].Col1)));
 			}
 
-			metadata.RemoveGenericConstraintMapping (generic_parameter);
-
 			return constraints;
 		}
 
@@ -2082,8 +2069,6 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < mapping.Count; i++)
 				overrides.Add ((MethodReference) LookupToken (mapping [i]));
-
-			metadata.RemoveOverrideMapping (method);
 
 			return overrides;
 		}
@@ -2521,8 +2506,6 @@ namespace Mono.Cecil {
 			for (int i = 0; i < ranges.Length; i++)
 				ReadCustomAttributeRange (ranges [i], custom_attributes);
 
-			metadata.RemoveCustomAttributeRange (owner);
-
 			if (module.IsWindowsMetadata ())
 				foreach (var custom_attribute in custom_attributes)
 					WindowsRuntimeProjections.Project (owner, custom_attribute);
@@ -2675,8 +2658,6 @@ namespace Mono.Cecil {
 
 			for (int i = 0; i < ranges.Length; i++)
 				ReadSecurityDeclarationRange (ranges [i], security_declarations);
-
-			metadata.RemoveSecurityDeclarationRange (owner);
 
 			return security_declarations;
 		}
