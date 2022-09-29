@@ -457,7 +457,7 @@ namespace Mono.Cecil.Tests {
 				var a = symbol.Scope.Constants [0];
 				Assert.AreEqual ("thing", a.Name);
 				Assert.AreEqual (null, a.Value);
-			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+			}, verify: false, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
 		[Test]
