@@ -241,7 +241,7 @@ namespace Mono.Cecil {
 					treatment = TypeDefinitionTreatment.PrefixWindowsRuntimeName;
 
 				if (treatment == TypeDefinitionTreatment.PrefixWindowsRuntimeName || treatment == TypeDefinitionTreatment.NormalType)
-					if (!type.IsInterface && HasAttribute (type, "Windows.UI.Xaml", "TreatAsAbstractComposableClassAttribute"))
+					if (!type.IsInterface && HasAttribute (type.CustomAttributes, "Windows.UI.Xaml", "TreatAsAbstractComposableClassAttribute"))
 						treatment |= TypeDefinitionTreatment.Abstract;
 			}
 			else if (metadata_kind == MetadataKind.ManagedWindowsMetadata && IsClrImplementationType (type))
@@ -860,7 +860,7 @@ namespace Mono.Cecil {
 			throw new Exception ();
 		}
 
-		public static void Project (ICustomAttributeProvider owner, CustomAttribute attribute)
+		public static void Project (ICustomAttributeProvider owner, Collection<CustomAttribute> owner_attributes, CustomAttribute attribute)
 		{
 			if (!IsWindowsAttributeUsageAttribute (owner, attribute))
 				return;
@@ -876,7 +876,7 @@ namespace Mono.Cecil {
 			}
 
 			if (treatment == CustomAttributeValueTreatment.None) {
-				var multiple = HasAttribute (type, "Windows.Foundation.Metadata", "AllowMultipleAttribute");
+				var multiple = HasAttribute (owner_attributes, "Windows.Foundation.Metadata", "AllowMultipleAttribute");
 				treatment = multiple ? CustomAttributeValueTreatment.AllowMultiple : CustomAttributeValueTreatment.AllowSingle;
 			}
 
@@ -905,9 +905,9 @@ namespace Mono.Cecil {
 			return declaring_type.Name == "AttributeUsageAttribute" && declaring_type.Namespace == /*"Windows.Foundation.Metadata"*/"System";
 		}
 
-		static bool HasAttribute (TypeDefinition type, string @namespace, string name)
+		static bool HasAttribute (Collection<CustomAttribute> attributes, string @namespace, string name)
 		{
-			foreach (var attribute in type.CustomAttributes) {
+			foreach (var attribute in attributes) {
 				var attribute_type = attribute.AttributeType;
 				if (attribute_type.Name == name && attribute_type.Namespace == @namespace)
 					return true;
