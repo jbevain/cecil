@@ -1878,7 +1878,19 @@ namespace Mono.Cecil {
 		void AddConstant (IConstantProvider owner, TypeReference type)
 		{
 			var constant = owner.Constant;
-			var etype = GetConstantType (type, constant);
+			ElementType etype;
+			try {
+				etype = GetConstantType (type, constant);
+			}
+			catch {
+				if (int.TryParse (constant.ToString (), out int intConstant)) {
+					constant = intConstant;
+					etype = ElementType.I4;
+				} else {
+					constant = constant.ToString ();
+					etype = ElementType.String;
+				}
+			}
 
 			constant_table.AddRow (new ConstantRow (
 				etype,
