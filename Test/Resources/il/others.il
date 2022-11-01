@@ -78,4 +78,14 @@
 		.other instance void Others::dang_Handler (class [mscorlib]System.EventHandler)
 		.other instance void Others::fang_Handler (class [mscorlib]System.EventHandler)
 	}
+	
+	.method public instance void  SameMethodNameInstanceStatic() cil managed
+	{
+		ret
+	}
+
+	.method public static void  SameMethodNameInstanceStatic() cil managed
+	{
+		ret
+	} // end of static method MethodNameTests::MethodName
 }

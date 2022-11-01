@@ -221,5 +221,20 @@ namespace Mono.Cecil.Tests {
 			Assert.IsNotNull (method);
 			Assert.AreEqual (method, method.MethodReturnType.Parameter.Method);
 		}
+
+		[Test]
+		public void InstanceAndStaticMethodComparison ()
+		{
+			TestIL ("others.il", module => {
+				var others = module.GetType ("Others");
+				var instance_method = others.Methods.Single (m => m.Name == "SameMethodNameInstanceStatic" && m.HasThis);
+				var static_method_reference = new MethodReference ("SameMethodNameInstanceStatic", instance_method.ReturnType, others)
+					{
+						HasThis = false
+					};
+
+				Assert.AreNotEqual(instance_method, static_method_reference.Resolve ());
+			});
+		}
 	}
 }
