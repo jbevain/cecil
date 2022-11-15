@@ -264,6 +264,9 @@ namespace Mono.Cecil {
 				if (!AreSame (method.ReturnType, reference.ReturnType))
 					continue;
 
+				if (method.HasThis != reference.HasThis)
+					continue;
+
 				if (method.IsVarArg () != reference.IsVarArg ())
 					continue;
 
