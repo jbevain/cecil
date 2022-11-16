@@ -17,19 +17,21 @@ namespace Mono.Cecil.Tests {
 		protected abstract string [] ManagedClassTypeNames { get; }
 		protected abstract string [] CustomListTypeNames { get; }
 
-		[Test]
-		public void CanReadMetadataType ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanReadMetadataType (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
 
 			TestModule (ModuleName, (module) => {
 				Assert.AreEqual (ExpectedMetadataKind, module.MetadataKind);
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 
-		[Test]
-		public void CanProjectParametersAndReturnTypes ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanProjectParametersAndReturnTypes (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -48,11 +50,12 @@ namespace Mono.Cecil.Tests {
 					Assert.AreEqual (listSetter.Parameters.Count, 1);
 					Assert.AreEqual (listSetter.Parameters [0].ParameterType.FullName, "System.Collections.Generic.IList`1<System.Int32>");
 				}
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 
-		[Test]
-		public void CanProjectInterfaces ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanProjectInterfaces (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -64,16 +67,41 @@ namespace Mono.Cecil.Tests {
 					Assert.IsNotNull (type.Interfaces.SingleOrDefault (i => i.InterfaceType.FullName == "System.Collections.Generic.IList`1<System.Int32>"));
 					Assert.IsNotNull (type.Interfaces.SingleOrDefault (i => i.InterfaceType.FullName == "System.Collections.Generic.IEnumerable`1<System.Int32>"));
 				}
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
-
-		[Test]
-		public void CanStripType ()
+		
+		/// <summary>
+		/// This test exists to verify a StackOverflowException that started happening with https://github.com/jbevain/cecil/pull/843
+		/// and was fixed by https://github.com/jbevain/cecil/pull/879
+		///
+		/// The windows runtime sdk assemblies must be read with ApplyWindowsRuntimeProjections in order for the StackOverflowException to happen
+		/// </summary>
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanAvoidCircleAttributeReading (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
 
-			var assemblyResolver = WindowsRuntimeAssemblyResolver.CreateInstance ();
+			TestModule (ModuleName, (module) => {
+
+				var windowsWinMd = module.AssemblyResolver.Resolve (new AssemblyNameReference ("Windows", null));
+
+				var problematicType = windowsWinMd.MainModule.GetType ("Windows.Foundation.Metadata.ActivatableAttribute");
+					
+				Assert.Greater (problematicType.CustomAttributes.Count, 0, "Expected one or more attributes");
+				
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
+		}
+
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanStripType (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
+		{
+			if (Platform.OnMono)
+				return;
+
+			var assemblyResolver = WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections);
 
 			TestModule (ModuleName, (originalModule) => {
 				var types = CustomListTypeNames.Select (typeName => originalModule.Types.Single (t => t.Name == typeName)).ToArray ();
@@ -107,8 +135,9 @@ namespace Mono.Cecil.Tests {
 
 		protected override string [] CustomListTypeNames { get { return new [] { "CustomList", "<WinRT>CustomList" }; } }
 
-		[Test]
-		public void CanProjectClasses ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanProjectClasses (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -129,11 +158,12 @@ namespace Mono.Cecil.Tests {
 				var winrtSomeOtherClassType = module.Types.Single (t => t.Name == "<WinRT>SomeOtherClass");
 				Assert.AreEqual ("SomeOtherClass", winrtSomeOtherClassType.WindowsRuntimeProjection.Name);
 				Assert.AreEqual (TypeDefinitionTreatment.PrefixWindowsRuntimeName, winrtSomeOtherClassType.WindowsRuntimeProjection.Treatment);
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 
-		[Test]
-		public void VerifyTypeReferenceToProjectedTypeInAttributeArgumentReferencesUnmangledTypeName()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void VerifyTypeReferenceToProjectedTypeInAttributeArgumentReferencesUnmangledTypeName(bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -147,7 +177,7 @@ namespace Mono.Cecil.Tests {
 				var attributeArgument = (TypeReference)attribute.ConstructorArguments[0].Value;
 
 				Assert.AreEqual("ManagedWinmd.ClassWithAsyncMethod/<DoStuffAsync>d__0", attributeArgument.FullName);
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance(), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance(readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 	}
 
@@ -162,8 +192,9 @@ namespace Mono.Cecil.Tests {
 
 		protected override string [] CustomListTypeNames { get { return new [] { "CustomList" }; } }
 
-		[Test]
-		public void CanProjectAndRedirectInterfaces ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanProjectAndRedirectInterfaces (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -213,11 +244,12 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (0, customPropertySetClass.Interfaces[6].CustomAttributes.Count);
 				Assert.AreEqual ("Windows.Foundation.Collections.IIterable`1<System.Collections.Generic.KeyValuePair`2<System.String,System.Object>>", customPropertySetClass.Interfaces[6].InterfaceType.FullName);
 
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 
-		[Test]
-		public void CanProjectInterfaceMethods ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanProjectInterfaceMethods (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -256,11 +288,12 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (customListClass.Methods[25].FullName, "System.Boolean NativeWinmd.CustomList::Remove(System.Int32)");
 				Assert.AreEqual (customListClass.Methods[26].FullName, "System.Collections.Generic.IEnumerator`1<System.Int32> NativeWinmd.CustomList::GetEnumerator()");
 				Assert.AreEqual (customListClass.Methods[27].FullName, "System.Collections.IEnumerator NativeWinmd.CustomList::GetEnumerator()");
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 
-		[Test]
-		public void CanProjectMethodOverrides ()
+		[TestCase (true)]
+		[TestCase (false)]
+		public void CanProjectMethodOverrides (bool readSdkAssembliesWithApplyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return;
@@ -299,7 +332,7 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (customListClass.Methods[26].Overrides[0].FullName, "System.Collections.Generic.IEnumerator`1<T> System.Collections.Generic.IEnumerable`1<System.Int32>::GetEnumerator()");
 				Assert.AreEqual (customListClass.Methods[27].Overrides[0].FullName, "System.Collections.IEnumerator System.Collections.IEnumerable::GetEnumerator()");
 
-			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (), applyWindowsRuntimeProjections: true);
+			}, verify: false, assemblyResolver: WindowsRuntimeAssemblyResolver.CreateInstance (readSdkAssembliesWithApplyWindowsRuntimeProjections), applyWindowsRuntimeProjections: true);
 		}
 	}
 }

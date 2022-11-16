@@ -182,7 +182,7 @@ namespace Mono.Cecil.Tests {
 		[Test]
 		public void WindowsRuntimeComponentAssembly ()
 		{
-			var resolver = WindowsRuntimeAssemblyResolver.CreateInstance ();
+			var resolver = WindowsRuntimeAssemblyResolver.CreateInstance (applyWindowsRuntimeProjections: false);
 			if (resolver == null)
 				return;
 

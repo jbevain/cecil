@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Win32;
 
 namespace Mono.Cecil.Tests {
@@ -10,12 +11,12 @@ namespace Mono.Cecil.Tests {
 
 		readonly Dictionary<string, AssemblyDefinition> assemblies = new Dictionary<string, AssemblyDefinition> ();
 
-		public static WindowsRuntimeAssemblyResolver CreateInstance ()
+		public static WindowsRuntimeAssemblyResolver CreateInstance (bool applyWindowsRuntimeProjections)
 		{
 			if (Platform.OnMono)
 				return null;
 			try {
-				return new WindowsRuntimeAssemblyResolver ();
+				return new WindowsRuntimeAssemblyResolver (applyWindowsRuntimeProjections);
 			} catch {
 				return null;
 			}
@@ -30,20 +31,30 @@ namespace Mono.Cecil.Tests {
 			return base.Resolve (name);
 		}
 
-		private WindowsRuntimeAssemblyResolver ()
+		private WindowsRuntimeAssemblyResolver (bool applyWindowsRuntimeProjections)
 		{
-			LoadWindowsSdk ("v8.1", "8.1", (installationFolder) => {
-				var fileName = Path.Combine (installationFolder, @"References\CommonConfiguration\Neutral\Annotated\Windows.winmd");
-				var assembly = AssemblyDefinition.ReadAssembly (fileName);
-				Register (assembly);
-			});
+			var readerParameters = new ReaderParameters {
+				ApplyWindowsRuntimeProjections = applyWindowsRuntimeProjections
+			};
 
 			LoadWindowsSdk ("v10.0", "10", (installationFolder) => {
 				var referencesFolder = Path.Combine (installationFolder, "References");
 				var assemblies = Directory.GetFiles (referencesFolder, "*.winmd", SearchOption.AllDirectories);
+				
+				var latestVersionDir = Directory.GetDirectories (Path.Combine (installationFolder, "UnionMetadata"))
+					.Where (d => Path.GetFileName (d) != "Facade")
+					.OrderBy (d => Path.GetFileName (d))
+					.Last ();
+
+				var windowsWinMdPath = Path.Combine (latestVersionDir, "Windows.winmd");
+				if (!File.Exists (windowsWinMdPath))
+					throw new FileNotFoundException (windowsWinMdPath);
+
+				var windowsWinmdAssembly = AssemblyDefinition.ReadAssembly (windowsWinMdPath, readerParameters);
+				Register (windowsWinmdAssembly);
 
 				foreach (var assemblyPath in assemblies) {
-					var assembly = AssemblyDefinition.ReadAssembly (assemblyPath);
+					var assembly = AssemblyDefinition.ReadAssembly (assemblyPath, readerParameters);
 					Register (assembly);
 				}
 			});

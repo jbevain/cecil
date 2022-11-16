@@ -2508,7 +2508,7 @@ namespace Mono.Cecil {
 
 			if (module.IsWindowsMetadata ())
 				foreach (var custom_attribute in custom_attributes)
-					WindowsRuntimeProjections.Project (owner, custom_attribute);
+					WindowsRuntimeProjections.Project (owner, custom_attributes, custom_attribute);
 
 			return custom_attributes;
 		}
