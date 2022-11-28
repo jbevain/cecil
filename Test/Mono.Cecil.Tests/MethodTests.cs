@@ -3,7 +3,7 @@ using System.Linq;
 
 using Mono.Cecil;
 using Mono.Cecil.Metadata;
-
+using Mono.Collections.Generic;
 using NUnit.Framework;
 
 namespace Mono.Cecil.Tests {
@@ -234,6 +234,51 @@ namespace Mono.Cecil.Tests {
 					};
 
 				Assert.AreNotEqual(instance_method, static_method_reference.Resolve ());
+			});
+		}
+
+		[Test]
+		public void FunctionPointerArgumentOverload ()
+		{
+			TestIL ("others.il", module => {
+				var others = module.GetType ("Others");
+				var overloaded_methods = others.Methods.Where (m => m.Name == "OverloadedWithFpArg").ToArray ();
+				// Manually create the function-pointer type so `AreSame` won't exit early due to reference equality
+				var overloaded_method_int_reference = new MethodReference ("OverloadedWithFpArg", module.TypeSystem.Void, others) 
+				{
+					HasThis = false,
+					Parameters = { new ParameterDefinition ("X", ParameterAttributes.None, new FunctionPointerType () {
+						HasThis = false,
+						ReturnType = module.TypeSystem.Int32,
+						Parameters = { new ParameterDefinition (module.TypeSystem.Int32) }
+					}) }
+				};
+				
+				var overloaded_method_long_reference = new MethodReference ("OverloadedWithFpArg", module.TypeSystem.Void, others) 
+				{
+					HasThis = false,
+					Parameters = { new ParameterDefinition ("X", ParameterAttributes.None, new FunctionPointerType () {
+						HasThis = false,
+						ReturnType = module.TypeSystem.Int32,
+						Parameters = { new ParameterDefinition (module.TypeSystem.Int64) }
+					}) }
+				};
+				
+				var overloaded_method_cdecl_reference = new MethodReference ("OverloadedWithFpArg", module.TypeSystem.Void, others) 
+				{
+					HasThis = false,
+					Parameters = { new ParameterDefinition ("X", ParameterAttributes.None, new FunctionPointerType () {
+						CallingConvention = MethodCallingConvention.C,
+						HasThis = false,
+						ReturnType = module.TypeSystem.Int32,
+						Parameters = { new ParameterDefinition (module.TypeSystem.Int32) }
+					}) } 
+				};
+				
+
+				Assert.AreEqual (overloaded_methods[0], overloaded_method_int_reference.Resolve ()); 
+				Assert.AreEqual (overloaded_methods[1], overloaded_method_long_reference.Resolve ()); 
+				Assert.AreEqual (overloaded_methods[2], overloaded_method_cdecl_reference.Resolve ()); 
 			});
 		}
 	}
