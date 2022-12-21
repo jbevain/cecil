@@ -9,6 +9,7 @@
 //
 
 using System;
+using System.Diagnostics;
 
 using RVA = System.UInt32;
 
@@ -47,11 +48,31 @@ namespace Mono.Cecil.PE {
 			map [(int) segment] = new Range (GetStart (segment), (uint) length);
 		}
 
-		public void AddMap (TextSegment segment, int length, int align)
+		uint AlignUp (uint value, uint align)
 		{
 			align--;
+			return (value + align) & ~align;
+		}
 
-			AddMap (segment, (length + align) & ~align);
+		public void AddMap (TextSegment segment, int length, int align)
+		{
+			var index = (int) segment;
+			uint start;
+			if (index != 0) {
+				// Align up the previous segment's length so that the new
+				// segment's start will be aligned.
+				index--;
+				Range previous = map [index];
+				start = AlignUp (previous.Start + previous.Length, (uint) align);
+				map [index].Length = start - previous.Start;
+			} else {
+				start = ImageWriter.text_rva;
+				// Should already be aligned.
+				Debug.Assert (start == AlignUp (start, (uint) align));
+			}
+			Debug.Assert (start == GetStart (segment));
+
+			map [(int) segment] = new Range (start, (uint) length);
 		}
 
 		public void AddMap (TextSegment segment, Range range)
