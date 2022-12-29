@@ -1894,11 +1894,16 @@ namespace Mono.Cecil {
 			var etype = constant_type.etype;
 			switch (etype) {
 			case ElementType.None:
-				var type = constant_type.CheckedResolve ();
-				if (type.IsEnum)
-					return GetConstantType (type.GetEnumUnderlyingType (), constant);
+				var type = constant_type.Resolve ();
+				if (type != null) {
+					if (type.IsEnum) {
+						return GetConstantType (type.GetEnumUnderlyingType (), constant);
+					}
+				} else {
+					return GetConstantType (constant.GetType ());
+				}
 
-				return ElementType.Class;
+				throw new InvalidOperationException();
 			case ElementType.String:
 				return ElementType.String;
 			case ElementType.Object:
