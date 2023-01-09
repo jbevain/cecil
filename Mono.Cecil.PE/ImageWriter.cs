@@ -696,7 +696,7 @@ namespace Mono.Cecil.PE {
 		{
 			var map = text_map;
 
-			map.AddMap (TextSegment.Code, metadata.code.length);
+			map.AddMap (TextSegment.Code, metadata.code.length, !pe64 ? 4 : 16);
 			map.AddMap (TextSegment.Resources, metadata.resources.length, 8);
 			map.AddMap (TextSegment.Data, metadata.data.length, metadata.data.BufferAlign);
 			if (metadata.data.length > 0)
