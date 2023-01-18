@@ -160,7 +160,7 @@ namespace Mono.Cecil.Tests {
 					var priv_impl = GetPrivateImplementationType (module);
 					Assert.IsNotNull (priv_impl);
 
-					Assert.AreEqual (6, priv_impl.Fields.Count);
+					Assert.AreEqual (8, priv_impl.Fields.Count);
 
 					foreach (var field in priv_impl.Fields)
 					{
@@ -170,7 +170,8 @@ namespace Mono.Cecil.Tests {
 						Assert.IsNotNull (field.InitialValue);
 
 						int rvaAlignment = AlignmentOfInteger (field.RVA);
-						int desiredAlignment = Math.Min(8, AlignmentOfInteger (field.InitialValue.Length));
+						var fieldType = field.FieldType.Resolve ();
+						int desiredAlignment = fieldType.PackingSize;
 						Assert.GreaterOrEqual (rvaAlignment, desiredAlignment);
 					}
 				}

@@ -32,7 +32,7 @@ namespace Mono.Cecil.Cil {
 		public CodeWriter (MetadataBuilder metadata)
 			: base (0)
 		{
-			this.code_base = metadata.text_map.GetNextRVA (TextSegment.CLIHeader);
+			this.code_base = metadata.text_map.GetRVA (TextSegment.Code);
 			this.metadata = metadata;
 			this.standalone_signatures = new Dictionary<uint, MetadataToken> ();
 			this.tiny_method_bodies = new Dictionary<ByteBuffer, RVA> (new ByteBufferEqualityComparer ());

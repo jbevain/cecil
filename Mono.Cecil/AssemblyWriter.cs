@@ -987,6 +987,11 @@ namespace Mono.Cecil {
 			var map = new TextMap ();
 			map.AddMap (TextSegment.ImportAddressTable, module.Architecture == TargetArchitecture.I386 ? 8 : 0);
 			map.AddMap (TextSegment.CLIHeader, 0x48, 8);
+			var pe64 = module.Architecture == TargetArchitecture.AMD64 || module.Architecture == TargetArchitecture.IA64 || module.Architecture == TargetArchitecture.ARM64;
+			// Alignment of the code segment must be set before the code is written
+			// These alignment values are probably not necessary, but are being left in
+			// for now in case something requires them.
+			map.AddMap (TextSegment.Code, 0, !pe64 ? 4 : 16);
 			return map;
 		}
 
