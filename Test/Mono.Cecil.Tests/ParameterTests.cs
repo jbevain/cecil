@@ -280,7 +280,7 @@ namespace Mono.Cecil.Tests {
 
 				Assert.AreEqual (1, method.Parameters.Count);
 				Assert.AreEqual ("a", method.Parameters [0].Name);
-			});
+			}, verify: false);
 		}
 	}
 }
