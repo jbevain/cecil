@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 using NUnit.Framework;
@@ -279,6 +280,94 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (overloaded_methods[0], overloaded_method_int_reference.Resolve ()); 
 				Assert.AreEqual (overloaded_methods[1], overloaded_method_long_reference.Resolve ()); 
 				Assert.AreEqual (overloaded_methods[2], overloaded_method_cdecl_reference.Resolve ()); 
+			});
+		}
+		
+		[Test]
+		public void PrivateScope ()
+		{
+			TestIL ("privatescope.il", module => {
+				var foo = module.GetType ("Foo");
+				var call_same_name_methods = foo.GetMethod ("CallSameNameMethods");
+				var call_instructions = call_same_name_methods.Body.Instructions
+					.Where (ins => ins.OpCode.Code == Code.Call)
+					.ToArray ();
+				
+				var first_same_name_index = 2;
+
+				// The first method will be the normal non-privatescope method.
+				var first_call_resolved = ((MethodReference)call_instructions [0].Operand).Resolve ();
+				var expected_first_call_resolved = foo.Methods [first_same_name_index];
+				Assert.IsFalse(first_call_resolved.IsCompilerControlled);
+				Assert.AreEqual(expected_first_call_resolved, first_call_resolved);
+				
+				// This is the first privatescope method.
+				var second_call_resolved = ((MethodReference)call_instructions [1].Operand).Resolve();
+				var expected_second_call_resolved = foo.Methods [first_same_name_index + 1];
+				
+				// Sanity check to make sure the ordering assumptions were correct.
+				Assert.IsTrue(expected_second_call_resolved.IsCompilerControlled, "The expected method should have been compiler controlled.");
+				
+				// The equality failure isn't going to be very helpful since both methods will have the same ToString value,
+				// so before we assert equality, we'll assert that the method is compiler controlled because that is the key difference
+				Assert.IsTrue(second_call_resolved.IsCompilerControlled, "Expected the method reference to resolve to a compiler controlled method");
+				Assert.AreEqual(expected_second_call_resolved, second_call_resolved);
+				
+				// This is the second privatescope method.
+				var third_call_resolved = ((MethodReference)call_instructions [2].Operand).Resolve ();
+				var expected_third_call_resolved = foo.Methods [first_same_name_index + 2];
+				
+				// Sanity check to make sure the ordering assumptions were correct.
+				Assert.IsTrue(expected_third_call_resolved.IsCompilerControlled, "The expected method should have been compiler controlled.");
+				
+				// The equality failure isn't going to be very helpful since both methods will have the same ToString value,
+				// so before we assert equality, we'll assert that the method is compiler controlled because that is the key difference
+				Assert.IsTrue(third_call_resolved.IsCompilerControlled, "Expected the method reference to resolve to a compiler controlled method");
+				Assert.AreEqual(expected_third_call_resolved, third_call_resolved);
+			});
+		}
+		
+		[Test]
+		public void PrivateScopeGeneric ()
+		{
+			TestIL ("privatescope.il", module => {
+				var foo = module.GetType ("Foo");
+				var call_same_name_methods = foo.GetMethod ("CallSameNameMethodsGeneric");
+				var call_instructions = call_same_name_methods.Body.Instructions
+					.Where (ins => ins.OpCode.Code == Code.Call)
+					.ToArray ();
+
+				var first_same_name_generic_index = 6;
+
+				// The first method will be the normal non-privatescope method.
+				var first_call_resolved = ((MethodReference)call_instructions [0].Operand).Resolve();
+				var expected_first_call_resolved = foo.Methods [first_same_name_generic_index];
+				Assert.IsFalse(first_call_resolved.IsCompilerControlled);
+				Assert.AreEqual(expected_first_call_resolved, first_call_resolved);
+				
+				// This is the first privatescope method.
+				var second_call_resolved = ((MethodReference)call_instructions [1].Operand).Resolve();
+				var expected_second_call_resolved = foo.Methods [first_same_name_generic_index + 1];
+				
+				// Sanity check to make sure the ordering assumptions were correct.
+				Assert.IsTrue(expected_second_call_resolved.IsCompilerControlled, "The expected method should have been compiler controlled.");
+				
+				// The equality failure isn't going to be very helpful since both methods will have the same ToString value,
+				// so before we assert equality, we'll assert that the method is compiler controlled because that is the key difference
+				Assert.IsTrue (second_call_resolved.IsCompilerControlled, "Expected the method reference to resolve to a compiler controlled method");
+				Assert.AreEqual(expected_second_call_resolved, second_call_resolved);
+
+				// This is the second privatescope method.
+				var third_call_resolved = ((MethodReference)call_instructions [2].Operand).Resolve();
+				var expected_third_call_resolved = foo.Methods [first_same_name_generic_index + 2];
+				
+				// Sanity check to make sure the ordering assumptions were correct.
+				Assert.IsTrue(expected_third_call_resolved.IsCompilerControlled, "The expected method should have been compiler controlled.");
+				
+				// The equality failure isn't going to be very helpful since both methods will have the same ToString value,
+				// so before we assert equality, we'll assert that the method is compiler controlled because that is the key difference
+				Assert.IsTrue(third_call_resolved.IsCompilerControlled, "Expected the method reference to resolve to a compiler controlled method");
+				Assert.AreEqual(expected_third_call_resolved, third_call_resolved);
 			});
 		}
 	}
