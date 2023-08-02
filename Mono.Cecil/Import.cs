@@ -346,10 +346,17 @@ namespace Mono.Cecil {
 
 			context.Push (declaring_type);
 			try {
+				var field_type = ImportType (field.FieldType, context);
+
+				foreach (var t in field.GetRequiredCustomModifiers ())
+					field_type = new RequiredModifierType (ImportType (t, context), field_type);
+				foreach (var t in field.GetOptionalCustomModifiers ())
+					field_type = new OptionalModifierType (ImportType (t, context), field_type);
+
 				return new FieldReference {
 					Name = field.Name,
 					DeclaringType = declaring_type,
-					FieldType = ImportType (field.FieldType, context),
+					FieldType = field_type,
 				};
 			} finally {
 				context.Pop ();
