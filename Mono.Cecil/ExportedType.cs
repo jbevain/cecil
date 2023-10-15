@@ -230,7 +230,7 @@ namespace Mono.Cecil {
 		public TypeDefinition Resolve ()
 		{
 			if (reentrancyGuard) {
-				throw new InvalidOperationException ($"Circularity when resolving exported type {this}");
+				throw new InvalidOperationException ($"Circularity when resolving exported type: '{this}'");
 			}
 
 			reentrancyGuard = true;
