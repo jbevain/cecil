@@ -2,6 +2,7 @@
   <Import Project="..\..\..\Mono.Cecil.Tests.props" />
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net40</TargetFrameworks>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Mono.Cecil.csproj">
