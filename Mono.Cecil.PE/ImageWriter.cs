@@ -61,7 +61,8 @@ namespace Mono.Cecil.PE {
 			if (metadataOnly)
 				return;
 
-			this.pe64 = module.Architecture == TargetArchitecture.AMD64 || module.Architecture == TargetArchitecture.IA64 || module.Architecture == TargetArchitecture.ARM64;
+			this.pe64 = module.Architecture == TargetArchitecture.AMD64 || module.Architecture == TargetArchitecture.IA64 || module.Architecture == TargetArchitecture.ARM64 ||
+				    module.Architecture == TargetArchitecture.RiscV64;
 			this.has_reloc = module.Architecture == TargetArchitecture.I386;
 			this.GetDebugHeader ();
 			this.GetWin32Resources ();
