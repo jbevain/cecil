@@ -32,6 +32,7 @@ namespace Mono.Cecil {
 		ARM = 0x01c0,
 		ARMv7 = 0x01c4,
 		ARM64 = 0xaa64,
+		RiscV64 = 0x5064,
 	}
 
 	[Flags]
