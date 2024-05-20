@@ -159,6 +159,19 @@ namespace Mono.Cecil {
 			{ typeof (object), ElementType.Object },
 		};
 
+		TypeReference ImportType (Type type, ImportGenericContext context, Type [] required_modifiers, Type [] optional_modifiers)
+		{
+			var import = ImportType (type, context);
+
+			foreach (var modifier in required_modifiers)
+				import = new RequiredModifierType (ImportType (modifier, context), import);
+
+			foreach (var modifier in optional_modifiers)
+				import = new OptionalModifierType (ImportType (modifier, context), import);
+
+			return import;
+		}
+
 		TypeReference ImportType (Type type, ImportGenericContext context)
 		{
 			return ImportType (type, context, ImportGenericKind.Open);
@@ -349,7 +362,7 @@ namespace Mono.Cecil {
 				return new FieldReference {
 					Name = field.Name,
 					DeclaringType = declaring_type,
-					FieldType = ImportType (field.FieldType, context),
+					FieldType = ImportType (field.FieldType, context, field.GetRequiredCustomModifiers (), field.GetOptionalCustomModifiers ()),
 				};
 			} finally {
 				context.Pop ();
@@ -393,15 +406,17 @@ namespace Mono.Cecil {
 			try {
 				var method_info = method as SR.MethodInfo;
 				reference.ReturnType = method_info != null
-					? ImportType (method_info.ReturnType, context)
+					? ImportType (method_info.ReturnType, context, method_info.ReturnParameter.GetRequiredCustomModifiers (), method_info.ReturnParameter.GetOptionalCustomModifiers ())
 					: ImportType (typeof (void), default (ImportGenericContext));
 
 				var parameters = method.GetParameters ();
 				var reference_parameters = reference.Parameters;
 
-				for (int i = 0; i < parameters.Length; i++)
+				for (int i = 0; i < parameters.Length; i++) {
+					var parameter = parameters [i];
 					reference_parameters.Add (
-						new ParameterDefinition (ImportType (parameters [i].ParameterType, context)));
+						new ParameterDefinition (ImportType (parameter.ParameterType, context, parameter.GetRequiredCustomModifiers (), parameter.GetOptionalCustomModifiers ())));
+				}
 
 				reference.DeclaringType = declaring_type;
 
