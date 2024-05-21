@@ -165,6 +165,11 @@ namespace Mono.Cecil {
 			set { attributes = attributes.SetAttributes ((ushort) GenericParameterAttributes.DefaultConstructorConstraint, value); }
 		}
 
+		public bool AllowByRefLikeConstraint {
+			get { return attributes.GetAttributes ((ushort) GenericParameterAttributes.AllowByRefLikeConstraint); }
+			set { attributes = attributes.SetAttributes ((ushort) GenericParameterAttributes.AllowByRefLikeConstraint, value); }
+		}
+
 		#endregion
 
 		public GenericParameter (IGenericParameterProvider owner)
