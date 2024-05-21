@@ -23,6 +23,6 @@ namespace Mono.Cecil {
 		ReferenceTypeConstraint			= 0x0004,
 		NotNullableValueTypeConstraint	= 0x0008,
 		DefaultConstructorConstraint	= 0x0010,
-		AcceptByRefLikeConstraint = 0x0020,
+		AllowByRefLikeConstraint = 0x0020,
 	}
 }
