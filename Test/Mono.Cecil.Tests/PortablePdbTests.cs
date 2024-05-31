@@ -1148,5 +1148,33 @@ class Program
 			buffer.WriteInt32 (cv.Directory.TimeDateStamp);
 			pdbId = buffer.buffer;
 		}
+
+		[Test]
+		public void WritePortablePdbPath ()
+		{
+			const string resource = "PdbPathLib.dll";
+			string destination = Path.GetTempFileName ();
+
+			using (var module = GetResourceModule (resource, new ReaderParameters { ReadSymbols = true })) {
+				module.Write (destination, new WriterParameters { WriteSymbols = true });
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, new ReaderParameters { ReadSymbols = true })) {
+				GetCodeViewPdbPath (module, out string pdbPath);
+
+				Assert.AreEqual ("/_/artifacts/obj/PdbPathLib/release/PdbPathLib.pdb", pdbPath);
+			}
+		}
+
+		static void GetCodeViewPdbPath (ModuleDefinition module, out string pdbPath)
+		{
+			var header = module.GetDebugHeader ();
+			var cv = Mixin.GetCodeViewEntry (header);
+			Assert.IsNotNull (cv);
+
+			CollectionAssert.AreEqual (new byte [] { 0x52, 0x53, 0x44, 0x53 }, cv.Data.Take (4));
+
+			pdbPath = Encoding.UTF8.GetString (cv.Data, 24, cv.Data.Length - 25);
+		}
 	}
 }

@@ -319,6 +319,20 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
+		string GetPdbPath ()
+		{
+			var debugHeader = module.Image.DebugHeader;
+			foreach (var entry in debugHeader.Entries) {
+				var data = entry.Data;
+				// Pdb path is NUL-terminated path at offset 24.
+				// https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
+				if (entry.Directory.Type == ImageDebugType.CodeView && data.Length >= 25)
+					return System.Text.Encoding.UTF8.GetString (data, 24, data.Length - 25);
+			}
+
+			return string.Empty;
+		}
+
 		public ImageDebugHeader GetDebugHeader ()
 		{
 			if (IsEmbedded)
@@ -341,7 +355,10 @@ namespace Mono.Cecil.Cil {
 				// PDB Age
 				buffer.WriteUInt32 (1);
 				// PDB Path
-				var fileName = writer.BaseStream.GetFileName ();
+				var fileName = GetPdbPath ();
+				if (string.IsNullOrEmpty (fileName)) {
+					fileName = writer.BaseStream.GetFileName ();
+				}
 				if (string.IsNullOrEmpty (fileName)) {
 					fileName = module.Assembly.Name.Name + ".pdb";
 				}
