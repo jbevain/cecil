@@ -173,7 +173,7 @@ namespace Mono.Cecil.Mdb {
 			// after the entire image of the assembly is written (since it's computed from the hash of that)
 		}
 
-		public void Write (TypeDefinition type)
+		public void Write (ICustomDebugInformationProvider provider)
 		{
 		}
 

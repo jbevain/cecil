@@ -186,8 +186,9 @@ namespace Mono.Cecil.Mdb {
 			};
 		}
 
-		public void Read (TypeDefinition type)
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
 		{
+			return new Collection<CustomDebugInformation> ();
 		}
 
 		public void Dispose ()

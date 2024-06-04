@@ -145,9 +145,9 @@ namespace Mono.Cecil.Cil {
 			method_info.kickoff_method = debug_reader.ReadStateMachineKickoffMethod (method_info.method);
 		}
 
-		public void Read (TypeDefinition type)
+		public Collections.Generic.Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
 		{
-			type.custom_infos = debug_reader.GetCustomDebugInformation (type);
+			return debug_reader.GetCustomDebugInformation (provider);
 		}
 
 		void ReadCustomDebugInformations (MethodDebugInformation info)
@@ -226,9 +226,9 @@ namespace Mono.Cecil.Cil {
 			return reader.Read (method);
 		}
 
-		public void Read (TypeDefinition type)
+		public Collections.Generic.Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
 		{
-			reader.Read (type);
+			return reader.Read (provider);
 		}
 
 		public void Dispose ()
@@ -329,9 +329,9 @@ namespace Mono.Cecil.Cil {
 			}
 		}
 
-		public void Write (TypeDefinition type)
+		public void Write (ICustomDebugInformationProvider provider)
 		{
-			pdb_metadata.AddCustomDebugInformations (type);
+			pdb_metadata.AddCustomDebugInformations (provider);
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
@@ -534,9 +534,9 @@ namespace Mono.Cecil.Cil {
 			writer.Write (info);
 		}
 
-		public void Write (TypeDefinition type)
+		public void Write (ICustomDebugInformationProvider provider)
 		{
-			writer.Write (type);
+			writer.Write (provider);
 		}
 
 		public ImageDebugHeader GetDebugHeader ()

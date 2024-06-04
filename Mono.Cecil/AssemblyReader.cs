@@ -404,7 +404,7 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < types.Count; i++) {
 				var type = types [i];
-				symbol_reader.Read (type);
+				type.custom_infos = symbol_reader.Read (type);
 
 				if (type.HasNestedTypes)
 					ReadTypesSymbols (type.NestedTypes, symbol_reader);

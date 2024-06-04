@@ -854,7 +854,7 @@ namespace Mono.Cecil.Cil {
 		ISymbolWriterProvider GetWriterProvider ();
 		bool ProcessDebugHeader (ImageDebugHeader header);
 		MethodDebugInformation Read (MethodDefinition method);
-		void Read (TypeDefinition type);
+		Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider);
 	}
 
 	public interface ISymbolReaderProvider {
@@ -1117,7 +1117,7 @@ namespace Mono.Cecil.Cil {
 		ImageDebugHeader GetDebugHeader ();
 		void Write (MethodDebugInformation info);
 		void Write ();
-		void Write (TypeDefinition type);
+		void Write (ICustomDebugInformationProvider provider);
 	}
 
 	public interface ISymbolWriterProvider {

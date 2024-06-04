@@ -265,7 +265,7 @@ namespace Mono.Cecil.Pdb {
 			writer.Close ();
 		}
 
-		public void Write (TypeDefinition type)
+		public void Write (ICustomDebugInformationProvider provider)
 		{
 		}
 

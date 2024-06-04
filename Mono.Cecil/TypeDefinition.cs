@@ -296,7 +296,7 @@ namespace Mono.Cecil {
 					module.Read (this, (provider, reader) => {
 						var symbol_reader = reader.module.symbol_reader;
 						if (symbol_reader != null)
-							symbol_reader.Read (provider);
+							custom_infos = symbol_reader.Read (provider);
 					});
 
 				return !custom_infos.IsNullOrEmpty ();
@@ -312,7 +312,7 @@ namespace Mono.Cecil {
 					module.Read (this, (provider, reader) => {
 						var symbol_reader = reader.module.symbol_reader;
 						if (symbol_reader != null)
-							symbol_reader.Read (provider);
+							custom_infos = symbol_reader.Read (provider);
 					});
 
 				Interlocked.CompareExchange (ref custom_infos, new Collection<CustomDebugInformation> (), null);

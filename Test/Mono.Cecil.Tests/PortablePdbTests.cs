@@ -750,9 +750,9 @@ class Program
 				symbol_writer.Write ();
 			}
 
-			public void Write (TypeDefinition type)
+			public void Write (ICustomDebugInformationProvider provider)
 			{
-				symbol_writer.Write (type);
+				symbol_writer.Write (provider);
 			}
 
 			public void Dispose ()
