@@ -145,6 +145,11 @@ namespace Mono.Cecil.Cil {
 			method_info.kickoff_method = debug_reader.ReadStateMachineKickoffMethod (method_info.method);
 		}
 
+		public void Read (TypeDefinition type)
+		{
+			type.custom_infos = debug_reader.GetCustomDebugInformation (type);
+		}
+
 		void ReadCustomDebugInformations (MethodDebugInformation info)
 		{
 			info.method.custom_infos = debug_reader.GetCustomDebugInformation (info.method);
@@ -219,6 +224,11 @@ namespace Mono.Cecil.Cil {
 		public MethodDebugInformation Read (MethodDefinition method)
 		{
 			return reader.Read (method);
+		}
+
+		public void Read (TypeDefinition type)
+		{
+			reader.Read (type);
 		}
 
 		public void Dispose ()
@@ -317,6 +327,11 @@ namespace Mono.Cecil.Cil {
 				var buffer = new byte [8192];
 				CryptoService.CopyStreamChunk (writer.BaseStream, final_stream.value, buffer, (int)writer.BaseStream.Length);
 			}
+		}
+
+		public void Write (TypeDefinition type)
+		{
+			pdb_metadata.AddCustomDebugInformations (type);
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
@@ -517,6 +532,11 @@ namespace Mono.Cecil.Cil {
 		public void Write (MethodDebugInformation info)
 		{
 			writer.Write (info);
+		}
+
+		public void Write (TypeDefinition type)
+		{
+			writer.Write (type);
 		}
 
 		public ImageDebugHeader GetDebugHeader ()

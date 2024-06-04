@@ -355,6 +355,10 @@ namespace Mono.Cecil.Pdb {
 			return document;
 		}
 
+		public void Read (TypeDefinition type)
+		{
+		}
+
 		public void Dispose ()
 		{
 			pdb_file.Dispose ();

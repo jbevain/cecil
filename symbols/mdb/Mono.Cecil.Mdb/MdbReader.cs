@@ -186,6 +186,10 @@ namespace Mono.Cecil.Mdb {
 			};
 		}
 
+		public void Read (TypeDefinition type)
+		{
+		}
+
 		public void Dispose ()
 		{
 			symbol_file.Dispose ();

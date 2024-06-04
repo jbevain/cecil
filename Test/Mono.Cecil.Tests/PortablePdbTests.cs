@@ -646,6 +646,26 @@ class Program
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
+		[Test]
+		public void TypeDefinitionDebugInformation ()
+		{
+			TestModule ("TypeDefinitionDebugInformation.dll", module => {
+				var enum_type = module.GetType ("TypeDefinitionDebugInformation.Enum");
+				Assert.IsTrue (enum_type.HasCustomDebugInformations);
+				var binary_custom_debug_info = enum_type.CustomDebugInformations.OfType<BinaryCustomDebugInformation> ().FirstOrDefault ();
+				Assert.IsNotNull (binary_custom_debug_info);
+				Assert.AreEqual (new Guid ("932E74BC-DBA9-4478-8D46-0F32A7BAB3D3"), binary_custom_debug_info.Identifier);
+				Assert.AreEqual (new byte [] { 0x1 }, binary_custom_debug_info.Data);
+
+				var interface_type = module.GetType ("TypeDefinitionDebugInformation.Interface");
+				Assert.IsTrue (interface_type.HasCustomDebugInformations);
+				binary_custom_debug_info = interface_type.CustomDebugInformations.OfType<BinaryCustomDebugInformation> ().FirstOrDefault ();
+				Assert.IsNotNull (binary_custom_debug_info);
+				Assert.AreEqual (new Guid ("932E74BC-DBA9-4478-8D46-0F32A7BAB3D3"), binary_custom_debug_info.Identifier);
+				Assert.AreEqual (new byte [] { 0x1 }, binary_custom_debug_info.Data);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
 		public sealed class SymbolWriterProvider : ISymbolWriterProvider {
 
 			readonly DefaultSymbolWriterProvider writer_provider = new DefaultSymbolWriterProvider ();
@@ -728,6 +748,11 @@ class Program
 			public void Write ()
 			{
 				symbol_writer.Write ();
+			}
+
+			public void Write (TypeDefinition type)
+			{
+				symbol_writer.Write (type);
 			}
 
 			public void Dispose ()
