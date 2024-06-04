@@ -292,32 +292,12 @@ namespace Mono.Cecil {
 				if (custom_infos != null)
 					return custom_infos.Count > 0;
 
-				if (module.HasImage ())
-					module.Read (this, (provider, reader) => {
-						var symbol_reader = reader.module.symbol_reader;
-						if (symbol_reader != null)
-							custom_infos = symbol_reader.Read (provider);
-					});
-
-				return !custom_infos.IsNullOrEmpty ();
+				return this.GetHasCustomDebugInformations (ref custom_infos, Module);
 			}
 		}
 
 		public Collection<CustomDebugInformation> CustomDebugInformations {
-			get {
-				if (custom_infos != null)
-					return custom_infos;
-
-				if (module.HasImage ())
-					module.Read (this, (provider, reader) => {
-						var symbol_reader = reader.module.symbol_reader;
-						if (symbol_reader != null)
-							custom_infos = symbol_reader.Read (provider);
-					});
-
-				Interlocked.CompareExchange (ref custom_infos, new Collection<CustomDebugInformation> (), null);
-				return custom_infos;
-			}
+			get { return custom_infos ?? (this.GetCustomDebugInformations (ref custom_infos, module)); }
 		}
 
 		#region TypeAttributes

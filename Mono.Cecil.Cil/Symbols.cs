@@ -1226,5 +1226,38 @@ namespace Mono.Cecil {
 				stream.Position = position;
 			}
 		}
+
+		public static bool GetHasCustomDebugInformations (
+			this ICustomDebugInformationProvider self,
+			ref Collection<CustomDebugInformation> collection,
+			ModuleDefinition module)
+		{
+			if (module.HasImage ())
+				module.Read (ref collection, self, (provider, reader) => {
+					var symbol_reader = reader.module.symbol_reader;
+					if (symbol_reader != null)
+						return symbol_reader.Read (provider);
+					return null;
+				});
+
+			return !collection.IsNullOrEmpty ();
+		}
+
+		public static Collection<CustomDebugInformation> GetCustomDebugInformations (
+			this ICustomDebugInformationProvider self,
+			ref Collection<CustomDebugInformation> collection,
+			ModuleDefinition module)
+		{
+			if (module.HasImage ())
+				module.Read (ref collection, self, (provider, reader) => {
+					var symbol_reader = reader.module.symbol_reader;
+					if (symbol_reader != null)
+						return symbol_reader.Read (self);
+					return null;
+				});
+
+			Interlocked.CompareExchange (ref collection, new Collection<CustomDebugInformation> (), null);
+			return collection;
+		}
 	}
 }

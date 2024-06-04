@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using Mono.Collections.Generic;
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
 
@@ -145,7 +146,7 @@ namespace Mono.Cecil.Cil {
 			method_info.kickoff_method = debug_reader.ReadStateMachineKickoffMethod (method_info.method);
 		}
 
-		public Collections.Generic.Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
 		{
 			return debug_reader.GetCustomDebugInformation (provider);
 		}
@@ -226,7 +227,7 @@ namespace Mono.Cecil.Cil {
 			return reader.Read (method);
 		}
 
-		public Collections.Generic.Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
 		{
 			return reader.Read (provider);
 		}
