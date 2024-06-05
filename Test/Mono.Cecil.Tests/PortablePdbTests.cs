@@ -1172,6 +1172,8 @@ class Program
 			var cv = Mixin.GetCodeViewEntry (header);
 			Assert.IsNotNull (cv);
 
+			// Sanity check that the CodeView debug directory entry has the expected signature:
+			// https://github.com/dotnet/runtime/blob/main/docs/design/specs/PE-COFF.md#codeview-debug-directory-entry-type-2
 			CollectionAssert.AreEqual (new byte [] { 0x52, 0x53, 0x44, 0x53 }, cv.Data.Take (4));
 
 			pdbPath = Encoding.UTF8.GetString (cv.Data, 24, cv.Data.Length - 25);
