@@ -321,7 +321,10 @@ namespace Mono.Cecil.Cil {
 
 		string GetPdbPath ()
 		{
-			var debugHeader = module.Image.DebugHeader;
+			if (!module.HasDebugHeader)
+				return string.Empty;
+
+			var debugHeader = module.GetDebugHeader ();
 			foreach (var entry in debugHeader.Entries) {
 				var data = entry.Data;
 				// Pdb path is NUL-terminated path at offset 24.
