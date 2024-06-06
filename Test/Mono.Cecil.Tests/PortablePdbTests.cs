@@ -672,6 +672,7 @@ class Program
 			using (var module = GetResourceModule ("TypeDefinitionDebugInformation.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
 				var enum_type = module.GetType ("TypeDefinitionDebugInformation.Enum");
 				var binary_custom_debug_info = enum_type.CustomDebugInformations.OfType<BinaryCustomDebugInformation> ().FirstOrDefault ();
+				Assert.AreEqual (new byte [] { 0x1 }, binary_custom_debug_info.Data);
 				binary_custom_debug_info.Data = new byte [] { 0x2 };
 
 				var outputModule = RoundtripModule (module, RoundtripType.None);
