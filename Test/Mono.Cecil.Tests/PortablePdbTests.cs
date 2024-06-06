@@ -666,6 +666,22 @@ class Program
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
+		[Test]
+		public void ModifyTypeDefinitionDebugInformation ()
+		{
+			using (var module = GetResourceModule ("TypeDefinitionDebugInformation.dll", new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () })) {
+				var enum_type = module.GetType ("TypeDefinitionDebugInformation.Enum");
+				var binary_custom_debug_info = enum_type.CustomDebugInformations.OfType<BinaryCustomDebugInformation> ().FirstOrDefault ();
+				binary_custom_debug_info.Data = new byte [] { 0x2 };
+
+				var outputModule = RoundtripModule (module, RoundtripType.None);
+				enum_type = outputModule.GetType ("TypeDefinitionDebugInformation.Enum");
+				binary_custom_debug_info = enum_type.CustomDebugInformations.OfType<BinaryCustomDebugInformation> ().FirstOrDefault ();
+				Assert.IsNotNull (binary_custom_debug_info);
+				Assert.AreEqual (new byte [] { 0x2 }, binary_custom_debug_info.Data);
+			}
+		}
+
 		public sealed class SymbolWriterProvider : ISymbolWriterProvider {
 
 			readonly DefaultSymbolWriterProvider writer_provider = new DefaultSymbolWriterProvider ();

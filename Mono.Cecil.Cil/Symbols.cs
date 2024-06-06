@@ -1232,13 +1232,14 @@ namespace Mono.Cecil {
 			ref Collection<CustomDebugInformation> collection,
 			ModuleDefinition module)
 		{
-			if (module.HasImage ())
-				module.Read (ref collection, self, (provider, reader) => {
+			if (module.HasImage ()) {
+				module.Read (ref collection, self, static (provider, reader) => {
 					var symbol_reader = reader.module.symbol_reader;
 					if (symbol_reader != null)
 						return symbol_reader.Read (provider);
 					return null;
 				});
+			}
 
 			return !collection.IsNullOrEmpty ();
 		}
@@ -1248,13 +1249,14 @@ namespace Mono.Cecil {
 			ref Collection<CustomDebugInformation> collection,
 			ModuleDefinition module)
 		{
-			if (module.HasImage ())
-				module.Read (ref collection, self, (provider, reader) => {
+			if (module.HasImage ()) {
+				module.Read (ref collection, self, static (provider, reader) => {
 					var symbol_reader = reader.module.symbol_reader;
 					if (symbol_reader != null)
-						return symbol_reader.Read (self);
+						return symbol_reader.Read (provider);
 					return null;
 				});
+			}
 
 			Interlocked.CompareExchange (ref collection, new Collection<CustomDebugInformation> (), null);
 			return collection;
