@@ -209,7 +209,7 @@ namespace Mono.Cecil {
 
 		protected virtual AssemblyDefinition SearchDirectory (AssemblyNameReference name, IEnumerable<string> directories, ReaderParameters parameters)
 		{
-			var extensions = name.IsWindowsRuntime ? new [] { ".winmd", ".dll" } : new [] { ".exe", ".dll" };
+			var extensions = name.IsWindowsRuntime ? new [] { ".winmd", ".dll" } : new [] { ".dll", ".exe" };
 			foreach (var directory in directories) {
 				foreach (var extension in extensions) {
 					string file = Path.Combine (directory, name.Name + extension);
