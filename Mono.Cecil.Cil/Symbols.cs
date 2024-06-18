@@ -854,6 +854,7 @@ namespace Mono.Cecil.Cil {
 		ISymbolWriterProvider GetWriterProvider ();
 		bool ProcessDebugHeader (ImageDebugHeader header);
 		MethodDebugInformation Read (MethodDefinition method);
+		Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider);
 	}
 
 	public interface ISymbolReaderProvider {
@@ -1116,6 +1117,7 @@ namespace Mono.Cecil.Cil {
 		ImageDebugHeader GetDebugHeader ();
 		void Write (MethodDebugInformation info);
 		void Write ();
+		void Write (ICustomDebugInformationProvider provider);
 	}
 
 	public interface ISymbolWriterProvider {
@@ -1223,6 +1225,41 @@ namespace Mono.Cecil {
 			} finally {
 				stream.Position = position;
 			}
+		}
+
+		public static bool GetHasCustomDebugInformations (
+			this ICustomDebugInformationProvider self,
+			ref Collection<CustomDebugInformation> collection,
+			ModuleDefinition module)
+		{
+			if (module.HasImage ()) {
+				module.Read (ref collection, self, static (provider, reader) => {
+					var symbol_reader = reader.module.symbol_reader;
+					if (symbol_reader != null)
+						return symbol_reader.Read (provider);
+					return null;
+				});
+			}
+
+			return !collection.IsNullOrEmpty ();
+		}
+
+		public static Collection<CustomDebugInformation> GetCustomDebugInformations (
+			this ICustomDebugInformationProvider self,
+			ref Collection<CustomDebugInformation> collection,
+			ModuleDefinition module)
+		{
+			if (module.HasImage ()) {
+				module.Read (ref collection, self, static (provider, reader) => {
+					var symbol_reader = reader.module.symbol_reader;
+					if (symbol_reader != null)
+						return symbol_reader.Read (provider);
+					return null;
+				});
+			}
+
+			Interlocked.CompareExchange (ref collection, new Collection<CustomDebugInformation> (), null);
+			return collection;
 		}
 	}
 }

@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Mdb;
-using Mono.Cecil.Pdb;
 using NUnit.Framework;
 
 namespace Mono.Cecil.Tests {
@@ -499,12 +497,6 @@ namespace Mono.Cecil.Tests {
 			return methodBody;
 		}
 
-		public enum RoundtripType {
-			None,
-			Pdb,
-			PortablePdb
-		}
-
 		static MethodBody RoundtripMethodBody(MethodBody methodBody, RoundtripType roundtripType, bool forceUnresolvedScopes = false, bool reverseScopeOrder = false)
 		{
 			var newModule = RoundtripModule (methodBody.Method.Module, roundtripType);
@@ -539,48 +531,6 @@ namespace Mono.Cecil.Tests {
 
 			foreach (var subScope in scope.Scopes)
 				ReverseScopeOrder (subScope);
-		}
-
-		static ModuleDefinition RoundtripModule(ModuleDefinition module, RoundtripType roundtripType)
-		{
-			if (roundtripType == RoundtripType.None)
-				return module;
-
-			var file = Path.Combine (Path.GetTempPath (), "TestILProcessor.dll");
-			if (File.Exists (file))
-				File.Delete (file);
-
-			ISymbolWriterProvider symbolWriterProvider;
-			switch (roundtripType) {
-			case RoundtripType.Pdb when Platform.HasNativePdbSupport:
-				symbolWriterProvider = new PdbWriterProvider ();
-				break;
-			case RoundtripType.PortablePdb:
-			default:
-				symbolWriterProvider = new PortablePdbWriterProvider ();
-				break;
-			}
-
-			module.Write (file, new WriterParameters {
-				SymbolWriterProvider = symbolWriterProvider,
-			});
-			module.Dispose ();
-
-			ISymbolReaderProvider symbolReaderProvider;
-			switch (roundtripType) {
-			case RoundtripType.Pdb when Platform.HasNativePdbSupport:
-				symbolReaderProvider = new PdbReaderProvider ();
-				break;
-			case RoundtripType.PortablePdb:
-			default:
-				symbolReaderProvider = new PortablePdbReaderProvider ();
-				break;
-			}
-
-			return ModuleDefinition.ReadModule (file, new ReaderParameters {
-				SymbolReaderProvider = symbolReaderProvider,
-				InMemory = true
-			});
 		}
 	}
 }

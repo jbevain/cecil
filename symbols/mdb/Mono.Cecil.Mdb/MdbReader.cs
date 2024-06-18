@@ -186,6 +186,11 @@ namespace Mono.Cecil.Mdb {
 			};
 		}
 
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
+		{
+			return new Collection<CustomDebugInformation> ();
+		}
+
 		public void Dispose ()
 		{
 			symbol_file.Dispose ();

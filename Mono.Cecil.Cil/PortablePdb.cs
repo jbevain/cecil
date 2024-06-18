@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using Mono.Collections.Generic;
 using Mono.Cecil.Metadata;
 using Mono.Cecil.PE;
 
@@ -145,6 +146,11 @@ namespace Mono.Cecil.Cil {
 			method_info.kickoff_method = debug_reader.ReadStateMachineKickoffMethod (method_info.method);
 		}
 
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
+		{
+			return debug_reader.GetCustomDebugInformation (provider);
+		}
+
 		void ReadCustomDebugInformations (MethodDebugInformation info)
 		{
 			info.method.custom_infos = debug_reader.GetCustomDebugInformation (info.method);
@@ -219,6 +225,11 @@ namespace Mono.Cecil.Cil {
 		public MethodDebugInformation Read (MethodDefinition method)
 		{
 			return reader.Read (method);
+		}
+
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
+		{
+			return reader.Read (provider);
 		}
 
 		public void Dispose ()
@@ -317,6 +328,11 @@ namespace Mono.Cecil.Cil {
 				var buffer = new byte [8192];
 				CryptoService.CopyStreamChunk (writer.BaseStream, final_stream.value, buffer, (int)writer.BaseStream.Length);
 			}
+		}
+
+		public void Write (ICustomDebugInformationProvider provider)
+		{
+			pdb_metadata.AddCustomDebugInformations (provider);
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
@@ -517,6 +533,11 @@ namespace Mono.Cecil.Cil {
 		public void Write (MethodDebugInformation info)
 		{
 			writer.Write (info);
+		}
+
+		public void Write (ICustomDebugInformationProvider provider)
+		{
+			writer.Write (provider);
 		}
 
 		public ImageDebugHeader GetDebugHeader ()
