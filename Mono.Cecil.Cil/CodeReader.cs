@@ -92,7 +92,7 @@ namespace Mono.Cecil.Cil {
 			switch (flags & 0x3) {
 			case 0x2: // tiny
 				body.code_size = flags >> 2;
-				body.MaxStackSize = 8;
+				body.max_stack_size = 8;
 				ReadCode ();
 				break;
 			case 0x3: // fat
