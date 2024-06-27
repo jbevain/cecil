@@ -149,6 +149,23 @@ namespace Mono.Cecil.Tests {
 		}
 
 		[Test]
+		public void TypeForwarderCircularity ()
+		{
+			var resolver = new CustomResolver();
+			var parameters = new ReaderParameters { AssemblyResolver = resolver };
+			
+			var module1 = GetResourceModule("TypeForwarderLoop1.dll", parameters);
+			var module2 = GetResourceModule("TypeForwarderLoop2.dll", parameters);
+
+			resolver.Register(module1.Assembly);
+			resolver.Register(module2.Assembly);
+
+			var reference = new TypeReference("MyNamespace", "MyType", module1, AssemblyNameReference.Parse(module1.Assembly.FullName), false);
+
+			Assert.Throws<InvalidOperationException>(() => { _ = reference.Resolve(); });
+		}
+
+		[Test]
 		public void NestedTypeForwarder ()
 		{
 			var resolver = new CustomResolver ();
