@@ -26,6 +26,8 @@ namespace Mono.Cecil {
 
 	static class CryptoService {
 
+		static SHA1 CreateSHA1 () => new SHA1CryptoServiceProvider ();
+
 		public static byte [] GetPublicKey (WriterParameters parameters)
 		{
 			using (var rsa = parameters.CreateRSA ()) {
@@ -93,7 +95,7 @@ namespace Mono.Cecil {
 				+ (strong_name_directory.VirtualAddress - text.VirtualAddress));
 			var strong_name_length = (int) strong_name_directory.Size;
 
-			var sha1 = new SHA1Managed ();
+			var sha1 = CreateSHA1 ();
 			var buffer = new byte [buffer_size];
 			using (var crypto_stream = new CryptoStream (Stream.Null, sha1, CryptoStreamMode.Write)) {
 				stream.Seek (0, SeekOrigin.Begin);
@@ -131,7 +133,7 @@ namespace Mono.Cecil {
 		{
 			const int buffer_size = 8192;
 
-			var sha1 = new SHA1Managed ();
+			var sha1 = CreateSHA1 ();
 			var buffer = new byte [buffer_size];
 
 			using (var crypto_stream = new CryptoStream (Stream.Null, sha1, CryptoStreamMode.Write))
@@ -142,7 +144,7 @@ namespace Mono.Cecil {
 
 		public static byte [] ComputeHash (params ByteBuffer [] buffers)
 		{
-			var sha1 = new SHA1Managed ();
+			var sha1 = CreateSHA1 ();
 
 			using (var crypto_stream = new CryptoStream (Stream.Null, sha1, CryptoStreamMode.Write)) {
 				for (int i = 0; i < buffers.Length; i++) {
