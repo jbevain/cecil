@@ -30,6 +30,7 @@ namespace Mono.Cecil.Pdb
 
 		readonly ISymUnmanagedWriter2 writer;
 		readonly Collection<ISymUnmanagedDocumentWriter> documents;
+		bool closed = false;
 
 		public SymWriter ()
 		{
@@ -78,11 +79,14 @@ namespace Mono.Cecil.Pdb
 
 		public void Close ()
 		{
-			writer.Close ();
-			Marshal.ReleaseComObject (writer);
+			if( !closed ) {
+				closed = true;
+				writer.Close ();
+				Marshal.ReleaseComObject ( writer );
 
-			foreach (var document in documents)
-				Marshal.ReleaseComObject (document);
+				foreach( var document in documents )
+					Marshal.ReleaseComObject ( document );
+			}
 		}
 
 		public void CloseMethod ()
