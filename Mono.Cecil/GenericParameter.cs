@@ -150,6 +150,11 @@ namespace Mono.Cecil {
 			set { attributes = attributes.SetMaskedAttributes ((ushort) GenericParameterAttributes.VarianceMask, (ushort) GenericParameterAttributes.Contravariant, value); }
 		}
 
+		public bool HasNoSpecialConstraint {
+			get { return attributes.GetMaskedAttributes ((ushort) GenericParameterAttributes.SpecialConstraintMask, (ushort) GenericParameterAttributes.NoSpecialConstraint); }
+			set { attributes = attributes.SetMaskedAttributes ((ushort) GenericParameterAttributes.SpecialConstraintMask, (ushort) GenericParameterAttributes.NoSpecialConstraint, value); }
+		}
+
 		public bool HasReferenceTypeConstraint {
 			get { return attributes.GetAttributes ((ushort) GenericParameterAttributes.ReferenceTypeConstraint); }
 			set { attributes = attributes.SetAttributes ((ushort) GenericParameterAttributes.ReferenceTypeConstraint, value); }
@@ -163,6 +168,11 @@ namespace Mono.Cecil {
 		public bool HasDefaultConstructorConstraint {
 			get { return attributes.GetAttributes ((ushort) GenericParameterAttributes.DefaultConstructorConstraint); }
 			set { attributes = attributes.SetAttributes ((ushort) GenericParameterAttributes.DefaultConstructorConstraint, value); }
+		}
+
+		public bool AllowsByRefLike {
+			get { return attributes.GetAttributes ((ushort) GenericParameterAttributes.AllowByRefLike); }
+			set { attributes = attributes.SetAttributes ((ushort) GenericParameterAttributes.AllowByRefLike, value); }
 		}
 
 		#endregion
