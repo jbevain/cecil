@@ -261,7 +261,7 @@ namespace Mono.Cecil.PE {
 				// 0xffffffff for negative value
 				// 0x00000000 for non-negative
 
-			   int signMask = value >> 31;
+				int signMask = value >> 31;
 
 				if ((value & ~b6) == (signMask & ~b6)) {
 					int n = ((value & b6) << 1) | (signMask & 1);
@@ -311,6 +311,7 @@ namespace Mono.Cecil.PE {
 		// extracted from .net BCL
 		static uint RotateRight (uint value, int offset)
 			=> (value >> offset) | (value << (32 - offset));
+
 		static uint RotateLeft (uint value, int offset)
 			=> (value << offset) | (value >> (32 - offset));
 
