@@ -252,19 +252,81 @@ namespace Mono.Cecil.PE {
 
 		public void WriteCompressedInt32 (int value)
 		{
-			if (value >= 0) {
-				WriteCompressedUInt32 ((uint) (value << 1));
-				return;
+			// extracted from System.Reflection.Metadata
+			unchecked {
+				const int b6 = (1 << 6) - 1;
+				const int b13 = (1 << 13) - 1;
+				const int b28 = (1 << 28) - 1;
+
+				// 0xffffffff for negative value
+				// 0x00000000 for non-negative
+
+				int signMask = value >> 31;
+
+				if ((value & ~b6) == (signMask & ~b6)) {
+					int n = ((value & b6) << 1) | (signMask & 1);
+					WriteByte ((byte)n);
+				} else if ((value & ~b13) == (signMask & ~b13)) {
+					int n = ((value & b13) << 1) | (signMask & 1);
+					ushort val = (ushort)(0x8000 | n);
+					WriteUInt16 (BitConverter.IsLittleEndian ? ReverseEndianness (val) : val);
+				} else if ((value & ~b28) == (signMask & ~b28)) {
+					int n = ((value & b28) << 1) | (signMask & 1);
+					uint val = 0xc0000000 | (uint)n;
+					WriteUInt32 (BitConverter.IsLittleEndian ? ReverseEndianness (val) : val);
+				} else {
+					throw new ArgumentOutOfRangeException ("value", "valid range is -2^28 to 2^28 -1");
+				}
 			}
+		}
 
-			if (value > -0x40)
-				value = 0x40 + value;
-			else if (value >= -0x2000)
-				value = 0x2000 + value;
-			else if (value >= -0x20000000)
-				value = 0x20000000 + value;
+		static uint ReverseEndianness (uint value)
+		{
+			// extracted from .net BCL
 
-			WriteCompressedUInt32 ((uint) ((value << 1) | 1));
+			// This takes advantage of the fact that the JIT can detect
+			// ROL32 / ROR32 patterns and output the correct intrinsic.
+			//
+			// Input: value = [ ww xx yy zz ]
+			//
+			// First line generates : [ ww xx yy zz ]
+			//                      & [ 00 FF 00 FF ]
+			//                      = [ 00 xx 00 zz ]
+			//             ROR32(8) = [ zz 00 xx 00 ]
+			//
+			// Second line generates: [ ww xx yy zz ]
+			//                      & [ FF 00 FF 00 ]
+			//                      = [ ww 00 yy 00 ]
+			//             ROL32(8) = [ 00 yy 00 ww ]
+			//
+			//                (sum) = [ zz yy xx ww ]
+			//
+			// Testing shows that throughput increases if the AND
+			// is performed before the ROL / ROR.
+
+			return RotateRight (value & 0x00FF00FFu, 8) // xx zz
+				+ RotateLeft (value & 0xFF00FF00u, 8); // ww yy
+		}
+
+		// extracted from .net BCL
+		static uint RotateRight (uint value, int offset)
+			=> (value >> offset) | (value << (32 - offset));
+
+		static uint RotateLeft (uint value, int offset)
+			=> (value << offset) | (value >> (32 - offset));
+
+		static ushort ReverseEndianness (ushort value)
+		{
+			// extracted from .net BCL
+
+			// Don't need to AND with 0xFF00 or 0x00FF since the final
+			// cast back to ushort will clear out all bits above [ 15 .. 00 ].
+			// This is normally implemented via "movzx eax, ax" on the return.
+			// Alternatively, the compiler could elide the movzx instruction
+			// entirely if it knows the caller is only going to access "ax"
+			// instead of "eax" / "rax" when the function returns.
+
+			return (ushort)((value >> 8) + (value << 8));
 		}
 
 		public void WriteBytes (byte [] bytes)
