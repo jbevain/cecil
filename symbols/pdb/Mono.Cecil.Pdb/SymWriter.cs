@@ -79,14 +79,15 @@ namespace Mono.Cecil.Pdb
 
 		public void Close ()
 		{
-			if( !closed ) {
-				closed = true;
-				writer.Close ();
-				Marshal.ReleaseComObject ( writer );
+			if (closed)
+				return;
 
-				foreach( var document in documents )
-					Marshal.ReleaseComObject ( document );
-			}
+			closed = true;
+			writer.Close ();
+			Marshal.ReleaseComObject (writer);
+
+			foreach (var document in documents)
+				Marshal.ReleaseComObject (document);
 		}
 
 		public void CloseMethod ()
