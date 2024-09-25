@@ -355,6 +355,11 @@ namespace Mono.Cecil.Pdb {
 			return document;
 		}
 
+		public Collection<CustomDebugInformation> Read (ICustomDebugInformationProvider provider)
+		{
+			return new Collection<CustomDebugInformation> ();
+		}
+
 		public void Dispose ()
 		{
 			pdb_file.Dispose ();

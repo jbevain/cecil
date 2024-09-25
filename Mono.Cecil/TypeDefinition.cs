@@ -10,12 +10,13 @@
 
 using System;
 using System.Threading;
+using Mono.Cecil.Cil;
 using Mono.Cecil.Metadata;
 using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
-	public sealed class TypeDefinition : TypeReference, IMemberDefinition, ISecurityDeclarationProvider {
+	public sealed class TypeDefinition : TypeReference, IMemberDefinition, ISecurityDeclarationProvider, ICustomDebugInformationProvider {
 
 		uint attributes;
 		TypeReference base_type;
@@ -33,6 +34,8 @@ namespace Mono.Cecil {
 		Collection<PropertyDefinition> properties;
 		Collection<CustomAttribute> custom_attributes;
 		Collection<SecurityDeclaration> security_declarations;
+
+		internal Collection<CustomDebugInformation> custom_infos;
 
 		public TypeAttributes Attributes {
 			get { return (TypeAttributes) attributes; }
@@ -282,6 +285,19 @@ namespace Mono.Cecil {
 
 		public override Collection<GenericParameter> GenericParameters {
 			get { return generic_parameters ?? (this.GetGenericParameters (ref generic_parameters, Module)); }
+		}
+
+		public bool HasCustomDebugInformations {
+			get {
+				if (custom_infos != null)
+					return custom_infos.Count > 0;
+
+				return this.GetHasCustomDebugInformations (ref custom_infos, Module);
+			}
+		}
+
+		public Collection<CustomDebugInformation> CustomDebugInformations {
+			get { return custom_infos ?? (this.GetCustomDebugInformations (ref custom_infos, module)); }
 		}
 
 		#region TypeAttributes
