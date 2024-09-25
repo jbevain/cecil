@@ -1772,6 +1772,10 @@ namespace Mono.Cecil {
 				sequence,
 				GetStringIndex (parameter.Name)));
 
+			// fixbug: update custom attributes and others before update token
+			_ = parameter.CustomAttributes;
+			var hasMarshalInfo = parameter.HasMarshalInfo;
+			
 			parameter.token = new MetadataToken (TokenType.Param, param_rid++);
 
 			if (parameter.HasCustomAttributes)
@@ -1780,7 +1784,7 @@ namespace Mono.Cecil {
 			if (parameter.HasConstant)
 				AddConstant (parameter, parameter.ParameterType);
 
-			if (parameter.HasMarshalInfo)
+			if (hasMarshalInfo)
 				AddMarshalInfo (parameter);
 		}
 
