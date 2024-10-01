@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 using SR = System.Reflection;
 
@@ -252,6 +253,7 @@ namespace Mono.Cecil {
 		ModuleAttributes attributes;
 		ModuleCharacteristics characteristics;
 		Guid mvid;
+		internal int MvidPosition;
 
 		internal ushort linker_version = 8;
 		internal ushort subsystem_major = 4;
@@ -1180,6 +1182,30 @@ namespace Mono.Cecil {
 			Mixin.CheckParameters (parameters);
 
 			ModuleWriter.WriteModule (this, Disposable.NotOwned (stream), parameters);
+		}
+	}
+
+	public static class ModuleDefinitionExtensions {
+
+		// See: https://groups.google.com/forum/#!topic/mono-cecil/AGq0LfBdqjo
+		public static byte [] GetBuildIndependentHash (this ModuleDefinition moduleDefinition, HashAlgorithm hashAlgorithm)
+		{
+			var buffer = File.ReadAllBytes (moduleDefinition.Image.FileName);
+
+			// Overwrite parts of the assembly file content byte array (only in memory of course)
+			// that change on every build with an empty byte array, and thus make it comparable 
+
+			Buffer.BlockCopy (new byte [sizeof (uint)], 0, buffer, moduleDefinition.Image.TimestampPosition, sizeof(uint));
+			Buffer.BlockCopy (new byte [sizeof (uint)], 0, buffer, moduleDefinition.Image.FileChecksumPosition, sizeof(uint));
+			Buffer.BlockCopy (new byte [moduleDefinition.Image.GuidHeap.IndexSize], 0, buffer, moduleDefinition.MvidPosition, moduleDefinition.Image.GuidHeap.IndexSize);
+
+			return hashAlgorithm.ComputeHash (buffer);
+		}
+
+		internal static byte [] GetBuildDependentHash (this ModuleDefinition moduleDefinition, HashAlgorithm hashAlgorithm)
+		{
+			var buffer = File.ReadAllBytes (moduleDefinition.Image.FileName);
+			return hashAlgorithm.ComputeHash (buffer);
 		}
 	}
 

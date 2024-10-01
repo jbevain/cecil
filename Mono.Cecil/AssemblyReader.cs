@@ -594,6 +594,7 @@ namespace Mono.Cecil {
 			Advance (2); // Generation
 
 			module.Name = ReadString ();
+			module.MvidPosition = position;
 			module.Mvid = ReadGuid ();
 
 			return module;
