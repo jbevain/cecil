@@ -23,6 +23,7 @@ namespace Mono.Cecil.PE {
 
 		public Disposable<Stream> Stream;
 		public string FileName;
+		public int FileChecksumPosition;
 
 		public ModuleKind Kind;
 		public uint Characteristics;
@@ -41,6 +42,7 @@ namespace Mono.Cecil.PE {
 
 		public uint EntryPointToken;
 		public uint Timestamp;
+		public int TimestampPosition;
 		public ModuleAttributes Attributes;
 
 		public DataDirectory Win32Resources;

@@ -73,6 +73,7 @@ namespace Mono.Cecil.PE {
 			ushort sections = ReadUInt16 ();
 
 			// TimeDateStamp		4
+			image.TimestampPosition = (int)BaseStream.Position;
 			image.Timestamp = ReadUInt32 ();
 			// PointerToSymbolTable	4
 			// NumberOfSymbols		4
@@ -132,7 +133,7 @@ namespace Mono.Cecil.PE {
 
 			// ImageBase			4 || 8
 			// SectionAlignment		4
-			// FileAlignement		4
+			// FileAlignment		4
 			// OSMajor				2
 			// OSMinor				2
 			// UserMajor			2
@@ -149,6 +150,7 @@ namespace Mono.Cecil.PE {
 			// HeaderSize			4
 			// FileChecksum			4
 			Advance (16);
+			image.FileChecksumPosition = (int)(BaseStream.Position - 4);
 
 			// SubSystem			2
 			subsystem = ReadUInt16 ();
