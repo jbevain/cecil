@@ -173,6 +173,10 @@ namespace Mono.Cecil.Mdb {
 			// after the entire image of the assembly is written (since it's computed from the hash of that)
 		}
 
+		public void Write (ICustomDebugInformationProvider provider)
+		{
+		}
+
 		public void Dispose ()
 		{
 			writer.WriteSymbolFile (module.Mvid);

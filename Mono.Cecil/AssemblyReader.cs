@@ -404,6 +404,7 @@ namespace Mono.Cecil {
 		{
 			for (int i = 0; i < types.Count; i++) {
 				var type = types [i];
+				type.custom_infos = symbol_reader.Read (type);
 
 				if (type.HasNestedTypes)
 					ReadTypesSymbols (type.NestedTypes, symbol_reader);
@@ -3158,6 +3159,17 @@ namespace Mono.Cecil {
 				metadata.CustomDebugInformations.TryGetValue (token, out infos);
 				metadata.CustomDebugInformations [token] = infos.Add (info);
 			}
+		}
+
+		public bool HasCustomDebugInformation (ICustomDebugInformationProvider provider)
+		{
+			InitializeCustomDebugInformations ();
+
+			Row<Guid, uint, uint> [] rows;
+			if (!metadata.CustomDebugInformations.TryGetValue (provider.MetadataToken, out rows))
+				return false;
+
+			return rows.Length > 0;
 		}
 
 		public Collection<CustomDebugInformation> GetCustomDebugInformation (ICustomDebugInformationProvider provider)
