@@ -214,6 +214,20 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (0, module.Image.SubSystemMinor);
 			});
 		}
+		
+		[Test]
+		public void ObfuscatedAssembly ()
+		{
+			using (var image = GetResourceImage ("libhello_obfuscated.dll")) {
+				Assert.AreEqual (3, image.DebugHeader.Entries.Length);
+				Assert.AreEqual (67, image.DebugHeader.Entries[0].Data.Length);
+				Assert.AreEqual (0, image.DebugHeader.Entries[1].Data.Length);
+				Assert.AreEqual (0, image.DebugHeader.Entries[2].Data.Length);
+			}
+
+			
+		}
+
 
 		[Test]
 		public void LocallyScopedConstantArray ()
