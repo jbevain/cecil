@@ -22,6 +22,7 @@ namespace Mono.Cecil {
 		int identifier;
 		ExportedType declaring_type;
 		internal MetadataToken token;
+		bool reentrancyGuard;
 
 		public string Namespace {
 			get { return @namespace; }
@@ -224,8 +225,6 @@ namespace Mono.Cecil {
 		{
 			return FullName;
 		}
-
-		private bool reentrancyGuard = false;
 
 		public TypeDefinition Resolve ()
 		{
