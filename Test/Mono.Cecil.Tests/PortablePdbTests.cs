@@ -16,6 +16,19 @@ namespace Mono.Cecil.Tests {
 	public class PortablePdbTests : BaseTestFixture {
 
 		[Test]
+		public void Documents ()
+		{
+		    TestModule ("DocumentsTestTarget.dll", module => {
+		        var documents = module.Documents;
+		        Assert.AreEqual(1, documents.Count);
+				var document = documents[0];
+				Assert.IsNotNull (document);
+				Assert.AreEqual ("/_/DocumentsTestTarget.cs", document.Url);
+		        Assert.AreEqual (DocumentLanguage.CSharp, document.Language);
+		    }, symbolReaderProvider: typeof(PortablePdbReaderProvider), symbolWriterProvider: typeof(PortablePdbWriterProvider));
+		}
+
+		[Test]
 		public void SequencePoints ()
 		{
 			TestPortablePdbModule (module => {

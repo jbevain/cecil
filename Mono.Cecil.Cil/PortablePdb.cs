@@ -119,6 +119,7 @@ namespace Mono.Cecil.Cil {
 		void ReadModule ()
 		{
 			module.custom_infos = debug_reader.GetCustomDebugInformation (module);
+			module.documents = debug_reader.GetDocuments ();
 		}
 
 		public MethodDebugInformation Read (MethodDefinition method)
@@ -295,6 +296,7 @@ namespace Mono.Cecil.Cil {
 				this.pdb_metadata.metadata_builder = this.module_metadata;
 
 			pdb_metadata.AddCustomDebugInformations (module);
+			pdb_metadata.AddDocuments (module);
 		}
 
 		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module, ImageWriter writer, Disposable<Stream> final_stream)
