@@ -2834,6 +2834,13 @@ namespace Mono.Cecil {
 			}
 		}
 
+		internal Collection<Document> GetDocuments ()
+		{
+			InitializeDocuments ();
+
+			return new Collection<Document> (metadata.Documents);
+		}
+
 		public Collection<SequencePoint> ReadSequencePoints (MethodDefinition method)
 		{
 			InitializeDocuments ();

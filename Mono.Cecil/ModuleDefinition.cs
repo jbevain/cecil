@@ -273,6 +273,7 @@ namespace Mono.Cecil {
 		TypeDefinitionCollection types;
 
 		internal Collection<CustomDebugInformation> custom_infos;
+		internal Collection<Document> documents;
 
 		internal MetadataBuilder metadata_builder;
 
@@ -569,6 +570,21 @@ namespace Mono.Cecil {
 					Interlocked.CompareExchange (ref custom_infos, new Collection<CustomDebugInformation> (), null);
 
 				return custom_infos;
+			}
+		}
+
+		internal bool HasDocuments {
+			get {
+				return documents != null && documents.Count > 0;
+			}
+		}
+
+		internal Collection<Document> Documents {
+			get {
+				if (documents == null)
+					Interlocked.CompareExchange (ref documents, new Collection<Document> (), null);
+
+				return documents;
 			}
 		}
 

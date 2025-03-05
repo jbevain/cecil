@@ -2013,6 +2013,17 @@ namespace Mono.Cecil {
 			}
 		}
 
+		internal void AddDocuments (ModuleDefinition module)
+		{
+			if (module.HasDocuments)
+			{
+				var documents = module.Documents;
+				for (int i = 0; i < documents.Count; i++) {
+					GetDocumentToken (documents[i]);
+				}
+			}
+		}
+
 		MetadataToken GetMemberRefToken (MemberReference member)
 		{
 			var row = CreateMemberRefRow (member);
