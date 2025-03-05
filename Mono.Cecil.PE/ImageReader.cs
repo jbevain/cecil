@@ -351,8 +351,10 @@ namespace Mono.Cecil.PE {
 					AddressOfRawData = ReadInt32 (),
 					PointerToRawData = ReadInt32 (),
 				};
-
-				if (directory.PointerToRawData == 0 || directory.SizeOfData < 0) {
+				
+				// directory.Characteristics  <-- has to be 0 (https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#the-debug-section)
+				// if this is not the case, an obfuscation of the file could be the case resulting in wrong SizeOfData 
+				if (directory.PointerToRawData == 0 || directory.Characteristics != 0 || directory.SizeOfData < 0) {
 					entries [i] = new ImageDebugHeaderEntry (directory, Empty<byte>.Array);
 					continue;
 				}
