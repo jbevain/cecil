@@ -22,6 +22,7 @@ namespace Mono.Cecil {
 		int identifier;
 		ExportedType declaring_type;
 		internal MetadataToken token;
+		bool reentrancyGuard;
 
 		public string Namespace {
 			get { return @namespace; }
@@ -227,7 +228,17 @@ namespace Mono.Cecil {
 
 		public TypeDefinition Resolve ()
 		{
-			return module.Resolve (CreateReference ());
+			if (reentrancyGuard) {
+				throw new InvalidOperationException ($"Circularity when resolving exported type: '{this}'");
+			}
+
+			reentrancyGuard = true;
+			try {
+				return module.Resolve (CreateReference ());
+			}
+			finally {
+				reentrancyGuard = false;
+			}
 		}
 
 		internal TypeReference CreateReference ()
