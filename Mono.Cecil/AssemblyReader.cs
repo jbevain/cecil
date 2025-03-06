@@ -988,13 +988,19 @@ namespace Mono.Cecil {
 			uint next_index;
 			var current_table = image.TableHeap [current];
 
+			var last_index = image.TableHeap [target].Length + 1;
+
 			if (current_index == current_table.Length)
-				next_index = image.TableHeap [target].Length + 1;
+				next_index = last_index;
 			else {
 				var position = this.position;
 				this.position += (int) (current_table.RowSize - image.GetTableIndexSize (target));
 				next_index = ReadTableIndex (target);
 				this.position = position;
+			}
+
+			if (next_index == 0 && current_index + 1 == current_table.Length && image.TableHeap [target].Length == 0xffff) {
+				next_index = last_index;
 			}
 
 			list.Start = start;
