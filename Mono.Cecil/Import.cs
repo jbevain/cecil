@@ -506,6 +506,16 @@ namespace Mono.Cecil {
 			if (type.IsTypeSpecification ())
 				return ImportTypeSpecification (type, context);
 
+			// If a type's scope is the module definition then we don't need to create a new type reference.  We can reuse the existing one, which is likely the TypeDefinition.
+			// Reusing the type avoid creating an unnecessary entry in the type reference table
+			if (type.Scope == module)
+				return type;
+
+			// This case is more contrived, but it's the same as the above.  If the type's scope matches the current modules assembly then we don't need to create a new type reference.
+			// Nor do we need to import the scope because the scope is the current modules assembly.
+			if (type.Scope is AssemblyNameReference asmName && Mixin.Equals (asmName, module.assembly.Name))
+				return type;
+
 			var reference = new TypeReference (
 				type.Namespace,
 				type.Name,
@@ -535,6 +545,8 @@ namespace Mono.Cecil {
 			case MetadataScopeType.AssemblyNameReference:
 				return ImportReference ((AssemblyNameReference) scope);
 			case MetadataScopeType.ModuleDefinition:
+				// This change to avoid self reference has been superceded by the check in ImportType to avoid creating the new TypeReference in the first place.
+				// However, given that ImportScope is protected people could be relying on this behavior so I'm not going to remove it
 				if (scope == module) return scope;
 				return ImportReference (((ModuleDefinition) scope).Assembly.Name);
 			case MetadataScopeType.ModuleReference:
@@ -809,7 +821,7 @@ namespace Mono.Cecil {
 			return a.Equals (b);
 		}
 
-		static bool Equals (AssemblyNameReference a, AssemblyNameReference b)
+		public static bool Equals (AssemblyNameReference a, AssemblyNameReference b)
 		{
 			if (ReferenceEquals (a, b))
 				return true;
