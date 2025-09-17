@@ -19,10 +19,11 @@ namespace Mono.Cecil {
 		Covariant		= 0x0001,
 		Contravariant	= 0x0002,
 
-		SpecialConstraintMask			= 0x001c,
+		SpecialConstraintMask			= 0x003c,
+		NoSpecialConstraint             = 0x0000,
 		ReferenceTypeConstraint			= 0x0004,
 		NotNullableValueTypeConstraint	= 0x0008,
 		DefaultConstructorConstraint	= 0x0010,
-		AllowByRefLikeConstraint = 0x0020,
+		AllowByRefLike					= 0x0020,
 	}
 }
