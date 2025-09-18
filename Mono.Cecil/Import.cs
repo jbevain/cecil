@@ -536,12 +536,31 @@ namespace Mono.Cecil {
 				return ImportReference ((AssemblyNameReference) scope);
 			case MetadataScopeType.ModuleDefinition:
 				if (scope == module) return scope;
-				return ImportReference (((ModuleDefinition) scope).Assembly.Name);
+				var moduleDefinition = (ModuleDefinition) scope;
+				if (moduleDefinition.Assembly == null)
+					return ImportReference (moduleDefinition);
+				else
+					return ImportReference (moduleDefinition.Assembly.Name);
 			case MetadataScopeType.ModuleReference:
-				throw new NotImplementedException ();
+					return ImportReference ((ModuleReference) scope);
 			}
 
 			throw new NotSupportedException ();
+		}
+
+		public virtual ModuleReference ImportReference (ModuleReference name)
+		{
+			Mixin.CheckName (name);
+
+			ModuleReference reference;
+			if (module.TryGetModuleReference (name, out reference))
+				return reference;
+
+			reference = new ModuleReference (name.Name);
+
+			module.ModuleReferences.Add (reference);
+
+			return reference;
 		}
 
 		public virtual AssemblyNameReference ImportReference (AssemblyNameReference name)
@@ -786,6 +805,23 @@ namespace Mono.Cecil {
 			return false;
 		}
 
+		public static bool TryGetModuleReference (this ModuleDefinition module, ModuleReference name_reference, out ModuleReference module_reference)
+		{
+			var references = module.ModuleReferences;
+
+			for (int i = 0; i < references.Count; i++) {
+				var reference = references [i];
+				if (!Equals (name_reference, reference))
+					continue;
+
+				module_reference = reference;
+				return true;
+			}
+
+			module_reference = null;
+			return false;
+		}
+
 		static bool Equals (byte [] a, byte [] b)
 		{
 			if (ReferenceEquals (a, b))
@@ -820,6 +856,15 @@ namespace Mono.Cecil {
 			if (a.Culture != b.Culture)
 				return false;
 			if (!Equals (a.PublicKeyToken, b.PublicKeyToken))
+				return false;
+			return true;
+		}
+
+		static bool Equals (ModuleReference a, ModuleReference b)
+		{
+			if (ReferenceEquals (a, b))
+				return true;
+			if (a.Name != b.Name)
 				return false;
 			return true;
 		}
