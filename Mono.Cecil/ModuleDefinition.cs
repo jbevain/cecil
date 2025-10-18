@@ -1305,11 +1305,14 @@ namespace Mono.Cecil {
 
 		public static string GetFileName (this Stream self)
 		{
-			var file_stream = self as FileStream;
-			if (file_stream == null)
+			switch (self) {
+			case IHaveAFileName withFileName:
+				return withFileName.GetFileName ();
+			case FileStream fs:
+				return Path.GetFullPath (fs.Name);
+			default:
 				return string.Empty;
-
-			return Path.GetFullPath (file_stream.Name);
+			}
 		}
 
 		public static TargetRuntime ParseRuntime (this string self)
