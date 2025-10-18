@@ -22,19 +22,16 @@ namespace Mono.Cecil {
 	sealed class TypeDefinitionCollection : Collection<TypeDefinition> {
 
 		readonly ModuleDefinition container;
-		readonly Dictionary<Slot, TypeDefinition> name_cache;
 
 		internal TypeDefinitionCollection (ModuleDefinition container)
 		{
 			this.container = container;
-			this.name_cache = new Dictionary<Slot, TypeDefinition> (new RowEqualityComparer ());
 		}
 
 		internal TypeDefinitionCollection (ModuleDefinition container, int capacity)
 			: base (capacity)
 		{
 			this.container = container;
-			this.name_cache = new Dictionary<Slot, TypeDefinition> (capacity, new RowEqualityComparer ());
 		}
 
 		protected override void OnAdd (TypeDefinition item, int index)
@@ -70,31 +67,12 @@ namespace Mono.Cecil {
 
 			type.module = container;
 			type.scope = container;
-			name_cache [new Slot (type.Namespace, type.Name)] = type;
 		}
 
 		void Detach (TypeDefinition type)
 		{
 			type.module = null;
 			type.scope = null;
-			name_cache.Remove (new Slot (type.Namespace, type.Name));
-		}
-
-		public TypeDefinition GetType (string fullname)
-		{
-			string @namespace, name;
-			TypeParser.SplitFullName (fullname, out @namespace, out name);
-
-			return GetType (@namespace, name);
-		}
-
-		public TypeDefinition GetType (string @namespace, string name)
-		{
-			TypeDefinition type;
-			if (name_cache.TryGetValue (new Slot (@namespace, name), out type))
-				return type;
-
-			return null;
 		}
 	}
 }
