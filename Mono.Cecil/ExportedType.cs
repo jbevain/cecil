@@ -22,7 +22,8 @@ namespace Mono.Cecil {
 		int identifier;
 		ExportedType declaring_type;
 		internal MetadataToken token;
-		bool reentrancyGuard;
+		[ThreadStatic]
+		static bool reentrancyGuard;
 
 		public string Namespace {
 			get { return @namespace; }
