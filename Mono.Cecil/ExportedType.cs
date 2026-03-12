@@ -22,7 +22,13 @@ namespace Mono.Cecil {
 		int identifier;
 		ExportedType declaring_type;
 		internal MetadataToken token;
-		bool reentrancyGuard;
+
+		// Maximum number of times Resolve() can re-enter itself following type
+		// forwarder chains across assemblies. We allow up to 128 forwardings,
+		// which should be more than enough for any real-world scenario and prevent circularity.
+		const int MaxForwardingDepth = 128;
+		[ThreadStatic]
+		static int reentrancyDepth;
 
 		public string Namespace {
 			get { return @namespace; }
@@ -228,16 +234,16 @@ namespace Mono.Cecil {
 
 		public TypeDefinition Resolve ()
 		{
-			if (reentrancyGuard) {
+			if (reentrancyDepth >= MaxForwardingDepth) {
 				throw new InvalidOperationException ($"Circularity when resolving exported type: '{this}'");
 			}
 
-			reentrancyGuard = true;
+			reentrancyDepth++;
 			try {
 				return module.Resolve (CreateReference ());
 			}
 			finally {
-				reentrancyGuard = false;
+				reentrancyDepth--;
 			}
 		}
 
