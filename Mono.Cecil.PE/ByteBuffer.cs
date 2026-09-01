@@ -269,11 +269,13 @@ namespace Mono.Cecil.PE {
 				} else if ((value & ~b13) == (signMask & ~b13)) {
 					int n = ((value & b13) << 1) | (signMask & 1);
 					ushort val = (ushort)(0x8000 | n);
-					WriteUInt16 (BitConverter.IsLittleEndian ? ReverseEndianness (val) : val);
+					// WriteUInt16 is always little-endian; compressed ints must be big-endian.
+					WriteUInt16 (ReverseEndianness (val));
 				} else if ((value & ~b28) == (signMask & ~b28)) {
 					int n = ((value & b28) << 1) | (signMask & 1);
 					uint val = 0xc0000000 | (uint)n;
-					WriteUInt32 (BitConverter.IsLittleEndian ? ReverseEndianness (val) : val);
+					// WriteUInt32 is always little-endian; compressed ints must be big-endian.
+					WriteUInt32 (ReverseEndianness (val));
 				} else {
 					throw new ArgumentOutOfRangeException ("value", "valid range is -2^28 to 2^28 -1");
 				}
