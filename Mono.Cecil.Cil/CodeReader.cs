@@ -438,6 +438,8 @@ namespace Mono.Cecil.Cil {
 				var instruction = GetInstruction (sequence_point.Offset);
 				if (instruction != null)
 					sequence_point.offset = new InstructionOffset (instruction);
+				else if (sequence_point.Offset == body.code_size)
+					symbol.end_of_method_sequence_point = sequence_point;
 			}
 		}
 
