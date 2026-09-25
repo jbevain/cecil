@@ -131,6 +131,9 @@ namespace Mono.Cecil.Cil {
 			if (symbol_writer != null && method.debug_info != null) {
 				method.debug_info.code_size = body.CodeSize;
 				method.debug_info.local_var_token = body.local_var_token;
+				var end_of_method = method.debug_info.end_of_method_sequence_point;
+				if (end_of_method != null)
+					end_of_method.offset = new InstructionOffset (body.CodeSize);
 				symbol_writer.Write (method.debug_info);
 			}
 

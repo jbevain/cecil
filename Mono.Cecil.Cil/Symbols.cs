@@ -726,6 +726,7 @@ namespace Mono.Cecil.Cil {
 		internal MethodDefinition kickoff_method;
 		internal int code_size;
 		internal MetadataToken local_var_token;
+		internal SequencePoint end_of_method_sequence_point;
 
 		public MethodDefinition Method {
 			get { return method; }
