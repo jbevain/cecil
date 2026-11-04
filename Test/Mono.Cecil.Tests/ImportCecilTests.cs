@@ -286,6 +286,51 @@ namespace Mono.Cecil.Tests {
 			Assert.AreEqual ("Mono.Cecil.Tests.ImportCecilTests/Generic`1<TS> Mono.Cecil.Tests.ImportCecilTests/Generic`1<System.String>::ComplexGenericMethod<TS>(T,TS)", method.FullName);
 		}
 
+		[Test]
+		public void ImportGenericTypeWithGenericArgumentInSameAssembly ()
+		{
+			using var module = CreateTestModule ();
+			var generic_type = module.ImportReference (typeof (GenericForSameAssemblyTests<>)).Resolve ();
+			
+			var type_definition = new TypeDefinition(string.Empty, "Bar", TypeAttributes.Public, module.ImportReference (typeof (object)));
+			module.Types.Add(type_definition);
+			
+			var generic_inst = new GenericInstanceType (generic_type);
+			generic_inst.GenericArguments.Add (type_definition);
+			
+			var imported = (GenericInstanceType)module.ImportReference (generic_inst);
+
+			Assert.That(imported.GenericArguments[0], Is.EqualTo (type_definition));
+
+			// Shouldn't be able to find this assert if the assert above passes, but just in case also assert a circular reference isn't created.
+			Assert.That(module.AssemblyReferences.Select(r => r.Name), Does.Not.Contain (module.Name));
+		}
+		
+		[Test]
+		public void ImportGenericTypeWithGenericArgumentInSameAssemblyTypeReference ()
+		{
+			using var module = CreateTestModule ();
+			var generic_type = module.ImportReference (typeof (GenericForSameAssemblyTests<>)).Resolve ();
+			
+			var type_definition = new TypeDefinition(string.Empty, "Bar", TypeAttributes.Public, module.ImportReference (typeof (object)));
+			module.Types.Add(type_definition);
+			
+			var type_reference = new TypeReference(type_definition.Namespace, type_definition.Name, module, new AssemblyNameReference(module.Assembly.Name.Name, module.Assembly.Name.Version));
+			
+			var generic_instance = new GenericInstanceType (generic_type);
+			generic_instance.GenericArguments.Add (type_reference);
+			
+			var imported = (GenericInstanceType)module.ImportReference (generic_instance);
+			
+			// By reusing the same type reference we can avoid triggering an ImportReference call which creates a circular reference.
+			Assert.That(imported.GenericArguments[0], Is.EqualTo (type_reference));
+
+			// Shouldn't be able to find this assert if the assert above passes, but just in case also assert a circular reference isn't created.
+			Assert.That(module.AssemblyReferences.Select(r => r.Name), Does.Not.Contain (module.Name));
+		}
+
+		public class GenericForSameAssemblyTests<T>;
+
 		delegate void Emitter (ModuleDefinition module, MethodBody body);
 
 		static TDelegate Compile<TDelegate> (Emitter emitter, [CallerMemberName] string testMethodName = null)
@@ -317,6 +362,11 @@ namespace Mono.Cecil.Tests {
 				File.WriteAllBytes (Path.Combine (Path.Combine (Path.GetTempPath (), "cecil"), module.Name + ".dll"), stream.ToArray ());
 				return SR.Assembly.Load (stream.ToArray ());
 			}
+		}
+
+		static ModuleDefinition CreateTestModule ([CallerMemberName] string testMethodName = null)
+		{
+			return CreateModule("ImportCecil_" + testMethodName);
 		}
 
 		static ModuleDefinition CreateTestModule<TDelegate> (string name, Emitter emitter)
