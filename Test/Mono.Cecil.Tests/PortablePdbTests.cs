@@ -617,6 +617,46 @@ class Program
 			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
 		}
 
+		[Test]
+		public void EmbeddedSourceForDocumentWithoutSequencePoints ()
+		{
+			using (var module_stream = new MemoryStream ())
+			using (var symbol_stream = new MemoryStream ()) {
+				using (var module = GetResourceModule ("embedcs.exe", new ReaderParameters {
+					SymbolReaderProvider = new PortablePdbReaderProvider (),
+				})) {
+					module.EntryPoint = null;
+					Assert.IsTrue (module.Types.Remove (module.GetType ("Program")));
+					Assert.IsTrue (module.Types.Remove (module.GetType ("B")));
+
+					module.Write (module_stream, new WriterParameters {
+						SymbolWriterProvider = new PortablePdbWriterProvider (),
+						SymbolStream = symbol_stream,
+					});
+				}
+
+				module_stream.Position = 0;
+				symbol_stream.Position = 0;
+
+				using (var module = ModuleDefinition.ReadModule (module_stream, new ReaderParameters {
+					SymbolReaderProvider = new PortablePdbReaderProvider (),
+					SymbolStream = symbol_stream,
+				})) {
+					var document = module.Documents.Single (document => document.Url.EndsWith ("b.cs", StringComparison.Ordinal));
+					var custom_infos = module.SymbolReader.Read (document);
+					Assert.IsNotNull (custom_infos);
+					var source = custom_infos.OfType<EmbeddedSourceDebugInformation> ().Single ();
+					Assert.AreEqual (Normalize (@"class B
+{
+    public static string Do()
+    {
+        return ""B::Do"";
+    }
+}"), Normalize (Encoding.UTF8.GetString (source.Content)));
+				}
+			}
+		}
+
 		static Document GetDocument (TypeDefinition type)
 		{
 			foreach (var method in type.Methods) {
