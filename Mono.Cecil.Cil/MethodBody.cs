@@ -35,7 +35,6 @@ namespace Mono.Cecil.Cil {
 
 		public int MaxStackSize {
 			get { return max_stack_size; }
-			set { max_stack_size = value; }
 		}
 
 		public int CodeSize {
