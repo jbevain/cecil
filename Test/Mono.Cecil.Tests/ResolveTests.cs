@@ -105,7 +105,12 @@ namespace Mono.Cecil.Tests {
 			public void Register (AssemblyDefinition assembly)
 			{
 				this.RegisterAssembly (assembly);
-				this.AddSearchDirectory (Path.GetDirectoryName (assembly.MainModule.FileName));
+
+				var fileName = assembly.MainModule.FileName;
+				if (string.IsNullOrEmpty (fileName))
+					return;
+
+				this.AddSearchDirectory (Path.GetDirectoryName (fileName));
 			}
 		}
 
@@ -163,6 +168,46 @@ namespace Mono.Cecil.Tests {
 			var reference = new TypeReference("MyNamespace", "MyType", module1, AssemblyNameReference.Parse(module1.Assembly.FullName), false);
 
 			Assert.Throws<InvalidOperationException>(() => { _ = reference.Resolve(); });
+		}
+
+		[Test]
+		public void TypeForwarderMultiLevel ()
+		{
+			using (var resolver = new CustomResolver ()) {
+				var chainC = CreateAssemblyWithType (resolver, "ChainC", "MyNamespace", "MyType");
+				var chainB = CreateForwarderAssembly (resolver, "ChainB", "MyNamespace", "MyType", chainC.Name);
+				var chainA = CreateForwarderAssembly (resolver, "ChainA", "MyNamespace", "MyType", chainB.Name);
+
+				var definition = new TypeReference ("MyNamespace", "MyType", chainA.MainModule, chainA.Name, false).Resolve ();
+				Assert.IsNotNull (definition);
+				Assert.AreEqual ("MyNamespace.MyType", definition.FullName);
+				Assert.AreEqual ("ChainC", definition.Module.Assembly.Name.Name);
+			}
+		}
+
+		static AssemblyDefinition CreateAssemblyWithType (CustomResolver resolver, string assemblyName, string typeNamespace, string typeName)
+		{
+			var assembly = CreateAssembly (resolver, assemblyName);
+			assembly.MainModule.Types.Add (new TypeDefinition (typeNamespace, typeName, TypeAttributes.Public | TypeAttributes.Class, assembly.MainModule.TypeSystem.Object));
+			resolver.Register (assembly);
+			return assembly;
+		}
+
+		static AssemblyDefinition CreateForwarderAssembly (CustomResolver resolver, string assemblyName, string typeNamespace, string typeName, AssemblyNameReference targetAssembly)
+		{
+			var assembly = CreateAssembly (resolver, assemblyName);
+			assembly.MainModule.AssemblyReferences.Add (targetAssembly);
+			assembly.MainModule.ExportedTypes.Add (new ExportedType (typeNamespace, typeName, assembly.MainModule, targetAssembly) { IsForwarder = true });
+			resolver.Register (assembly);
+			return assembly;
+		}
+
+		static AssemblyDefinition CreateAssembly (IAssemblyResolver resolver, string assemblyName)
+		{
+			return AssemblyDefinition.CreateAssembly (
+				new AssemblyNameDefinition (assemblyName, new Version (1, 0)),
+				assemblyName,
+				new ModuleParameters { Kind = ModuleKind.Dll, AssemblyResolver = resolver });
 		}
 
 		[Test]
