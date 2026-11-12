@@ -270,5 +270,17 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual (12, param.Constant);
 			});
 		}
+
+		[Test]
+		public void ModuleWith0xFFFFParameters ()
+		{
+			TestModule ("param0xffff.dll", module => {
+				var test = module.GetType ("Program");
+				var method = test.GetMethod ("F_65534");
+
+				Assert.AreEqual (1, method.Parameters.Count);
+				Assert.AreEqual ("a", method.Parameters [0].Name);
+			}, verify: false);
+		}
 	}
 }
