@@ -135,7 +135,7 @@ namespace Mono.Cecil {
 
 			var arrayType = typeReference as ArrayType;
 			if (arrayType != null)
-				return new ArrayType (Resolve (arrayType.ElementType), arrayType.Rank);
+				return new ArrayType (Resolve (arrayType.ElementType), arrayType);
 
 			var pointerType = typeReference as PointerType;
 			if (pointerType != null)

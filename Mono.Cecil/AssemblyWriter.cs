@@ -2821,6 +2821,7 @@ namespace Mono.Cecil {
 				break;
 			}
 
+			case ElementType.SzArray:
 			case ElementType.Array: {
 				var array = (ArrayType) type;
 				if (!array.IsVector) {
@@ -2850,13 +2851,10 @@ namespace Mono.Cecil {
 
 		void WriteArrayTypeSignature (ArrayType array)
 		{
-			WriteElementType (ElementType.Array);
-			WriteTypeSignature (array.ElementType);
-
 			var dimensions = array.Dimensions;
 			var rank = dimensions.Count;
-
-			WriteCompressedUInt32 ((uint) rank);
+			if (rank == 0 || rank > 0x1fffffff)
+				throw new ArgumentException ("Invalid array rank.", "array");
 
 			var sized = 0;
 			var lbounds = 0;
@@ -2865,29 +2863,34 @@ namespace Mono.Cecil {
 				var dimension = dimensions [i];
 
 				if (dimension.UpperBound.HasValue) {
+					if (sized != i)
+						throw new ArgumentException ("Array sizes must form a contiguous prefix.", "array");
+					var size = (long) dimension.UpperBound.Value - dimension.LowerBound.GetValueOrDefault () + 1;
+					if (size < 0 || size > 0x1fffffff)
+						throw new ArgumentException ("Array size is outside the compressed unsigned integer range.", "array");
 					sized++;
+				}
+				if (dimension.LowerBound.HasValue) {
+					if (lbounds != i)
+						throw new ArgumentException ("Array lower bounds must form a contiguous prefix.", "array");
+					if (dimension.LowerBound.Value < -0x10000000 || dimension.LowerBound.Value > 0x0fffffff)
+						throw new ArgumentException ("Array lower bound is outside the compressed signed integer range.", "array");
 					lbounds++;
-				} else if (dimension.LowerBound.HasValue)
-					lbounds++;
+				}
 			}
 
-			var sizes = new int [sized];
-			var low_bounds = new int [lbounds];
-
-			for (int i = 0; i < lbounds; i++) {
-				var dimension = dimensions [i];
-				low_bounds [i] = dimension.LowerBound.GetValueOrDefault ();
-				if (dimension.UpperBound.HasValue)
-					sizes [i] = dimension.UpperBound.Value - low_bounds [i] + 1;
-			}
-
+			WriteElementType (ElementType.Array);
+			WriteTypeSignature (array.ElementType);
+			WriteCompressedUInt32 ((uint) rank);
 			WriteCompressedUInt32 ((uint) sized);
-			for (int i = 0; i < sized; i++)
-				WriteCompressedUInt32 ((uint) sizes [i]);
+			for (int i = 0; i < sized; i++) {
+				var dimension = dimensions [i];
+				WriteCompressedUInt32 ((uint) ((long) dimension.UpperBound.Value - dimension.LowerBound.GetValueOrDefault () + 1));
+			}
 
 			WriteCompressedUInt32 ((uint) lbounds);
 			for (int i = 0; i < lbounds; i++)
-				WriteCompressedInt32 (low_bounds [i]);
+				WriteCompressedInt32 (dimensions [i].LowerBound.Value);
 		}
 
 		public void WriteGenericInstanceSignature (IGenericInstance instance)
@@ -2961,6 +2964,9 @@ namespace Mono.Cecil {
 
 		void WriteCustomAttributeFixedArrayArgument (ArrayType type, CustomAttributeArgument argument)
 		{
+			if (Mixin.HasNonVectorArray (type) || Mixin.HasNonVectorArray (argument.Type))
+				throw new ArgumentException ("Custom attribute array values must be vectors.");
+
 			var values = argument.Value as CustomAttributeArgument [];
 
 			if (values == null) {
@@ -3107,6 +3113,8 @@ namespace Mono.Cecil {
 		{
 			if (type.IsArray) {
 				var array = (ArrayType) type;
+				if (Mixin.HasNonVectorArray (array))
+					throw new ArgumentException ("Custom attribute array values must be vectors.");
 				WriteElementType (ElementType.SzArray);
 				WriteCustomAttributeFieldOrPropType (array.ElementType);
 				return;

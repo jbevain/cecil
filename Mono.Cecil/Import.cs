@@ -230,8 +230,21 @@ namespace Mono.Cecil {
 			if (type.IsPointer)
 				return new PointerType (ImportType (type.GetElementType (), context));
 
-			if (type.IsArray)
-				return new ArrayType (ImportType (type.GetElementType (), context), type.GetArrayRank ());
+			if (type.IsArray) {
+				var element_type = type.GetElementType ();
+				var imported_element = ImportType (element_type, context);
+				var rank = type.GetArrayRank ();
+				// Type.IsSZArray is not available on all supported frameworks.
+				// Avoid constructing a reflection array type, which requires dynamic code.
+#if NET
+				var is_vector = type.IsSZArray;
+#else
+				var is_vector = type.Name.EndsWith ("[]", StringComparison.Ordinal);
+#endif
+				return rank == 1
+					? new ArrayType (imported_element, is_vector)
+					: new ArrayType (imported_element, rank);
+			}
 
 			if (type.IsGenericType)
 				return ImportGenericInstance (type, context);
@@ -629,22 +642,7 @@ namespace Mono.Cecil {
 					ImportType (modreq.ElementType, context));
 			case ElementType.Array:
 				var array = (ArrayType) type;
-				var imported_array = new ArrayType (ImportType (array.ElementType, context));
-				if (array.IsVector)
-					return imported_array;
-
-				var dimensions = array.Dimensions;
-				var imported_dimensions = imported_array.Dimensions;
-
-				imported_dimensions.Clear ();
-
-				for (int i = 0; i < dimensions.Count; i++) {
-					var dimension = dimensions [i];
-
-					imported_dimensions.Add (new ArrayDimension (dimension.LowerBound, dimension.UpperBound));
-				}
-
-				return imported_array;
+				return new ArrayType (ImportType (array.ElementType, context), array);
 			case ElementType.GenericInst:
 				var instance = (GenericInstanceType) type;
 				var element_type = ImportType (instance.ElementType, context);

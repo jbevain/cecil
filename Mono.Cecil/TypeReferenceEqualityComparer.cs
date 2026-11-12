@@ -31,13 +31,19 @@ namespace Mono.Cecil {
 				return AreEqual ((GenericInstanceType)a, (GenericInstanceType)b, comparisonMode);
 			}
 
-			if (aMetadataType == MetadataType.Array || bMetadataType == MetadataType.Array) {
+			var aIsArray = aMetadataType == MetadataType.Array
+			               || aMetadataType == MetadataType.SzArray;
+
+			var bIsArray = bMetadataType == MetadataType.Array
+			               || bMetadataType == MetadataType.SzArray;
+
+			if (aIsArray || bIsArray) {
 				if (aMetadataType != bMetadataType)
 					return false;
 
 				var a1 = (ArrayType)a;
 				var b1 = (ArrayType)b;
-				if (a1.Rank != b1.Rank)
+				if (a1.Rank != b1.Rank || a1.IsVector != b1.IsVector)
 					return false;
 
 				return AreEqual (a1.ElementType, b1.ElementType, comparisonMode);
@@ -189,9 +195,14 @@ namespace Mono.Cecil {
 				return hashCode;
 			}
 
-			if (metadataType == MetadataType.Array) {
+			if (metadataType == MetadataType.Array || metadataType == MetadataType.SzArray) {
 				var arrayType = (ArrayType)obj;
-				return GetHashCodeFor (arrayType.ElementType) * hashCodeMultiplier + arrayType.Rank.GetHashCode ();
+				var rank = (metadataType == MetadataType.SzArray || arrayType.IsVector)
+					? 0
+					: arrayType.Rank.GetHashCode ();
+
+				var hashCode = GetHashCodeFor (arrayType.ElementType) * hashCodeMultiplier + rank;
+				return hashCode * hashCodeMultiplier;
 			}
 
 			if (metadataType == MetadataType.Var || metadataType == MetadataType.MVar) {

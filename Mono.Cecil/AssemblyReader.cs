@@ -3006,7 +3006,7 @@ namespace Mono.Cecil {
 				value = new decimal (signature.ReadInt32 (), signature.ReadInt32 (), signature.ReadInt32 (), (b & 0x80) != 0, (byte) (b & 0x7f));
 			} else if (type.IsTypeOf ("System", "DateTime")) {
 				value = new DateTime (signature.ReadInt64());
-			} else if (type.etype == ElementType.Object || type.etype == ElementType.None || type.etype == ElementType.Class || type.etype == ElementType.Array || type.etype == ElementType.GenericInst) {
+			} else if (type.etype == ElementType.Object || type.etype == ElementType.None || type.etype == ElementType.Class || type.etype == ElementType.Array || type.etype == ElementType.SzArray || type.etype == ElementType.GenericInst) {
 				value = null;
 			} else
 				value = signature.ReadConstantSignature (type.etype);
@@ -3345,17 +3345,27 @@ namespace Mono.Cecil {
 
 		ArrayType ReadArrayTypeSignature ()
 		{
-			var array = new ArrayType (ReadTypeSignature ());
+			var array = new ArrayType (ReadTypeSignature (), false);
 
-			var rank = ReadCompressedUInt32 ();
+			var rank = ReadArrayShapeUInt32 ();
+			if (rank == 0)
+				throw new BadImageFormatException ("An array must have at least one dimension.");
 
-			var sizes = new uint [ReadCompressedUInt32 ()];
+			var size_count = ReadArrayShapeUInt32 ();
+			if (size_count > rank || size_count > (long) start + sig_length - position)
+				throw new BadImageFormatException ("Invalid array size count.");
+			var sizes = new uint [size_count];
 			for (int i = 0; i < sizes.Length; i++)
-				sizes [i] = ReadCompressedUInt32 ();
+				sizes [i] = ReadArrayShapeUInt32 ();
 
-			var low_bounds = new int [ReadCompressedUInt32 ()];
-			for (int i = 0; i < low_bounds.Length; i++)
+			var bound_count = ReadArrayShapeUInt32 ();
+			if (bound_count > rank || bound_count > (long) start + sig_length - position)
+				throw new BadImageFormatException ("Invalid array lower-bound count.");
+			var low_bounds = new int [bound_count];
+			for (int i = 0; i < low_bounds.Length; i++) {
+				CheckArrayShapeInteger ();
 				low_bounds [i] = ReadCompressedInt32 ();
+			}
 
 			array.Dimensions.Clear ();
 
@@ -3366,12 +3376,34 @@ namespace Mono.Cecil {
 					lower = low_bounds [i];
 
 				if (i < sizes.Length)
-					upper = lower + (int) sizes [i] - 1;
+					// An omitted lower bound defaults to zero, but must remain omitted
+					// in the model so writing preserves the independent bounds list.
+					upper = lower.GetValueOrDefault () + (int) sizes [i] - 1;
 
 				array.Dimensions.Add (new ArrayDimension (lower, upper));
 			}
 
 			return array;
+		}
+
+		uint ReadArrayShapeUInt32 ()
+		{
+			CheckArrayShapeInteger ();
+			return ReadCompressedUInt32 ();
+		}
+
+		void CheckArrayShapeInteger ()
+		{
+			var end = Math.Min ((long) start + sig_length, buffer.Length);
+			if (position >= end)
+				throw new BadImageFormatException ("Truncated array shape.");
+
+			var first = buffer [position];
+			if (first >= 0xe0)
+				throw new BadImageFormatException ("Invalid compressed array-shape integer.");
+			var size = first < 0x80 ? 1 : first < 0xc0 ? 2 : 4;
+			if (end - position < size)
+				throw new BadImageFormatException ("Truncated array shape.");
 		}
 
 		TypeReference GetTypeDefOrRef (MetadataToken token)
@@ -3569,6 +3601,9 @@ namespace Mono.Cecil {
 
 		CustomAttributeArgument ReadCustomAttributeFixedArrayArgument (ArrayType type)
 		{
+			if (Mixin.HasNonVectorArray (type))
+				throw new BadImageFormatException ("Custom attribute array values must be vectors.");
+
 			var length = ReadUInt32 ();
 
 			if (length == 0xffffffff)
@@ -3692,6 +3727,8 @@ namespace Mono.Cecil {
 			var etype = (ElementType) ReadByte ();
 
 			switch (etype) {
+			case ElementType.Array:
+				throw new BadImageFormatException ("Custom attribute array values must be vectors.");
 			case ElementType.Boxed:
 				return TypeSystem.Object;
 			case ElementType.SzArray:

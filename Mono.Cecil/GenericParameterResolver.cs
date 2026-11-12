@@ -81,7 +81,7 @@ namespace Mono.Cecil {
 
 		private static ArrayType ResolveIfNeeded (IGenericInstance genericInstanceMethod, IGenericInstance genericInstanceType, ArrayType arrayType)
 		{
-			return new ArrayType (ResolveIfNeeded (genericInstanceMethod, genericInstanceType, arrayType.ElementType), arrayType.Rank);
+			return new ArrayType (ResolveIfNeeded (genericInstanceMethod, genericInstanceType, arrayType.ElementType), arrayType);
 		}
 
 		private static ByReferenceType ResolveIfNeeded (IGenericInstance genericInstanceMethod, IGenericInstance genericInstanceType, ByReferenceType byReferenceType)

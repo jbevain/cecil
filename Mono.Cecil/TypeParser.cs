@@ -171,6 +171,7 @@ namespace Mono.Cecil {
 					case '*':
 						position++;
 						Add (ref specs, 1);
+						TryParse (']');
 						break;
 					default:
 						var rank = 1;
@@ -276,7 +277,7 @@ namespace Mono.Cecil {
 					type = new ArrayType (type);
 					break;
 				default:
-					var array = new ArrayType (type);
+					var array = new ArrayType (type, false);
 					array.Dimensions.Clear ();
 
 					for (int j = 0; j < specs [i]; j++)
@@ -484,6 +485,8 @@ namespace Mono.Cecil {
 					name.Append ("[]");
 				} else {
 					name.Append ('[');
+					if (array.Rank == 1)
+						name.Append ('*');
 					for (int i = 1; i < array.Rank; i++)
 						name.Append (',');
 					name.Append (']');

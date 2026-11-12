@@ -364,6 +364,23 @@ namespace Mono.Cecil.Tests {
 			AssertDocumentID ("M:N.X.N#IX{N#KVP{System#String,System#Int32}}#IXA(N.KVP{System.String,System.Int32})", method);
 		}
 
+		[TestCase (null, 4, ":5")]
+		[TestCase (-2, 2, "-2:5")]
+		[TestCase (0, -1, "0:0")]
+		public void SizedArrayParameter (int? lower, int upper, string dimension)
+		{
+			using (var module = ModuleDefinition.CreateModule ("Documentation", ModuleKind.Dll)) {
+				var type = new TypeDefinition ("N", "Holder", TypeAttributes.Public, module.TypeSystem.Object);
+				module.Types.Add (type);
+				var method = new MethodDefinition ("M", MethodAttributes.Public, module.TypeSystem.Void);
+				type.Methods.Add (method);
+				var array = new ArrayType (module.TypeSystem.Int32, false);
+				array.Dimensions [0] = new ArrayDimension (lower, upper);
+				method.Parameters.Add (new ParameterDefinition (array));
+				AssertDocumentID ("M:N.Holder.M(System.Int32[" + dimension + "])", method);
+			}
+		}
+
 		TypeDefinition GetTestType ()
 		{
 			return typeof (N.X).ToDefinition ();
