@@ -29,12 +29,7 @@ namespace Mono.Cecil.Rocks {
 			if (rank == 0)
 				throw new ArgumentOutOfRangeException ("rank");
 
-			var array = new ArrayType (self);
-
-			for (int i = 1; i < rank; i++)
-				array.Dimensions.Add (new ArrayDimension ());
-
-			return array;
+			return new ArrayType (self, rank);
 		}
 
 		public static PointerType MakePointerType (this TypeReference self)

@@ -18,17 +18,26 @@ namespace Mono.Cecil.Tests {
 
 			Assert.IsInstanceOf (typeof (ArrayType), string_array);
 			Assert.AreEqual (1, string_array.Rank);
+			Assert.IsTrue (string_array.IsVector);
+			Assert.IsNull (string_array.Dimensions);
 		}
 
-		[Test]
-		public void MakeArrayTypeRank ()
+		[TestCase (1)]
+		[TestCase (2)]
+		[TestCase (3)]
+		public void MakeArrayTypeRank (int rank)
 		{
 			var @string = GetTypeReference (typeof (string));
 
-			var string_array = @string.MakeArrayType (3);
+			var string_array = @string.MakeArrayType (rank);
 
 			Assert.IsInstanceOf (typeof (ArrayType), string_array);
-			Assert.AreEqual (3, string_array.Rank);
+			Assert.AreEqual (rank, string_array.Rank);
+			Assert.AreEqual (rank == 1, string_array.IsVector);
+			if (rank == 1)
+				Assert.IsNull (string_array.Dimensions);
+			else
+				Assert.AreEqual (rank, string_array.Dimensions.Count);
 		}
 
 		[Test]

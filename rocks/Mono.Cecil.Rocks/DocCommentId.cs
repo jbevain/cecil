@@ -91,6 +91,7 @@ namespace Mono.Cecil.Rocks {
 		{
 			switch (type.MetadataType) {
 			case MetadataType.Array:
+			case MetadataType.SzArray:
 				WriteArrayTypeSignature ((ArrayType)type);
 				break;
 			case MetadataType.ByReference:
@@ -195,7 +196,7 @@ namespace Mono.Cecil.Rocks {
 				id.Append (':');
 
 				if (dimension.UpperBound.HasValue)
-					id.Append (dimension.UpperBound.Value - (dimension.LowerBound.GetValueOrDefault () + 1));
+					id.Append ((long) dimension.UpperBound.Value - dimension.LowerBound.GetValueOrDefault () + 1);
 			});
 
 			id.Append ("]");

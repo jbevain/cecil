@@ -384,7 +384,7 @@ namespace Mono.Cecil {
 
 		static bool AreSame (ArrayType a, ArrayType b)
 		{
-			if (a.Rank != b.Rank)
+			if (a.Rank != b.Rank || a.IsVector != b.IsVector)
 				return false;
 
 			// TODO: dimensions

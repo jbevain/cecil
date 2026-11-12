@@ -36,6 +36,7 @@ namespace Mono.Cecil {
 		Class = ElementType.Class,
 		Var = ElementType.Var,
 		Array = ElementType.Array,
+		SzArray = ElementType.SzArray,
 		GenericInstance = ElementType.GenericInst,
 		TypedByReference = ElementType.TypedByRef,
 		IntPtr = ElementType.I,

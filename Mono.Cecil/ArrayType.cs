@@ -53,8 +53,14 @@ namespace Mono.Cecil {
 
 		Collection<ArrayDimension> dimensions;
 
+		/// <summary>
+		/// Gets the dimensions of a non-vector array, or null for a vector (T[]).
+		/// </summary>
 		public Collection<ArrayDimension> Dimensions {
 			get {
+				if (etype == MD.ElementType.SzArray)
+					return null;
+
 				if (dimensions != null)
 					return dimensions;
 
@@ -62,27 +68,16 @@ namespace Mono.Cecil {
 				empty_dimensions.Add (new ArrayDimension ());
 
 				Interlocked.CompareExchange (ref dimensions, empty_dimensions, null);
-
 				return dimensions;
 			}
 		}
 
 		public int Rank {
-			get { return dimensions == null ? 1 : dimensions.Count; }
+			get { return (dimensions == null || etype == MD.ElementType.SzArray) ? 1 : dimensions.Count; }
 		}
 
 		public bool IsVector {
-			get {
-				if (dimensions == null)
-					return true;
-
-				if (dimensions.Count > 1)
-					return false;
-
-				var dimension = dimensions [0];
-
-				return !dimension.IsSized;
-			}
+			get { return etype == MD.ElementType.SzArray; }
 		}
 
 		public override bool IsValueType {
@@ -102,6 +97,8 @@ namespace Mono.Cecil {
 			get {
 				if (IsVector)
 					return "[]";
+				if (Rank == 1 && !Dimensions [0].IsSized)
+					return "[*]";
 
 				var suffix = new StringBuilder ();
 				suffix.Append ("[");
@@ -122,24 +119,52 @@ namespace Mono.Cecil {
 		}
 
 		public ArrayType (TypeReference type)
+			: this (type, true)
+		{
+		}
+
+		/// <summary>
+		/// Creates a vector (T[]) or a rank-one array with unspecified bounds (T[*]).
+		/// </summary>
+		public ArrayType (TypeReference type, bool isVector)
 			: base (type)
 		{
 			Mixin.CheckType (type);
-			this.etype = MD.ElementType.Array;
+			this.etype = isVector ? MD.ElementType.SzArray : MD.ElementType.Array;
 		}
 
 		public ArrayType (TypeReference type, int rank)
-			: this (type)
+			: this (type, rank, rank == 1)
 		{
-			Mixin.CheckType (type);
+		}
 
-			if (rank == 1)
+		/// <summary>
+		/// Creates an array of the specified rank and kind. Vectors must have rank one.
+		/// </summary>
+		public ArrayType (TypeReference type, int rank, bool vector)
+			: this (type, vector)
+		{
+			if (rank < 1 || rank > 0x1fffffff || (vector && rank != 1))
+				throw new ArgumentOutOfRangeException ("rank");
+
+			if (vector)
 				return;
 
 			dimensions = new Collection<ArrayDimension> (rank);
 			for (int i = 0; i < rank; i++)
 				dimensions.Add (new ArrayDimension ());
-			this.etype = MD.ElementType.Array;
+		}
+
+		internal ArrayType (TypeReference type, ArrayType array)
+			: this (type, array.IsVector)
+		{
+			if (array.IsVector)
+				return;
+
+			var source = array.Dimensions;
+			dimensions = new Collection<ArrayDimension> (source.Count);
+			for (int i = 0; i < source.Count; i++)
+				dimensions.Add (source [i]);
 		}
 	}
 }

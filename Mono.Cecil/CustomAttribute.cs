@@ -15,6 +15,17 @@ using Mono.Collections.Generic;
 
 namespace Mono.Cecil {
 
+	static partial class Mixin {
+
+		public static bool HasNonVectorArray (TypeReference type)
+		{
+			for (var array = type as ArrayType; array != null; array = array.ElementType as ArrayType)
+				if (!array.IsVector)
+					return true;
+			return false;
+		}
+	}
+
 	public struct CustomAttributeArgument {
 
 		readonly TypeReference type;
