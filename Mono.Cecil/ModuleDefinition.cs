@@ -898,7 +898,7 @@ namespace Mono.Cecil {
 		{
 			Mixin.CheckField (field);
 
-			if (field.Module == this)
+			if (field.Module == this && field.FieldType.Module == this)
 				return field;
 
 			CheckContext (context, this);
