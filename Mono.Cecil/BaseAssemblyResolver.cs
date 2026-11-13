@@ -70,15 +70,16 @@ namespace Mono.Cecil {
 
 		static readonly bool on_mono = Type.GetType ("Mono.Runtime") != null;
 
+		static readonly bool on_coreclr = Type.GetType ("System.Runtime.Loader.AssemblyLoadContext") != null;
+
 		readonly Collection<string> directories;
 
 #if NET_CORE
 		// Maps file names of available trusted platform assemblies to their full paths.
 		// Internal for testing.
 		internal static readonly Lazy<Dictionary<string, string>> TrustedPlatformAssemblies = new Lazy<Dictionary<string, string>> (CreateTrustedPlatformAssemblyMap);
-#else
-		Collection<string> gac_paths;
 #endif
+		Collection<string> gac_paths;
 
 		public void AddSearchDirectory (string directory)
 		{
@@ -134,35 +135,39 @@ namespace Mono.Cecil {
 			}
 
 #if NET_CORE
-			assembly = SearchTrustedPlatformAssemblies (name, parameters);
-			if (assembly != null)
-				return assembly;
-#else
-			var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
-			var framework_dirs = on_mono
-				? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
-				: new [] { framework_dir };
+			if (on_coreclr) {
+				assembly = SearchTrustedPlatformAssemblies (name, parameters);
+				if (assembly != null)
+					return assembly;
+			} else
+#endif
+			{
+				var framework_dir = Path.GetDirectoryName (typeof (object).Module.FullyQualifiedName);
+				var framework_dirs = on_mono
+					? new [] { framework_dir, Path.Combine (framework_dir, "Facades") }
+					: new [] { framework_dir };
 
-			if (IsZero (name.Version)) {
+				if (IsZero (name.Version)) {
+					assembly = SearchDirectory (name, framework_dirs, parameters);
+					if (assembly != null)
+						return assembly;
+				}
+
+				if (name.Name == "mscorlib") {
+					assembly = GetCorlib (name, parameters);
+					if (assembly != null)
+						return assembly;
+				}
+
+				assembly = GetAssemblyInGac (name, parameters);
+				if (assembly != null)
+					return assembly;
+
 				assembly = SearchDirectory (name, framework_dirs, parameters);
 				if (assembly != null)
 					return assembly;
 			}
 
-			if (name.Name == "mscorlib") {
-				assembly = GetCorlib (name, parameters);
-				if (assembly != null)
-					return assembly;
-			}
-
-			assembly = GetAssemblyInGac (name, parameters);
-			if (assembly != null)
-				return assembly;
-
-			assembly = SearchDirectory (name, framework_dirs, parameters);
-			if (assembly != null)
-				return assembly;
-#endif
 			if (ResolveFailure != null) {
 				assembly = ResolveFailure (this, name);
 				if (assembly != null)
@@ -231,7 +236,7 @@ namespace Mono.Cecil {
 			return version.Major == 0 && version.Minor == 0 && version.Build == 0 && version.Revision == 0;
 		}
 
-#if !NET_CORE
+#region .NET Framework-specific resolvers
 		AssemblyDefinition GetCorlib (AssemblyNameReference reference, ReaderParameters parameters)
 		{
 			var version = reference.Version;
@@ -393,7 +398,7 @@ namespace Mono.Cecil {
 					Path.Combine (gac, reference.Name), gac_folder.ToString ()),
 				reference.Name + ".dll");
 		}
-#endif
+#endregion
 		public void Dispose ()
 		{
 			Dispose (true);
