@@ -619,7 +619,7 @@ namespace Mono.Cecil.Pdb {
 			if (buffer != null && bufferLength > 0) {
 				for (int i = 0; i < length; i++)
 					buffer [i] = name [i];
-				buffer [length + 1] = '\0';
+				buffer [length] = '\0';
 			}
 		}
 
