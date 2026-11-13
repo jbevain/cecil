@@ -898,6 +898,55 @@ class Program
 		}
 
 		[Test]
+		public void EndOfMethodSequencePointAfterInsertingInstructions ()
+		{
+			// Some compilers (e.g. F#) emit a hidden sequence point at an IL offset equal
+			// to the code size, i.e. just past the last instruction.
+			var source = Path.GetTempFileName ();
+			var destination = Path.GetTempFileName ();
+			var writer_parameters = new WriterParameters { SymbolWriterProvider = new PortablePdbWriterProvider () };
+			var reader_parameters = new ReaderParameters { SymbolReaderProvider = new PortablePdbReaderProvider () };
+
+			using (var module = ModuleDefinition.CreateModule ("EndOfMethod", ModuleKind.Dll)) {
+				var type = new TypeDefinition ("", "Program", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.TypeSystem.Object);
+				module.Types.Add (type);
+
+				var method = new MethodDefinition ("Add", MethodAttributes.Public | MethodAttributes.Static, module.TypeSystem.Int32);
+				type.Methods.Add (method);
+
+				var il = method.Body.GetILProcessor ();
+				il.Emit (OpCodes.Ldc_I4_1);
+				il.Emit (OpCodes.Ldc_I4_2);
+				il.Emit (OpCodes.Add);
+				il.Emit (OpCodes.Ret);
+
+				var document = new Document (@"C:\test.fs");
+				var sequence_points = method.DebugInformation.SequencePoints;
+				sequence_points.Add (new SequencePoint (method.Body.Instructions [0], document) { StartLine = 1, StartColumn = 1, EndLine = 1, EndColumn = 10 });
+				sequence_points.Add (new SequencePoint (4, document) { StartLine = 0xfeefee, EndLine = 0xfeefee });
+
+				module.Write (source, writer_parameters);
+			}
+
+			using (var module = ModuleDefinition.ReadModule (source, reader_parameters)) {
+				var method = module.GetType ("Program").GetMethod ("Add");
+				var il = method.Body.GetILProcessor ();
+				var first = method.Body.Instructions [0];
+				il.InsertBefore (first, il.Create (OpCodes.Ldc_I4, 42));
+				il.InsertBefore (first, il.Create (OpCodes.Pop));
+
+				module.Write (destination, writer_parameters);
+			}
+
+			using (var module = ModuleDefinition.ReadModule (destination, reader_parameters)) {
+				var method = module.GetType ("Program").GetMethod ("Add");
+
+				Assert.AreEqual (10, method.Body.CodeSize);
+				CollectionAssert.AreEqual (new [] { 6, 10 }, method.DebugInformation.SequencePoints.Select (sp => sp.Offset).ToArray ());
+			}
+		}
+
+		[Test]
 		public void DoubleWriteAndReadWithDeterministicMvidAndVariousChanges ()
 		{
 			Guid mvidIn, mvidARM64Out, mvidX64Out;
