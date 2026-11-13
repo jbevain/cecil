@@ -296,7 +296,22 @@ namespace Mono.Cecil.Cil {
 				this.pdb_metadata.metadata_builder = this.module_metadata;
 
 			pdb_metadata.AddCustomDebugInformations (module);
+			ReadDocumentCustomDebugInformations ();
 			pdb_metadata.AddDocuments (module);
+		}
+
+		void ReadDocumentCustomDebugInformations ()
+		{
+			var symbol_reader = module.SymbolReader;
+			if (symbol_reader == null)
+				return;
+
+			var documents = module.Documents;
+			for (int i = 0; i < documents.Count; i++) {
+				var document = documents [i];
+				if (document.custom_infos == null)
+					document.custom_infos = symbol_reader.Read (document);
+			}
 		}
 
 		internal PortablePdbWriter (MetadataBuilder pdb_metadata, ModuleDefinition module, ImageWriter writer, Disposable<Stream> final_stream)
