@@ -75,7 +75,7 @@ namespace Mono.Cecil.Pdb {
 
 		void DefineCustomMetadata (MethodDebugInformation info, MetadataToken import_parent)
 		{
-			var metadata = new CustomMetadataWriter (this.writer);
+			using var metadata = new CustomMetadataWriter (this.writer);
 
 			if (import_parent.RID != 0) {
 				metadata.WriteForwardInfo (import_parent);
@@ -372,6 +372,7 @@ namespace Mono.Cecil.Pdb {
 		public void Dispose ()
 		{
 			stream.Dispose ();
+			writer.Dispose ();
 		}
 	}
 }
