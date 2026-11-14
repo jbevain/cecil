@@ -370,5 +370,55 @@ namespace Mono.Cecil.Tests {
 				Assert.AreEqual(expected_third_call_resolved, third_call_resolved);
 			});
 		}
+
+		[Test]
+		public void ReplacedGenericParameterKeepsZeroTokenAfterReadingTypeSpecOperand ()
+		{
+			var module = ModuleDefinition.CreateModule ("TypeSpecGenericParamTest", ModuleKind.Dll);
+			var entity = new TypeDefinition ("", "Entity", TypeAttributes.Public | TypeAttributes.Class, module.TypeSystem.Object);
+			module.Types.Add (entity);
+
+			var userIo = new TypeDefinition ("", "UserIO", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed, module.TypeSystem.Object);
+			module.Types.Add (userIo);
+
+			var save = new MethodDefinition ("Save", MethodAttributes.Public | MethodAttributes.Static, module.TypeSystem.Void);
+			var saveGp = new GenericParameter ("T", save);
+			save.GenericParameters.Add (saveGp);
+			var local = new VariableDefinition (saveGp);
+			save.Body.Variables.Add (local);
+			save.Body.InitLocals = true;
+			var il = save.Body.GetILProcessor ();
+			il.Emit (Mono.Cecil.Cil.OpCodes.Ldloca, local);
+			il.Emit (Mono.Cecil.Cil.OpCodes.Initobj, saveGp);
+			il.Emit (Mono.Cecil.Cil.OpCodes.Ret);
+			userIo.Methods.Add (save);
+
+			var constrained = new MethodDefinition ("Constrained", MethodAttributes.Public | MethodAttributes.Static, module.TypeSystem.Void);
+			var constrainedGp = new GenericParameter ("T", constrained);
+			constrainedGp.Constraints.Add (new GenericParameterConstraint (entity));
+			constrained.GenericParameters.Add (constrainedGp);
+			constrained.Body.GetILProcessor ().Emit (Mono.Cecil.Cil.OpCodes.Ret);
+			userIo.Methods.Add (constrained);
+
+			using (var stream = new System.IO.MemoryStream ()) {
+				module.Write (stream);
+				stream.Position = 0;
+
+				using (var readModule = ModuleDefinition.ReadModule (stream)) {
+					var readSave = readModule.GetType ("UserIO").GetMethod ("Save");
+					var originalGp = readSave.GenericParameters [0];
+					Assert.AreEqual (TokenType.GenericParam, originalGp.MetadataToken.TokenType);
+
+					readSave.GenericParameters [0] = new GenericParameter (originalGp.Name, originalGp.Owner) {
+						Attributes = originalGp.Attributes,
+					};
+
+					var _ = readSave.Body;
+
+					Assert.AreEqual (new MetadataToken (TokenType.GenericParam), readSave.GenericParameters [0].MetadataToken);
+					Assert.AreEqual (0, readSave.GenericParameters [0].Constraints.Count);
+				}
+			}
+		}
 	}
 }
