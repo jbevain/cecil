@@ -719,6 +719,29 @@ namespace Mono.Cecil.Tests {
 		}
 #endif
 
+		[Test]
+		public void ExternalEnumFieldIsValueType ()
+		{
+			TestCSharp ("CustomAttributes.cs", module => {
+				var externalEnumField = module.GetType ("ExternalEnumField");
+				var attribute = GetAttribute (externalEnumField, "Foo");
+				Assert.IsNotNull (attribute);
+
+				var field = attribute.Fields.Single (f => f.Name == "Targets");
+				Assert.AreEqual ("System.AttributeTargets", field.Argument.Type.FullName);
+				Assert.IsTrue (field.Argument.Type.IsValueType);
+
+				var bzzz = module.GetType ("Bzzz");
+				var bzzzAttribute = GetAttribute (bzzz, "Foo");
+				Assert.IsNotNull (bzzzAttribute);
+
+				var boxedField = bzzzAttribute.Fields.Single (f => f.Name == "Pan");
+				var boxedValue = (CustomAttributeArgument) boxedField.Argument.Value;
+				Assert.AreEqual ("System.Security.AccessControl.AceFlags", boxedValue.Type.FullName);
+				Assert.IsTrue (boxedValue.Type.IsValueType);
+			});
+		}
+
 		static void AssertCustomAttribute (string expected, CustomAttribute attribute)
 		{
 			Assert.AreEqual (expected, PrettyPrint (attribute));

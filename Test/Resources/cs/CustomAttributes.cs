@@ -92,6 +92,8 @@ class FooAttribute : Attribute {
 
 	public GenericWithEnum<byte>.OnGenericNumber NumberEnumField;
 	public GenericWithEnum<byte>.OnGenericNumber NumberEnumProperty { get; set; }
+
+	public AttributeTargets Targets;
 }
 
 [Foo ("bar")]
@@ -197,3 +199,7 @@ class PropertyEnumOnGenericType {
 class WithAttributeUsingNestedEnumArray {
 }
 #endif
+
+[Foo (Targets = AttributeTargets.Class)]
+class ExternalEnumField {
+}
