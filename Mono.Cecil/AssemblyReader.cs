@@ -3697,7 +3697,10 @@ namespace Mono.Cecil {
 			case ElementType.SzArray:
 				return new ArrayType (ReadCustomAttributeFieldOrPropType ());
 			case ElementType.Enum:
-				return ReadTypeReference ();
+				var enum_type = ReadTypeReference ();
+				if (enum_type != null && !enum_type.IsDefinition)
+					enum_type.IsValueType = true;
+				return enum_type;
 			case ElementType.Type:
 				return TypeSystem.LookupType ("System", "Type");
 			default:
