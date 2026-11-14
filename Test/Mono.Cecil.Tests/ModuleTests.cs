@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Reflection.PortableExecutable;
 
 using Mono.Cecil;
 
@@ -350,6 +353,53 @@ namespace Mono.Cecil.Tests {
 
 			// Ensure you can still delete the file
 			File.Delete (path);
+		}
+
+		[Test]
+		public void CyclicTypeSpecThrowsBadImageFormatException ()
+		{
+			var metadata = new System.Reflection.Metadata.Ecma335.MetadataBuilder ();
+			metadata.AddModule (
+				0,
+				metadata.GetOrAddString ("CycleTest.dll"),
+				metadata.GetOrAddGuid (Guid.NewGuid ()),
+				default,
+				default);
+
+			metadata.AddTypeDefinition (
+				default,
+				default,
+				metadata.GetOrAddString ("<Module>"),
+				default,
+				MetadataTokens.FieldDefinitionHandle (1),
+				MetadataTokens.MethodDefinitionHandle (1));
+
+			// Self-referential TypeSpec: SZARRAY (0x1D) -> CLASS (0x12) -> TypeSpec #1
+			var sig = new BlobBuilder ();
+			sig.WriteByte ((byte) SignatureTypeCode.SZArray);
+			sig.WriteByte (0x12);
+			sig.WriteCompressedInteger (CodedIndex.TypeDefOrRefOrSpec (MetadataTokens.TypeSpecificationHandle (1)));
+			var typeSpec = metadata.AddTypeSpecification (metadata.GetOrAddBlob (sig));
+
+			metadata.AddTypeDefinition (
+				System.Reflection.TypeAttributes.Public,
+				default,
+				metadata.GetOrAddString ("CyclicType"),
+				typeSpec,
+				MetadataTokens.FieldDefinitionHandle (1),
+				MetadataTokens.MethodDefinitionHandle (1));
+
+			var peBuilder = new ManagedPEBuilder (
+				new PEHeaderBuilder (imageCharacteristics: Characteristics.Dll),
+				new MetadataRootBuilder (metadata),
+				new BlobBuilder ());
+			var peBlob = new BlobBuilder ();
+			peBuilder.Serialize (peBlob);
+
+			using var stream = new MemoryStream (peBlob.ToArray ());
+			var module = ModuleDefinition.ReadModule (stream, new ReaderParameters { ReadSymbols = false });
+
+			Assert.Throws<BadImageFormatException> (() => module.Types.ToList ());
 		}
 	}
 }
