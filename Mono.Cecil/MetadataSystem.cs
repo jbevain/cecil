@@ -300,6 +300,11 @@ namespace Mono.Cecil {
 
 		public bool TryGetGenericConstraintMapping (GenericParameter generic_parameter, out Collection<Row<uint, MetadataToken>> mapping)
 		{
+			if (generic_parameter.token.TokenType != TokenType.GenericParam) {
+				mapping = null;
+				return false;
+			}
+
 			return GenericConstraints.TryGetValue (generic_parameter.token.RID, out mapping);
 		}
 

@@ -1202,7 +1202,7 @@ namespace Mono.Cecil {
 
 			var reader = ReadSignature (ReadBlobIndex ());
 			var type = reader.ReadTypeSignature ();
-			if (type.token.RID == 0)
+			if (type.token.TokenType == TokenType.TypeSpec && type.token.RID == 0)
 				type.token = new MetadataToken (TokenType.TypeSpec, rid);
 
 			return type;
