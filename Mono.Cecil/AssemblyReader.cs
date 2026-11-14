@@ -453,6 +453,7 @@ namespace Mono.Cecil {
 		internal IGenericContext context;
 
 		readonly MetadataReader metadata_reader;
+		readonly HashSet<MetadataToken> active_tokens = new HashSet<MetadataToken> ();
 
 		public MetadataReader (ModuleDefinition module)
 			: base (module.Image.TableHeap.data)
@@ -2166,30 +2167,38 @@ namespace Mono.Cecil {
 			var position = this.position;
 			var context = this.context;
 
-			switch (token.TokenType) {
-			case TokenType.TypeDef:
-				element = GetTypeDefinition (rid);
-				break;
-			case TokenType.TypeRef:
-				element = GetTypeReference (rid);
-				break;
-			case TokenType.TypeSpec:
-				element = GetTypeSpecification (rid);
-				break;
-			case TokenType.Field:
-				element = GetFieldDefinition (rid);
-				break;
-			case TokenType.Method:
-				element = GetMethodDefinition (rid);
-				break;
-			case TokenType.MemberRef:
-				element = GetMemberReference (rid);
-				break;
-			case TokenType.MethodSpec:
-				element = GetMethodSpecification (rid);
-				break;
-			default:
-				return null;
+			if (token.TokenType != TokenType.TypeDef && !active_tokens.Add (token))
+				throw new BadImageFormatException ($"Cyclic metadata token detected: {token}");
+
+			try {
+				switch (token.TokenType) {
+				case TokenType.TypeDef:
+					element = GetTypeDefinition (rid);
+					break;
+				case TokenType.TypeRef:
+					element = GetTypeReference (rid);
+					break;
+				case TokenType.TypeSpec:
+					element = GetTypeSpecification (rid);
+					break;
+				case TokenType.Field:
+					element = GetFieldDefinition (rid);
+					break;
+				case TokenType.Method:
+					element = GetMethodDefinition (rid);
+					break;
+				case TokenType.MemberRef:
+					element = GetMemberReference (rid);
+					break;
+				case TokenType.MethodSpec:
+					element = GetMethodSpecification (rid);
+					break;
+				default:
+					return null;
+				}
+			} finally {
+				if (token.TokenType != TokenType.TypeDef)
+					active_tokens.Remove (token);
 			}
 
 			this.position = position;
